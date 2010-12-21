@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Core
+Bundle-SymbolicName: com.cloudbees.eclipse.ui;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.cloudbees.eclipse.ui.CloudBeesUIPlugin
+Bundle-Vendor: Cloud Bees, Inc
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Require-Bundle: com.cloudbees.eclipse.core;bundle-version="1.0.0",
+ org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources;bundle-version="3.6.100",
+ org.eclipse.ui.intro;bundle-version="3.4.0",
+ org.eclipse.equinox.security;bundle-version="1.0.200"

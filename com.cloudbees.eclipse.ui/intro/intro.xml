@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<introContent>
+
+  	<extensionContent id="comcloudbeeseclipseui-introExtension" style="css/intro.css" name="CloudBees Eclipse Toolkit" path="overview/@">
+		<group style-id="content-group" id="comcloudbeeseclipseui-introLink-group">
+       		<link label="CloudBees Eclipse Toolkit" url="https://grandcentral.cloudbees.com/account/signup" id="comcloudbeeseclipseui-introLink" style-id="content-link">
+          		<text>CloudBees DEV@cloud provides a fully integrated development infrastructure featuring a Hudson-based continuous integration available as a SaaS, Git and SVN repositories and much more!</text>
+       		</link>
+       	</group>
+  	</extensionContent>
+</introContent>

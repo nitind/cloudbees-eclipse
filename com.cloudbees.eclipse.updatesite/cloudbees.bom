@@ -1,0 +1,1492 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:billOfMaterials xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:md="http://www.eclipse.org/buckminster/MetaData-1.0" topNodeId="d518fea3-fa1d-38f3-bd39-36cd5ab83352" componentQueryId="3fcb5882-f143-3db6-b72c-c9f860147d17" timestamp="2010-12-16T16:28:41.473+0000">
+    <md:idwrapper id="3fcb5882-f143-3db6-b72c-c9f860147d17">
+        <md:componentQuery xmlns:cq="http://www.eclipse.org/buckminster/CQuery-1.0" resourceMap="file:/home/if/workspaced/builds/com.cloudbees.updatesite/cloudbees.rmap">
+            <cq:rootRequest name="com.cloudbees.updatesite" componentType="eclipse.feature"/>
+        </md:componentQuery>
+    </md:idwrapper>
+    <md:idwrapper id="3c01ede5-8d39-3230-bfc7-021b6b53532f">
+        <md:provider readerType="local" componentTypes="eclipse.feature">
+            <rm:uri xmlns:rm="http://www.eclipse.org/buckminster/RMap-1.0" format="file:/home/if/workspaced/builds/{0}/">
+                <com:propertyRef xmlns:com="http://www.eclipse.org/buckminster/Common-1.0" key="buckminster.component"/>
+            </rm:uri>
+        </md:provider>
+    </md:idwrapper>
+    <md:idwrapper id="7f66f267-6839-30e9-ab0c-3112ec298d0c">
+        <md:cspec name="com.cloudbees.updatesite" componentType="eclipse.feature" version="1.0.0.qualifier">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="com.cloudbees.feature" componentType="eclipse.feature"/>
+            </cs:dependencies>
+            <cs:generators xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:generator generates="com.cloudbees.updatesite.source" attribute="source.feature.jar" generatesType="eclipse.feature"/>
+            </cs:generators>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="build.properties" path="build.properties"/>
+                <cs:private name="raw.manifest" path="feature.xml"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="delete.dir"/>
+                    </cs:actorProperties>
+                    <cs:properties>
+                        <cs:property key="dir.to.delete" value="${buckminster.output}/"/>
+                    </cs:properties>
+                    <cs:prerequisites>
+                        <cs:attribute name="buckminster.clean" component="com.cloudbees.feature"/>
+                    </cs:prerequisites>
+                </cs:public>
+                <cs:public name="manifest" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="expand.feature.version"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites>
+                        <cs:attribute name="raw.manifest" alias="manifest"/>
+                        <cs:attribute name="bundle.jars" alias="bundles"/>
+                        <cs:attribute name="feature.references" alias="features"/>
+                        <cs:attribute name="build.properties" alias="properties"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/temp/">
+                        <cs:path path="feature.xml"/>
+                    </cs:products>
+                </cs:public>
+                <cs:public name="site.p2" actor="p2SiteGenerator">
+                    <cs:prerequisites>
+                        <cs:attribute name="site.feature.exports" alias="site" filter="(&amp;(!(site.pack200=true))(!(site.signing=true)))"/>
+                        <cs:attribute name="site.packed" alias="site" filter="(site.pack200=true)"/>
+                        <cs:attribute name="site.signed" alias="site" filter="(&amp;(site.signing=true)(!(site.pack200=true)))"/>
+                        <cs:attribute name="manifest" alias="site.definer"/>
+                        <cs:attribute name="product.configuration.exports" alias="product.configs"/>
+                    </cs:prerequisites>
+                    <cs:products base="${buckminster.output}/site.p2/" upToDatePolicy="ACTOR"/>
+                </cs:public>
+                <cs:public name="site.p2.zip" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="create.site.zip"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites>
+                        <cs:attribute name="manifest" alias="manifest"/>
+                        <cs:attribute name="site.p2" alias="action.requirements"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/site.p2.zip/" fileCount="1" upToDatePolicy="COUNT"/>
+                </cs:public>
+                <cs:public name="site.packed" actor="jarProcessor">
+                    <cs:properties>
+                        <cs:property key="command" value="pack"/>
+                    </cs:properties>
+                    <cs:prerequisites>
+                        <cs:attribute name="site.feature.exports" alias="jar.folder" filter="(!(site.signing=true))"/>
+                        <cs:attribute name="site.signed" alias="jar.folder" filter="(site.signing=true)"/>
+                    </cs:prerequisites>
+                    <cs:products base="${buckminster.output}/site.packed/" upToDatePolicy="MAPPER"/>
+                </cs:public>
+                <cs:public name="site.signed" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.signing"/>
+                        <cs:property key="targets" value="sign.jars"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites alias="action.requirements">
+                        <cs:attribute name="site.repacked" filter="(site.pack200=true)"/>
+                        <cs:attribute name="site.feature.exports" filter="(!(site.pack200=true))"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/site.signed/" upToDatePolicy="MAPPER"/>
+                </cs:public>
+                <cs:public name="source.manifest" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="create.source.feature"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites>
+                        <cs:attribute name="manifest" alias="manifest"/>
+                        <cs:attribute name="source.bundle.jars" alias="bundles"/>
+                        <cs:attribute name="source.feature.references" alias="features"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/temp/source/">
+                        <cs:path path="feature.xml"/>
+                    </cs:products>
+                </cs:public>
+                <cs:private name="copy.features" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="copy.group"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites alias="action.requirements">
+                        <cs:attribute name="feature.jars"/>
+                        <cs:attribute name="source.feature.jars"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/site/features/" upToDatePolicy="MAPPER"/>
+                </cs:private>
+                <cs:private name="copy.plugins" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="copy.group"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites alias="action.requirements">
+                        <cs:attribute name="bundle.jars"/>
+                        <cs:attribute name="source.bundle.jars"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/site/plugins/" upToDatePolicy="MAPPER"/>
+                </cs:private>
+                <cs:private name="copy.subfeatures" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="copy.group"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites alias="action.requirements">
+                        <cs:attribute name="feature.references"/>
+                        <cs:attribute name="source.feature.references"/>
+                        <cs:attribute name="feature.jar" filter="(site.include.top=true)"/>
+                        <cs:attribute name="source.feature.jar" filter="(&amp;(site.include.top=true)(!(cbi.include.source=false)))"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/site/features/" upToDatePolicy="MAPPER"/>
+                </cs:private>
+                <cs:private name="feature.jar" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="create.feature.jar"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites alias="action.requirements">
+                        <cs:attribute name="manifest" alias="manifest"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/jar/" fileCount="1" upToDatePolicy="COUNT"/>
+                </cs:private>
+                <cs:private name="site.repacked" actor="jarProcessor">
+                    <cs:properties>
+                        <cs:property key="command" value="repack"/>
+                    </cs:properties>
+                    <cs:prerequisites>
+                        <cs:attribute name="site.feature.exports" alias="jar.folder"/>
+                    </cs:prerequisites>
+                    <cs:products base="${buckminster.output}/site.repacked/" upToDatePolicy="MAPPER"/>
+                </cs:private>
+                <cs:private name="source.feature.jar" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="create.feature.jar"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites alias="action.requirements">
+                        <cs:attribute name="source.manifest" alias="manifest"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/source.jar/" fileCount="1" upToDatePolicy="COUNT"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.jars" component="com.cloudbees.feature"/>
+                </cs:public>
+                <cs:public name="feature.exports" rebase="${buckminster.output}/site/">
+                    <cs:attribute name="copy.features"/>
+                    <cs:attribute name="copy.plugins"/>
+                </cs:public>
+                <cs:public name="feature.jars">
+                    <cs:attribute name="feature.jar"/>
+                    <cs:attribute name="feature.references"/>
+                </cs:public>
+                <cs:public name="feature.references">
+                    <cs:attribute name="feature.jars" component="com.cloudbees.feature"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports">
+                    <cs:attribute name="product.configuration.exports" component="com.cloudbees.feature"/>
+                </cs:public>
+                <cs:public name="site.feature.exports" rebase="${buckminster.output}/site/">
+                    <cs:attribute name="copy.subfeatures"/>
+                    <cs:attribute name="copy.plugins"/>
+                </cs:public>
+                <cs:public name="source.bundle.jars" filter="(!(cbi.include.source=false))">
+                    <cs:attribute name="source.bundle.jars" component="com.cloudbees.feature"/>
+                </cs:public>
+                <cs:public name="source.feature.jars" filter="(!(cbi.include.source=false))">
+                    <cs:attribute name="source.feature.jar"/>
+                    <cs:attribute name="source.feature.references"/>
+                </cs:public>
+                <cs:public name="source.feature.references" filter="(!(cbi.include.source=false))">
+                    <cs:attribute name="source.feature.jars" component="com.cloudbees.feature"/>
+                </cs:public>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="c3ab967e-5038-3cd4-b5b8-f07839149458">
+        <md:resolution cspecId="7f66f267-6839-30e9-ab0c-3112ec298d0c" materializable="false" providerId="3c01ede5-8d39-3230-bfc7-021b6b53532f" repository="file:/home/if/workspaced/builds/com.cloudbees.updatesite/" componentType="eclipse.feature" lastModified="0">
+            <md:request name="com.cloudbees.updatesite" componentType="eclipse.feature"/>
+            <md:versionMatch version="1.0.0.qualifier"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="097b6b8b-fc46-37f6-bbec-821e24ac9f7b">
+        <md:cspec name="com.cloudbees.feature" componentType="eclipse.feature" version="1.0.0.qualifier">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="com.cloudbees.core" componentType="osgi.bundle"/>
+            </cs:dependencies>
+            <cs:generators xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:generator generates="com.cloudbees.source.feature" attribute="source.feature.jar" generatesType="eclipse.feature"/>
+            </cs:generators>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="build.properties" path="build.properties"/>
+                <cs:private name="raw.manifest" path="feature.xml"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="delete.dir"/>
+                    </cs:actorProperties>
+                    <cs:properties>
+                        <cs:property key="dir.to.delete" value="${buckminster.output}/"/>
+                    </cs:properties>
+                    <cs:prerequisites>
+                        <cs:attribute name="buckminster.clean" component="com.cloudbees.core"/>
+                    </cs:prerequisites>
+                </cs:public>
+                <cs:public name="manifest" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="expand.feature.version"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites>
+                        <cs:attribute name="raw.manifest" alias="manifest"/>
+                        <cs:attribute name="bundle.jars" alias="bundles"/>
+                        <cs:attribute name="feature.references" alias="features"/>
+                        <cs:attribute name="build.properties" alias="properties"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/temp/">
+                        <cs:path path="feature.xml"/>
+                    </cs:products>
+                </cs:public>
+                <cs:public name="site.p2" actor="p2SiteGenerator">
+                    <cs:prerequisites>
+                        <cs:attribute name="site.feature.exports" alias="site" filter="(&amp;(!(site.pack200=true))(!(site.signing=true)))"/>
+                        <cs:attribute name="site.packed" alias="site" filter="(site.pack200=true)"/>
+                        <cs:attribute name="site.signed" alias="site" filter="(&amp;(site.signing=true)(!(site.pack200=true)))"/>
+                        <cs:attribute name="manifest" alias="site.definer"/>
+                        <cs:attribute name="product.configuration.exports" alias="product.configs"/>
+                    </cs:prerequisites>
+                    <cs:products base="${buckminster.output}/site.p2/" upToDatePolicy="ACTOR"/>
+                </cs:public>
+                <cs:public name="site.p2.zip" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="create.site.zip"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites>
+                        <cs:attribute name="manifest" alias="manifest"/>
+                        <cs:attribute name="site.p2" alias="action.requirements"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/site.p2.zip/" fileCount="1" upToDatePolicy="COUNT"/>
+                </cs:public>
+                <cs:public name="site.packed" actor="jarProcessor">
+                    <cs:properties>
+                        <cs:property key="command" value="pack"/>
+                    </cs:properties>
+                    <cs:prerequisites>
+                        <cs:attribute name="site.feature.exports" alias="jar.folder" filter="(!(site.signing=true))"/>
+                        <cs:attribute name="site.signed" alias="jar.folder" filter="(site.signing=true)"/>
+                    </cs:prerequisites>
+                    <cs:products base="${buckminster.output}/site.packed/" upToDatePolicy="MAPPER"/>
+                </cs:public>
+                <cs:public name="site.signed" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.signing"/>
+                        <cs:property key="targets" value="sign.jars"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites alias="action.requirements">
+                        <cs:attribute name="site.repacked" filter="(site.pack200=true)"/>
+                        <cs:attribute name="site.feature.exports" filter="(!(site.pack200=true))"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/site.signed/" upToDatePolicy="MAPPER"/>
+                </cs:public>
+                <cs:public name="source.manifest" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="create.source.feature"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites>
+                        <cs:attribute name="manifest" alias="manifest"/>
+                        <cs:attribute name="source.bundle.jars" alias="bundles"/>
+                        <cs:attribute name="source.feature.references" alias="features"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/temp/source/">
+                        <cs:path path="feature.xml"/>
+                    </cs:products>
+                </cs:public>
+                <cs:private name="copy.features" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="copy.group"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites alias="action.requirements">
+                        <cs:attribute name="feature.jars"/>
+                        <cs:attribute name="source.feature.jars"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/site/features/" upToDatePolicy="MAPPER"/>
+                </cs:private>
+                <cs:private name="copy.plugins" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="copy.group"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites alias="action.requirements">
+                        <cs:attribute name="bundle.jars"/>
+                        <cs:attribute name="source.bundle.jars"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/site/plugins/" upToDatePolicy="MAPPER"/>
+                </cs:private>
+                <cs:private name="copy.subfeatures" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="copy.group"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites alias="action.requirements">
+                        <cs:attribute name="feature.references"/>
+                        <cs:attribute name="source.feature.references"/>
+                        <cs:attribute name="feature.jar" filter="(site.include.top=true)"/>
+                        <cs:attribute name="source.feature.jar" filter="(&amp;(site.include.top=true)(!(cbi.include.source=false)))"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/site/features/" upToDatePolicy="MAPPER"/>
+                </cs:private>
+                <cs:private name="feature.jar" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="create.feature.jar"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites alias="action.requirements">
+                        <cs:attribute name="manifest" alias="manifest"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/jar/" fileCount="1" upToDatePolicy="COUNT"/>
+                </cs:private>
+                <cs:private name="site.repacked" actor="jarProcessor">
+                    <cs:properties>
+                        <cs:property key="command" value="repack"/>
+                    </cs:properties>
+                    <cs:prerequisites>
+                        <cs:attribute name="site.feature.exports" alias="jar.folder"/>
+                    </cs:prerequisites>
+                    <cs:products base="${buckminster.output}/site.repacked/" upToDatePolicy="MAPPER"/>
+                </cs:private>
+                <cs:private name="source.feature.jar" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="create.feature.jar"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites alias="action.requirements">
+                        <cs:attribute name="source.manifest" alias="manifest"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/source.jar/" fileCount="1" upToDatePolicy="COUNT"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments" component="com.cloudbees.core"/>
+                </cs:public>
+                <cs:public name="feature.exports" rebase="${buckminster.output}/site/">
+                    <cs:attribute name="copy.features"/>
+                    <cs:attribute name="copy.plugins"/>
+                </cs:public>
+                <cs:public name="feature.jars">
+                    <cs:attribute name="feature.jar"/>
+                    <cs:attribute name="feature.references"/>
+                </cs:public>
+                <cs:public name="feature.references"/>
+                <cs:public name="product.configuration.exports">
+                    <cs:attribute name="product.configuration.exports" component="com.cloudbees.core"/>
+                </cs:public>
+                <cs:public name="site.feature.exports" rebase="${buckminster.output}/site/">
+                    <cs:attribute name="copy.subfeatures"/>
+                    <cs:attribute name="copy.plugins"/>
+                </cs:public>
+                <cs:public name="source.bundle.jars" filter="(!(cbi.include.source=false))">
+                    <cs:attribute name="bundle.and.fragments.source" component="com.cloudbees.core"/>
+                </cs:public>
+                <cs:public name="source.feature.jars" filter="(!(cbi.include.source=false))">
+                    <cs:attribute name="source.feature.jar"/>
+                    <cs:attribute name="source.feature.references"/>
+                </cs:public>
+                <cs:public name="source.feature.references" filter="(!(cbi.include.source=false))"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="8c777113-bccb-33d3-850f-152151bc129a">
+        <md:resolution cspecId="097b6b8b-fc46-37f6-bbec-821e24ac9f7b" materializable="false" providerId="3c01ede5-8d39-3230-bfc7-021b6b53532f" repository="file:/home/if/workspaced/builds/com.cloudbees.feature/" componentType="eclipse.feature" lastModified="0">
+            <md:request name="com.cloudbees.feature" componentType="eclipse.feature"/>
+            <md:versionMatch version="1.0.0.qualifier"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="4df1894a-2a17-3f8b-885b-7a2e543019af">
+        <md:provider readerType="local" componentTypes="osgi.bundle">
+            <rm:uri xmlns:rm="http://www.eclipse.org/buckminster/RMap-1.0" format="file:/home/if/workspaced/builds/{0}/">
+                <com:propertyRef xmlns:com="http://www.eclipse.org/buckminster/Common-1.0" key="buckminster.component"/>
+            </rm:uri>
+        </md:provider>
+    </md:idwrapper>
+    <md:idwrapper id="6009b014-532e-39dd-83c2-faadc017c207">
+        <md:cspec name="com.cloudbees.core" componentType="osgi.bundle" version="1.0.0.qualifier" shortDesc="Core">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.ui" componentType="osgi.bundle"/>
+                <cs:dependency name="org.eclipse.core.runtime" componentType="osgi.bundle"/>
+            </cs:dependencies>
+            <cs:generators xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:generator generates="com.cloudbees.core.source" attribute="source.bundle.jar" generatesType="osgi.bundle"/>
+            </cs:generators>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="build.properties" path="build.properties"/>
+                <cs:private name="bin.includes">
+                    <cs:path path="META-INF/"/>
+                    <cs:path path="plugin.xml"/>
+                </cs:private>
+                <cs:private name="eclipse.build.source" base="src/"/>
+                <cs:private name="raw.manifest" path="MANIFEST.MF" base="META-INF/"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="create.bundle.jar"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites>
+                        <cs:attribute name="manifest" alias="manifest"/>
+                        <cs:attribute name="jar.contents" alias="action.requirements"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/jar/" fileCount="1" upToDatePolicy="COUNT"/>
+                </cs:public>
+                <cs:public name="source.bundle.jar" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="create.bundle.jar"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites>
+                        <cs:attribute name="src.includes" alias="action.requirements"/>
+                        <cs:attribute name="source.manifest" alias="manifest"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/source.jar/"/>
+                </cs:public>
+                <cs:private name="buckminster.rm.build.dir" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="delete.dir"/>
+                    </cs:actorProperties>
+                    <cs:properties>
+                        <cs:property key="dir.to.delete" value="${buckminster.output}/"/>
+                    </cs:properties>
+                </cs:private>
+                <cs:private name="eclipse.build" always="true">
+                    <cs:prerequisites>
+                        <cs:attribute name="eclipse.build.requirements"/>
+                        <cs:attribute name="eclipse.build.source"/>
+                    </cs:prerequisites>
+                    <cs:products>
+                        <cs:private name="eclipse.build.output.bin" base="${buckminster.home}/bin/"/>
+                    </cs:products>
+                </cs:private>
+                <cs:private name="eclipse.clean" always="true"/>
+                <cs:private name="manifest" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="expand.bundle.version"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites>
+                        <cs:attribute name="raw.manifest" alias="manifest"/>
+                        <cs:attribute name="build.properties" alias="properties"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/temp/">
+                        <cs:path path="MANIFEST.MF"/>
+                    </cs:products>
+                </cs:private>
+                <cs:private name="source.manifest" actor="ant">
+                    <cs:actorProperties>
+                        <cs:property key="buildFileId" value="buckminster.pdetasks"/>
+                        <cs:property key="targets" value="create.source.manifest"/>
+                    </cs:actorProperties>
+                    <cs:prerequisites>
+                        <cs:attribute name="manifest" alias="manifest"/>
+                        <cs:attribute name="build.properties" alias="properties"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/temp/">
+                        <cs:path path="SOURCE_MANIFEST.MF"/>
+                    </cs:products>
+                </cs:private>
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:properties>
+                        <cs:property key="fragment.attribute" value="bundle.jar"/>
+                    </cs:properties>
+                    <cs:prerequisites>
+                        <cs:attribute name="eclipse.build"/>
+                    </cs:prerequisites>
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+                <cs:private name="target.fragments.source" actor="copyTargetFragments">
+                    <cs:properties>
+                        <cs:property key="fragment.attribute" value="source.bundle.jar"/>
+                    </cs:properties>
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean">
+                    <cs:attribute name="buckminster.clean" component="org.eclipse.ui"/>
+                    <cs:attribute name="buckminster.clean" component="org.eclipse.core.runtime"/>
+                    <cs:attribute name="buckminster.rm.build.dir"/>
+                    <cs:attribute name="eclipse.clean"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source">
+                    <cs:attribute name="target.fragments.source"/>
+                    <cs:attribute name="source.bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.jars" component="org.eclipse.ui"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.runtime"/>
+                    <cs:attribute name="bundle.and.fragments"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="eclipse.build"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports">
+                    <cs:attribute name="product.configuration.exports" component="org.eclipse.ui"/>
+                    <cs:attribute name="product.configuration.exports" component="org.eclipse.core.runtime"/>
+                </cs:public>
+                <cs:private name="eclipse.build.requirements">
+                    <cs:attribute name="java.binaries" component="org.eclipse.ui"/>
+                    <cs:attribute name="java.binaries" component="org.eclipse.core.runtime"/>
+                </cs:private>
+                <cs:private name="jar.contents">
+                    <cs:attribute name="bin.includes"/>
+                    <cs:attribute name="eclipse.build.output.bin"/>
+                </cs:private>
+                <cs:private name="src.includes">
+                    <cs:attribute name="eclipse.build.source"/>
+                </cs:private>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="90ebf67d-18e3-3099-989c-b5a516cbd43c">
+        <md:resolution cspecId="6009b014-532e-39dd-83c2-faadc017c207" materializable="false" providerId="4df1894a-2a17-3f8b-885b-7a2e543019af" repository="file:/home/if/workspaced/builds/com.cloudbees.core/" componentType="osgi.bundle" lastModified="0">
+            <md:request name="com.cloudbees.core" componentType="osgi.bundle"/>
+            <md:versionMatch version="1.0.0.qualifier"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="a39bb1f4-29ef-3c76-b0fd-d629badf0b10">
+        <md:provider readerType="eclipse.platform" componentTypes="osgi.bundle">
+            <rm:uri xmlns:rm="http://www.eclipse.org/buckminster/RMap-1.0" format="plugin/${buckminster.component}"/>
+            <rm:property xmlns:rm="http://www.eclipse.org/buckminster/RMap-1.0" key="buckminster.mutable" value="false"/>
+            <rm:property xmlns:rm="http://www.eclipse.org/buckminster/RMap-1.0" key="buckminster.source" value="false"/>
+            <rm:versionConverter xmlns:rm="http://www.eclipse.org/buckminster/RMap-1.0" type="tag"/>
+        </md:provider>
+    </md:idwrapper>
+    <md:idwrapper id="05087078-cdd0-3827-85b7-ef771218b406">
+        <md:cspec name="org.eclipse.core.runtime" componentType="osgi.bundle" version="3.6.0.v20100505" shortDesc="Core Runtime">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.osgi" componentType="osgi.bundle" versionDesignator="[3.5.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.equinox.common" componentType="osgi.bundle" versionDesignator="[3.5.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.core.jobs" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.equinox.registry" componentType="osgi.bundle" versionDesignator="[3.4.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.equinox.preferences" componentType="osgi.bundle" versionDesignator="[3.3.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.core.contenttype" componentType="osgi.bundle" versionDesignator="[3.3.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.equinox.app" componentType="osgi.bundle" versionDesignator="[1.0.0,2.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.core.runtime_3.6.0.v20100505.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.osgi"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.common"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.jobs"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.registry"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.preferences"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.contenttype"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.app"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="java.binaries" component="org.eclipse.osgi"/>
+                    <cs:attribute name="java.binaries" component="org.eclipse.equinox.common"/>
+                    <cs:attribute name="java.binaries" component="org.eclipse.core.jobs"/>
+                    <cs:attribute name="java.binaries" component="org.eclipse.equinox.registry"/>
+                    <cs:attribute name="java.binaries" component="org.eclipse.equinox.preferences"/>
+                    <cs:attribute name="java.binaries" component="org.eclipse.core.contenttype"/>
+                    <cs:attribute name="java.binaries" component="org.eclipse.equinox.app"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="28e41e8b-77a7-3102-9d8e-acff04894c03">
+        <md:resolution cspecId="05087078-cdd0-3827-85b7-ef771218b406" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.core.runtime" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.core.runtime" componentType="osgi.bundle"/>
+            <md:versionMatch version="3.6.0.v20100505"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="d9351366-b22b-3c33-94e4-b7b0b67924e8">
+        <md:cspec name="org.eclipse.equinox.registry" componentType="osgi.bundle" version="3.5.0.v20100503" shortDesc="Extension Registry Support">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.equinox.common" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.equinox.registry_3.5.0.v20100503.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.common"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="6211bc44-d5b9-3ed3-9f5c-f7a4bef8f830">
+        <md:resolution cspecId="d9351366-b22b-3c33-94e4-b7b0b67924e8" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.equinox.registry" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.equinox.registry" componentType="osgi.bundle" versionDesignator="[3.4.0,4.0.0)"/>
+            <md:versionMatch version="3.5.0.v20100503"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="270b54f4-b481-38ca-bcff-122156d88aa0">
+        <md:cspec name="org.eclipse.equinox.common" componentType="osgi.bundle" version="3.6.0.v20100503" shortDesc="Common Eclipse Runtime">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.osgi" componentType="osgi.bundle"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.equinox.common_3.6.0.v20100503.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="ffa5ac4b-f49a-3ecd-b2d9-017a6a3b8693">
+        <md:resolution cspecId="270b54f4-b481-38ca-bcff-122156d88aa0" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.equinox.common" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.equinox.common" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+            <md:versionMatch version="3.6.0.v20100503"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="de10a718-42e7-37dc-9322-98b5276d8c68">
+        <md:cspec name="org.eclipse.osgi" componentType="osgi.bundle" version="3.6.1.R36x_v20100806" shortDesc="%systemBundle">
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.osgi_3.6.1.R36x_v20100806.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="9bda4754-93c3-3b6d-9fc6-a63ca24e999f">
+        <md:resolution cspecId="de10a718-42e7-37dc-9322-98b5276d8c68" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.osgi" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.osgi" componentType="osgi.bundle"/>
+            <md:versionMatch version="3.6.1.R36x_v20100806"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="c78900b8-1033-3dea-98dc-b90414f21df9">
+        <md:resolvedNode resolutionId="9bda4754-93c3-3b6d-9fc6-a63ca24e999f"/>
+    </md:idwrapper>
+    <md:idwrapper id="82ee7fb6-a3e1-351d-a94b-68a6501c497f">
+        <md:resolvedNode resolutionId="ffa5ac4b-f49a-3ecd-b2d9-017a6a3b8693">
+            <md:child refId="c78900b8-1033-3dea-98dc-b90414f21df9"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="f9914284-c79c-3597-b5d4-352189f513b6">
+        <md:resolvedNode resolutionId="6211bc44-d5b9-3ed3-9f5c-f7a4bef8f830">
+            <md:child refId="82ee7fb6-a3e1-351d-a94b-68a6501c497f"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="0d9fb11b-4d9a-308e-bdcf-5a1b2601f92f">
+        <md:cspec name="org.eclipse.core.contenttype" componentType="osgi.bundle" version="3.4.100.v20100505-1235" shortDesc="Eclipse Content Mechanism">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.equinox.preferences" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.equinox.registry" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.equinox.common" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.core.contenttype_3.4.100.v20100505-1235.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.preferences"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.registry"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.common"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="60049a3b-cc6c-39f9-bf36-c097114040a9">
+        <md:resolution cspecId="0d9fb11b-4d9a-308e-bdcf-5a1b2601f92f" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.core.contenttype" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.core.contenttype" componentType="osgi.bundle" versionDesignator="[3.3.0,4.0.0)"/>
+            <md:versionMatch version="3.4.100.v20100505-1235"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="d61955ae-0232-37ee-aa97-b1467a9ff72e">
+        <md:cspec name="org.eclipse.equinox.preferences" componentType="osgi.bundle" version="3.3.0.v20100503" shortDesc="Eclipse Preferences Mechanism">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.equinox.common" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.equinox.preferences_3.3.0.v20100503.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.common"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="5858c6e3-b4de-367e-ad22-a0f77d752cda">
+        <md:resolution cspecId="d61955ae-0232-37ee-aa97-b1467a9ff72e" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.equinox.preferences" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.equinox.preferences" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+            <md:versionMatch version="3.3.0.v20100503"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="c897b341-b04f-36e3-8c56-c44925c7e664">
+        <md:resolvedNode resolutionId="5858c6e3-b4de-367e-ad22-a0f77d752cda">
+            <md:child refId="82ee7fb6-a3e1-351d-a94b-68a6501c497f"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="d3dcca26-15fc-3094-9ebd-79b8e3f23248">
+        <md:resolvedNode resolutionId="60049a3b-cc6c-39f9-bf36-c097114040a9">
+            <md:child refId="82ee7fb6-a3e1-351d-a94b-68a6501c497f"/>
+            <md:child refId="c897b341-b04f-36e3-8c56-c44925c7e664"/>
+            <md:child refId="f9914284-c79c-3597-b5d4-352189f513b6"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="634135b5-9c76-3769-807f-5a4041c6ae1b">
+        <md:cspec name="org.eclipse.equinox.app" componentType="osgi.bundle" version="1.3.1.R36x_v20100803" shortDesc="Equinox Application Container">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.equinox.registry" componentType="osgi.bundle" versionDesignator="[3.4.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.equinox.common" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.equinox.app_1.3.1.R36x_v20100803.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.registry"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.common"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="1b7d6ee1-d2f5-3a43-8269-18f4b63819d3">
+        <md:resolution cspecId="634135b5-9c76-3769-807f-5a4041c6ae1b" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.equinox.app" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.equinox.app" componentType="osgi.bundle" versionDesignator="[1.0.0,2.0.0)"/>
+            <md:versionMatch version="1.3.1.R36x_v20100803"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="6c128ad4-7057-3a02-9a44-26fcbcac3530">
+        <md:resolvedNode resolutionId="1b7d6ee1-d2f5-3a43-8269-18f4b63819d3">
+            <md:child refId="f9914284-c79c-3597-b5d4-352189f513b6"/>
+            <md:child refId="82ee7fb6-a3e1-351d-a94b-68a6501c497f"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="91394ada-f877-3c38-b20c-c24fdd1b9e3b">
+        <md:cspec name="org.eclipse.core.jobs" componentType="osgi.bundle" version="3.5.1.R36x_v20100824" shortDesc="Eclipse Jobs Mechanism">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.equinox.common" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.core.jobs_3.5.1.R36x_v20100824.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.common"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="3e5a6bdd-3fe8-3750-91d0-902f4d8d36f3">
+        <md:resolution cspecId="91394ada-f877-3c38-b20c-c24fdd1b9e3b" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.core.jobs" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.core.jobs" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+            <md:versionMatch version="3.5.1.R36x_v20100824"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="2cfe14ac-5055-3411-b72e-d921be4f6fd1">
+        <md:resolvedNode resolutionId="3e5a6bdd-3fe8-3750-91d0-902f4d8d36f3">
+            <md:child refId="82ee7fb6-a3e1-351d-a94b-68a6501c497f"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="44b1c898-d016-36d8-a24a-a8382fa371f4">
+        <md:resolvedNode resolutionId="28e41e8b-77a7-3102-9d8e-acff04894c03">
+            <md:child refId="f9914284-c79c-3597-b5d4-352189f513b6"/>
+            <md:child refId="c78900b8-1033-3dea-98dc-b90414f21df9"/>
+            <md:child refId="82ee7fb6-a3e1-351d-a94b-68a6501c497f"/>
+            <md:child refId="d3dcca26-15fc-3094-9ebd-79b8e3f23248"/>
+            <md:child refId="6c128ad4-7057-3a02-9a44-26fcbcac3530"/>
+            <md:child refId="c897b341-b04f-36e3-8c56-c44925c7e664"/>
+            <md:child refId="2cfe14ac-5055-3411-b72e-d921be4f6fd1"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="629b3627-e30c-36e3-afa5-dcedc229b836">
+        <md:cspec name="org.eclipse.ui" componentType="osgi.bundle" version="3.6.1.M20100826-1330" shortDesc="Eclipse UI">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.core.runtime" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.swt" componentType="osgi.bundle" versionDesignator="[3.5.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.jface" componentType="osgi.bundle" versionDesignator="[3.5.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.ui.workbench" componentType="osgi.bundle" versionDesignator="[3.5.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.core.expressions" componentType="osgi.bundle" versionDesignator="[3.4.0,4.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.ui_3.6.1.M20100826-1330.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.runtime"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.swt"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.jface"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.ui.workbench"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.expressions"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="java.binaries" component="org.eclipse.swt"/>
+                    <cs:attribute name="java.binaries" component="org.eclipse.jface"/>
+                    <cs:attribute name="java.binaries" component="org.eclipse.ui.workbench"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="13b4e6e7-01e6-3906-9106-32eb02649913">
+        <md:resolution cspecId="629b3627-e30c-36e3-afa5-dcedc229b836" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.ui" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.ui" componentType="osgi.bundle"/>
+            <md:versionMatch version="3.6.1.M20100826-1330"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="2a6a1c37-d239-3d98-855f-a3d160a05f5f">
+        <md:cspec name="org.eclipse.ui.workbench" componentType="osgi.bundle" version="3.6.1.M20100826-1330" shortDesc="Workbench">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.core.runtime" componentType="osgi.bundle" versionDesignator="[3.6.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.help" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.jface" componentType="osgi.bundle" versionDesignator="[3.5.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.swt" componentType="osgi.bundle" versionDesignator="[3.5.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.core.expressions" componentType="osgi.bundle" versionDesignator="[3.4.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.jface.databinding" componentType="osgi.bundle" versionDesignator="[1.3.0,2.0.0)"/>
+                <cs:dependency name="org.eclipse.core.databinding.property" componentType="osgi.bundle" versionDesignator="[1.2.0,2.0.0)"/>
+                <cs:dependency name="org.eclipse.core.databinding.observable" componentType="osgi.bundle" versionDesignator="[1.2.0,2.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.ui.workbench_3.6.1.M20100826-1330.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.runtime"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.help"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.jface"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.swt"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.expressions"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.jface.databinding"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.databinding.property"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.databinding.observable"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="1260cb67-5fcd-3154-b020-19dd77eb695e">
+        <md:resolution cspecId="2a6a1c37-d239-3d98-855f-a3d160a05f5f" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.ui.workbench" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.ui.workbench" componentType="osgi.bundle" versionDesignator="[3.5.0,4.0.0)"/>
+            <md:versionMatch version="3.6.1.M20100826-1330"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="aa593a76-ac84-3c3f-906f-b6bba767201d">
+        <md:cspec name="org.eclipse.jface.databinding" componentType="osgi.bundle" version="1.4.0.I20100601-0800" shortDesc="JFace Data Binding for SWT and JFace">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.swt" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.jface" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.equinox.common" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.core.databinding.observable" componentType="osgi.bundle" versionDesignator="[1.3.0,2.0.0)"/>
+                <cs:dependency name="org.eclipse.core.databinding.property" componentType="osgi.bundle" versionDesignator="[1.3.0,2.0.0)"/>
+                <cs:dependency name="org.eclipse.core.databinding" componentType="osgi.bundle" versionDesignator="[1.2.0,2.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.jface.databinding_1.4.0.I20100601-0800.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.swt"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.jface"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.common"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.databinding.observable"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.databinding.property"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.databinding"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="934fba6f-2320-3f3c-8bf9-0fd577959083">
+        <md:resolution cspecId="aa593a76-ac84-3c3f-906f-b6bba767201d" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.jface.databinding" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.jface.databinding" componentType="osgi.bundle" versionDesignator="[1.3.0,2.0.0)"/>
+            <md:versionMatch version="1.4.0.I20100601-0800"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="7760bcbb-7c03-3678-8559-191fe4f07a3e">
+        <md:cspec name="org.eclipse.core.databinding.property" componentType="osgi.bundle" version="1.3.0.I20100601-0800" shortDesc="JFace Data Binding">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.equinox.common" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.core.databinding.observable" componentType="osgi.bundle" versionDesignator="[1.3.0,2.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.core.databinding.property_1.3.0.I20100601-0800.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.common"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.databinding.observable"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="1196f053-d4e5-378b-9f83-e87bf83b60a6">
+        <md:resolution cspecId="7760bcbb-7c03-3678-8559-191fe4f07a3e" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.core.databinding.property" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.core.databinding.property" componentType="osgi.bundle" versionDesignator="[1.3.0,2.0.0)"/>
+            <md:versionMatch version="1.3.0.I20100601-0800"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="b98b4a35-22f8-3390-bc86-e5fc2a4f9040">
+        <md:cspec name="org.eclipse.core.databinding.observable" componentType="osgi.bundle" version="1.3.0.I20100601-0800" shortDesc="JFace Data Binding Observables">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.equinox.common" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.core.databinding.observable_1.3.0.I20100601-0800.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.common"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="ad2fedc8-4c65-3101-97e8-2440c24098c2">
+        <md:resolution cspecId="b98b4a35-22f8-3390-bc86-e5fc2a4f9040" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.core.databinding.observable" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.core.databinding.observable" componentType="osgi.bundle" versionDesignator="[1.3.0,2.0.0)"/>
+            <md:versionMatch version="1.3.0.I20100601-0800"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="bc68e934-1416-31d3-8b2b-d44dad175437">
+        <md:resolvedNode resolutionId="ad2fedc8-4c65-3101-97e8-2440c24098c2">
+            <md:child refId="82ee7fb6-a3e1-351d-a94b-68a6501c497f"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="f6aa75c2-2871-3d99-8471-72bfad47765c">
+        <md:resolvedNode resolutionId="1196f053-d4e5-378b-9f83-e87bf83b60a6">
+            <md:child refId="82ee7fb6-a3e1-351d-a94b-68a6501c497f"/>
+            <md:child refId="bc68e934-1416-31d3-8b2b-d44dad175437"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="3e3abb0a-35d9-38f7-8c92-bc9e4565ea55">
+        <md:cspec name="org.eclipse.swt" componentType="osgi.bundle" version="3.6.1.v3655c" shortDesc="Standard Widget Toolkit">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.osgi" componentType="osgi.bundle"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.swt_3.6.1.v3655c.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="fca48a26-80cd-3d2f-90ea-ea06de866ae2">
+        <md:resolution cspecId="3e3abb0a-35d9-38f7-8c92-bc9e4565ea55" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.swt" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.swt" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+            <md:versionMatch version="3.6.1.v3655c"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="c612f92c-a2e2-3cf2-b146-918d60c51d50">
+        <md:resolvedNode resolutionId="fca48a26-80cd-3d2f-90ea-ea06de866ae2">
+            <md:child refId="c78900b8-1033-3dea-98dc-b90414f21df9"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="301e0ae6-3f55-38ea-aa8b-f4b7e22e52cb">
+        <md:cspec name="org.eclipse.core.databinding" componentType="osgi.bundle" version="1.3.100.I20100601-0800" shortDesc="JFace Data Binding">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.equinox.common" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.core.databinding.observable" componentType="osgi.bundle" versionDesignator="[1.3.0,2.0.0)"/>
+                <cs:dependency name="org.eclipse.core.databinding.property" componentType="osgi.bundle" versionDesignator="[1.3.0,2.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.core.databinding_1.3.100.I20100601-0800.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.common"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.databinding.observable"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.databinding.property"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="java.binaries" component="org.eclipse.core.databinding.observable"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="e67940f2-f85e-339c-b46e-6be215eb4728">
+        <md:resolution cspecId="301e0ae6-3f55-38ea-aa8b-f4b7e22e52cb" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.core.databinding" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.core.databinding" componentType="osgi.bundle" versionDesignator="[1.2.0,2.0.0)"/>
+            <md:versionMatch version="1.3.100.I20100601-0800"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="61aefff0-82c8-34d0-aa28-99d02a60e580">
+        <md:resolvedNode resolutionId="e67940f2-f85e-339c-b46e-6be215eb4728">
+            <md:child refId="f6aa75c2-2871-3d99-8471-72bfad47765c"/>
+            <md:child refId="82ee7fb6-a3e1-351d-a94b-68a6501c497f"/>
+            <md:child refId="bc68e934-1416-31d3-8b2b-d44dad175437"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="b4ec560f-edc7-35ce-8e93-f6583d7f8616">
+        <md:cspec name="org.eclipse.jface" componentType="osgi.bundle" version="3.6.1.M20100825-0800" shortDesc="JFace">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.swt" componentType="osgi.bundle" versionDesignator="[3.6.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.core.commands" componentType="osgi.bundle" versionDesignator="[3.4.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.equinox.common" componentType="osgi.bundle" versionDesignator="[3.3.0,4.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.jface_3.6.1.M20100825-0800.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.swt"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.commands"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.common"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="java.binaries" component="org.eclipse.swt"/>
+                    <cs:attribute name="java.binaries" component="org.eclipse.core.commands"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="732641b2-207d-3a01-a5bb-6d7e7762d5fd">
+        <md:resolution cspecId="b4ec560f-edc7-35ce-8e93-f6583d7f8616" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.jface" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.jface" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+            <md:versionMatch version="3.6.1.M20100825-0800"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="4a1258ab-53c8-3c3b-a26d-f9ba256b9b27">
+        <md:cspec name="org.eclipse.core.commands" componentType="osgi.bundle" version="3.6.0.I20100512-1500" shortDesc="Commands">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.equinox.common" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.core.commands_3.6.0.I20100512-1500.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.equinox.common"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="e821f946-4411-3560-a952-4f61d8fe3c57">
+        <md:resolution cspecId="4a1258ab-53c8-3c3b-a26d-f9ba256b9b27" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.core.commands" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.core.commands" componentType="osgi.bundle" versionDesignator="[3.4.0,4.0.0)"/>
+            <md:versionMatch version="3.6.0.I20100512-1500"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="54a1f3ed-39be-382a-84b1-7085df424c74">
+        <md:resolvedNode resolutionId="e821f946-4411-3560-a952-4f61d8fe3c57">
+            <md:child refId="82ee7fb6-a3e1-351d-a94b-68a6501c497f"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="eb3a3e33-bea2-3ddd-bd40-2d362feb7ef6">
+        <md:resolvedNode resolutionId="732641b2-207d-3a01-a5bb-6d7e7762d5fd">
+            <md:child refId="c612f92c-a2e2-3cf2-b146-918d60c51d50"/>
+            <md:child refId="82ee7fb6-a3e1-351d-a94b-68a6501c497f"/>
+            <md:child refId="54a1f3ed-39be-382a-84b1-7085df424c74"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="6c354cc8-1100-3def-8010-7afa203408b5">
+        <md:resolvedNode resolutionId="934fba6f-2320-3f3c-8bf9-0fd577959083">
+            <md:child refId="f6aa75c2-2871-3d99-8471-72bfad47765c"/>
+            <md:child refId="82ee7fb6-a3e1-351d-a94b-68a6501c497f"/>
+            <md:child refId="c612f92c-a2e2-3cf2-b146-918d60c51d50"/>
+            <md:child refId="61aefff0-82c8-34d0-aa28-99d02a60e580"/>
+            <md:child refId="bc68e934-1416-31d3-8b2b-d44dad175437"/>
+            <md:child refId="eb3a3e33-bea2-3ddd-bd40-2d362feb7ef6"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="831e3790-272d-3242-b7f0-154a6bd4491c">
+        <md:cspec name="org.eclipse.core.expressions" componentType="osgi.bundle" version="3.4.200.v20100505" shortDesc="Expression Language">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.core.runtime" componentType="osgi.bundle" versionDesignator="[3.3.0,4.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.core.expressions_3.4.200.v20100505.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.runtime"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="5587f5a3-215a-34a4-be22-57dbdcfe92fb">
+        <md:resolution cspecId="831e3790-272d-3242-b7f0-154a6bd4491c" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.core.expressions" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.core.expressions" componentType="osgi.bundle" versionDesignator="[3.4.0,4.0.0)"/>
+            <md:versionMatch version="3.4.200.v20100505"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="f389727e-55d1-3c5d-bb90-b130f49c0fbe">
+        <md:resolvedNode resolutionId="5587f5a3-215a-34a4-be22-57dbdcfe92fb">
+            <md:child refId="44b1c898-d016-36d8-a24a-a8382fa371f4"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="ecd2abe0-9f4e-3510-821c-e6cc685f2e3f">
+        <md:cspec name="org.eclipse.help" componentType="osgi.bundle" version="3.5.0.v20100524" shortDesc="Help System Core">
+            <cs:dependencies xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:dependency name="org.eclipse.core.runtime" componentType="osgi.bundle" versionDesignator="[3.6.0,4.0.0)"/>
+                <cs:dependency name="org.eclipse.core.expressions" componentType="osgi.bundle" versionDesignator="[3.4.200,4.0.0)"/>
+            </cs:dependencies>
+            <cs:artifacts xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="bundle.jar" path="org.eclipse.help_3.5.0.v20100524.jar" base="../"/>
+            </cs:artifacts>
+            <cs:actions xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:private name="target.fragments" actor="copyTargetFragments">
+                    <cs:products alias="action.output" base="${buckminster.output}/fragments/" upToDatePolicy="ACTOR"/>
+                </cs:private>
+            </cs:actions>
+            <cs:groups xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0">
+                <cs:public name="buckminster.clean"/>
+                <cs:public name="bundle.and.fragments">
+                    <cs:attribute name="target.fragments"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="bundle.and.fragments.source"/>
+                <cs:public name="bundle.jars">
+                    <cs:attribute name="bundle.and.fragments"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.runtime"/>
+                    <cs:attribute name="bundle.jars" component="org.eclipse.core.expressions"/>
+                </cs:public>
+                <cs:public name="java.binaries">
+                    <cs:attribute name="java.binaries" component="org.eclipse.core.expressions"/>
+                    <cs:attribute name="bundle.jar"/>
+                </cs:public>
+                <cs:public name="product.configuration.exports"/>
+            </cs:groups>
+        </md:cspec>
+    </md:idwrapper>
+    <md:idwrapper id="679bc42f-b6aa-3a27-b076-947279bdc1a9">
+        <md:resolution cspecId="ecd2abe0-9f4e-3510-821c-e6cc685f2e3f" materializable="false" providerId="a39bb1f4-29ef-3c76-b0fd-d629badf0b10" repository="plugin/org.eclipse.help" componentType="osgi.bundle" lastModified="0">
+            <md:request name="org.eclipse.help" componentType="osgi.bundle" versionDesignator="[3.2.0,4.0.0)"/>
+            <md:versionMatch version="3.5.0.v20100524"/>
+        </md:resolution>
+    </md:idwrapper>
+    <md:idwrapper id="178e81a0-1011-3464-88bf-a3693d66042a">
+        <md:resolvedNode resolutionId="679bc42f-b6aa-3a27-b076-947279bdc1a9">
+            <md:child refId="f389727e-55d1-3c5d-bb90-b130f49c0fbe"/>
+            <md:child refId="44b1c898-d016-36d8-a24a-a8382fa371f4"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="57b234e8-82f1-3397-8ec3-b86e1196218d">
+        <md:resolvedNode resolutionId="1260cb67-5fcd-3154-b020-19dd77eb695e">
+            <md:child refId="6c354cc8-1100-3def-8010-7afa203408b5"/>
+            <md:child refId="f6aa75c2-2871-3d99-8471-72bfad47765c"/>
+            <md:child refId="bc68e934-1416-31d3-8b2b-d44dad175437"/>
+            <md:child refId="c612f92c-a2e2-3cf2-b146-918d60c51d50"/>
+            <md:child refId="eb3a3e33-bea2-3ddd-bd40-2d362feb7ef6"/>
+            <md:child refId="f389727e-55d1-3c5d-bb90-b130f49c0fbe"/>
+            <md:child refId="178e81a0-1011-3464-88bf-a3693d66042a"/>
+            <md:child refId="44b1c898-d016-36d8-a24a-a8382fa371f4"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="0d3bc9a1-d81d-350e-aca8-8651afba55bb">
+        <md:resolvedNode resolutionId="13b4e6e7-01e6-3906-9106-32eb02649913">
+            <md:child refId="44b1c898-d016-36d8-a24a-a8382fa371f4"/>
+            <md:child refId="57b234e8-82f1-3397-8ec3-b86e1196218d"/>
+            <md:child refId="eb3a3e33-bea2-3ddd-bd40-2d362feb7ef6"/>
+            <md:child refId="c612f92c-a2e2-3cf2-b146-918d60c51d50"/>
+            <md:child refId="f389727e-55d1-3c5d-bb90-b130f49c0fbe"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="05c72b3d-27df-3a9c-b6a4-e360b35b1e89">
+        <md:resolvedNode resolutionId="90ebf67d-18e3-3099-989c-b5a516cbd43c">
+            <md:child refId="44b1c898-d016-36d8-a24a-a8382fa371f4"/>
+            <md:child refId="0d3bc9a1-d81d-350e-aca8-8651afba55bb"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="68d4ee1d-59de-33a7-891c-bf0599ee101b">
+        <md:resolvedNode resolutionId="8c777113-bccb-33d3-850f-152151bc129a">
+            <md:child refId="05c72b3d-27df-3a9c-b6a4-e360b35b1e89"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+    <md:idwrapper id="d518fea3-fa1d-38f3-bd39-36cd5ab83352">
+        <md:resolvedNode resolutionId="c3ab967e-5038-3cd4-b5b8-f07839149458">
+            <md:child refId="68d4ee1d-59de-33a7-891c-bf0599ee101b"/>
+        </md:resolvedNode>
+    </md:idwrapper>
+</md:billOfMaterials>
