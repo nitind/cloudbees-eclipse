@@ -12,6 +12,7 @@ import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -21,11 +22,13 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.cloudbees.eclipse.core.internal.forge.ForgeSync;
+import com.cloudbees.eclipse.core.json.AccountServicesRequest;
 import com.cloudbees.eclipse.core.json.AccountServicesResponse;
 import com.cloudbees.eclipse.core.json.DomainIdRequest;
 import com.cloudbees.eclipse.core.json.DomainIdResponse;
@@ -41,7 +44,10 @@ import com.google.gson.GsonBuilder;
  */
 public class GrandCentralService {
 
-  private static final String BASE_URL = "https://grandcentral.cloudbees.com/api/";
+  private final static Logger log = Logger.getLogger(GrandCentralService.class.getName());
+  
+  //private static final String BASE_URL = "https://grandcentral.cloudbees.com/api/";
+  private static final String BASE_URL = "https://grandcentral.beescloud.com/api/";
 
   private ForgeSyncService forgeSyncService = new ForgeSyncService();
 
@@ -55,6 +61,50 @@ public class GrandCentralService {
    * @throws CloudBeesException
    */
   public boolean remoteValidateUser(String email, String password, IProgressMonitor monitor) throws CloudBeesException {
+    
+    StringBuffer errMsg = new StringBuffer();
+    
+    try {
+      HttpClient httpclient = getAPIClient();
+
+      AccountServicesRequest req = new AccountServicesRequest();
+      req.email = "vpandey@cloudbees.com"; //email;
+      req.api_key = "2bf5c815c8334b2"; //password;
+
+      Gson g = createGson();
+      String json = g.toJson(req);
+
+      StringEntity se = new StringEntity("api_key=2bf5c815c8334b2&email=vpandey@cloudbees.com");
+      
+      String url = BASE_URL + "account/services";
+      HttpPost post = new HttpPost(url);
+      post.setEntity(se);
+      //post.setHeader("Accept", "application/json");
+      //post.setHeader("Content-type", "application/json");
+      
+      //post.getParams().setParameter("api_key", "2bf5c815c8334b2");
+      //post.getParams().setParameter("email", "vpandey@cloudbees.com");
+      
+      
+      
+      HttpResponse resp = httpclient.execute(post);
+      String bodyResponse = getResponseBody(resp);
+            
+      AccountServicesResponse services = g.fromJson(bodyResponse, AccountServicesResponse.class);
+
+      if (services.message!=null && services.message.length()>0) {
+        errMsg.append(services.message);
+      }
+      checkResponseCode(resp);
+      
+      return services.account_name.length()>0;
+
+    } catch (Exception e) {
+      throw new CloudBeesException("Failed to get account services info"+(errMsg.length()>0?" ("+errMsg+")":""), e);
+    }
+  }
+
+  private boolean webValidateUser(String email, String password) throws CloudBeesException {
     String url = "https://sso.cloudbees.com/sso-gateway/signon/usernamePasswordLogin.do";
 
     HttpClient httpclient = getAPIClient();
@@ -86,9 +136,6 @@ public class GrandCentralService {
     } catch (IOException e) {
       throw new CloudBeesException("Failed to validate user", e);
     }
-
-    // String url = "https://sso.cloudbees.com/sso-gateway/signon/login.do";
-
   }
 
   public String remoteGetDomainId(String email, String password) throws CloudBeesException {
@@ -202,7 +249,7 @@ public class GrandCentralService {
 
     //TODO Dummy until real API becomes available
     AccountServicesResponse r = new AccountServicesResponse();
-    r.api_version = "1.0";
+    //r.api_version = "1.0";
 
     ForgeService forge1 = new ForgeService();
     forge1.type = "SVN";

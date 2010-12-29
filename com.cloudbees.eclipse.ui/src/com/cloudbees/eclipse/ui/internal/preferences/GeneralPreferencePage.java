@@ -4,10 +4,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.core.internal.jobs.InternalJob;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
@@ -134,45 +139,47 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
       @Override
       public void widgetSelected(SelectionEvent e) {
 
-        try {
           final String email = fieldEmail.getStringValue();
           final String password = fieldPassword.getStringValue();
 
-          // no need to fork at this point
-          PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, true, new IRunnableWithProgress() {
+          ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell()); 
+          try {
+            dialog.run(true, true, new IRunnableWithProgress(){ 
+                public void run(IProgressMonitor monitor) {
+                  monitor.beginTask("Validating CloudBees account...", 100);
+                  try {
+                    monitor.subTask("Connecting..");
+                    monitor.internalWorked(10d);
+                    
+                    boolean loginValid = CloudBeesCorePlugin.getDefault().getGrandCentralService()
+                        .remoteValidateUser(email, password, monitor);
+                    if (loginValid) {
+                      MessageDialog.openInformation(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay()
+                          .getActiveShell(), "Validation result", "Validation successful!");
+                    } else {
+                      MessageDialog.openError(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay().getActiveShell(),
+                          "Validation result", "Validation was not successful!\nWrong email or password?");
+                    }
 
-            public void run(IProgressMonitor monitor) {
-              try {
-                boolean loginValid = CloudBeesCorePlugin.getDefault().getGrandCentralService()
-                    .remoteValidateUser(email, password, monitor);
-                if (loginValid) {
-                  MessageDialog.openInformation(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay()
-                      .getActiveShell(), "Validation result", "Validation successful!");
-                } else {
-                  MessageDialog.openError(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay().getActiveShell(),
-                      "Validation result", "Validation was not successful!\nWrong email or password?");
+                  } catch (CloudBeesException e1) {
+                    throw new RuntimeException(e1);
+                  }
+                  
+                  monitor.done();                
                 }
-
-              } catch (CloudBeesException e1) {
-                e1.printStackTrace();
-                // TODO Log properly
-                CloudBeesUIPlugin.showError("Failed to validate your account.", e1);
-              }
-            }
-          });
-        } catch (InvocationTargetException e1) {
-          e1.printStackTrace();
-          // TODO Log properly
-          CloudBeesUIPlugin.showError("Failed to validate your account.", e1.getTargetException());
-        } catch (InterruptedException e1) {
-          e1.printStackTrace();
-          // TODO Log properly
-          CloudBeesUIPlugin.showError("Failed to validate your account.", e1);
-        }
-
+            });
+          } catch (InvocationTargetException e1) {
+            Throwable t1 = e1.getTargetException().getCause()!=null?e1.getTargetException().getCause():e1.getTargetException();
+            Throwable t2 = t1.getCause()!=null?t1.getCause():null;
+            
+            CloudBeesUIPlugin.showError("Failed to validate your account.", t1.getMessage(), t2);
+          } catch (InterruptedException e1) {
+            CloudBeesUIPlugin.showError("Failed to validate your account.", e1);
+          }
+          
       }
     });
-
+    
     createSignUpLink(groupInnerComp);
   }
 

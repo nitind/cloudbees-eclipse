@@ -106,8 +106,13 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   public static void showError(String msg, Throwable e) {
-    Status status = new Status(IStatus.ERROR, "Error!", 0, msg, e);
-    ErrorDialog.openError(Display.getCurrent().getActiveShell(), "Error!", msg, status);
+    Status status = new Status(IStatus.ERROR, "Error!", 0, e.getMessage(), e);
+    ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Error!", msg, status);
+  }
+
+  public static void showError(String msg, String reason, Throwable e) {
+    Status status = new Status(IStatus.ERROR, "Error!", 0, reason, e);
+    ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Error!", msg, status);
   }
 
 }
