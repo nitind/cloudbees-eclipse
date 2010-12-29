@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="com.cloudbees.eclipse.feature"
+      id="com.cloudbees.eclipse"
       label="CloudBees Eclipse Toolkit"
       version="1.0.0.qualifier"
       provider-name="CloudBees, Inc">
@@ -16,11 +16,6 @@
    <license url="http://www.example.com/license">
       [Enter License Description here.]
    </license>
-
-   <requires>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.core.runtime"/>
-   </requires>
 
    <plugin
          id="com.cloudbees.eclipse.core"
