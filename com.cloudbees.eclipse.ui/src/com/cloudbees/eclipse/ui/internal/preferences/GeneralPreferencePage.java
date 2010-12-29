@@ -4,11 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.eclipse.core.internal.jobs.InternalJob;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -88,9 +84,18 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
   private void createCompositeLogin() {
     Group group = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_IN);
     group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    group.setLayout(new GridLayout(1, false));
 
+    GridLayout gl = new GridLayout(1, false);
+    gl.marginLeft=5;
+    gl.marginRight=5;
+    gl.marginTop=5;
+    gl.marginBottom=5;
+    gl.horizontalSpacing=5;
+
+    group.setLayout(gl);
+    
     Composite groupInnerComp = new Composite(group, SWT.NONE);
+    
     groupInnerComp.setLayout(new GridLayout(2, false));
     groupInnerComp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
@@ -98,6 +103,8 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
     final StringFieldEditor fieldEmail = new StringFieldEditor(PreferenceConstants.P_EMAIL, Messages.pref_email, 30,
         groupInnerComp);
+    
+    fieldEmail.getTextControl(groupInnerComp).setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     addField(fieldEmail);
 
     final StringFieldEditor fieldPassword = new StringFieldEditor(PreferenceConstants.P_PASSWORD,
@@ -131,9 +138,28 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
         getTextControl().setEchoChar('*');
       }
     };
+    
+    fieldPassword.getTextControl(groupInnerComp).setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     addField(fieldPassword);
 
-    Button b = new Button(groupInnerComp, SWT.PUSH);
+    Composite signupAndValidateRow = new Composite(groupInnerComp, SWT.NONE);
+    GridData signupRowData = new GridData(GridData.FILL_HORIZONTAL);
+    signupRowData.horizontalSpan=2;
+
+    signupAndValidateRow.setLayoutData(signupRowData);
+    GridLayout gl2 = new GridLayout(2, false);
+    gl2.marginWidth=0;
+    gl2.marginHeight=0;
+    gl2.marginTop=5;
+    signupAndValidateRow.setLayout(gl2);
+    
+    createSignUpLink(signupAndValidateRow);
+    
+    Button b = new Button(signupAndValidateRow, SWT.PUSH);
+    GridData validateButtonLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_END);
+    validateButtonLayoutData.widthHint=75;
+    b.setLayoutData(validateButtonLayoutData);
+    
     b.setText(Messages.pref_validate_login);
     b.addSelectionListener(new SelectionAdapter() {
       @Override
@@ -179,8 +205,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
           
       }
     });
-    
-    createSignUpLink(groupInnerComp);
+        
   }
 
   private void createAttachNectarLink(Composite parent) {
@@ -198,6 +223,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
   private void createSignUpLink(Composite parent) {
     final Link link = new Link(parent, SWT.NONE);
+    link.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     link.setText(Messages.pref_signup);
     link.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
