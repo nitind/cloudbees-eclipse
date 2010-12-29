@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rmap xmlns="http://www.eclipse.org/buckminster/RMap-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mp="http://www.eclipse.org/buckminster/MavenProvider-1.0"
-	xmlns:pmp="http://www.eclipse.org/buckminster/PDEMapProvider-1.0" xmlns:bc="http://www.eclipse.org/buckminster/Common-1.0"
->
+	xmlns:pmp="http://www.eclipse.org/buckminster/PDEMapProvider-1.0" xmlns:bc="http://www.eclipse.org/buckminster/Common-1.0">
 
 	<property key="build.type" mutable="true" value="N" />
 
-	<locator pattern="^org\.eclipse(\..+)?" searchPathRef="target.platform" />
+	<locator pattern="^org\.tigris(\..+)?" searchPathRef="subclipse" />
+	
+	<!-- <locator pattern="^org\.eclipse(\..+)?" searchPathRef="target.platform" /> -->
+	
+	<!--
+	<locator searchPathRef="localsdk" />-->
+	
+	<locator searchPathRef="target.platform" />
+	
 	<locator searchPathRef="resources" />
 
 	<searchPath name="resources">
@@ -16,10 +23,26 @@
 			</uri>
 		</provider>
 	</searchPath>
+	
+<!--
+	<searchPath name="localsdk">
+		<provider componentTypes="osgi.bundle,eclipse.feature" readerType="local">
+			<uri format="file:///G:/eclipse-java-helios-SR1/plugins" />
+		</provider>			
+	</searchPath>
+  -->
+	<searchPath name="subclipse">
+		<provider componentTypes="eclipse.feature,osgi.bundle" readerType="p2" source="false" mutable="false" resolutionFilter="(|(build.type=N)(build.type=R))">
+			<uri format="http://subclipse.tigris.org/update_1.6.x" />
+		</provider>
+	</searchPath>
+	
 	<searchPath name="target.platform">
+		
 		<provider componentTypes="eclipse.feature,osgi.bundle" readerType="p2" source="false" mutable="false" resolutionFilter="(build.type=N)">
 			<uri format="http://download.eclipse.org/releases/helios" />
 		</provider>
+
 <!--		<provider componentTypes="eclipse.feature,osgi.bundle" readerType="p2" source="false" mutable="false" resolutionFilter="(|(build.type=N)(build.type=R))">-->
 <!--			<uri format="http://download.eclipse.org/eclipse/updates/3.6" />-->
 <!--		</provider>-->
