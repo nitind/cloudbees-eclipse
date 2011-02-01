@@ -64,24 +64,6 @@ public class NectarInstance {
     return ret;
   }
 
-  //FIXME Move to .test project as a junit test as it gets ready!
-  public static void main(String[] args) {
-    List<NectarInstance> list = new ArrayList<NectarInstance>();
-    NectarInstance i1 = new NectarInstance("label1", "url1", "username1", "password1", true);
-    NectarInstance i2 = new NectarInstance("label2", "url2", null, null, true);
-    NectarInstance i3 = new NectarInstance("label3", "url3", "username3", "", true);
-    list.add(i1);
-    list.add(i2);
-    list.add(i3);
-    
-    String ret = encode(list);
-    System.out.println("ENCODED:"+ret);
-    List<NectarInstance> decoded = decode(ret);
-    for (NectarInstance inst: decoded) {
-      System.out.println(inst);
-    }
-  }
-
   @Override
   public String toString() {
     StringBuffer ret = new StringBuffer();

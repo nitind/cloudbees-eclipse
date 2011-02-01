@@ -21,11 +21,12 @@ import org.eclipse.ui.part.ViewPart;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.nectar.api.BaseNectarResponse;
+import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 
 /**
- * View showing jobs for both NectarInfo offline installations and JaaS NectarInfo instances
+ * View showing jobs for both NectarInfo offline installations and JaaS Nectar instances
  * 
  * @author ahtik
  */
@@ -40,8 +41,6 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
   private Action action1; // Configure Account
   private Action action2; // Attach NectarInfo
   private Action action3; // Reload Forge repositories
-
-
 
   class NameSorter extends ViewerSorter {
   }
@@ -61,15 +60,27 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
         System.out.println("Source " + sel.getClass());
 
         if (sel instanceof TreeSelection) {
-          
 
           Object el = ((TreeSelection) sel).getFirstElement();
           if (el instanceof BaseNectarResponse[]) {
             if (((BaseNectarResponse[]) el).length == 1) {
               BaseNectarResponse resp = ((BaseNectarResponse[]) el)[0];
-              CloudBeesUIPlugin.getDefault().showJobs(resp);
+              try {
+                CloudBeesUIPlugin.getDefault().showJobs(resp.serviceUrl, resp.viewUrl);
+              } catch (CloudBeesException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+              }
               return;
             }
+          } else if (el instanceof NectarInstanceResponse.View) {
+            try {
+              CloudBeesUIPlugin.getDefault().showJobs(null, ((NectarInstanceResponse.View) el).url);
+            } catch (CloudBeesException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
+            return;
           }
         }
 
@@ -82,8 +93,6 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
                   
                 }
         */
-
-
 
       }
     });

@@ -21,11 +21,12 @@ import org.osgi.framework.BundleContext;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.Logger;
+import com.cloudbees.eclipse.core.NectarChangeListener;
 import com.cloudbees.eclipse.core.NectarService;
 import com.cloudbees.eclipse.core.domain.NectarInstance;
-import com.cloudbees.eclipse.core.nectar.api.BaseNectarResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
-import com.cloudbees.eclipse.ui.views.NectarJobsView;
+import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
+import com.cloudbees.eclipse.ui.views.jobs.JobsView;
 
 /**
  * CloudBees Eclipse Toolkit UI Plugin
@@ -44,6 +45,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   private NectarService ns = new NectarService("http://deadlock.netbeans.org/hudson/");
   private NectarService ns2 = new NectarService("http://hudson.jboss.org/hudson/");
+
+  private List<NectarChangeListener> nectarChangeListeners = new ArrayList<NectarChangeListener>();
 
   public CloudBeesUIPlugin() {
     super();
@@ -186,15 +189,43 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return resp;
   }
 
-  public void showJobs(BaseNectarResponse resp) {
+  /**
+   * Either viewUrl or serviceUrl can be null. If both are provided then viewUrl must belong to serviceUrl.
+   * 
+   * @param serviceUrl
+   * @param viewUrl
+   * @throws CloudBeesException
+   */
+  public void showJobs(String serviceUrl, String viewUrl) throws CloudBeesException {
     try {
+
+      PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(JobsView.ID);
+
       //TODO Start monitoring this job list
 
-      PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(NectarJobsView.ID);
+      //TODO Look up proper service based on resp.serviceUrl. assume "ns" for now.
+      NectarJobsResponse jobs = ns.getJobs(viewUrl);
+
+      Iterator<NectarChangeListener> iterator = nectarChangeListeners.iterator();
+      while (iterator.hasNext()) {
+        NectarChangeListener listener = (NectarChangeListener) iterator.next();
+        listener.activeJobViewChanged(jobs);
+      }
+
+
     } catch (PartInitException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
+
+  }
+
+  public void addNectarChangeListener(NectarChangeListener nectarChangeListener) {
+    this.nectarChangeListeners.add(nectarChangeListener);
+  }
+
+  public void removeNectarChangeListener(NectarChangeListener listener) {
+    nectarChangeListeners.remove(listener);
   }
 
 }
