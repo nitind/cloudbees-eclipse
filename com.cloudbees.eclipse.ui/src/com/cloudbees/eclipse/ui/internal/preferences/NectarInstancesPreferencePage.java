@@ -121,7 +121,7 @@ public class NectarInstancesPreferencePage extends PreferencePage implements IWo
         Shell parent = CloudBeesUIPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell();
         WizardDialog dialog = new NectarWizardDialog(parent);
         dialog.create();
-        dialog.getShell().setSize(Math.max(400, dialog.getShell().getSize().x), 350);
+        dialog.getShell().setSize(Math.max(400, dialog.getShell().getSize().x), 400);
         dialog.open();
         loadTable();
 

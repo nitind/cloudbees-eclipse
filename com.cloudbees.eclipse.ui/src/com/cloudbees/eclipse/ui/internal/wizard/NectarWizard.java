@@ -11,7 +11,7 @@ public class NectarWizard extends Wizard {
   private NectarInstance ni = new NectarInstance();
 
   private NectarUrlPage pageUrl = new NectarUrlPage();
-  private NectarAuthenticationPage pageAuth = new NectarAuthenticationPage();
+//  private NectarAuthenticationPage pageAuth = new NectarAuthenticationPage();
   private NectarFinishPage pageFinish = new NectarFinishPage();
 
   public NectarWizard() {
@@ -24,14 +24,14 @@ public class NectarWizard extends Wizard {
     setHelpAvailable(false);
     ni = new NectarInstance();
     pageUrl.setNectarInstance(ni);
-    pageAuth.setNectarInstance(ni);
+//    pageAuth.setNectarInstance(ni);
     pageFinish.setNectarInstance(ni);
   }
 
   @Override
   public void addPages() {
     addPage(pageUrl);
-    addPage(pageAuth);
+//    addPage(pageAuth);
     addPage(pageFinish);
   }
 

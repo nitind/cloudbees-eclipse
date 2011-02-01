@@ -13,16 +13,18 @@ public class NectarInstance {
   public String url;
   public String username;
   public String password;
+  public boolean authenticate;
 
   public NectarInstance() {
     
   }
   
-  public NectarInstance(String label, String url, String username, String password) {
+  public NectarInstance(String label, String url, String username, String password, boolean authenticate) {
     this.label = label;
     this.url = url;
     this.username = username;
     this.password = password;
+    this.authenticate = authenticate;
   }
 
   /**
@@ -65,9 +67,9 @@ public class NectarInstance {
   //FIXME Move to .test project as a junit test as it gets ready!
   public static void main(String[] args) {
     List<NectarInstance> list = new ArrayList<NectarInstance>();
-    NectarInstance i1 = new NectarInstance("label1", "url1", "username1", "password1");
-    NectarInstance i2 = new NectarInstance("label2", "url2", null, null);
-    NectarInstance i3 = new NectarInstance("label3", "url3", "username3", "");
+    NectarInstance i1 = new NectarInstance("label1", "url1", "username1", "password1", true);
+    NectarInstance i2 = new NectarInstance("label2", "url2", null, null, true);
+    NectarInstance i3 = new NectarInstance("label3", "url3", "username3", "", true);
     list.add(i1);
     list.add(i2);
     list.add(i3);
