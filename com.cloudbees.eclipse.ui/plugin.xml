@@ -44,7 +44,7 @@
             name="CloudBees CI"
             icon="icons/jobs_view6.png"
             category="com.cloudbees.eclipse"
-            class="com.cloudbees.eclipse.ui.views.NectarInstanceView"
+            class="com.cloudbees.eclipse.ui.views.nectartree.NectarTreeView"
             id="com.cloudbees.eclipse.ui.views.NectarInstanceView">
       </view>
       <view

@@ -13,6 +13,7 @@ import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -22,7 +23,9 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.NectarService;
 import com.cloudbees.eclipse.core.domain.NectarInstance;
+import com.cloudbees.eclipse.core.nectar.api.BaseNectarResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
+import com.cloudbees.eclipse.ui.views.NectarJobsView;
 
 /**
  * CloudBees Eclipse Toolkit UI Plugin
@@ -181,6 +184,17 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     //FIXME let's pretend we have 1 dev at cloud nectar
     resp.add(ns.getViews());
     return resp;
+  }
+
+  public void showJobs(BaseNectarResponse resp) {
+    try {
+      //TODO Start monitoring this job list
+
+      PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(NectarJobsView.ID);
+    } catch (PartInitException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 
 }

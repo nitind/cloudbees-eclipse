@@ -4,7 +4,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.jface.util.ConfigureColumns;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.CellLabelProvider;
@@ -18,7 +17,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.ViewPart;
 
@@ -26,6 +24,7 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
+import com.cloudbees.eclipse.ui.views.nectartree.InstanceContentProvider;
 
 /**
  * View showing jobs for both NectarInfo offline installations and JaaS NectarInfo instances
@@ -124,7 +123,6 @@ public class NectarJobsView extends ViewPart implements IPropertyChangeListener 
   }
 
   private void fillLocalPullDown(IMenuManager manager) {
-    ConfigureColumns.forTable(viewer.getTable(), PlatformUI.getWorkbench().getActiveWorkbenchWindow());
     //manager.add(action1);
     //manager.add(action2);
     manager.add(new Separator());
