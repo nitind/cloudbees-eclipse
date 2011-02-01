@@ -1,5 +1,5 @@
 package com.cloudbees.eclipse.core.gc.api;
 
-public class BaseResponse {
+public class GCBaseResponse {
   String message;
 }
