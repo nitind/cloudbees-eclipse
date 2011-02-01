@@ -75,7 +75,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
     group.setText(Messages.pref_group_devAtCloud);
 
-    addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_HAAS, Messages.pref_enable_haas, groupInnerComp));
+    addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_JAAS, Messages.pref_enable_jaas, groupInnerComp));
     addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_FORGE, Messages.pref_enable_forge, groupInnerComp));
 
     createAttachNectarLink(groupInnerComp);
@@ -86,16 +86,16 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
     group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
     GridLayout gl = new GridLayout(1, false);
-    gl.marginLeft=5;
-    gl.marginRight=5;
-    gl.marginTop=5;
-    gl.marginBottom=5;
-    gl.horizontalSpacing=5;
+    gl.marginLeft = 5;
+    gl.marginRight = 5;
+    gl.marginTop = 5;
+    gl.marginBottom = 5;
+    gl.horizontalSpacing = 5;
 
     group.setLayout(gl);
-    
+
     Composite groupInnerComp = new Composite(group, SWT.NONE);
-    
+
     groupInnerComp.setLayout(new GridLayout(2, false));
     groupInnerComp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
@@ -103,7 +103,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
     final StringFieldEditor fieldEmail = new StringFieldEditor(PreferenceConstants.P_EMAIL, Messages.pref_email, 30,
         groupInnerComp);
-    
+
     fieldEmail.getTextControl(groupInnerComp).setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     addField(fieldEmail);
 
@@ -138,74 +138,76 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
         getTextControl().setEchoChar('*');
       }
     };
-    
+
     fieldPassword.getTextControl(groupInnerComp).setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     addField(fieldPassword);
 
     Composite signupAndValidateRow = new Composite(groupInnerComp, SWT.NONE);
     GridData signupRowData = new GridData(GridData.FILL_HORIZONTAL);
-    signupRowData.horizontalSpan=2;
+    signupRowData.horizontalSpan = 2;
 
     signupAndValidateRow.setLayoutData(signupRowData);
     GridLayout gl2 = new GridLayout(2, false);
-    gl2.marginWidth=0;
-    gl2.marginHeight=0;
-    gl2.marginTop=5;
+    gl2.marginWidth = 0;
+    gl2.marginHeight = 0;
+    gl2.marginTop = 5;
     signupAndValidateRow.setLayout(gl2);
-    
+
     createSignUpLink(signupAndValidateRow);
-    
+
     Button b = new Button(signupAndValidateRow, SWT.PUSH);
     GridData validateButtonLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_END);
-    validateButtonLayoutData.widthHint=75;
+    validateButtonLayoutData.widthHint = 75;
     b.setLayoutData(validateButtonLayoutData);
-    
+
     b.setText(Messages.pref_validate_login);
     b.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent e) {
 
-          final String email = fieldEmail.getStringValue();
-          final String password = fieldPassword.getStringValue();
+        final String email = fieldEmail.getStringValue();
+        final String password = fieldPassword.getStringValue();
 
-          ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell()); 
-          try {
-            dialog.run(true, true, new IRunnableWithProgress(){ 
-                public void run(IProgressMonitor monitor) {
-                  monitor.beginTask("Validating CloudBees account...", 100);
-                  try {
-                    monitor.subTask("Connecting..");
-                    monitor.internalWorked(10d);
-                    
-                    boolean loginValid = CloudBeesCorePlugin.getDefault().getGrandCentralService()
-                        .remoteValidateUser(email, password, monitor);
-                    if (loginValid) {
-                      MessageDialog.openInformation(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay()
-                          .getActiveShell(), "Validation result", "Validation successful!");
-                    } else {
-                      MessageDialog.openError(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay().getActiveShell(),
-                          "Validation result", "Validation was not successful!\nWrong email or password?");
-                    }
+        ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
+        try {
+          dialog.run(true, true, new IRunnableWithProgress() {
+            public void run(IProgressMonitor monitor) {
+              monitor.beginTask("Validating CloudBees account...", 100); //TODO i18n
+              try {
+                monitor.subTask("Connecting..");//TODO i18n
+                monitor.internalWorked(10d);
 
-                  } catch (CloudBeesException e1) {
-                    throw new RuntimeException(e1);
-                  }
-                  
-                  monitor.done();                
+                boolean loginValid = CloudBeesCorePlugin.getDefault().getGrandCentralService()
+                    .remoteValidateUser(email, password, monitor);
+                if (loginValid) {
+                  MessageDialog.openInformation(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay()
+                      .getActiveShell(), "Validation result", "Validation successful!");//TODO i18n
+                } else {
+                  MessageDialog.openError(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay().getActiveShell(),
+                      "Validation result", "Validation was not successful!\nWrong email or password?");//TODO i18n
                 }
-            });
-          } catch (InvocationTargetException e1) {
-            Throwable t1 = e1.getTargetException().getCause()!=null?e1.getTargetException().getCause():e1.getTargetException();
-            Throwable t2 = t1.getCause()!=null?t1.getCause():null;
-            
-            CloudBeesUIPlugin.showError("Failed to validate your account.", t1.getMessage(), t2);
-          } catch (InterruptedException e1) {
-            CloudBeesUIPlugin.showError("Failed to validate your account.", e1);
-          }
-          
+
+              } catch (CloudBeesException e1) {
+                throw new RuntimeException(e1);
+              }
+
+              monitor.done();
+            }
+          });
+        } catch (InvocationTargetException e1) {
+          e1.printStackTrace();
+          Throwable t1 = e1.getTargetException().getCause() != null ? e1.getTargetException().getCause() : e1
+              .getTargetException();
+          Throwable t2 = t1.getCause() != null ? t1.getCause() : null;
+
+          CloudBeesUIPlugin.showError("Failed to validate your account.", t1.getMessage(), t2);
+        } catch (InterruptedException e1) {
+          CloudBeesUIPlugin.showError("Failed to validate your account.", e1);
+        }
+
       }
     });
-        
+
   }
 
   private void createAttachNectarLink(Composite parent) {

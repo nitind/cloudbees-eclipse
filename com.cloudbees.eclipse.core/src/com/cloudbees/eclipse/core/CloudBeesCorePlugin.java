@@ -1,7 +1,9 @@
 package com.cloudbees.eclipse.core;
 
+import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -18,6 +20,10 @@ public class CloudBeesCorePlugin extends Plugin {
 
   private GrandCentralService gcService;
 
+  private ServiceTracker proxyServiceTracker;
+
+  private Logger logger;
+
   /**
    * The constructor
    */
@@ -33,6 +39,12 @@ public class CloudBeesCorePlugin extends Plugin {
     plugin = this;
     gcService = new GrandCentralService();
     gcService.start();
+    
+    proxyServiceTracker = new ServiceTracker(getBundle().getBundleContext(), IProxyService.class.getName(), null);
+    proxyServiceTracker.open();
+
+    logger = new Logger(getLog());
+
   }
 
   /*
@@ -40,10 +52,14 @@ public class CloudBeesCorePlugin extends Plugin {
    * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
    */
   public void stop(BundleContext context) throws Exception {
+    logger = null;
     plugin = null;
     if (gcService != null) {
       gcService.stop();
       gcService = null;
+    }
+    if (proxyServiceTracker!=null) {
+      proxyServiceTracker.close();
     }
     super.stop(context);
   }
@@ -62,6 +78,10 @@ public class CloudBeesCorePlugin extends Plugin {
       throw new CloudBeesException("CloudBeesCorePlugin not yet initialized!");
     }
     return gcService;
+  }
+
+  public Logger getLogger() {
+    return logger;
   }
 
 }

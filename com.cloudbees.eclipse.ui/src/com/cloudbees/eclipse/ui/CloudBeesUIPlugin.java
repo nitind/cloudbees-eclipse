@@ -1,6 +1,9 @@
 package com.cloudbees.eclipse.ui;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -9,13 +12,17 @@ import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.Logger;
+import com.cloudbees.eclipse.core.NectarService;
+import com.cloudbees.eclipse.core.domain.NectarInstance;
+import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
 
 /**
  * CloudBees Eclipse Toolkit UI Plugin
@@ -29,6 +36,11 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   // The shared instance
   private static CloudBeesUIPlugin plugin;
+
+  private Logger logger;
+
+  private NectarService ns = new NectarService("http://deadlock.netbeans.org/hudson/");
+  private NectarService ns2 = new NectarService("http://hudson.jboss.org/hudson/");
 
   public CloudBeesUIPlugin() {
     super();
@@ -44,6 +56,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   public void start(BundleContext context) throws Exception {
     super.start(context);
     plugin = this;
+    logger = new Logger(getLog());
   }
 
   /*
@@ -54,6 +67,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
    * )
    */
   public void stop(BundleContext context) throws Exception {
+    logger = null;
     plugin = null;
     super.stop(context);
   }
@@ -108,11 +122,65 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   public static void showError(String msg, Throwable e) {
     Status status = new Status(IStatus.ERROR, "Error!", 0, e.getMessage(), e);
     ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Error!", msg, status);
+    e.printStackTrace();
   }
 
   public static void showError(String msg, String reason, Throwable e) {
     Status status = new Status(IStatus.ERROR, "Error!", 0, reason, e);
     ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Error!", msg, status);
+    e.printStackTrace();
+  }
+
+  public Logger getLogger() {
+    return logger;
+  }
+
+  public List<NectarInstance> getManualNectarInstances() {
+    IPreferenceStore store = CloudBeesUIPlugin.getDefault().getPreferenceStore();
+    String instances = store.getString(PreferenceConstants.P_NECTAR_INSTANCES);
+    List<NectarInstance> list = NectarInstance.decode(instances);
+    return list;
+  }
+
+  public void addNectarInstance(NectarInstance ni) {
+    if (ni == null || ni.label == null || ni.url == null || ni.label.length() == 0 || ni.url.length() == 0) {
+      throw new RuntimeException("Unable to add new instance with an empty url or label!");
+    }
+    List<NectarInstance> list = getManualNectarInstances();
+    list.add(ni);
+    CloudBeesUIPlugin.getDefault().getPreferenceStore()
+        .putValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
+  }
+
+  public List<NectarInstanceResponse> getManualNectarsInfo() throws CloudBeesException {
+    List<NectarInstanceResponse> resp = new ArrayList<NectarInstanceResponse>();
+
+    Iterator<NectarInstance> it = getManualNectarInstances().iterator();
+    while (it.hasNext()) {
+      NectarInstance inst = (NectarInstance) it.next();
+      NectarService service = lookupNectarService(inst);
+      resp.add(service.getViews());
+    }
+
+    //FIXME let's pretend we have 2 manually configured nectars locally
+    resp.add(ns.getViews());
+    resp.add(ns2.getViews());
+
+    return resp;
+  }
+
+  private NectarService lookupNectarService(NectarInstance inst) {
+    // TODO Auto-generated method stub
+    //dummily respond with the same nb deadlock service for now
+    return ns;
+  }
+
+  public List<NectarInstanceResponse> getDevAtCloudNectarsInfo() throws CloudBeesException {
+    List<NectarInstanceResponse> resp = new ArrayList<NectarInstanceResponse>();
+
+    //FIXME let's pretend we have 1 dev at cloud nectar
+    resp.add(ns.getViews());
+    return resp;
   }
 
 }

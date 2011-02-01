@@ -13,3 +13,12 @@ Set it as Target Platform
 2. We maintain compatibility for Java 5 so configure Installed JREs to have JDK 1.5 set default.
 
 3. Make sure to load cb_cleanup.xml and cb_format.xml to your eclipse formatting and cleanup settings to keep the project consistent!
+
+4. Install eGit from Helios - http://download.eclipse.org/releases/helios preconfigured update site
+
+5. Install subclipse from http://subclipse.tigris.org/update_1.6.x
+OR
+5. Install subversive/SVN from Helios update site 
+
+please do not use subclipse and eclipse.org subversive/SVN client at the same time. 
+hey don't work well together and are and not designed to do so.

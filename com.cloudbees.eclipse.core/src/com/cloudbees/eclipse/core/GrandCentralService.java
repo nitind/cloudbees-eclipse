@@ -1,41 +1,19 @@
 package com.cloudbees.eclipse.core;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.net.URL;
-import java.security.KeyStore;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import com.cloudbees.eclipse.core.gc.api.AccountServicesResponse;
+import com.cloudbees.eclipse.core.gc.api.KeysUsingAuthRequest;
+import com.cloudbees.eclipse.core.gc.api.KeysUsingAuthResponse;
+import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusRequest;
 import com.cloudbees.eclipse.core.internal.forge.ForgeSync;
-import com.cloudbees.eclipse.core.json.AccountServicesRequest;
-import com.cloudbees.eclipse.core.json.AccountServicesResponse;
-import com.cloudbees.eclipse.core.json.DomainIdRequest;
-import com.cloudbees.eclipse.core.json.DomainIdResponse;
-import com.cloudbees.eclipse.core.json.ForgeService;
-import com.cloudbees.eclipse.core.json.HaasService;
+import com.cloudbees.eclipse.util.Utils;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Central access to CloudBees Grand Central API
@@ -44,15 +22,15 @@ import com.google.gson.GsonBuilder;
  */
 public class GrandCentralService {
 
-  private final static Logger log = Logger.getLogger(GrandCentralService.class.getName());
-  
+  private static final String HOST = System.getProperty("cloudbees.host", "cloudbees.com");
+
   //private static final String BASE_URL = "https://grandcentral.cloudbees.com/api/";
-  private static final String BASE_URL = "https://grandcentral.beescloud.com/api/";
+  private static final String BASE_URL = "https://grandcentral." + HOST + "/api/";
 
   private ForgeSyncService forgeSyncService = new ForgeSyncService();
 
   /**
-   * Validates user credential against CloudBees SSO authentication server.
+   * Validates user credential against CloudBees SSO authentication server. FIXME Refactor to json-based validation
    * 
    * @param email
    * @param password
@@ -61,181 +39,102 @@ public class GrandCentralService {
    * @throws CloudBeesException
    */
   public boolean remoteValidateUser(String email, String password, IProgressMonitor monitor) throws CloudBeesException {
-    
+
     StringBuffer errMsg = new StringBuffer();
-    
+
     try {
-      HttpClient httpclient = getAPIClient();
+      HttpClient httpclient = Utils.getAPIClient();
 
-      AccountServicesRequest req = new AccountServicesRequest();
-      req.email = "vpandey@cloudbees.com"; //email;
-      req.api_key = "2bf5c815c8334b2"; //password;
+      AccountServiceStatusRequest req = new AccountServiceStatusRequest();
+      req.email = email;
+      req.password = password;
 
-      Gson g = createGson();
-      String json = g.toJson(req);
+      String url = BASE_URL + "user/keys_using_auth";
 
-      StringEntity se = new StringEntity("api_key=2bf5c815c8334b2&email=vpandey@cloudbees.com");
-      
-      String url = BASE_URL + "account/services";
-      HttpPost post = new HttpPost(url);
-      post.setEntity(se);
-      //post.setHeader("Accept", "application/json");
-      //post.setHeader("Content-type", "application/json");
-      
-      //post.getParams().setParameter("api_key", "2bf5c815c8334b2");
-      //post.getParams().setParameter("email", "vpandey@cloudbees.com");
-      
-      
-      
+      HttpPost post = Utils.jsonRequest(url, req);
+
       HttpResponse resp = httpclient.execute(post);
-      String bodyResponse = getResponseBody(resp);
-            
+      String bodyResponse = Utils.getResponseBody(resp);
+
+      Gson g = Utils.createGson();
+
       AccountServicesResponse services = g.fromJson(bodyResponse, AccountServicesResponse.class);
 
-      if (services.message!=null && services.message.length()>0) {
+      if (services.message != null && services.message.length() > 0) {
         errMsg.append(services.message);
       }
-      checkResponseCode(resp);
-      
-      return services.account_name.length()>0;
+      Utils.checkResponseCode(resp);
+
+      return services.account_name.length() > 0;
 
     } catch (Exception e) {
-      throw new CloudBeesException("Failed to get account services info"+(errMsg.length()>0?" ("+errMsg+")":""), e);
+      throw new CloudBeesException("Failed to get account services info"
+          + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
     }
   }
 
-  private boolean webValidateUser(String email, String password) throws CloudBeesException {
-    String url = "https://sso.cloudbees.com/sso-gateway/signon/usernamePasswordLogin.do";
+  /*  private boolean webValidateUser(String email, String password) throws CloudBeesException {
+      String url = "https://sso.cloudbees.com/sso-gateway/signon/usernamePasswordLogin.do";
 
-    HttpClient httpclient = getAPIClient();
+      HttpClient httpclient = getAPIClient();
 
-    HttpPost post = new HttpPost(url);
+      HttpPost post = new HttpPost(url);
 
-    List<NameValuePair> formparams = new ArrayList<NameValuePair>();
-    formparams.add(new BasicNameValuePair("josso_cmd", "login"));
-    formparams.add(new BasicNameValuePair("josso_username", email));
-    formparams.add(new BasicNameValuePair("josso_password", password));
+      List<NameValuePair> formparams = new ArrayList<NameValuePair>();
+      formparams.add(new BasicNameValuePair("josso_cmd", "login"));
+      formparams.add(new BasicNameValuePair("josso_username", email));
+      formparams.add(new BasicNameValuePair("josso_password", password));
 
-    try {
-      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, "UTF-8");
-      post.setEntity(entity);
+      try {
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, "UTF-8");
+        post.setEntity(entity);
 
-      HttpResponse resp = httpclient.execute(post);
-      int code = resp.getStatusLine().getStatusCode();
-      if (code == 302) {
-        // FIXME Temporarily until json API becomes available, validate
-        // user by assuming redirect means successful login
-        return true;
+        HttpResponse resp = httpclient.execute(post);
+        int code = resp.getStatusLine().getStatusCode();
+        if (code == 302) {
+          // FIXME Temporarily until json API becomes available, validate
+          // user by assuming redirect means successful login
+          return true;
+        }
+
+        return false; // wrong response code means invalid user or
+        // unrecognized response page
+
+      } catch (ClientProtocolException e) {
+        throw new CloudBeesException("Failed to validate user", e);
+      } catch (IOException e) {
+        throw new CloudBeesException("Failed to validate user", e);
       }
-
-      return false; // wrong response code means invalid user or
-      // unrecognized response page
-
-    } catch (ClientProtocolException e) {
-      throw new CloudBeesException("Failed to validate user", e);
-    } catch (IOException e) {
-      throw new CloudBeesException("Failed to validate user", e);
-    }
-  }
+    }*/
 
   public String remoteGetDomainId(String email, String password) throws CloudBeesException {
     try {
-      HttpClient httpclient = getAPIClient();
+      HttpClient httpclient = Utils.getAPIClient();
 
-      DomainIdRequest req = new DomainIdRequest();
+      KeysUsingAuthRequest req = new KeysUsingAuthRequest();
       req.email = email;
-      req.api_key = password;
+      req.password = password;
 
-      Gson g = createGson();
+      Gson g = Utils.createGson();
       String json = g.toJson(req);
 
-      String url = BASE_URL + "domain_id";
+      String url = BASE_URL + "api_key";
       HttpPost post = new HttpPost(url);
       post.getParams().setParameter("json", json);
       HttpResponse resp = httpclient.execute(post);
 
-      checkResponseCode(resp);
-      String bodyResponse = getResponseBody(resp);
+      Utils.checkResponseCode(resp);
+      String bodyResponse = Utils.getResponseBody(resp);
 
-      DomainIdResponse domainId = g.fromJson(bodyResponse, DomainIdResponse.class);
+      KeysUsingAuthResponse domainId = g.fromJson(bodyResponse, KeysUsingAuthResponse.class);
 
-      return domainId.domain_id;
-
-    } catch (Exception e) {
-      throw new CloudBeesException("Failed to get domain_id", e);
-    }
-  }
-
-  private String getResponseBody(HttpResponse resp) throws CloudBeesException {
-    try {
-      return readString(resp.getEntity().getContent());
-    } catch (IllegalStateException e) {
-      throw new CloudBeesException("Failed to read response", e);
-    } catch (IOException e) {
-      throw new CloudBeesException("Failed to read response", e);
-    }
-  }
-
-  private void checkResponseCode(HttpResponse resp) throws CloudBeesException {
-    int responseStatus = resp.getStatusLine().getStatusCode();
-    if (responseStatus != 200) {
-      throw new CloudBeesException("Unexpected response code:" + responseStatus);
-    }
-  }
-
-  private String readString(InputStream is) throws CloudBeesException {
-    try {
-      Writer writer = new StringWriter();
-      char[] buffer = new char[1024];
-      try {
-        Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-        int n;
-        while ((n = reader.read(buffer)) != -1) {
-          writer.write(buffer, 0, n);
-        }
-      } finally {
-        is.close();
-      }
-      return writer.toString();
-    } catch (Exception e) {
-      throw new CloudBeesException("Failed to read inputstream", e);
-    }
-  }
-
-  private HttpClient getAPIClient() throws CloudBeesException {
-    DefaultHttpClient httpclient = new DefaultHttpClient();
-    try {
-      KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-
-      URL truststore = CloudBeesCorePlugin.getDefault().getBundle().getResource("truststore");
-      InputStream instream = truststore.openStream();
-
-      try {
-        trustStore.load(instream, "123456".toCharArray());
-      } finally {
-        instream.close();
-      }
-
-      SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
-      // Override https handling to use provided truststore
-      Scheme sch = new Scheme("https", socketFactory, 443);
-      httpclient.getConnectionManager().getSchemeRegistry().register(sch);
-      return httpclient;
+      return domainId.api_key;
 
     } catch (Exception e) {
-      throw new CloudBeesException("Error while initiating access to CloudBees GrandCentral API!", e);
+      throw new CloudBeesException("Failed to get api_key", e);
     }
   }
 
-  public static Gson createGson() {
-    final GsonBuilder gsonBuilder = new GsonBuilder();
-    gsonBuilder.serializeSpecialFloatingPointValues();
-    gsonBuilder.serializeNulls();
-    // gsonBuilder.setPrettyPrinting(); // temporary
-    // gsonBuilder.excludeFieldsWithoutExposeAnnotation();
-    Gson g = gsonBuilder.create();
-    return g;
-  }
 
   public void start() {
     // Do nothing for now.
@@ -251,24 +150,24 @@ public class GrandCentralService {
     AccountServicesResponse r = new AccountServicesResponse();
     //r.api_version = "1.0";
 
-    ForgeService forge1 = new ForgeService();
+    AccountServicesResponse.ForgeService forge1 = new AccountServicesResponse.ForgeService();
     forge1.type = "SVN";
     forge1.url = "http://anonsvn.jboss.org/repos/jbpm/jbpm4/trunk/";
 
-    ForgeService forge2 = new ForgeService();
+    AccountServicesResponse.ForgeService forge2 = new AccountServicesResponse.ForgeService();
     forge2.type = "GIT";
     forge2.url = "https://github.com/vivek/hudson.git";
 
-    r.forge = new ForgeService[] { forge1, forge2 };
+    r.forge = new AccountServicesResponse.ForgeService[] { forge1, forge2 };
 
-    r.haas = new HaasService[] {};
+    r.jaas = new AccountServicesResponse.JaasService[] {};
 
     return r;
   }
 
   public void reloadForgeRepos(String email, String password, IProgressMonitor monitor) throws CloudBeesException {
     AccountServicesResponse services = remoteGetAccountServices(email, password);
-    for (ForgeService forgeService : services.forge) {
+    for (AccountServicesResponse.ForgeService forgeService : services.forge) {
       ForgeSync.TYPE type = ForgeSync.TYPE.valueOf(forgeService.type);
       if (type == null) {
         throw new CloudBeesException("Unexpected Forge repository type " + forgeService.type + "!");

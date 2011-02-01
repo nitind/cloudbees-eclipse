@@ -24,7 +24,7 @@
 	<variableList>
 		<variable>
 			<name>CLOUDBEES_GIT_LOC</name>
-			<value>file:/G:/cb/git/cloudbees-eclipse</value>
+			<value>file:/home/ahti/cb/cloudbees-eclipse</value>
 		</variable>
 	</variableList>
 </projectDescription>
