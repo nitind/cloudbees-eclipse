@@ -101,6 +101,10 @@ public class NectarUrlPage extends AbstractNectarPage {
         textPassword.setEnabled(auth);
         lblUsername.setEnabled(auth);
         lblPassword.setEnabled(auth);
+        if (!auth) {
+          textUsername.setText("");
+          textPassword.setText("");
+        }
       }
     };
     chkAuthenticate.addSelectionListener(selectionListener);
