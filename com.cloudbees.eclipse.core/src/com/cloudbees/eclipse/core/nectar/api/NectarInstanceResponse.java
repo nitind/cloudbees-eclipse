@@ -1,5 +1,7 @@
 package com.cloudbees.eclipse.core.nectar.api;
 
+import com.google.gson.annotations.Expose;
+
 
 
 public class NectarInstanceResponse extends BaseNectarResponse {
@@ -29,6 +31,13 @@ public class NectarInstanceResponse extends BaseNectarResponse {
   public static class View {
     public String name;
     public String url;
+
+    @Expose(deserialize = false, serialize = false)
+    public boolean isPrimary;
+
+    @Expose(deserialize = false, serialize = false)
+    public NectarInstanceResponse response;
+
     //public Job[] jobs;
   }
 

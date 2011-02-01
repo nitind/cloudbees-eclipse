@@ -32,7 +32,7 @@ import com.cloudbees.eclipse.ui.PreferenceConstants;
  */
 public class NectarTreeView extends ViewPart implements IPropertyChangeListener {
 
-  public static final String ID = "com.cloudbees.eclipse.ui.views.NectarInstanceView";
+  public static final String ID = "com.cloudbees.eclipse.ui.views.nectartree.NectarTreeView";
 
   private TreeViewer viewer;
 
@@ -55,24 +55,22 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
     viewer.addOpenListener(new IOpenListener() {
 
       public void open(OpenEvent event) {
-        Object source = event.getSource();
         ISelection sel = event.getSelection();
-        System.out.println("Source " + sel.getClass());
 
         if (sel instanceof TreeSelection) {
 
           Object el = ((TreeSelection) sel).getFirstElement();
-          if (el instanceof BaseNectarResponse[]) {
-            if (((BaseNectarResponse[]) el).length == 1) {
-              BaseNectarResponse resp = ((BaseNectarResponse[]) el)[0];
-              try {
-                CloudBeesUIPlugin.getDefault().showJobs(resp.serviceUrl, resp.viewUrl);
-              } catch (CloudBeesException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-              }
-              return;
+
+          if (el instanceof BaseNectarResponse) {
+
+            BaseNectarResponse resp = (BaseNectarResponse) el;
+            try {
+              CloudBeesUIPlugin.getDefault().showJobs(resp.serviceUrl, resp.viewUrl);
+            } catch (CloudBeesException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
             }
+            return;
           } else if (el instanceof NectarInstanceResponse.View) {
             try {
               CloudBeesUIPlugin.getDefault().showJobs(null, ((NectarInstanceResponse.View) el).url);
@@ -81,6 +79,13 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
               e.printStackTrace();
             }
             return;
+          } else if (el instanceof InstanceGroup) {
+            boolean exp = viewer.getExpandedState(el);
+            if (exp) {
+              viewer.collapseToLevel(el, 1);
+            } else {
+              viewer.expandToLevel(el, 1);
+            }
           }
         }
 
@@ -97,7 +102,7 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
       }
     });
 
-    viewer.expandToLevel(1);
+    viewer.expandToLevel(2);
 
     makeActions();
     contributeToActionBars();

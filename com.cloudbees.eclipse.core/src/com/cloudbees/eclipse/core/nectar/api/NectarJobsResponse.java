@@ -20,6 +20,8 @@ public class NectarJobsResponse extends BaseNectarResponse {
     public Boolean inQueue;
     public String color;
 
+    public String url;
+
     public Boolean buildable;
 
     public Build lastBuild;
@@ -34,6 +36,13 @@ public class NectarJobsResponse extends BaseNectarResponse {
       public String fullDisplayName;
       public String url;
       public String builtOn;
+
+      // Merged from regular build request, json tree can fetch this nicely
+      public Boolean building;
+      public Long duration;
+      public Long number;
+      public Long timestamp;
+
     }
 
     public static class HealthReport {

@@ -24,4 +24,5 @@ Bundle-ClassPath: .,
  lib/httpcore-4.0.1.jar
 Export-Package: com.cloudbees.eclipse.core,
  com.cloudbees.eclipse.core.domain,
- com.cloudbees.eclipse.core.nectar.api
+ com.cloudbees.eclipse.core.nectar.api,
+ com.cloudbees.eclipse.core.util

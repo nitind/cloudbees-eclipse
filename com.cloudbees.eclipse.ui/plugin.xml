@@ -2,6 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
 
+
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
@@ -40,12 +41,13 @@
             name="CloudBees"
             id="com.cloudbees.eclipse">
       </category>
+      
       <view
             name="CloudBees CI"
             icon="icons/jobs_view6.png"
             category="com.cloudbees.eclipse"
             class="com.cloudbees.eclipse.ui.views.nectartree.NectarTreeView"
-            id="com.cloudbees.eclipse.ui.views.NectarInstanceView">
+            id="com.cloudbees.eclipse.ui.views.nectartree.NectarTreeView">
       </view>
       <view
             name="CI Jobs"
@@ -53,6 +55,14 @@
             category="com.cloudbees.eclipse"
             class="com.cloudbees.eclipse.ui.views.jobs.JobsView"
             id="com.cloudbees.eclipse.ui.views.JobsView">
+      </view>
+
+      <view
+            name="Job Details"
+            icon="icons/16x16/cb_plain.png"
+            allowMultiple="true"
+            class="com.cloudbees.eclipse.ui.views.jobdetails.JobDetailsView"
+            id="com.cloudbees.eclipse.ui.views.jobdetails.JobDetailsView">            
       </view>
 
    </extension>
@@ -65,7 +75,7 @@
                ratio="0.5"
                relative="org.eclipse.ui.views.TaskList"
                relationship="right"
-               id="com.cloudbees.eclipse.ui.views.NectarInstanceView">
+               id="com.cloudbees.eclipse.ui.views.NectarTreeView">
          </view>
       </perspectiveExtension>
 
@@ -75,7 +85,7 @@
                ratio="0.5"
                relative="org.eclipse.ui.views.TaskList"
                relationship="right"
-               id="com.cloudbees.eclipse.ui.views.NectarInstanceView">
+               id="com.cloudbees.eclipse.ui.views.nectartree.NectarTreeView">
          </view>
       </perspectiveExtension>
 
@@ -85,7 +95,7 @@
                ratio="0.5"
                relative="org.eclipse.ui.views.TaskList"
                relationship="right"
-               id="com.cloudbees.eclipse.ui.views.NectarInstanceView">
+               id="com.cloudbees.eclipse.ui.views.nectartree.NectarTreeView">
          </view>
       </perspectiveExtension>
 
@@ -95,11 +105,18 @@
                ratio="0.5"
                relative="org.eclipse.ui.views.TaskList"
                relationship="right"
-               id="com.cloudbees.eclipse.ui.views.NectarInstanceView">
+               id="com.cloudbees.eclipse.ui.views.nectartree.NectarTreeView">
          </view>
       </perspectiveExtension>
 
-
    </extension>
 
+ <extension point="org.eclipse.ui.editors">
+       <editor id="com.cloudbees.eclipse.ui.views.jobdetails.JobDetailsForm"
+          name="CI Job Info"
+          icon="icons/16x16/cb_plain.png"
+  		   extensions="foo" 
+  		   class="com.cloudbees.eclipse.ui.views.jobdetails.JobDetailsForm"  
+       />
+  </extension>
 </plugin>

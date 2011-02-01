@@ -1,14 +1,18 @@
 package com.cloudbees.eclipse.ui.views.nectartree;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 
+import com.cloudbees.eclipse.core.NectarService;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse.View;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
-public class InstanceLabelProvider extends LabelProvider {
+public class InstanceLabelProvider extends LabelProvider implements IFontProvider {
 
   private final static ImageDescriptor ICON_FOLDER_HOSTED = ImageDescriptor.createFromURL(CloudBeesUIPlugin
       .getDefault().getBundle().getResource("/icons/16x16/cb_folder_run.png"));
@@ -48,6 +52,7 @@ public class InstanceLabelProvider extends LabelProvider {
 
     super.dispose();
   }
+  
 
   public String getText(Object obj) {
     if (obj instanceof InstanceGroup) {
@@ -56,6 +61,12 @@ public class InstanceLabelProvider extends LabelProvider {
     }
     if (obj instanceof NectarInstanceResponse) {
       NectarInstanceResponse inst = (NectarInstanceResponse) obj;
+
+      NectarService s = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(inst.serviceUrl);
+      if (s != null) {
+        return s.getLabel();
+      }
+
       String name = inst.nodeName;
       if (name != null && name.length() > 0) {
         return name;
@@ -93,6 +104,16 @@ public class InstanceLabelProvider extends LabelProvider {
           imageKey = ISharedImages.IMG_OBJ_PROJECT;
         }
         return PlatformUI.getWorkbench().getSharedImages().getImage(imageKey);*/
+  }
+
+  public Font getFont(Object element) {
+    if (element instanceof NectarInstanceResponse.View) {
+      View view = (NectarInstanceResponse.View) element;
+      if (view.isPrimary) {
+        return JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
+      }
+    }
+    return null;
   }
 
 }

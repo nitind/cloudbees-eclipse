@@ -13,6 +13,7 @@ import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -26,6 +27,8 @@ import com.cloudbees.eclipse.core.NectarService;
 import com.cloudbees.eclipse.core.domain.NectarInstance;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
+import com.cloudbees.eclipse.core.util.Utils;
+import com.cloudbees.eclipse.ui.views.jobdetails.JobDetailsView;
 import com.cloudbees.eclipse.ui.views.jobs.JobsView;
 
 /**
@@ -43,13 +46,23 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   private Logger logger;
 
-  private NectarService ns = new NectarService("http://deadlock.netbeans.org/hudson/");
-  private NectarService ns2 = new NectarService("http://hudson.jboss.org/hudson/");
+  private NectarService ns = new NectarService(new NectarInstance("Netbeans", "http://deadlock.netbeans.org/hudson/"));
+  private NectarService ns2 = new NectarService(new NectarInstance("jBoss", "http://hudson.jboss.org/hudson/"));
+  private NectarService ns3 = new NectarService(new NectarInstance("Eclipse", "https://hudson.eclipse.org/hudson/"));
+  private NectarService ns4 = new NectarService(new NectarInstance("ahti grandomstate",
+      "https://grandomstate.ci.cloudbees.com/"));
+
+
+  private List<NectarService> nectarRegistry = new ArrayList<NectarService>();
 
   private List<NectarChangeListener> nectarChangeListeners = new ArrayList<NectarChangeListener>();
 
   public CloudBeesUIPlugin() {
     super();
+    nectarRegistry.add(ns);
+    nectarRegistry.add(ns2);
+    nectarRegistry.add(ns3);
+    nectarRegistry.add(ns4);
   }
 
   /*
@@ -165,27 +178,46 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     while (it.hasNext()) {
       NectarInstance inst = (NectarInstance) it.next();
       NectarService service = lookupNectarService(inst);
-      resp.add(service.getViews());
+      try {
+        resp.add(service.getInstance());
+      } catch (CloudBeesException e) {
+        System.out.println("Failed to contact " + service + ". Not adding to the list for now.");//TODO log
+        //TODO Consider adding it to the list anyway, just mark it somehow as "Unreachable" in UI!
+        e.printStackTrace();
+      }
     }
 
     //FIXME let's pretend we have 2 manually configured nectars locally
-    resp.add(ns.getViews());
-    resp.add(ns2.getViews());
+    NectarService service = null;
+    try {
+      ;
+      resp.add((service = ns).getInstance());
+      resp.add((service = ns2).getInstance());
+      resp.add((service = ns3).getInstance());
+      resp.add((service = ns4).getInstance());
+    } catch (CloudBeesException e) {
+      System.out.println("Failed to contact " + service + ". Not adding to the list for now.");//TODO log
+      //TODO Consider adding it to the list anyway, just mark it somehow as "Unreachable" in UI!
+      e.printStackTrace();
+    }
 
     return resp;
   }
 
   private NectarService lookupNectarService(NectarInstance inst) {
-    // TODO Auto-generated method stub
-    //dummily respond with the same nb deadlock service for now
-    return ns;
+    NectarService service = getNectarServiceForUrl(inst.url);
+    if (service == null) {
+      service = new NectarService(inst);
+      nectarRegistry.add(service);
+    }
+    return service;
   }
 
   public List<NectarInstanceResponse> getDevAtCloudNectarsInfo() throws CloudBeesException {
     List<NectarInstanceResponse> resp = new ArrayList<NectarInstanceResponse>();
 
     //FIXME let's pretend we have 1 dev at cloud nectar
-    resp.add(ns.getViews());
+    resp.add(ns.getInstance());
     return resp;
   }
 
@@ -212,7 +244,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         listener.activeJobViewChanged(jobs);
       }
 
-
     } catch (PartInitException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -226,6 +257,40 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   public void removeNectarChangeListener(NectarChangeListener listener) {
     nectarChangeListeners.remove(listener);
+  }
+
+  public NectarService getNectarServiceForUrl(String serviceUrl) {
+    Iterator<NectarService> iter = nectarRegistry.iterator();
+    while (iter.hasNext()) {
+      NectarService service = (NectarService) iter.next();
+      if (service.getUrl().equals(serviceUrl)) {
+        return service;
+      }
+    }
+    return null;
+  }
+
+  public void showJobDetails(String jobUrl) {
+    if (jobUrl == null) {
+      return;
+    }
+    // Look up the service
+    Iterator<NectarService> it = nectarRegistry.iterator();
+    while (it.hasNext()) {
+      NectarService service = (NectarService) it.next();
+      if (jobUrl.startsWith(service.getUrl())) {
+
+        try {
+          PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
+              .showView(JobDetailsView.ID, Utils.toB64(jobUrl), IWorkbenchPage.VIEW_ACTIVATE);
+        } catch (PartInitException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+        return;
+      }
+    }
+
   }
 
 }

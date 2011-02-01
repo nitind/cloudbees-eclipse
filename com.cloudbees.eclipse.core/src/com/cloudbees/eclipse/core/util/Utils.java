@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.util;
+package com.cloudbees.eclipse.core.util;
 
 import java.io.BufferedReader;
 import java.io.File;

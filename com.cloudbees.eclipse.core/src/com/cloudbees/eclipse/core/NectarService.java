@@ -4,9 +4,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 
+import com.cloudbees.eclipse.core.domain.NectarInstance;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
-import com.cloudbees.eclipse.util.Utils;
+import com.cloudbees.eclipse.core.util.Utils;
 import com.google.gson.Gson;
 
 /**
@@ -16,10 +17,12 @@ import com.google.gson.Gson;
  */
 public class NectarService {
 
-  private String url;
+  /*private String url;
+  private String label;*/
+  private NectarInstance nectar;
 
-  public NectarService(String url) {
-    this.url = url;
+  public NectarService(NectarInstance nectar) {
+    this.nectar = nectar;
   }
 
   /**
@@ -30,8 +33,9 @@ public class NectarService {
    */
   public NectarJobsResponse getJobs(String viewUrl) throws CloudBeesException {
 
-    if (viewUrl != null && !viewUrl.startsWith(url)) {
-      throw new CloudBeesException("Unexpected view url provided! Service url: " + url + "; view url: " + viewUrl);
+    if (viewUrl != null && !viewUrl.startsWith(nectar.url)) {
+      throw new CloudBeesException("Unexpected view url provided! Service url: " + nectar.url + "; view url: "
+          + viewUrl);
     }
 
     StringBuffer errMsg = new StringBuffer();
@@ -41,7 +45,7 @@ public class NectarService {
 
       Gson g = Utils.createGson();
 
-      String reqUrl = viewUrl != null ? viewUrl : url;
+      String reqUrl = viewUrl != null ? viewUrl : nectar.url;
 
       HttpPost post = new HttpPost(reqUrl + "api/json?tree=" + NectarJobsResponse.getTreeQuery());
       post.setHeader("Accept", "application/json");
@@ -53,7 +57,7 @@ public class NectarService {
       NectarJobsResponse views = g.fromJson(bodyResponse, NectarJobsResponse.class);
 
       if (views != null) {
-        views.serviceUrl = url;
+        views.serviceUrl = nectar.url;
       }
 
       Utils.checkResponseCode(resp);
@@ -65,10 +69,9 @@ public class NectarService {
           + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
     }
 
-
   }
 
-  public NectarInstanceResponse getViews() throws CloudBeesException {
+  public NectarInstanceResponse getInstance() throws CloudBeesException {
 
     StringBuffer errMsg = new StringBuffer();
 
@@ -77,8 +80,9 @@ public class NectarService {
 
       Gson g = Utils.createGson();
 
+      HttpPost post = new HttpPost(nectar.url + "api/json?tree=" + NectarInstanceResponse.getTreeQuery());
 
-      HttpPost post = new HttpPost(url + "api/json?tree=" + NectarInstanceResponse.getTreeQuery());
+      System.out.println("Nectar: " + nectar);
 
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
@@ -86,20 +90,41 @@ public class NectarService {
       HttpResponse resp = httpclient.execute(post);
       String bodyResponse = Utils.getResponseBody(resp);
 
-      NectarInstanceResponse views = g.fromJson(bodyResponse, NectarInstanceResponse.class);
+      NectarInstanceResponse instance = g.fromJson(bodyResponse, NectarInstanceResponse.class);
 
-      if (views != null) {
-        views.serviceUrl = url;
+      if (instance != null) {
+        instance.serviceUrl = nectar.url;
+
+        if (instance.views != null) {
+          for (int i = 0; i < instance.views.length; i++) {
+            instance.views[i].response = instance;
+            instance.views[i].isPrimary = instance.primaryView.url.equals(instance.views[i].url);
+          }
+        }
       }
 
       Utils.checkResponseCode(resp);
 
-      return views;
+      return instance;
 
     } catch (Exception e) {
-      throw new CloudBeesException("Failed to get views"
-          + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
+      throw new CloudBeesException("Failed to get views" + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
     }
   }
 
+  public String getLabel() {
+    return nectar.label;
+  }
+
+  public String getUrl() {
+    return nectar.url;
+  }
+
+  @Override
+  public String toString() {
+    if (nectar != null) {
+      return "NectarService[nectarInstance=" + nectar + "]";
+    }
+    return super.toString();
+  }
 }

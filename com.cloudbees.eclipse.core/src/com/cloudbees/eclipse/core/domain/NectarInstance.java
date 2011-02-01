@@ -4,7 +4,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.cloudbees.eclipse.util.Utils;
+import com.cloudbees.eclipse.core.util.Utils;
 import com.google.gson.reflect.TypeToken;
 
 public class NectarInstance {
@@ -19,6 +19,10 @@ public class NectarInstance {
     
   }
   
+  public NectarInstance(String label, String url) {
+    this(label, url, null, null, false);
+  }
+
   public NectarInstance(String label, String url, String username, String password, boolean authenticate) {
     this.label = label;
     this.url = url;

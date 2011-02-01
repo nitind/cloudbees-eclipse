@@ -13,6 +13,10 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.IOpenListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
@@ -30,6 +34,7 @@ import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.NectarChangeListener;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job;
+import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job.Build;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 
@@ -78,13 +83,27 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     //Tree tree = viewer.getTree();
     //tree.setHeaderVisible(true);
 
-    table.getTable().setLinesVisible(true);
+    //table.getTable().setLinesVisible(true);
     table.getTable().setHeaderVisible(true);
 
-    createColumn("S", 10, new CellLabelProvider() {
+    createColumn("S", 20, new CellLabelProvider() {
       public void update(ViewerCell cell) {
         NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
-        Image img = stateIcons.get(job.color);
+
+        String key = job.color;
+
+        /*        ImageData[] imageDatas = new ImageLoader().load(new FileInputStream("myAnimated.gif"));
+                Image[] images = new Image[imageDatas.length];
+                for (int n = 0; n < imageDatas.length; n++) {
+                  // images[n] = new Image(myTable.getDislay(), imageDatas[n]);
+                }
+        */
+        if (job.color != null && job.color.contains("_")) {
+          key = job.color.substring(0, job.color.indexOf("_"));
+        }
+
+        Image img = stateIcons.get(key);
+
         if (img != null) {
           cell.setText("");
           cell.setImage(img);
@@ -94,9 +113,16 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         }
 
       }
+
+      @Override
+      public String getToolTipText(Object element) {
+        System.out.println("TOOLTIP FOR ELEMENT " + element);
+        return super.getToolTipText(element);
+      }
+
     });
 
-    createColumn("Job", 200, new CellLabelProvider() {
+    createColumn("Job", 250, new CellLabelProvider() {
       public void update(ViewerCell cell) {
         NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
         cell.setText(job.displayName);
@@ -117,31 +143,31 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
           }
         });
     */
-    createColumn("Last build", 100, new CellLabelProvider() {
+    createColumn("Last build", 150, new CellLabelProvider() {
       public void update(ViewerCell cell) {
         NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
         try {
-          cell.setText(job.lastBuild.fullDisplayName);
+          cell.setText(JobsView.this.formatBuildInfo(job.lastBuild));
         } catch (Throwable t) {
           cell.setText("n/a");
         }
       }
     });
-    createColumn("Last success", 100, new CellLabelProvider() {
+    createColumn("Last success", 150, new CellLabelProvider() {
       public void update(ViewerCell cell) {
         NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
         try {
-          cell.setText(job.lastSuccessfulBuild.fullDisplayName);
+          cell.setText(JobsView.this.formatBuildInfo(job.lastSuccessfulBuild));
         } catch (Throwable t) {
           cell.setText("n/a");
         }
       }
     });
-    createColumn("Last failure", 100, new CellLabelProvider() {
+    createColumn("Last failure", 105, new CellLabelProvider() {
       public void update(ViewerCell cell) {
         NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
         try {
-          cell.setText(job.lastFailedBuild.fullDisplayName);
+          cell.setText(JobsView.this.formatBuildInfo(job.lastFailedBuild));
         } catch (Throwable t) {
           cell.setText("n/a");
         }
@@ -170,6 +196,22 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
           }
         });*/
 
+    table.addOpenListener(new IOpenListener() {
+
+      public void open(OpenEvent event) {
+        ISelection sel = event.getSelection();
+
+        if (sel instanceof IStructuredSelection) {
+          Object el = ((IStructuredSelection) sel).getFirstElement();
+          if (el instanceof NectarJobsResponse.Job) {
+            CloudBeesUIPlugin.getDefault().showJobDetails(((NectarJobsResponse.Job) el).url);
+          }
+        }
+
+      }
+
+    });
+
     makeActions();
     contributeToActionBars();
 
@@ -184,13 +226,39 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
   }
 
+  protected String formatBuildInfo(Build build) {
+    String unit = "";
+    if (build.duration != null) {
+      //TODO Implement proper human-readable duration conversion, consider using the same conversion rules that Jenkins uses
+      System.out.println("DURATION: " + build.timestamp);
+      long mins = (System.currentTimeMillis() - build.timestamp.longValue()) / (60L * 1000);
+      long hr = mins / 60;
+      if (mins < 60) {
+        unit = mins + " min";
+        if (mins > 1) {
+          unit = unit + "s";
+        }
+      } else if (mins < 60 * 60 * 24) {
+        //long newmins = mins - (hr * 60);
+        unit = hr + " hr" + (hr > 1 ? "s" : "");/* + " " + newmins + " min" + (newmins > 1 ? "s" : "");*/
+      } else {
+        long days = hr / 24L;
+        unit = days + " day" + (days > 1 ? "s" : "")/* + ", " + hr + " hr" + (hr > 1 ? "s" : "")*/;
+      }
+
+    }
+    String timeComp = build.duration != null ? ", " + unit + " ago" : "";
+    String buildComp = build.number != null ? "#" + build.number : "n/a";
+    return buildComp + timeComp;
+  }
+
   private void initImages() {
 
-    String[] icons = { "blue", "red" };
+    String[] icons = { "blue", "red", "yellow" };
 
     for (int i = 0; i < icons.length; i++) {
       Image img = ImageDescriptor.createFromURL(
-          CloudBeesUIPlugin.getDefault().getBundle().getResource("/jenkins-icons/16x16/" + icons[i] + ".gif"))
+          CloudBeesUIPlugin.getDefault().getBundle().getResource("/icons/jenkins-icons/16x16/" + icons[i] + ".gif"))
           .createImage();
       System.out.println("Created image " + img);
       stateIcons.put(icons[i], img);
@@ -199,7 +267,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     stateIcons.put(
         "disabled",
         ImageDescriptor.createFromURL(
-            CloudBeesUIPlugin.getDefault().getBundle().getResource("/jenkins-icons/16x16/grey.gif")).createImage());
+            CloudBeesUIPlugin.getDefault().getBundle().getResource("/icons/jenkins-icons/16x16/grey.gif"))
+            .createImage());
 
   }
 

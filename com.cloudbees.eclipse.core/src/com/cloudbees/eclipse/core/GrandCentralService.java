@@ -12,7 +12,7 @@ import com.cloudbees.eclipse.core.gc.api.KeysUsingAuthRequest;
 import com.cloudbees.eclipse.core.gc.api.KeysUsingAuthResponse;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusRequest;
 import com.cloudbees.eclipse.core.internal.forge.ForgeSync;
-import com.cloudbees.eclipse.util.Utils;
+import com.cloudbees.eclipse.core.util.Utils;
 import com.google.gson.Gson;
 
 /**

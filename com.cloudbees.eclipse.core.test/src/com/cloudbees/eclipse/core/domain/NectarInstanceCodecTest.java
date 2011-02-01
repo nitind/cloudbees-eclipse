@@ -10,9 +10,9 @@ public class NectarInstanceCodecTest {
   @Test
   public void testCodec() {
     List<NectarInstance> list = new ArrayList<NectarInstance>();
-    NectarInstance i1 = new NectarInstance("label1", "url1", "username1", "password1");
-    NectarInstance i2 = new NectarInstance("label2", "url2", null, null);
-    NectarInstance i3 = new NectarInstance("label3", "url3", "username3", "");
+    NectarInstance i1 = new NectarInstance("label1", "url1", "username1", "password1", true);
+    NectarInstance i2 = new NectarInstance("label2", "url2", null, null, false);
+    NectarInstance i3 = new NectarInstance("label3", "url3", "username3", "", true);
     list.add(i1);
     list.add(i2);
     list.add(i3);
