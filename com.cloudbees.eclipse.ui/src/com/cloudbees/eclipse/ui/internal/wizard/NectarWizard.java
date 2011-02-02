@@ -48,6 +48,7 @@ public class NectarWizard extends Wizard {
 
   private void saveInstanceInfo() {
 
+    // FIXME shouldn't we actually save only when Apply clicked on the preference page? 
     CloudBeesUIPlugin.getDefault().saveNectarInstance(ni);
 
   }
