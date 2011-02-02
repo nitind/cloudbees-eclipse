@@ -1,6 +1,8 @@
 package com.cloudbees.eclipse.ui.internal.preferences;
 
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -86,15 +88,11 @@ public class NectarInstancesPreferencePage extends PreferencePage implements IWo
     table.addSelectionListener(new SelectionListener() {
       
       public void widgetSelected(SelectionEvent e) {
-        TableItem[] items = ((Table) e.getSource()).getSelection();
-        NectarInstancesPreferencePage.this.btnEdit.setEnabled(items != null && items.length > 0);
-        NectarInstancesPreferencePage.this.btnRemove.setEnabled(items != null && items.length > 0);
+        enableButtons();
       }
-      
+
       public void widgetDefaultSelected(SelectionEvent e) {
-        TableItem[] items = ((Table) e.getSource()).getSelection();
-        NectarInstancesPreferencePage.this.btnEdit.setEnabled(items != null && items.length > 0);
-        NectarInstancesPreferencePage.this.btnRemove.setEnabled(items != null && items.length > 0);
+        enableButtons();
       }
     });
 
@@ -190,15 +188,33 @@ public class NectarInstancesPreferencePage extends PreferencePage implements IWo
   }
 
   private void loadTable() {
+    // FIXME preserve selection on reload
+
     table.removeAll();
 
-    Iterator<NectarInstance> it = CloudBeesUIPlugin.getDefault().getManualNectarInstances().iterator();
-    while (it.hasNext()) {
-      NectarInstance instance = (NectarInstance) it.next();
+    List<NectarInstance> insts = CloudBeesUIPlugin.getDefault().getManualNectarInstances();
+    Collections.sort(insts, new Comparator<NectarInstance>() {
+      public int compare(NectarInstance o1, NectarInstance o2) {
+        return o1.label.compareTo(o2.label);
+      }
+    });
+
+    for (NectarInstance instance : insts) {
       TableItem tableItem = new TableItem(table, SWT.NONE);
       tableItem.setText(new String[] { instance.label, instance.url });
       tableItem.setData(instance);
     }
+
+    if (table.getItemCount() > 0) {
+      table.setSelection(0);
+    }
+
+    enableButtons();
   }
 
+  private void enableButtons() {
+    TableItem[] items = table.getSelection();
+    NectarInstancesPreferencePage.this.btnEdit.setEnabled(items != null && items.length > 0);
+    NectarInstancesPreferencePage.this.btnRemove.setEnabled(items != null && items.length > 0);
+  }
 }
