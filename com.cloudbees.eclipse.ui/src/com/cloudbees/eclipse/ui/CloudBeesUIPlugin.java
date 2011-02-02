@@ -47,25 +47,12 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   private Logger logger;
 
-  private NectarService ns = new NectarService(new NectarInstance("111", "Netbeans",
-      "http://deadlock.netbeans.org/hudson/"));
-  private NectarService ns2 = new NectarService(new NectarInstance("222", "jBoss", "http://hudson.jboss.org/hudson/"));
-  private NectarService ns3 = new NectarService(new NectarInstance("333", "Eclipse",
-      "https://hudson.eclipse.org/hudson/"));
-  private NectarService ns4 = new NectarService(new NectarInstance("444", "ahti grandomstate",
-      "https://grandomstate.ci.cloudbees.com/"));
-
-
   private List<NectarService> nectarRegistry = new ArrayList<NectarService>();
 
   private List<NectarChangeListener> nectarChangeListeners = new ArrayList<NectarChangeListener>();
 
   public CloudBeesUIPlugin() {
     super();
-    nectarRegistry.add(ns);
-    nectarRegistry.add(ns2);
-    nectarRegistry.add(ns3);
-    nectarRegistry.add(ns4);
   }
 
   /*
@@ -164,6 +151,32 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return list;
   }
 
+  public List<NectarInstance> getDevAtCloudInstances() {
+
+    // TODO read from prefs
+    //    String instances = store.getString(PreferenceConstants.P_DEVATCLOUD_INSTANCES);
+    //    List<NectarInstance> list = NectarInstance.decode(instances);
+
+    List<NectarInstance> list = new ArrayList<NectarInstance>();
+    NectarInstance ns = new NectarInstance("111", "Netbeans", "http://deadlock.netbeans.org/hudson/");
+    NectarInstance ns2 = new NectarInstance("222", "jBoss", "http://hudson.jboss.org/hudson/");
+    NectarInstance ns3 = new NectarInstance("333", "Eclipse", "https://hudson.eclipse.org/hudson/");
+    NectarInstance ns4 = new NectarInstance("444", "ahti grandomstate", "https://grandomstate.ci.cloudbees.com/");
+    list.add(ns);
+    list.add(ns2);
+    list.add(ns3);
+    list.add(ns4);
+
+    // XXX hack
+    for (NectarInstance ni : list) {
+      if (getNectarServiceForUrl(ni.url) == null) {
+        nectarRegistry.add(new NectarService(ni));
+      }
+    }
+
+    return list;
+  }
+
   public void saveNectarInstance(NectarInstance ni) {
     if (ni == null || ni.label == null || ni.url == null || ni.label.length() == 0 || ni.url.length() == 0) {
       throw new IllegalStateException("Unable to add new instance with an empty url or label!");
@@ -187,35 +200,40 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   public List<NectarInstanceResponse> getManualNectarsInfo() throws CloudBeesException {
-    List<NectarInstanceResponse> resp = new ArrayList<NectarInstanceResponse>();
+    List<NectarInstance> instances = new ArrayList<NectarInstance>(getManualNectarInstances());
 
-    Iterator<NectarInstance> it = getManualNectarInstances().iterator();
-    while (it.hasNext()) {
-      NectarInstance inst = (NectarInstance) it.next();
+    List<NectarInstanceResponse> resp = pollInstances(instances);
+
+    return resp;
+  }
+
+  public List<NectarInstanceResponse> getDevAtCloudNectarsInfo() throws CloudBeesException {
+    List<NectarInstance> instances = new ArrayList<NectarInstance>(getDevAtCloudInstances());
+
+    List<NectarInstanceResponse> resp = pollInstances(instances);
+
+    return resp;
+  }
+
+  private List<NectarInstanceResponse> pollInstances(List<NectarInstance> instances) {
+    List<NectarInstanceResponse> resp = new ArrayList<NectarInstanceResponse>();
+    for (NectarInstance inst : instances) {
       NectarService service = lookupNectarService(inst);
       try {
         resp.add(service.getInstance());
       } catch (CloudBeesException e) {
         System.out.println("Failed to contact " + service + ". Not adding to the list for now.");//TODO log
+
         //TODO Consider adding it to the list anyway, just mark it somehow as "Unreachable" in UI!
+        NectarInstanceResponse fakeResp = new NectarInstanceResponse();
+        fakeResp.serviceUrl = inst.url;
+        fakeResp.nodeName = inst.label;
+        fakeResp.views = new NectarInstanceResponse.View[0];
+        resp.add(fakeResp);
+
         e.printStackTrace();
       }
     }
-
-    //FIXME let's pretend we have 2 manually configured nectars locally
-    NectarService service = null;
-    try {
-      ;
-      resp.add((service = ns).getInstance());
-      resp.add((service = ns2).getInstance());
-      resp.add((service = ns3).getInstance());
-      resp.add((service = ns4).getInstance());
-    } catch (CloudBeesException e) {
-      System.out.println("Failed to contact " + service + ". Not adding to the list for now.");//TODO log
-      //TODO Consider adding it to the list anyway, just mark it somehow as "Unreachable" in UI!
-      e.printStackTrace();
-    }
-
     return resp;
   }
 
@@ -226,14 +244,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       nectarRegistry.add(service);
     }
     return service;
-  }
-
-  public List<NectarInstanceResponse> getDevAtCloudNectarsInfo() throws CloudBeesException {
-    List<NectarInstanceResponse> resp = new ArrayList<NectarInstanceResponse>();
-
-    //FIXME let's pretend we have 1 dev at cloud nectar
-    resp.add(ns.getInstance());
-    return resp;
   }
 
   /**
@@ -250,8 +260,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
       //TODO Start monitoring this job list
 
-      //TODO Look up proper service based on resp.serviceUrl. assume "ns" for now.
-      NectarJobsResponse jobs = ns.getJobs(viewUrl);
+      NectarJobsResponse jobs = getNectarServiceForUrl(serviceUrl).getJobs(viewUrl);
 
       Iterator<NectarChangeListener> iterator = nectarChangeListeners.iterator();
       while (iterator.hasNext()) {
