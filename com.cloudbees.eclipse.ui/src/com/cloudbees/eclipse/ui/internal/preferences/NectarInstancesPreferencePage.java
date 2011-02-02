@@ -7,6 +7,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -30,7 +31,10 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
  */
 
 public class NectarInstancesPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
-  private Table table;
+  protected Table table;
+  protected Button btnAdd;
+  protected Button btnEdit;
+  protected Button btnRemove;
 
   public NectarInstancesPreferencePage() {
     setPreferenceStore(CloudBeesUIPlugin.getDefault().getPreferenceStore());
@@ -78,6 +82,21 @@ public class NectarInstancesPreferencePage extends PreferencePage implements IWo
     table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
     table.setHeaderVisible(true);
     table.setLinesVisible(true);
+    
+    table.addSelectionListener(new SelectionListener() {
+      
+      public void widgetSelected(SelectionEvent e) {
+        TableItem[] items = ((Table) e.getSource()).getSelection();
+        NectarInstancesPreferencePage.this.btnEdit.setEnabled(items != null && items.length > 0);
+        NectarInstancesPreferencePage.this.btnRemove.setEnabled(items != null && items.length > 0);
+      }
+      
+      public void widgetDefaultSelected(SelectionEvent e) {
+        TableItem[] items = ((Table) e.getSource()).getSelection();
+        NectarInstancesPreferencePage.this.btnEdit.setEnabled(items != null && items.length > 0);
+        NectarInstancesPreferencePage.this.btnRemove.setEnabled(items != null && items.length > 0);
+      }
+    });
 
     TableColumn tblclmnLabel = new TableColumn(table, SWT.NONE);
     tblclmnLabel.setWidth(217);
@@ -94,39 +113,76 @@ public class NectarInstancesPreferencePage extends PreferencePage implements IWo
     compositeButtons.setLayout(gl_compositeButtons);
     compositeButtons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
 
-    Button btnAdd = new Button(compositeButtons, SWT.PUSH);
+    btnAdd = new Button(compositeButtons, SWT.PUSH);
     GridData gd_btnAdd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
     gd_btnAdd.widthHint = 70;
     btnAdd.setLayoutData(gd_btnAdd);
     btnAdd.setText("&Add...");
 
-    Button btnEdit = new Button(compositeButtons, SWT.NONE);
+    btnEdit = new Button(compositeButtons, SWT.NONE);
     btnEdit.setEnabled(false);
     GridData gd_btnEdit = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
     gd_btnEdit.widthHint = 70;
     btnEdit.setLayoutData(gd_btnEdit);
     btnEdit.setText("E&dit...");
 
-    Button btnRemove = new Button(compositeButtons, SWT.NONE);
+    btnRemove = new Button(compositeButtons, SWT.NONE);
     btnRemove.setEnabled(false);
     GridData gd_btnRemove = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
     gd_btnRemove.widthHint = 70;
     btnRemove.setLayoutData(gd_btnRemove);
     btnRemove.setText("&Remove");
-    btnAdd.addSelectionListener(new SelectionAdapter() {
+    
+    SelectionAdapter addListener = new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-
-
         Shell parent = CloudBeesUIPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell();
         WizardDialog dialog = new NectarWizardDialog(parent);
         dialog.create();
         dialog.getShell().setSize(Math.max(400, dialog.getShell().getSize().x), 400);
         dialog.open();
         loadTable();
-
       }
-    });
+    };
+    btnAdd.addSelectionListener(addListener);
+
+    SelectionAdapter editListener = new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        TableItem[] items = NectarInstancesPreferencePage.this.table.getSelection();
+        if (items == null || items.length <= 0) {
+          return;
+        }
+        NectarInstance ni = (NectarInstance) items[0].getData();
+        
+        Shell parent = CloudBeesUIPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell();
+        WizardDialog dialog = new NectarWizardDialog(parent, ni);
+        dialog.create();
+        dialog.getShell().setSize(Math.max(400, dialog.getShell().getSize().x), 400);
+        dialog.open();
+        loadTable();
+      }
+    };
+    btnEdit.addSelectionListener(editListener);
+
+    SelectionAdapter removeListener = new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        TableItem[] items = NectarInstancesPreferencePage.this.table.getSelection();
+        int[] itemIndices = NectarInstancesPreferencePage.this.table.getSelectionIndices();
+        if (items == null || items.length <= 0) {
+          return;
+        }
+
+        for (TableItem item : items) {
+          NectarInstance ni = (NectarInstance) item.getData();
+          CloudBeesUIPlugin.getDefault().removeNectarInstance(ni);
+        }
+
+        NectarInstancesPreferencePage.this.table.remove(itemIndices);
+      }
+    };
+    btnRemove.addSelectionListener(removeListener);
 
     loadTable();
     return comp;
@@ -141,9 +197,8 @@ public class NectarInstancesPreferencePage extends PreferencePage implements IWo
       NectarInstance instance = (NectarInstance) it.next();
       TableItem tableItem = new TableItem(table, SWT.NONE);
       tableItem.setText(new String[] { instance.label, instance.url });
+      tableItem.setData(instance);
     }
-
-
   }
 
 }

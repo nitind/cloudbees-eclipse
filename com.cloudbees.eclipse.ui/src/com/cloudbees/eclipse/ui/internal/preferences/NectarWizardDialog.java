@@ -7,12 +7,17 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 
+import com.cloudbees.eclipse.core.domain.NectarInstance;
 import com.cloudbees.eclipse.ui.internal.wizard.NectarWizard;
 
 public class NectarWizardDialog extends WizardDialog {
 
   public NectarWizardDialog(Shell parent) {
     super(parent, new NectarWizard());
+  }
+
+  public NectarWizardDialog(Shell parent, NectarInstance ni) {
+    super(parent, new NectarWizard(ni));
   }
 
   @Override

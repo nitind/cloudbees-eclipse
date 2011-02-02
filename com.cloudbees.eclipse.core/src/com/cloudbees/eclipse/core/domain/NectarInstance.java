@@ -3,11 +3,14 @@ package com.cloudbees.eclipse.core.domain;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.cloudbees.eclipse.core.util.Utils;
 import com.google.gson.reflect.TypeToken;
 
-public class NectarInstance {
+public class NectarInstance implements Comparable<NectarInstance> {
+
+  public String id;
 
   public String label;
   public String url;
@@ -16,19 +19,53 @@ public class NectarInstance {
   public boolean authenticate;
 
   public NectarInstance() {
-    
+    this.id = UUID.randomUUID().toString(); // FIXME should we check that it's actually unique? 
   }
   
-  public NectarInstance(String label, String url) {
-    this(label, url, null, null, false);
+  public NectarInstance(String id, String label, String url) {
+    this(id, label, url, null, null, false);
   }
 
-  public NectarInstance(String label, String url, String username, String password, boolean authenticate) {
+  public NectarInstance(String id, String label, String url, String username, String password, boolean authenticate) {
     this.label = label;
     this.url = url;
     this.username = username;
     this.password = password;
     this.authenticate = authenticate;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    NectarInstance other = (NectarInstance) obj;
+    if (id == null) {
+      if (other.id != null)
+        return false;
+    } else if (!id.equals(other.id))
+      return false;
+    return true;
+  }
+
+  /** i.e. order by id for collections */
+  public int compareTo(NectarInstance other) {
+    if (other == null) {
+      return +1;
+    }
+
+    return this.id.compareTo(other.id);
   }
 
   /**
@@ -79,5 +116,4 @@ public class NectarInstance {
     ret.append("]");
     return ret.toString();
   }
-
 }

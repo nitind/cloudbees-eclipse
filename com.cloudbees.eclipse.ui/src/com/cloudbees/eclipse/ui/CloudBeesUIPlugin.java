@@ -2,6 +2,7 @@ package com.cloudbees.eclipse.ui;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -46,10 +47,12 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   private Logger logger;
 
-  private NectarService ns = new NectarService(new NectarInstance("Netbeans", "http://deadlock.netbeans.org/hudson/"));
-  private NectarService ns2 = new NectarService(new NectarInstance("jBoss", "http://hudson.jboss.org/hudson/"));
-  private NectarService ns3 = new NectarService(new NectarInstance("Eclipse", "https://hudson.eclipse.org/hudson/"));
-  private NectarService ns4 = new NectarService(new NectarInstance("ahti grandomstate",
+  private NectarService ns = new NectarService(new NectarInstance("111", "Netbeans",
+      "http://deadlock.netbeans.org/hudson/"));
+  private NectarService ns2 = new NectarService(new NectarInstance("222", "jBoss", "http://hudson.jboss.org/hudson/"));
+  private NectarService ns3 = new NectarService(new NectarInstance("333", "Eclipse",
+      "https://hudson.eclipse.org/hudson/"));
+  private NectarService ns4 = new NectarService(new NectarInstance("444", "ahti grandomstate",
       "https://grandomstate.ci.cloudbees.com/"));
 
 
@@ -161,12 +164,24 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return list;
   }
 
-  public void addNectarInstance(NectarInstance ni) {
+  public void saveNectarInstance(NectarInstance ni) {
+    if (ni == null || ni.label == null || ni.url == null || ni.label.length() == 0 || ni.url.length() == 0) {
+      throw new IllegalStateException("Unable to add new instance with an empty url or label!");
+    }
+    List<NectarInstance> list = getManualNectarInstances();
+    list.remove(ni); // when editing - id is the same, but props old
+    list.add(ni);
+    Collections.sort(list);
+    CloudBeesUIPlugin.getDefault().getPreferenceStore()
+        .putValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
+  }
+
+  public void removeNectarInstance(NectarInstance ni) {
     if (ni == null || ni.label == null || ni.url == null || ni.label.length() == 0 || ni.url.length() == 0) {
       throw new RuntimeException("Unable to add new instance with an empty url or label!");
     }
     List<NectarInstance> list = getManualNectarInstances();
-    list.add(ni);
+    list.remove(ni);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
         .putValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
   }
