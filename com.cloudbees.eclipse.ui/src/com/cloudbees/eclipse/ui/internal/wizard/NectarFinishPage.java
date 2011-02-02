@@ -8,14 +8,41 @@ import org.eclipse.swt.widgets.Label;
 
 public class NectarFinishPage extends AbstractNectarPage {
 
+  private static final String DESCR = "Here comes the text describing which cool things you can do now.\nIt's full of possibilities."; // TODO i18n
+  private String error;
+  private Label labelContentText;
+
   /**
    * Create the wizard.
    */
   public NectarFinishPage() {
     super("finish");
-    setTitle("New Nectar location added");
-    setMessage("Congratulations! Nectar location has been successfully added!");
-    //setDescription("Wizard Page description");
+  }
+
+  public void initText(Exception e) {
+    error = null;
+    if (e != null) {
+      // TODO format error nicely, so user can react properly
+      error = e.getLocalizedMessage();
+      Throwable cause = e.getCause();
+      while (cause != null) {
+        error += "\n" + cause.getLocalizedMessage();
+        cause = cause.getCause();
+      }
+    }
+
+    if (error == null) {
+      setTitle("Congratulations! Nectar is configured properly");
+      setMessage("Specified Nectar location is working well!");
+      //setDescription("Wizard Page description");
+
+    } else {
+      setTitle("Failure! Nectar is not configured properly");
+      setMessage("Specified Nectar location is not working, but you can add it nonetheless!");
+      //setDescription("Wizard Page description");
+    }
+
+    updateContent();
   }
 
   /**
@@ -31,8 +58,25 @@ public class NectarFinishPage extends AbstractNectarPage {
     gl_container.marginHeight = 0;
     container.setLayout(gl_container);
     
-    Label labelSuccessText = new Label(container, SWT.WRAP);
-    labelSuccessText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 1, 1));
-    labelSuccessText.setText("Here comes the text describing which cool things you can do now.\nIt's full of possibilities.");
+    labelContentText = new Label(container, SWT.WRAP);
+    labelContentText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 1, 1));
+    updateContent();
+  }
+
+  public void updateContent() {
+    if (labelContentText == null) {
+      return;
+    }
+    
+    String mess = "";
+
+    if (error != null && error.trim().length() > 0) {
+      mess += "Error: \n" + error + "\n\n";
+    } else {
+      mess += DESCR;
+    }
+    
+    labelContentText.setText(mess);
+    labelContentText.getParent().layout();
   }
 }

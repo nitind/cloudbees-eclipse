@@ -7,7 +7,11 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 
+import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.NectarService;
 import com.cloudbees.eclipse.core.domain.NectarInstance;
+import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
+import com.cloudbees.eclipse.ui.internal.wizard.NectarFinishPage;
 import com.cloudbees.eclipse.ui.internal.wizard.NectarWizard;
 
 public class NectarWizardDialog extends WizardDialog {
@@ -22,25 +26,33 @@ public class NectarWizardDialog extends WizardDialog {
 
   @Override
   protected void nextPressed() {
-    System.out.println("NEXT PRESSED "+getCurrentPage().getName());
     if ("url".equals(getCurrentPage().getName())) {
-      System.out.println("Validating connection!");
       try {
         run(false, true, new IRunnableWithProgress() {
           
           public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
             monitor.setTaskName("Validating Nectar URL...");
-            Thread.currentThread().sleep(2000);
+
+            NectarService ns = CloudBeesUIPlugin.getDefault().lookupNectarService(
+                ((NectarWizard) getWizard()).getNectarInstance());
+
+            try {
+              ns.getInstance();
+              ((NectarFinishPage) ((NectarWizard) getWizard()).getPage("finish")).initText(null);
+            } catch (CloudBeesException e) {
+              ((NectarFinishPage) ((NectarWizard) getWizard()).getPage("finish")).initText(e);
+
+              e.printStackTrace(); // TODO log
+            }
+
             monitor.done();
           }
 
         });
       } catch (InvocationTargetException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        e.printStackTrace(); // TODO log
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        e.printStackTrace(); // TODO log
       }
       
     }

@@ -13,7 +13,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.cloudbees.eclipse.core.domain.NectarInstance;
+
 public class NectarUrlPage extends AbstractNectarPage {
+
   private Text textUrl;
   private Text textLabel;
   private Text textUsername;
@@ -26,9 +29,25 @@ public class NectarUrlPage extends AbstractNectarPage {
   public NectarUrlPage() {
     super("url");
     setMessage("Please provide a URL and label for your connection.");
-    setTitle("New Nectar location");
-    setDescription("New Nectar location");
-    setPageComplete(false);
+
+    init();
+  }
+
+  private void init() {
+    if (isEditMode()) {
+      setTitle("Edit Nectar location");
+      setDescription("Edit Nectar location");
+      validate();
+    } else {
+      setTitle("New Nectar location");
+      setDescription("New Nectar location");
+      setPageComplete(false);
+    }
+  }
+
+  public void setNectarInstance(NectarInstance ni) {
+    super.setNectarInstance(ni);
+    init();
   }
 
   /**
@@ -105,6 +124,7 @@ public class NectarUrlPage extends AbstractNectarPage {
           textUsername.setText("");
           textPassword.setText("");
         }
+        validate();
       }
     };
     chkAuthenticate.addSelectionListener(selectionListener);
@@ -122,6 +142,10 @@ public class NectarUrlPage extends AbstractNectarPage {
   }
 
   private void validate() {
+    if (textUrl == null) {
+      return; // not yet
+    }
+
     if (textUrl.getText().length() == 0) {
       setErrorMessage("Url is empty!"); // TODO i18n
       setPageComplete(false);

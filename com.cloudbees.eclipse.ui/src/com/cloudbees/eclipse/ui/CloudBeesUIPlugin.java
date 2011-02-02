@@ -169,7 +169,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       throw new IllegalStateException("Unable to add new instance with an empty url or label!");
     }
     List<NectarInstance> list = getManualNectarInstances();
-    list.remove(ni); // when editing - id is the same, but props old
+    list.remove(ni); // when editing - id is the same, but props old, so lets kill old instance first
     list.add(ni);
     Collections.sort(list);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
@@ -177,8 +177,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   public void removeNectarInstance(NectarInstance ni) {
-    if (ni == null || ni.label == null || ni.url == null || ni.label.length() == 0 || ni.url.length() == 0) {
-      throw new RuntimeException("Unable to add new instance with an empty url or label!");
+    if (ni == null) {
+      throw new RuntimeException("Unable to remove null instance!");
     }
     List<NectarInstance> list = getManualNectarInstances();
     list.remove(ni);
@@ -219,7 +219,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return resp;
   }
 
-  private NectarService lookupNectarService(NectarInstance inst) {
+  public NectarService lookupNectarService(NectarInstance inst) {
     NectarService service = getNectarServiceForUrl(inst.url);
     if (service == null) {
       service = new NectarService(inst);

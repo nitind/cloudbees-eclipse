@@ -10,9 +10,8 @@ public class NectarWizard extends Wizard {
 
   private final NectarInstance ni;
 
-  private NectarUrlPage pageUrl = new NectarUrlPage();
-
-  private NectarFinishPage pageFinish = new NectarFinishPage();
+  private final NectarUrlPage pageUrl = new NectarUrlPage();
+  private final NectarFinishPage pageFinish = new NectarFinishPage();
 
   public NectarWizard() {
     this(new NectarInstance());
@@ -25,7 +24,11 @@ public class NectarWizard extends Wizard {
     ImageDescriptor id = ImageDescriptor.createFromURL(CloudBeesUIPlugin.getDefault().getBundle()
         .getResource("/icons/cb_wiz_icon2.png"));
     setDefaultPageImageDescriptor(id);
-    setWindowTitle("New Nectar instance");
+    if (ni.label == null) {
+      setWindowTitle("New Nectar instance");
+    } else {
+      setWindowTitle("Edit Nectar instance");
+    }
     setForcePreviousAndNextButtons(true);
     setHelpAvailable(false);
 
@@ -45,6 +48,9 @@ public class NectarWizard extends Wizard {
     return true;
   }
 
+  public NectarInstance getNectarInstance() {
+    return ni;
+  }
 
   private void saveInstanceInfo() {
 

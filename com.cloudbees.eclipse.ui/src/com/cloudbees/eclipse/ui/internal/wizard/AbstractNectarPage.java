@@ -11,10 +11,15 @@ abstract public class AbstractNectarPage extends WizardPage {
   }
 
   protected NectarInstance ni;
-  
+  private boolean editMode;
   
   public void setNectarInstance(NectarInstance ni) {
     this.ni = ni;
+    editMode = ni.label != null;
+  }
+
+  public boolean isEditMode() {
+    return editMode;
   }
 
 }
