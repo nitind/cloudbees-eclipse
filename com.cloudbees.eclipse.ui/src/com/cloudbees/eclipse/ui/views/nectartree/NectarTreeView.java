@@ -11,6 +11,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -22,6 +23,7 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.nectar.api.BaseNectarResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
+import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse.View;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 
@@ -44,6 +46,23 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
   private Action action4; // Reload Jaas repositories
 
   class NameSorter extends ViewerSorter {
+
+    @Override
+    public int compare(Viewer viewer, Object e1, Object e2) {
+      if (e1 instanceof NectarInstanceResponse.View && e2 instanceof NectarInstanceResponse.View) {
+        NectarInstanceResponse.View v1 = (View) e1;
+        NectarInstanceResponse.View v2 = (View) e2;
+        if (v1.name != null && v2.name != null) {
+          return v1.name.compareTo(v2.name);
+        }
+
+      }
+
+      //TODO Add ordering for the instance labels
+
+      return super.compare(viewer, e1, e2);
+    }
+
   }
 
   public void createPartControl(Composite parent) {

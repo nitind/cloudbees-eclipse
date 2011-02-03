@@ -18,6 +18,10 @@ public class NectarInstanceResponse extends BaseNectarResponse {
   @Expose(deserialize = false, serialize = false)
   public boolean offline = false;
 
+  @Expose(deserialize = false, serialize = false)
+  public String label;
+
+  @Expose(deserialize = false, serialize = false)
   public final static String QTREE = QTreeFactory.create(NectarInstanceResponse.class);
 
   public NectarInstanceResponse() {

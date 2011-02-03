@@ -112,6 +112,10 @@ public class InstanceLabelProvider extends LabelProvider implements IFontProvide
       if (view.isPrimary) {
         return JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
       }
+    } else if (element instanceof NectarInstanceResponse) {
+      if (((NectarInstanceResponse) element).offline) {
+        return JFaceResources.getFontRegistry().getItalic(JFaceResources.DEFAULT_FONT);
+      }
     }
     return null;
   }

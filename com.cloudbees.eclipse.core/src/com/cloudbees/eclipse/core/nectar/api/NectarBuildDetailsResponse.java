@@ -1,5 +1,7 @@
 package com.cloudbees.eclipse.core.nectar.api;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * Main response object for the job view
  * 
@@ -9,6 +11,7 @@ public class NectarBuildDetailsResponse extends BaseNectarResponse {
 
   public Action[] actions;
 
+  @Expose(deserialize = false, serialize = false)
   public final static String QTREE = QTreeFactory.create(NectarBuildDetailsResponse.class);
 
   public static class Action {

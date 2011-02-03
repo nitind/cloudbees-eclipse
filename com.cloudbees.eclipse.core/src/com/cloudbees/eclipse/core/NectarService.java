@@ -114,10 +114,11 @@ public class NectarService {
       boolean tryToLogin = false; // after first 302 let's try to login with our credentials
   
       do {
-        if (nectar.jossoCookie != null) {
+
+        /*if (nectar.jossoCookie != null) {
           reqUrl += "&JOSSO_SESSIONID=" + nectar.jossoCookie;
         }
-
+        */
         HttpPost post = new HttpPost(reqUrl);
         post.setHeader("Accept", "application/json");
         post.setHeader("Content-type", "application/json");

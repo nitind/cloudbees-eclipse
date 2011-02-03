@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
@@ -82,6 +83,22 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   }
 
   class NameSorter extends ViewerSorter {
+
+    @Override
+    public int compare(Viewer viewer, Object e1, Object e2) {
+
+      if (e1 instanceof NectarJobsResponse.Job && e2 instanceof NectarJobsResponse.Job) {
+        NectarJobsResponse.Job j1 = (NectarJobsResponse.Job) e1;
+        NectarJobsResponse.Job j2 = (NectarJobsResponse.Job) e2;
+
+        if (j1.displayName != null && j2.displayName != null) {
+          return j1.displayName.toLowerCase().compareTo(j2.displayName.toLowerCase());
+        }
+
+      }
+
+      return super.compare(viewer, e1, e2);
+    }
 
   }
 
