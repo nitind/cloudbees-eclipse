@@ -25,6 +25,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
@@ -75,7 +77,12 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       setContentDescription("No jobs available.");
     } else {
       String label = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(newView.serviceUrl).getLabel();
-      setContentDescription("Build jobs for " + label + ". Updated at " + new Date());
+
+      String viewInfo="";
+        if (newView.name!=null && newView.name.length()>0) {
+        viewInfo = " (" + newView.name + ")";
+      }
+      setContentDescription("Jobs for " + label + viewInfo + ". Updated " + new Date() + ".");
     }
     contentProvider.setJobs(Arrays.asList(newView.jobs));
 
@@ -106,7 +113,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     initImages();
 
-    table = new TableViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION | SWT.BORDER
+    table = new TableViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION
     /*SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL*/);
     //Tree tree = viewer.getTree();
     //tree.setHeaderVisible(true);
@@ -114,7 +121,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     //table.getTable().setLinesVisible(true);
     table.getTable().setHeaderVisible(true);
 
-    createColumn("S", 20, new CellLabelProvider() {
+    createColumn("S", 20, JobSorter.STATE, new CellLabelProvider() {
       public void update(ViewerCell cell) {
         NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
 
@@ -142,15 +149,10 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
       }
 
-      @Override
-      public String getToolTipText(Object element) {
-        System.out.println("TOOLTIP FOR ELEMENT " + element);
-        return super.getToolTipText(element);
-      }
 
     });
 
-    createColumn("Job", 250, new CellLabelProvider() {
+    TableViewerColumn namecol = createColumn("Job", 250, JobSorter.JOB, new CellLabelProvider() {
       public void update(ViewerCell cell) {
         NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
         cell.setText(job.displayName);
@@ -171,7 +173,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
           }
         });
     */
-    createColumn("Last build", 150, new CellLabelProvider() {
+    createColumn("Last build", 150, JobSorter.LAST_BUILD, new CellLabelProvider() {
       public void update(ViewerCell cell) {
         NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
         try {
@@ -181,7 +183,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         }
       }
     });
-    createColumn("Last success", 150, new CellLabelProvider() {
+    createColumn("Last success", 150, JobSorter.LAST_SUCCESS, new CellLabelProvider() {
       public void update(ViewerCell cell) {
         NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
         try {
@@ -191,7 +193,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         }
       }
     });
-    createColumn("Last failure", 105, new CellLabelProvider() {
+    createColumn("Last failure", 105, JobSorter.LAST_FAILURE, new CellLabelProvider() {
       public void update(ViewerCell cell) {
         NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
         try {
@@ -214,7 +216,11 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     table.setContentProvider(contentProvider);
     //viewer.setLabelProvider(new InstanceLabelProvider());
-    table.setSorter(new NameSorter());
+
+    table.setSorter(new JobSorter(JobSorter.JOB));
+
+    //table.setComparator(new ViewerComparator());
+
     table.setInput(getViewSite());
     /*
         table.addFilter(new ViewerFilter() {
@@ -240,6 +246,9 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     });
 
+    table.getTable().setSortColumn(namecol.getColumn());
+    table.getTable().setSortDirection(SWT.DOWN);
+
     makeActions();
     contributeToActionBars();
 
@@ -251,6 +260,11 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     };
 
     CloudBeesUIPlugin.getDefault().addNectarChangeListener(nectarChangeListener);
+
+  }
+
+  private void configureSorting(int state) {
+    // TODO Auto-generated method stub
 
   }
 
@@ -300,19 +314,46 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
   }
 
-  private void createColumn(final String colName, int width, CellLabelProvider cellLabelProvider) {
+  private TableViewerColumn createColumn(final String colName, int width, CellLabelProvider cellLabelProvider) {
+    return createColumn(colName, width, -1, cellLabelProvider);
+  }
+
+  private TableViewerColumn createColumn(final String colName, int width, final int sortCol,
+      CellLabelProvider cellLabelProvider) {
     final TableViewerColumn treeViewerColumn = new TableViewerColumn(table, SWT.NONE);
-    TableColumn trclmnCol = treeViewerColumn.getColumn();
+    TableColumn col = treeViewerColumn.getColumn();
 
     if (width > 0) {
-      trclmnCol.setWidth(width);
+      col.setWidth(width);
     }
 
-    trclmnCol.setText(colName);
-    trclmnCol.setMoveable(true);
+    col.setText(colName);
+    col.setMoveable(true);
 
     treeViewerColumn.setLabelProvider(cellLabelProvider);
 
+    if (sortCol >= 0) {
+
+      treeViewerColumn.getColumn().addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+
+          int newOrder = SWT.DOWN;
+
+          if (table.getTable().getSortColumn().equals(treeViewerColumn.getColumn())
+              && table.getTable().getSortDirection() == SWT.DOWN) {
+            newOrder = SWT.UP;
+          }
+
+          table.getTable().setSortColumn(treeViewerColumn.getColumn());
+          table.getTable().setSortDirection(newOrder);
+          JobSorter newSorter = new JobSorter(sortCol);
+          newSorter.setDirection(newOrder);
+          table.setSorter(newSorter);
+        }
+      });
+    }
+    return treeViewerColumn;
   }
 
   private void contributeToActionBars() {

@@ -11,6 +11,8 @@ public class NectarJobsResponse extends BaseNectarResponse {
 
   public Job[] jobs;
 
+  public String name;
+
   @Expose(deserialize = false, serialize = false)
   public final static String QTREE = QTreeFactory.create(NectarJobsResponse.class);
 

@@ -43,15 +43,15 @@
       </category>
       
       <view
-            name="CloudBees CI"
-            icon="icons/jobs_view6.png"
+            name="CloudBees"
+            icon="icons/16x16/cb_plain.png"
             category="com.cloudbees.eclipse"
             class="com.cloudbees.eclipse.ui.views.nectartree.NectarTreeView"
             id="com.cloudbees.eclipse.ui.views.nectartree.NectarTreeView">
       </view>
       <view
-            name="CI Jobs"
-            icon="icons/jobs_view6.png"
+            name="Build Jobs"
+            icon="icons/16x16/cb_plain.png"
             category="com.cloudbees.eclipse"
             class="com.cloudbees.eclipse.ui.views.jobs.JobsView"
             id="com.cloudbees.eclipse.ui.views.JobsView">
