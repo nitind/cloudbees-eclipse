@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import com.cloudbees.eclipse.core.domain.NectarInstance;
+import com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
 
@@ -15,7 +16,7 @@ public class NectarServiceTest {
   public void testViewAndJobsRetrieval() throws CloudBeesException {
     NectarService s = new NectarService(new NectarInstance("Hudson", "http://deadlock.netbeans.org/hudson/"));
 
-    System.out.println("Query tree: " + NectarInstanceResponse.getTreeQuery());
+    System.out.println("Query tree: " + NectarInstanceResponse.QTREE);
 
     NectarInstanceResponse vs = s.getInstance();
     NectarInstanceResponse.View[] views = vs.views;
@@ -38,6 +39,26 @@ public class NectarServiceTest {
     }
 
     assertTrue(jobs.length > 0);
+
+  }
+
+  @Test
+  public void testJobDetailRetrieval() throws CloudBeesException {
+    NectarService s = new NectarService(new NectarInstance("Hudson", "http://deadlock.netbeans.org/hudson/"));
+
+    NectarBuildDetailsResponse details = s.getJobDetails("http://deadlock.netbeans.org/hudson/job/jackpot30/301/");
+
+    System.out.println("Received details:");
+
+    for (NectarBuildDetailsResponse.ChangeSet.ChangeSetItem set : details.changeSet.items) {
+      System.out.println("item: " + set.msg);
+    }
+
+    System.out.println("Display name: " + details.fullDisplayName);
+
+    assertTrue(details.fullDisplayName.length() > 0);
+
+    assertTrue(details.changeSet.items.length > 0);
 
   }
 

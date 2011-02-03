@@ -29,8 +29,9 @@ import com.cloudbees.eclipse.core.NectarService;
 import com.cloudbees.eclipse.core.domain.NectarInstance;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
-import com.cloudbees.eclipse.ui.views.jobdetails.JobDetailEditorInput;
-import com.cloudbees.eclipse.ui.views.jobdetails.JobDetailsPart;
+import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job;
+import com.cloudbees.eclipse.ui.views.build.BuildEditorInput;
+import com.cloudbees.eclipse.ui.views.build.BuildPart;
 import com.cloudbees.eclipse.ui.views.jobs.JobsView;
 
 /**
@@ -309,33 +310,33 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     nectarChangeListeners.remove(listener);
   }
 
-  public NectarService getNectarServiceForUrl(String serviceOrViewUrl) {
+  public NectarService getNectarServiceForUrl(String serviceOrViewOrJobUrl) {
     Iterator<NectarService> iter = nectarRegistry.iterator();
     while (iter.hasNext()) {
       NectarService service = (NectarService) iter.next();
-      if (serviceOrViewUrl.startsWith(service.getUrl())) {
+      if (serviceOrViewOrJobUrl.startsWith(service.getUrl())) {
         return service;
       }
     }
     return null;
   }
 
-  public void showJobDetails(String jobUrl) {
-    if (jobUrl == null) {
+  public void showBuildForJob(Job el) {
+    if (el == null) {
       return;
     }
     // Look up the service
     Iterator<NectarService> it = nectarRegistry.iterator();
     while (it.hasNext()) {
       NectarService service = (NectarService) it.next();
-      if (jobUrl.startsWith(service.getUrl())) {
+      if (el.url.startsWith(service.getUrl())) {
 
         try {
           //JobDetailsForm.ID, Utils.toB64(jobUrl), IWorkbenchPage.VIEW_ACTIVATE
           // IEditorDescriptor descr = PlatformUI.getWorkbench().getEditorRegistry().findEditor(JobDetailsForm.ID);
 
           PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-              .openEditor(new JobDetailEditorInput(jobUrl), JobDetailsPart.ID);
+              .openEditor(new BuildEditorInput(el), BuildPart.ID);
 
         } catch (PartInitException e) {
           // TODO Auto-generated catch block

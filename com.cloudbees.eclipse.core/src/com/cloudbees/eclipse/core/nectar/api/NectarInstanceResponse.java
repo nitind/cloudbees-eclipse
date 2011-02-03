@@ -18,9 +18,7 @@ public class NectarInstanceResponse extends BaseNectarResponse {
   @Expose(deserialize = false, serialize = false)
   public boolean offline = false;
 
-  static {
-    initTreeQuery(NectarInstanceResponse.class);
-  }
+  public final static String QTREE = QTreeFactory.create(NectarInstanceResponse.class);
 
   public NectarInstanceResponse() {
 
@@ -42,12 +40,6 @@ public class NectarInstanceResponse extends BaseNectarResponse {
     public NectarInstanceResponse response;
 
     //public Job[] jobs;
-  }
-
-
-  public final static String getTreeQuery() {
-    //enforce this subclass to be loaded
-    return _getTreeQuery();
   }
 
 }

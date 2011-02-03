@@ -1,6 +1,8 @@
 package com.cloudbees.eclipse.ui.views.jobs;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -67,7 +69,15 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   }
 
   protected void setInput(NectarJobsResponse newView) {
+    if (newView.jobs == null) {
+      contentProvider.setJobs(new ArrayList<NectarJobsResponse.Job>());
+      setContentDescription("No jobs available.");
+    } else {
+      String label = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(newView.serviceUrl).getLabel();
+      setContentDescription("Build jobs for " + label + ". Updated at " + new Date());
+    }
     contentProvider.setJobs(Arrays.asList(newView.jobs));
+
     table.refresh();
   }
 
@@ -205,7 +215,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         if (sel instanceof IStructuredSelection) {
           Object el = ((IStructuredSelection) sel).getFirstElement();
           if (el instanceof NectarJobsResponse.Job) {
-            CloudBeesUIPlugin.getDefault().showJobDetails(((NectarJobsResponse.Job) el).url);
+            CloudBeesUIPlugin.getDefault().showBuildForJob(((NectarJobsResponse.Job) el));
           }
         }
 
@@ -231,7 +241,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     String unit = "";
     if (build.duration != null) {
       //TODO Implement proper human-readable duration conversion, consider using the same conversion rules that Jenkins uses
-      System.out.println("DURATION: " + build.timestamp);
+      //System.out.println("DURATION: " + build.timestamp);
       long mins = (System.currentTimeMillis() - build.timestamp.longValue()) / (60L * 1000);
       long hr = mins / 60;
       if (mins < 60) {
