@@ -10,9 +10,10 @@ import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
 
 public class NectarServiceTest {
 
+
   @Test
   public void testViewAndJobsRetrieval() throws CloudBeesException {
-    NectarService s = new NectarService(new NectarInstance("12345", "Hudson", "http://deadlock.netbeans.org/hudson/"));
+    NectarService s = new NectarService(new NectarInstance("Hudson", "http://deadlock.netbeans.org/hudson/"));
 
     System.out.println("Query tree: " + NectarInstanceResponse.getTreeQuery());
 

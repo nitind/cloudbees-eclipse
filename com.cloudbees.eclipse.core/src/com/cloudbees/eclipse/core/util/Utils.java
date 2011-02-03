@@ -151,7 +151,8 @@ public class Utils {
   public final static void checkResponseCode(HttpResponse resp) throws CloudBeesException {
     int responseStatus = resp.getStatusLine().getStatusCode();
     if (responseStatus != 200) {
-      throw new CloudBeesException("Unexpected response code:" + responseStatus);
+      throw new CloudBeesException("Unexpected response code:" + responseStatus + ". Message:"
+          + resp.getStatusLine().getReasonPhrase());
     }
   }
 

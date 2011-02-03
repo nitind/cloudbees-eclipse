@@ -14,6 +14,8 @@ import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -51,6 +53,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   private List<NectarChangeListener> nectarChangeListeners = new ArrayList<NectarChangeListener>();
 
+  private IPropertyChangeListener prefListener;
+
   public CloudBeesUIPlugin() {
     super();
   }
@@ -66,6 +70,29 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     super.start(context);
     plugin = this;
     logger = new Logger(getLog());
+    loadAccountCredentials();
+    hookPrefChangeListener();
+  }
+
+  private void hookPrefChangeListener() {
+    //SecurePreferencesFactory.getDefault().// get(PreferenceConstants.P_PASSWORD, "");
+    prefListener = new IPropertyChangeListener() {
+
+      public void propertyChange(PropertyChangeEvent event) {
+        if (PreferenceConstants.P_PASSWORD.equalsIgnoreCase(event.getProperty())
+            || PreferenceConstants.P_EMAIL.equalsIgnoreCase(event.getProperty())) {
+          try {
+            loadAccountCredentials();
+          } catch (CloudBeesException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }
+
+      }
+    };
+    getPreferenceStore().addPropertyChangeListener(prefListener);
+
   }
 
   /*
@@ -79,6 +106,10 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     logger = null;
     plugin = null;
     super.stop(context);
+    if (prefListener != null) {
+      getPreferenceStore().removePropertyChangeListener(prefListener);
+      prefListener = null;
+    }
   }
 
   /**
@@ -101,17 +132,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
             return;
           }
 
-          String password;
           try {
-            password = SecurePreferencesFactory.getDefault().get(PreferenceConstants.P_PASSWORD, "");
-          } catch (StorageException e) {
-            throw new InvocationTargetException(e);
-          }
-
-          String email = getPreferenceStore().getString(PreferenceConstants.P_EMAIL);
-
-          try {
-            CloudBeesCorePlugin.getDefault().getGrandCentralService().reloadForgeRepos(email, password, monitor);
+            CloudBeesCorePlugin.getDefault().getGrandCentralService().reloadForgeRepos(monitor);
           } catch (CloudBeesException e) {
             e.printStackTrace();
             throw new InvocationTargetException(e);
@@ -151,30 +173,22 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return list;
   }
 
-  public List<NectarInstance> getDevAtCloudInstances() {
+  public List<NectarInstance> loadDevAtCloudInstances(IProgressMonitor monitor) throws CloudBeesException {
 
     // TODO read from prefs
     //    String instances = store.getString(PreferenceConstants.P_DEVATCLOUD_INSTANCES);
     //    List<NectarInstance> list = NectarInstance.decode(instances);
 
-    List<NectarInstance> list = new ArrayList<NectarInstance>();
-    NectarInstance ns = new NectarInstance("111", "Netbeans", "http://deadlock.netbeans.org/hudson/");
-    NectarInstance ns2 = new NectarInstance("222", "jBoss", "http://hudson.jboss.org/hudson/");
-    NectarInstance ns3 = new NectarInstance("333", "Eclipse", "https://hudson.eclipse.org/hudson/");
-    NectarInstance ns4 = new NectarInstance("444", "ahti grandomstate", "https://grandomstate.ci.cloudbees.com/");
-    list.add(ns);
-    list.add(ns2);
-    list.add(ns3);
-    list.add(ns4);
+    List<NectarInstance> instances = CloudBeesCorePlugin.getDefault().getGrandCentralService()
+        .loadDACNectarInstances(monitor);
 
-    // XXX hack
-    for (NectarInstance ni : list) {
+    for (NectarInstance ni : instances) {
       if (getNectarServiceForUrl(ni.url) == null) {
         nectarRegistry.add(new NectarService(ni));
       }
     }
 
-    return list;
+    return instances;
   }
 
   public void saveNectarInstance(NectarInstance ni) {
@@ -207,8 +221,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return resp;
   }
 
-  public List<NectarInstanceResponse> getDevAtCloudNectarsInfo() throws CloudBeesException {
-    List<NectarInstance> instances = new ArrayList<NectarInstance>(getDevAtCloudInstances());
+  public List<NectarInstanceResponse> getDevAtCloudNectarsInfo(IProgressMonitor monitor) throws CloudBeesException {
+    List<NectarInstance> instances = new ArrayList<NectarInstance>(loadDevAtCloudInstances(monitor));
 
     List<NectarInstanceResponse> resp = pollInstances(instances);
 
@@ -315,6 +329,31 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       }
     }
 
+  }
+
+  public void loadAccountCredentials() throws CloudBeesException {
+    //TODO Remove
+    System.out.println("Reloading credentials from the preferences");
+
+    String password;
+    try {
+      password = SecurePreferencesFactory.getDefault().get(PreferenceConstants.P_PASSWORD, "");
+    } catch (StorageException e) {
+      throw new CloudBeesException("Failed to load GrandCentral password from the storage!", e);
+    }
+
+    String email = getPreferenceStore().getString(PreferenceConstants.P_EMAIL);
+    CloudBeesCorePlugin.getDefault().getGrandCentralService().setAuthInfo(email, password);
+
+  }
+
+  /**
+   * As secure storage is not providing change listener functionality, we must call this programmatically.
+   * 
+   * @throws CloudBeesException
+   */
+  public void fireSecureStorageChanged() throws CloudBeesException {
+    loadAccountCredentials();
   }
 
 }

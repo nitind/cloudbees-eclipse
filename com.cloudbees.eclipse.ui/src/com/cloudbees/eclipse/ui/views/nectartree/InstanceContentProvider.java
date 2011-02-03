@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -32,7 +33,7 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
     if (parent.equals(site)) {
       if (root == null) {
         try {
-          initialize();
+          initialize(null);
         } catch (Exception e) {
           e.printStackTrace();
           return new InstanceGroup[0];//service not available
@@ -65,13 +66,15 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
     if (parent instanceof InstanceGroup)
       return ((InstanceGroup) parent).hasChildren();
 
-    if (parent instanceof NectarInstanceResponse)
-      return ((NectarInstanceResponse) parent).views.length > 0;
+    if (parent instanceof NectarInstanceResponse) {
+
+      return ((NectarInstanceResponse) parent).views == null || ((NectarInstanceResponse) parent).views.length > 0;
+    }
 
     return false;
   }
 
-  private void initialize() throws CloudBeesException {
+  private void initialize(IProgressMonitor monitor) throws CloudBeesException {
     //TreeObject to1 = new TreeObject("job 1");
     InstanceGroup p1 = new InstanceGroup("Nectar", false);
 
@@ -83,7 +86,7 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
     }
 
     InstanceGroup p2 = new InstanceGroup("DEV@cloud", true);
-    List<NectarInstanceResponse> dev = CloudBeesUIPlugin.getDefault().getDevAtCloudNectarsInfo();
+    List<NectarInstanceResponse> dev = CloudBeesUIPlugin.getDefault().getDevAtCloudNectarsInfo(monitor);
     Iterator<NectarInstanceResponse> devit = dev.iterator();
     while (devit.hasNext()) {
       NectarInstanceResponse resp = (NectarInstanceResponse) devit.next();

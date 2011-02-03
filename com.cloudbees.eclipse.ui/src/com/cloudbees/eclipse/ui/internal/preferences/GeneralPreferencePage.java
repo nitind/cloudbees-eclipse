@@ -31,8 +31,8 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
-import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.Messages;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
@@ -126,7 +126,11 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
       protected void doStore() {
         try {
           SecurePreferencesFactory.getDefault().put(PreferenceConstants.P_PASSWORD, getTextControl().getText(), true);
-        } catch (StorageException e) {
+
+          // Call programmatically as SecurePreferences does not provide change listeners          
+          CloudBeesUIPlugin.getDefault().fireSecureStorageChanged();
+
+        } catch (Exception e) {
           e.printStackTrace();
           CloudBeesUIPlugin.showError(
               "Saving password failed!\nPossible cause: Eclipse security master password is not set.", e);
@@ -177,15 +181,23 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
                 monitor.subTask("Connecting..");//TODO i18n
                 monitor.internalWorked(10d);
 
-                boolean loginValid = CloudBeesCorePlugin.getDefault().getGrandCentralService()
-                    .remoteValidateUser(email, password, monitor);
-                if (loginValid) {
-                  MessageDialog.openInformation(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay()
-                      .getActiveShell(), "Validation result", "Validation successful!");//TODO i18n
-                } else {
-                  MessageDialog.openError(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay().getActiveShell(),
-                      "Validation result", "Validation was not successful!\nWrong email or password?");//TODO i18n
-                }
+                GrandCentralService gcs = new GrandCentralService(email, password);
+                final boolean loginValid = gcs.validateUser(monitor);
+
+                PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+
+                  public void run() {
+                    if (loginValid) {
+                      MessageDialog.openInformation(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay()
+                          .getActiveShell(), "Validation result", "Validation successful!");//TODO i18n
+                    } else {
+                      MessageDialog.openError(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay()
+                          .getActiveShell(), "Validation result",
+                          "Validation was not successful!\nWrong email or password?");//TODO i18n
+                    }
+                  }
+
+                });
 
               } catch (CloudBeesException e1) {
                 throw new RuntimeException(e1);

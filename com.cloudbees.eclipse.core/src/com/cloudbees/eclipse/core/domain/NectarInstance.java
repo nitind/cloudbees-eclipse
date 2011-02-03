@@ -10,7 +10,7 @@ import com.google.gson.reflect.TypeToken;
 
 public class NectarInstance implements Comparable<NectarInstance> {
 
-  public String id;
+  public String id = UUID.randomUUID().toString();
 
   public String label;
   public String url;
@@ -19,14 +19,13 @@ public class NectarInstance implements Comparable<NectarInstance> {
   public boolean authenticate;
 
   public NectarInstance() {
-    this.id = UUID.randomUUID().toString(); // FIXME should we check that it's actually unique? 
   }
   
-  public NectarInstance(String id, String label, String url) {
-    this(id, label, url, null, null, false);
+  public NectarInstance(String label, String url) {
+    this(label, url, null, null, false);
   }
 
-  public NectarInstance(String id, String label, String url, String username, String password, boolean authenticate) {
+  public NectarInstance(String label, String url, String username, String password, boolean authenticate) {
     this.label = label;
     this.url = url;
     this.username = username;

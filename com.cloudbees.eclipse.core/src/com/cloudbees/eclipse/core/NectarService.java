@@ -108,7 +108,7 @@ public class NectarService {
       return instance;
 
     } catch (Exception e) {
-      throw new CloudBeesException("Failed to get views" + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
+      throw new CloudBeesException("Failed to get Nectar views" + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
     }
   }
 
