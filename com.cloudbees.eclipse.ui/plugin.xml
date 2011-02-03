@@ -112,11 +112,10 @@
    </extension>
 
  <extension point="org.eclipse.ui.editors">
-       <editor id="com.cloudbees.eclipse.ui.views.jobdetails.JobDetailsForm"
-          name="CI Job Info"
-          icon="icons/16x16/cb_plain.png"
-  		   extensions="foo" 
-  		   class="com.cloudbees.eclipse.ui.views.jobdetails.JobDetailsForm"  
-       />
+       <editor
+             class="com.cloudbees.eclipse.ui.views.jobdetails.JobDetailsPart"
+             id="com.cloudbees.eclipse.ui.views.jobdetails.JobDetailsPart"
+             name="Build details">
+       </editor>
   </extension>
 </plugin>

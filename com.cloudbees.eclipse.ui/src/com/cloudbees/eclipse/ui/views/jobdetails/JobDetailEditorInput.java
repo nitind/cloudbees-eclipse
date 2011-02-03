@@ -5,6 +5,7 @@ import org.eclipse.ui.internal.part.NullEditorInput;
 public class JobDetailEditorInput extends NullEditorInput {
 
   public JobDetailEditorInput(String jobUrl) {
+    super();
     System.out.println("Creating job details editor for url " + jobUrl);
   }
 

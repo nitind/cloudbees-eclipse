@@ -16,7 +16,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -30,8 +29,8 @@ import com.cloudbees.eclipse.core.NectarService;
 import com.cloudbees.eclipse.core.domain.NectarInstance;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
-import com.cloudbees.eclipse.core.util.Utils;
-import com.cloudbees.eclipse.ui.views.jobdetails.JobDetailsView;
+import com.cloudbees.eclipse.ui.views.jobdetails.JobDetailEditorInput;
+import com.cloudbees.eclipse.ui.views.jobdetails.JobDetailsPart;
 import com.cloudbees.eclipse.ui.views.jobs.JobsView;
 
 /**
@@ -332,8 +331,12 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       if (jobUrl.startsWith(service.getUrl())) {
 
         try {
+          //JobDetailsForm.ID, Utils.toB64(jobUrl), IWorkbenchPage.VIEW_ACTIVATE
+          // IEditorDescriptor descr = PlatformUI.getWorkbench().getEditorRegistry().findEditor(JobDetailsForm.ID);
+
           PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-              .showView(JobDetailsView.ID, Utils.toB64(jobUrl), IWorkbenchPage.VIEW_ACTIVATE);
+              .openEditor(new JobDetailEditorInput(jobUrl), JobDetailsPart.ID);
+
         } catch (PartInitException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
