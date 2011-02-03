@@ -80,9 +80,9 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
       String viewInfo="";
         if (newView.name!=null && newView.name.length()>0) {
-        viewInfo = " (" + newView.name + ")";
+        viewInfo = newView.name + " [";
       }
-      setContentDescription("Jobs for " + label + viewInfo + ". Updated " + new Date() + ".");
+      setContentDescription(viewInfo + label + (viewInfo.length() > 0 ? "]" : "") + " (" + new Date() + ")");
     }
     contentProvider.setJobs(Arrays.asList(newView.jobs));
 
@@ -152,6 +152,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     });
 
+    //TODO i18n
     TableViewerColumn namecol = createColumn("Job", 250, JobSorter.JOB, new CellLabelProvider() {
       public void update(ViewerCell cell) {
         NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
