@@ -299,6 +299,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     //manager.add(action2);
     manager.add(new Separator());
     manager.add(action3);
+    manager.add(action4);
   }
 
   private void makeActions() {
@@ -368,9 +369,9 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         //        }
       }
     };
-    action4.setText("Reload JaaS instances...");
-    action4.setToolTipText("Reload JaaS instances");
-    /*    action3.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
+    action4.setText("Reload Nectar instances...");
+    action4.setToolTipText("Reload Nectar instances");
+    /*    action4.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
             .getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
     */
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
