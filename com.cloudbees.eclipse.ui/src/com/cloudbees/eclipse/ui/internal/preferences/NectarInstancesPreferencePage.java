@@ -192,7 +192,7 @@ public class NectarInstancesPreferencePage extends PreferencePage implements IWo
 
     table.removeAll();
 
-    List<NectarInstance> insts = CloudBeesUIPlugin.getDefault().getManualNectarInstances();
+    List<NectarInstance> insts = CloudBeesUIPlugin.getDefault().loadManualNectarInstances();
     Collections.sort(insts, new Comparator<NectarInstance>() {
       public int compare(NectarInstance o1, NectarInstance o2) {
         return o1.label.compareTo(o2.label);

@@ -15,6 +15,9 @@ public class NectarInstanceResponse extends BaseNectarResponse {
   public PrimaryView primaryView;
   public View[] views;
 
+  @Expose(deserialize = false, serialize = false)
+  public boolean offline = false;
+
   static {
     initTreeQuery(NectarInstanceResponse.class);
   }

@@ -67,8 +67,7 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
       return ((InstanceGroup) parent).hasChildren();
 
     if (parent instanceof NectarInstanceResponse) {
-
-      return ((NectarInstanceResponse) parent).views == null || ((NectarInstanceResponse) parent).views.length > 0;
+      return ((NectarInstanceResponse) parent).views != null && ((NectarInstanceResponse) parent).views.length > 0;
     }
 
     return false;

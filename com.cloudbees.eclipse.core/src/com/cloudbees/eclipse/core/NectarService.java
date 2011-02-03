@@ -47,6 +47,10 @@ public class NectarService {
 
       String reqUrl = viewUrl != null ? viewUrl : nectar.url;
 
+      if (!reqUrl.endsWith("/")) {
+        reqUrl = reqUrl + "/";
+      }
+
       HttpPost post = new HttpPost(reqUrl + "api/json?tree=" + NectarJobsResponse.getTreeQuery());
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
@@ -65,7 +69,7 @@ public class NectarService {
       return views;
 
     } catch (Exception e) {
-      throw new CloudBeesException("Failed to get account services info"
+      throw new CloudBeesException("Failed to get Nectar jobs for '" + nectar.url + "'. "
           + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
     }
 
@@ -80,7 +84,12 @@ public class NectarService {
 
       Gson g = Utils.createGson();
 
-      HttpPost post = new HttpPost(nectar.url + "api/json?tree=" + NectarInstanceResponse.getTreeQuery());
+      String reqUrl = nectar.url;
+      if (!reqUrl.endsWith("/")) {
+        reqUrl = reqUrl + "/";
+      }
+
+      HttpPost post = new HttpPost(reqUrl + "api/json?tree=" + NectarInstanceResponse.getTreeQuery());
 
       System.out.println("Nectar: " + nectar);
 
@@ -108,7 +117,8 @@ public class NectarService {
       return instance;
 
     } catch (Exception e) {
-      throw new CloudBeesException("Failed to get Nectar views" + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
+      throw new CloudBeesException("Failed to get Nectar views for '" + nectar.url + "'. "
+          + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
     }
   }
 

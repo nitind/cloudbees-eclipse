@@ -166,10 +166,17 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return logger;
   }
 
-  public List<NectarInstance> getManualNectarInstances() {
+  public List<NectarInstance> loadManualNectarInstances() {
     IPreferenceStore store = CloudBeesUIPlugin.getDefault().getPreferenceStore();
     String instances = store.getString(PreferenceConstants.P_NECTAR_INSTANCES);
     List<NectarInstance> list = NectarInstance.decode(instances);
+
+    if (list != null) {
+      for (NectarInstance inst : list) {
+        lookupNectarService(inst);
+      }
+    }
+
     return list;
   }
 
@@ -195,7 +202,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     if (ni == null || ni.label == null || ni.url == null || ni.label.length() == 0 || ni.url.length() == 0) {
       throw new IllegalStateException("Unable to add new instance with an empty url or label!");
     }
-    List<NectarInstance> list = getManualNectarInstances();
+    List<NectarInstance> list = loadManualNectarInstances();
     list.remove(ni); // when editing - id is the same, but props old, so lets kill old instance first
     list.add(ni);
     Collections.sort(list);
@@ -207,14 +214,14 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     if (ni == null) {
       throw new RuntimeException("Unable to remove null instance!");
     }
-    List<NectarInstance> list = getManualNectarInstances();
+    List<NectarInstance> list = loadManualNectarInstances();
     list.remove(ni);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
         .putValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
   }
 
   public List<NectarInstanceResponse> getManualNectarsInfo() throws CloudBeesException {
-    List<NectarInstance> instances = new ArrayList<NectarInstance>(getManualNectarInstances());
+    List<NectarInstance> instances = new ArrayList<NectarInstance>(loadManualNectarInstances());
 
     List<NectarInstanceResponse> resp = pollInstances(instances);
 
@@ -242,7 +249,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         NectarInstanceResponse fakeResp = new NectarInstanceResponse();
         fakeResp.serviceUrl = inst.url;
         fakeResp.nodeName = inst.label;
-        fakeResp.views = new NectarInstanceResponse.View[0];
+        fakeResp.offline = true;
+
+        //fakeResp.views = new NectarInstanceResponse.View[0];
         resp.add(fakeResp);
 
         e.printStackTrace();
@@ -274,6 +283,10 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
       //TODO Start monitoring this job list
 
+      if (serviceUrl == null && viewUrl != null) {
+        serviceUrl = getNectarServiceForUrl(viewUrl).getUrl();
+      }
+
       NectarJobsResponse jobs = getNectarServiceForUrl(serviceUrl).getJobs(viewUrl);
 
       Iterator<NectarChangeListener> iterator = nectarChangeListeners.iterator();
@@ -297,11 +310,11 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     nectarChangeListeners.remove(listener);
   }
 
-  public NectarService getNectarServiceForUrl(String serviceUrl) {
+  public NectarService getNectarServiceForUrl(String serviceOrViewUrl) {
     Iterator<NectarService> iter = nectarRegistry.iterator();
     while (iter.hasNext()) {
       NectarService service = (NectarService) iter.next();
-      if (service.getUrl().equals(serviceUrl)) {
+      if (serviceOrViewUrl.startsWith(service.getUrl())) {
         return service;
       }
     }

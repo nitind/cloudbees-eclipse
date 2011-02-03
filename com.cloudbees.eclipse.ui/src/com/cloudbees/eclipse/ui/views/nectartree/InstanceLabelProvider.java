@@ -64,14 +64,14 @@ public class InstanceLabelProvider extends LabelProvider implements IFontProvide
 
       NectarService s = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(inst.serviceUrl);
       if (s != null) {
-        return s.getLabel();
+        return s.getLabel() + (inst.offline ? " (offline)" : "");//TODO i18n
       }
 
       String name = inst.nodeName;
       if (name != null && name.length() > 0) {
-        return name;
+        return name + (inst.offline ? " (offline)" : "");//TODO i18n
       }
-      return inst.primaryView.url;
+      return inst.primaryView.url + (inst.offline ? " (offline)" : "");//TODO i18n
     }
     if (obj instanceof NectarInstanceResponse.View) {
       NectarInstanceResponse.View view = (View) obj;
