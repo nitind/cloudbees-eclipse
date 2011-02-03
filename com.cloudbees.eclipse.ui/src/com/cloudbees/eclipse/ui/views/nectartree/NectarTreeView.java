@@ -41,6 +41,7 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
   private Action action1; // Configure Account
   private Action action2; // Attach NectarInfo
   private Action action3; // Reload Forge repositories
+  private Action action4; // Reload Jaas repositories
 
   class NameSorter extends ViewerSorter {
   }
@@ -178,6 +179,27 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
         .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
     action3.setEnabled(forgeEnabled);
 
+    action4 = new Action() {
+      public void run() {
+        //        try {
+          //CloudBeesUIPlugin.getDefault().reloadJaasInstances();
+          viewer.getContentProvider().inputChanged(viewer, null, null); // make it refresh itself
+        //        } catch (CloudBeesException e) {
+        //          //TODO I18n!
+        //          CloudBeesUIPlugin.showError("Failed to reload JaaS repositories!", e);
+        //        }
+      }
+    };
+    action4.setText("Reload JaaS instances...");
+    action4.setToolTipText("Reload JaaS instances");
+    /*    action3.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
+            .getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
+    */
+    CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
+
+    boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
+        .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
+    action4.setEnabled(jaasEnabled);
   }
 
   public void setFocus() {
@@ -189,6 +211,12 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
       boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
           .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
       action3.setEnabled(forgeEnabled);
+    }
+
+    if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())) {
+      boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
+          .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
+      action4.setEnabled(jaasEnabled);
     }
   }
 

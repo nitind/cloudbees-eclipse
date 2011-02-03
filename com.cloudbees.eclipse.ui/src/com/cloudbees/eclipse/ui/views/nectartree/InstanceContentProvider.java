@@ -24,6 +24,7 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
   }
 
   public void inputChanged(Viewer v, Object oldInput, Object newInput) {
+    root = null;
   }
 
   public void dispose() {
@@ -95,6 +96,5 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
     root = new ArrayList<InstanceGroup>();
     root.add(p1);
     root.add(p2);
-
   }
 }

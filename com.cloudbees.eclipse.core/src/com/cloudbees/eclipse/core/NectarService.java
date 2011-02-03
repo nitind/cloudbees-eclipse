@@ -137,4 +137,30 @@ public class NectarService {
     }
     return super.toString();
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((nectar == null) ? 0 : nectar.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    NectarService other = (NectarService) obj;
+    if (nectar == null) {
+      if (other.nectar != null)
+        return false;
+    } else if (!nectar.equals(other.nectar))
+      return false;
+    return true;
+  }
+
 }
