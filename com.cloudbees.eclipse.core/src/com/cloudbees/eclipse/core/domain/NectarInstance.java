@@ -17,6 +17,7 @@ public class NectarInstance implements Comparable<NectarInstance> {
   public String username;
   public String password;
   public boolean authenticate;
+  public String jossoCookie;
 
   public NectarInstance() {
   }

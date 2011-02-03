@@ -14,8 +14,9 @@ import java.security.KeyStore;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.params.CookiePolicy;
+import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.StringEntity;
@@ -91,9 +92,11 @@ public class Utils {
     }
   }
 
-  public final static HttpClient getAPIClient() throws CloudBeesException {
+  public final static DefaultHttpClient getAPIClient() throws CloudBeesException {
     DefaultHttpClient httpclient = new DefaultHttpClient();
     try {
+      HttpClientParams.setCookiePolicy(httpclient.getParams(), CookiePolicy.BROWSER_COMPATIBILITY);
+
       KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 
       CloudBeesCorePlugin plugin = CloudBeesCorePlugin.getDefault();
