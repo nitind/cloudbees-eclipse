@@ -5,6 +5,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 
 import com.cloudbees.eclipse.core.domain.NectarInstance;
+import com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
 import com.cloudbees.eclipse.core.util.Utils;
@@ -51,14 +52,22 @@ public class NectarService {
         reqUrl = reqUrl + "/";
       }
 
-      HttpPost post = new HttpPost(reqUrl + "api/json?tree=" + NectarJobsResponse.getTreeQuery());
+      String uri = reqUrl + "api/json?tree=" + NectarJobsResponse.QTREE;
+      HttpPost post = new HttpPost(uri);
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
 
       HttpResponse resp = httpclient.execute(post);
       String bodyResponse = Utils.getResponseBody(resp);
 
-      NectarJobsResponse views = g.fromJson(bodyResponse, NectarJobsResponse.class);
+      NectarJobsResponse views = null;
+      try {
+        views = g.fromJson(bodyResponse, NectarJobsResponse.class);
+      } catch (Exception e) {
+        //FIXME log properly
+        System.out.println("Illegal JSON response from the server for the request:\n" + uri + ":\n" + bodyResponse);
+        throw e;
+      }
 
       if (views != null) {
         views.serviceUrl = nectar.url;
@@ -89,7 +98,7 @@ public class NectarService {
         reqUrl = reqUrl + "/";
       }
 
-      HttpPost post = new HttpPost(reqUrl + "api/json?tree=" + NectarInstanceResponse.getTreeQuery());
+      HttpPost post = new HttpPost(reqUrl + "api/json?tree=" + NectarInstanceResponse.QTREE);
 
       System.out.println("Nectar: " + nectar);
 
@@ -136,5 +145,50 @@ public class NectarService {
       return "NectarService[nectarInstance=" + nectar + "]";
     }
     return super.toString();
+  }
+
+  public NectarBuildDetailsResponse getJobDetails(String jobUrl) throws CloudBeesException {
+
+    if (jobUrl != null && !jobUrl.startsWith(nectar.url)) {
+      throw new CloudBeesException("Unexpected view url provided! Service url: " + nectar.url + "; job url: " + jobUrl);
+    }
+
+    StringBuffer errMsg = new StringBuffer();
+
+    String reqUrl = jobUrl;
+
+    if (!reqUrl.endsWith("/")) {
+      reqUrl = reqUrl + "/";
+    }
+
+    String reqStr = reqUrl + "api/json?tree=" + NectarBuildDetailsResponse.QTREE;
+
+    try {
+      HttpClient httpclient = Utils.getAPIClient();
+
+      Gson g = Utils.createGson();
+
+
+      HttpPost post = new HttpPost(reqStr);
+      post.setHeader("Accept", "application/json");
+      post.setHeader("Content-type", "application/json");
+
+      HttpResponse resp = httpclient.execute(post);
+      String bodyResponse = Utils.getResponseBody(resp);
+
+      NectarBuildDetailsResponse details = g.fromJson(bodyResponse, NectarBuildDetailsResponse.class);
+
+      if (details.fullDisplayName == null) {
+        throw new CloudBeesException("Response does not contain required fields!");
+      }
+      Utils.checkResponseCode(resp);
+
+      return details;
+
+    } catch (Exception e) {
+      throw new CloudBeesException("Failed to get Nectar jobs for '" + jobUrl + "'. "
+          + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr, e);
+    }
+
   }
 }

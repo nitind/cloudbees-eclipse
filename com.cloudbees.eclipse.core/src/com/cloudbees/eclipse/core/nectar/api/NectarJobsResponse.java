@@ -9,9 +9,7 @@ public class NectarJobsResponse extends BaseNectarResponse {
 
   public Job[] jobs;
 
-  static {
-    initTreeQuery(NectarJobsResponse.class);
-  }
+  public final static String QTREE = QTreeFactory.create(NectarJobsResponse.class);
 
   public static class Job {
     public HealthReport[] healthReport;
@@ -53,11 +51,6 @@ public class NectarJobsResponse extends BaseNectarResponse {
 
     }
 
-  }
-
-  public final static String getTreeQuery() {
-    //enforce this subclass to be loaded
-    return _getTreeQuery();
   }
 
 }
