@@ -14,7 +14,6 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
-
 public class InstanceContentProvider implements IStructuredContentProvider, ITreeContentProvider {
   private List<InstanceGroup> root;
   private IViewSite site;
@@ -86,13 +85,19 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
     }
 
     InstanceGroup p2 = new InstanceGroup("DEV@cloud", true);
-    List<NectarInstanceResponse> dev = CloudBeesUIPlugin.getDefault().getDevAtCloudNectarsInfo(monitor);
-    Iterator<NectarInstanceResponse> devit = dev.iterator();
-    while (devit.hasNext()) {
-      NectarInstanceResponse resp = (NectarInstanceResponse) devit.next();
-      p2.addChild(resp);
+
+    try {
+      List<NectarInstanceResponse> dev = CloudBeesUIPlugin.getDefault().getDevAtCloudNectarsInfo(monitor);
+      Iterator<NectarInstanceResponse> devit = dev.iterator();
+      while (devit.hasNext()) {
+        NectarInstanceResponse resp = (NectarInstanceResponse) devit.next();
+        p2.addChild(resp);
+      }
+    } catch (CloudBeesException e) {
+      // Let's ignore these errors so the tree for manual nectars remains available
+      //TODO consider logging anyway
     }
-    
+
     root = new ArrayList<InstanceGroup>();
     root.add(p1);
     root.add(p2);
