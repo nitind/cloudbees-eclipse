@@ -282,6 +282,12 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
    * @throws CloudBeesException
    */
   public void showJobs(String serviceUrl, String viewUrl) throws CloudBeesException {
+    System.out.println("Show jobs: " + serviceUrl + " - " + viewUrl);
+
+    if (serviceUrl == null && viewUrl == null) {
+      return; // no info
+    }
+
     try {
       IProgressMonitor monitor = new NullProgressMonitor(); // TODO add progress monitor instance from somewhere
 
