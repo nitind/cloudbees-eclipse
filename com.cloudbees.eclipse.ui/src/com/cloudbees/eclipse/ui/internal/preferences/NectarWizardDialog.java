@@ -37,7 +37,7 @@ public class NectarWizardDialog extends WizardDialog {
                 ((NectarWizard) getWizard()).getNectarInstance());
 
             try {
-              ns.getInstance();
+              ns.getInstance(monitor);
               ((NectarFinishPage) ((NectarWizard) getWizard()).getPage("finish")).initText(null);
             } catch (CloudBeesException e) {
               ((NectarFinishPage) ((NectarWizard) getWizard()).getPage("finish")).initText(e);

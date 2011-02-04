@@ -92,10 +92,12 @@ public class BuildPart extends EditorPart {
       // No last build available
     } else {
 
+      IProgressMonitor monitor = null;
+
       NectarService service = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(details.getLastBuild().url);
 
       try {
-        detail = service.getJobDetails(details.getLastBuild().url);
+        detail = service.getJobDetails(details.getLastBuild().url, monitor);
         this.lastBuildAvailable = true;
       } catch (CloudBeesException e) {
         throw new PartInitException("Failed to load build information from the remote host!", e);

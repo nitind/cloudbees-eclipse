@@ -18,7 +18,7 @@ public class NectarServiceTest {
 
     System.out.println("Query tree: " + NectarInstanceResponse.QTREE);
 
-    NectarInstanceResponse vs = s.getInstance();
+    NectarInstanceResponse vs = s.getInstance(null);
     NectarInstanceResponse.View[] views = vs.views;
     System.out.println("Primary view: " + vs.primaryView.name + ";" + vs.primaryView.url);
     System.out.println("Received views:");
@@ -30,7 +30,7 @@ public class NectarServiceTest {
     assertTrue(views.length > 0);
 
     System.err.println("Jobs:");
-    NectarJobsResponse jb = s.getJobs(null);
+    NectarJobsResponse jb = s.getJobs(null, null);
     NectarJobsResponse.Job[] jobs = jb.jobs;
     System.out.println("Received builds:");
 
@@ -46,7 +46,8 @@ public class NectarServiceTest {
   public void testJobDetailRetrieval() throws CloudBeesException {
     NectarService s = new NectarService(new NectarInstance("Hudson", "http://deadlock.netbeans.org/hudson/"));
 
-    NectarBuildDetailsResponse details = s.getJobDetails("http://deadlock.netbeans.org/hudson/job/jackpot30/301/");
+    NectarBuildDetailsResponse details = s
+        .getJobDetails("http://deadlock.netbeans.org/hudson/job/jackpot30/301/", null);
 
     System.out.println("Received details:");
 

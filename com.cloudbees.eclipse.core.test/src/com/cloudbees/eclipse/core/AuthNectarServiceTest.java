@@ -17,7 +17,7 @@ public class AuthNectarServiceTest {
 
     NectarService s = new NectarService(ni);
 
-    NectarInstanceResponse vs = s.getInstance();
+    NectarInstanceResponse vs = s.getInstance(null);
 
     assertTrue(vs.views.length > 0);
 

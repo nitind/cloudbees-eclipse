@@ -16,6 +16,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.cloudbees.eclipse.core.domain.NectarInstance;
 import com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse;
@@ -35,6 +36,8 @@ public class NectarService {
   private String label;*/
   private NectarInstance nectar;
 
+  private static String lastJossoSessionId = null;
+
   public NectarService(NectarInstance nectar) {
     this.nectar = nectar;
   }
@@ -45,7 +48,10 @@ public class NectarService {
    * @return
    * @throws CloudBeesException
    */
-  public NectarJobsResponse getJobs(String viewUrl) throws CloudBeesException {
+  public NectarJobsResponse getJobs(String viewUrl, IProgressMonitor monitor) throws CloudBeesException {
+    if (monitor != null) {
+      monitor.setTaskName("Fetching Job list...");
+    }
 
     if (viewUrl != null && !viewUrl.startsWith(nectar.url)) {
       throw new CloudBeesException("Unexpected view url provided! Service url: " + nectar.url + "; view url: "
@@ -70,7 +76,7 @@ public class NectarService {
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
 
-      String bodyResponse = retrieveWithLogin(httpclient, post);
+      String bodyResponse = retrieveWithLogin(httpclient, post, monitor);
 
       NectarJobsResponse views = null;
       try {
@@ -94,8 +100,11 @@ public class NectarService {
 
   }
 
-  public NectarInstanceResponse getInstance() throws CloudBeesException {
-  
+  public NectarInstanceResponse getInstance(IProgressMonitor monitor) throws CloudBeesException {
+    if (monitor != null) {
+      monitor.setTaskName("Getting instance details from Nectar...");
+    }
+
     StringBuffer errMsg = new StringBuffer();
   
     System.out.println("Nectar: " + nectar);
@@ -113,7 +122,7 @@ public class NectarService {
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
 
-      String bodyResponse = retrieveWithLogin(httpclient, post);
+      String bodyResponse = retrieveWithLogin(httpclient, post, monitor);
 
       if (bodyResponse == null) {
         throw new CloudBeesException("Failed to receive response from server");
@@ -140,32 +149,33 @@ public class NectarService {
     }
   }
 
-  private String retrieveWithLogin(DefaultHttpClient httpclient, HttpPost post) throws UnsupportedEncodingException,
+  private String retrieveWithLogin(DefaultHttpClient httpclient, HttpPost post, IProgressMonitor monitor)
+      throws UnsupportedEncodingException,
       IOException, ClientProtocolException, CloudBeesException, Exception {
     String bodyResponse = null;
 
-    //        if (nectar.jossoCookie != null) {
-    //          reqUrl += "&JOSSO_SESSIONID=" + nectar.jossoCookie;
+    //        if (lastJossoCookie != null) {
+    //          reqUrl += "&JOSSO_SESSIONID=" + lastJossoCookie;
     //        }
 
     boolean tryToLogin = true;
     do {
-      if (nectar.jossoCookie != null) {
+      if (lastJossoSessionId != null) {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-        nvps.add(new BasicNameValuePair("JOSSO_SESSIONID", nectar.jossoCookie));
+        nvps.add(new BasicNameValuePair("JOSSO_SESSIONID", lastJossoSessionId));
         post.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8)); // 1
 
-        post.addHeader("Cookie", "JOSSO_SESSIONID=" + nectar.jossoCookie); // 2
+        post.addHeader("Cookie", "JOSSO_SESSIONID=" + lastJossoSessionId); // 2
 
-        httpclient.getCookieStore().addCookie(new BasicClientCookie("JOSSO_SESSIONID", nectar.jossoCookie)); // 3
+        httpclient.getCookieStore().addCookie(new BasicClientCookie("JOSSO_SESSIONID", lastJossoSessionId)); // 3
       }
 
       HttpResponse resp = httpclient.execute(post);
       bodyResponse = Utils.getResponseBody(resp);
 
       if ((resp.getStatusLine().getStatusCode() == 302 || resp.getStatusLine().getStatusCode() == 301) && tryToLogin) { // redirect to login
-        login(httpclient, post.getURI().toASCIIString(), resp.getFirstHeader("Location").getValue());
-        httpclient.getCookieStore().clear(); // TODO comment out
+        login(httpclient, post.getURI().toASCIIString(), resp.getFirstHeader("Location").getValue(), monitor);
+        //httpclient.getCookieStore().clear();
         tryToLogin = false;
       } else {
         Utils.checkResponseCode(resp);
@@ -177,11 +187,16 @@ public class NectarService {
     return bodyResponse;
   }
 
-  private void login(DefaultHttpClient httpClient, final String referer, final String redirect) throws Exception {
+  private void login(DefaultHttpClient httpClient, final String referer, final String redirect,
+      final IProgressMonitor monitor) throws Exception {
+    if (monitor != null) {
+      monitor.subTask("Logging in to Nectar...");
+    }
     //    httpClient.getCookieStore().clear();
     //    List<Cookie> oldCookies = new ArrayList<Cookie>(httpClient.getCookieStore().getCookies());
+
     String nextUrl = redirect;
-    login: for (int i = 0; i < 20 && nextUrl != null; i++) {
+    for (int i = 0; i < 20 && nextUrl != null; i++) {
       HttpResponse lastResp = visitSite(httpClient, nextUrl, referer);
 
       Header redir = lastResp.getFirstHeader("Location");
@@ -199,15 +214,27 @@ public class NectarService {
 
       nextUrl = redirUrl;
 
-      for (Cookie cook : httpClient.getCookieStore().getCookies()) {
-        if ("JOSSO_SESSIONID".equals(cook.getName())) {
-          nectar.jossoCookie = cook.getValue();
-          break login; // ready
-        }
+      Header cookie = lastResp.getFirstHeader("Set-Cookie");
+      if (cookie == null) {
+        cookie = lastResp.getFirstHeader("SET-COOKIE");
+      }
+      if (cookie != null && cookie.getValue().startsWith("JOSSO_SESSIONID=")) {
+        break; // logged in ok
+      }
+
+      if (monitor != null) {
+        monitor.worked(i + 1);
       }
     }
 
-    System.out.println("JOSSO_SESSIONID=" + nectar.jossoCookie);
+    for (Cookie cook : httpClient.getCookieStore().getCookies()) {
+      if ("JOSSO_SESSIONID".equals(cook.getName())) {
+        lastJossoSessionId = cook.getValue();
+        //        break login; // ready
+      }
+    }
+
+    System.out.println("JOSSO_SESSIONID=" + lastJossoSessionId);
   }
 
   private HttpResponse visitSite(DefaultHttpClient httpClient, String url, String refererUrl)
@@ -252,7 +279,11 @@ public class NectarService {
     return super.toString();
   }
 
-  public NectarBuildDetailsResponse getJobDetails(String jobUrl) throws CloudBeesException {
+  public NectarBuildDetailsResponse getJobDetails(String jobUrl, final IProgressMonitor monitor)
+      throws CloudBeesException {
+    if (monitor != null) {
+      monitor.setTaskName("Fetching Job details...");
+    }
 
     if (jobUrl != null && !jobUrl.startsWith(nectar.url)) {
       throw new CloudBeesException("Unexpected view url provided! Service url: " + nectar.url + "; job url: " + jobUrl);
@@ -278,7 +309,7 @@ public class NectarService {
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
 
-      String bodyResponse = retrieveWithLogin(httpclient, post);
+      String bodyResponse = retrieveWithLogin(httpclient, post, monitor);
 
       NectarBuildDetailsResponse details = g.fromJson(bodyResponse, NectarBuildDetailsResponse.class);
 
