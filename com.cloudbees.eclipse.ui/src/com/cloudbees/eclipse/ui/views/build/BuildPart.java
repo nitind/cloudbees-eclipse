@@ -1,6 +1,7 @@
 package com.cloudbees.eclipse.ui.views.build;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -92,7 +93,7 @@ public class BuildPart extends EditorPart {
       // No last build available
     } else {
 
-      IProgressMonitor monitor = null;
+      IProgressMonitor monitor = new NullProgressMonitor();
 
       NectarService service = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(details.getLastBuild().url);
 

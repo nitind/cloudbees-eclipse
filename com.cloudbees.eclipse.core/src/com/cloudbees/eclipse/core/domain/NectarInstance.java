@@ -17,20 +17,24 @@ public class NectarInstance implements Comparable<NectarInstance> {
   public String username;
   public String password;
   public boolean authenticate;
+  public boolean atCloud;
 
   public NectarInstance() {
   }
   
   public NectarInstance(String label, String url) {
-    this(label, url, null, null, false);
+    this(label, url, null, null, false, false);
   }
 
-  public NectarInstance(String label, String url, String username, String password, boolean authenticate) {
+  public NectarInstance(String label, String url, String username, String password, boolean authenticate,
+      boolean atCloud) {
     this.label = label;
     this.url = url;
     this.username = username;
     this.password = password;
     this.authenticate = authenticate;
+    this.atCloud = atCloud;
+    //    this.id = url;
   }
 
   @Override

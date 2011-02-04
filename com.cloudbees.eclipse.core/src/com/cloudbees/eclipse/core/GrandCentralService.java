@@ -275,7 +275,7 @@ public class GrandCentralService {
 
         String url = "https://" + account + ".ci." + HOST;
 
-        NectarInstance inst = new NectarInstance(account, url, email, password, true);
+        NectarInstance inst = new NectarInstance(account, url, email, password, true, true);
 
         instances.add(inst);
       }

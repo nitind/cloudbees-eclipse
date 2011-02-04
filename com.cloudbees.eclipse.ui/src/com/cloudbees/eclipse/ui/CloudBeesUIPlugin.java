@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
@@ -88,11 +89,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
             e.printStackTrace();
           }
         }
-
       }
     };
     getPreferenceStore().addPropertyChangeListener(prefListener);
-
   }
 
   /*
@@ -170,6 +169,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     IPreferenceStore store = CloudBeesUIPlugin.getDefault().getPreferenceStore();
     String instances = store.getString(PreferenceConstants.P_NECTAR_INSTANCES);
     List<NectarInstance> list = NectarInstance.decode(instances);
+    System.out.println("Loaded: " + list);
 
     if (list != null) {
       for (NectarInstance inst : list) {
@@ -203,11 +203,16 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       throw new IllegalStateException("Unable to add new instance with an empty url or label!");
     }
     List<NectarInstance> list = loadManualNectarInstances();
+    System.out.println("save before: " + list);
     list.remove(ni); // when editing - id is the same, but props old, so lets kill old instance first
     list.add(ni);
+
+    nectarRegistry.remove(new NectarService(ni));
+
+    System.out.println("save after: " + list);
     Collections.sort(list);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
-        .putValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
+        .setValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
   }
 
   public void removeNectarInstance(NectarInstance ni) {
@@ -217,7 +222,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     List<NectarInstance> list = loadManualNectarInstances();
     list.remove(ni);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
-        .putValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
+        .setValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
   }
 
   public List<NectarInstanceResponse> getManualNectarsInfo(IProgressMonitor monitor) throws CloudBeesException {
@@ -278,7 +283,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
    */
   public void showJobs(String serviceUrl, String viewUrl) throws CloudBeesException {
     try {
-      IProgressMonitor monitor = null; // TODO add progress monitor instance from somewhere
+      IProgressMonitor monitor = new NullProgressMonitor(); // TODO add progress monitor instance from somewhere
 
       PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(JobsView.ID);
 

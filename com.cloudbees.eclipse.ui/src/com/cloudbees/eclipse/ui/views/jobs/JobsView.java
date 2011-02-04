@@ -465,6 +465,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
           .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
       action4.setEnabled(jaasEnabled);
+
+      // TODO kill jobs list
     }
   }
 

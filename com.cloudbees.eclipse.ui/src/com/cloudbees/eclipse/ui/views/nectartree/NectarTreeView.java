@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.ViewPart;
 
@@ -201,8 +202,7 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
 
     action4 = new Action() {
       public void run() {
-        viewer.getContentProvider().inputChanged(viewer, null, null); // make it refresh itself
-        viewer.refresh();
+        refreshTree();
       }
     };
     action4.setText("Reload Nectar instances...");
@@ -233,11 +233,37 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
           .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
       action4.setEnabled(jaasEnabled);
     }
+
+    if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())
+        || PreferenceConstants.P_NECTAR_INSTANCES.equals(event.getProperty())) {
+      refreshTree();
+    }
   }
 
   @Override
   public void dispose() {
     CloudBeesUIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
     super.dispose();
+  }
+
+  protected void refreshTree() {
+    //        try {
+    //          PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new IRunnableWithProgress() {
+    //          public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+    PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+      public void run() {
+          viewer.getContentProvider().inputChanged(viewer, null, null); // make it refresh itself
+          viewer.refresh();
+        }
+      });
+    //          }
+    //          });
+    //        } catch (InvocationTargetException e) {
+    //          // TODO Auto-generated catch block
+    //          e.printStackTrace();
+    //        } catch (InterruptedException e) {
+    //          // TODO Auto-generated catch block
+    //          e.printStackTrace();
+    //        }
   }
 }

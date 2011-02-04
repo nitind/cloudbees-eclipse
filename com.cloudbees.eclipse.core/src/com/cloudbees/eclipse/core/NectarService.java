@@ -49,9 +49,7 @@ public class NectarService {
    * @throws CloudBeesException
    */
   public NectarJobsResponse getJobs(String viewUrl, IProgressMonitor monitor) throws CloudBeesException {
-    if (monitor != null) {
-      monitor.setTaskName("Fetching Job list...");
-    }
+    monitor.setTaskName("Fetching Job list...");
 
     if (viewUrl != null && !viewUrl.startsWith(nectar.url)) {
       throw new CloudBeesException("Unexpected view url provided! Service url: " + nectar.url + "; view url: "
@@ -101,9 +99,7 @@ public class NectarService {
   }
 
   public NectarInstanceResponse getInstance(IProgressMonitor monitor) throws CloudBeesException {
-    if (monitor != null) {
-      monitor.setTaskName("Getting instance details from Nectar...");
-    }
+    monitor.setTaskName("Getting instance details from Nectar...");
 
     StringBuffer errMsg = new StringBuffer();
   
@@ -189,9 +185,7 @@ public class NectarService {
 
   private void login(DefaultHttpClient httpClient, final String referer, final String redirect,
       final IProgressMonitor monitor) throws Exception {
-    if (monitor != null) {
-      monitor.subTask("Logging in to Nectar...");
-    }
+    monitor.subTask("Logging in to Nectar...");
     //    httpClient.getCookieStore().clear();
     //    List<Cookie> oldCookies = new ArrayList<Cookie>(httpClient.getCookieStore().getCookies());
 
@@ -222,9 +216,7 @@ public class NectarService {
         break; // logged in ok
       }
 
-      if (monitor != null) {
-        monitor.worked(i + 1);
-      }
+      monitor.worked(i + 1);
     }
 
     for (Cookie cook : httpClient.getCookieStore().getCookies()) {
@@ -281,9 +273,7 @@ public class NectarService {
 
   public NectarBuildDetailsResponse getJobDetails(String jobUrl, final IProgressMonitor monitor)
       throws CloudBeesException {
-    if (monitor != null) {
-      monitor.setTaskName("Fetching Job details...");
-    }
+    monitor.setTaskName("Fetching Job details...");
 
     if (jobUrl != null && !jobUrl.startsWith(nectar.url)) {
       throw new CloudBeesException("Unexpected view url provided! Service url: " + nectar.url + "; job url: " + jobUrl);
