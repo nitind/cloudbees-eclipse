@@ -51,7 +51,7 @@
       </view>
       <view
             name="Build Jobs"
-            icon="icons/16x16/cb_plain.png"
+            icon="icons/jobs_view6.png"
             category="com.cloudbees.eclipse"
             class="com.cloudbees.eclipse.ui.views.jobs.JobsView"
             id="com.cloudbees.eclipse.ui.views.JobsView">
@@ -87,6 +87,7 @@
        <editor
              class="com.cloudbees.eclipse.ui.views.build.BuildPart"
              id="com.cloudbees.eclipse.ui.views.build.BuildPart"
+             icon="icons/epl/debugt_obj.png"
              name="Build details">
        </editor>
   </extension>

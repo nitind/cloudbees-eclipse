@@ -24,4 +24,8 @@ public class BuildEditorInput extends NullEditorInput {
     return job.lastBuild;
   }
 
+  public Job getJob() {
+    return job;
+  }
+
 }
