@@ -13,11 +13,11 @@ public class AuthNectarServiceTest {
   @Test
   public void testSSOAuth() throws CloudBeesException {
     NectarInstance ni = new NectarInstance("grandsomstate", "https://grandomstate.ci.cloudbees.com",
-        "ahti@codehoop.com", "13DoF02l", true);
+        "ahti@codehoop.com", "13DoF02l", true, true);
 
     NectarService s = new NectarService(ni);
 
-    NectarInstanceResponse vs = s.getInstance();
+    NectarInstanceResponse vs = s.getInstance(null);
 
     assertTrue(vs.views.length > 0);
 

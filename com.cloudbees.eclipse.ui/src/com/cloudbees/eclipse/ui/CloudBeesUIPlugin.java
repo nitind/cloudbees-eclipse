@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
@@ -88,11 +89,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
             e.printStackTrace();
           }
         }
-
       }
     };
     getPreferenceStore().addPropertyChangeListener(prefListener);
-
   }
 
   /*
@@ -170,6 +169,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     IPreferenceStore store = CloudBeesUIPlugin.getDefault().getPreferenceStore();
     String instances = store.getString(PreferenceConstants.P_NECTAR_INSTANCES);
     List<NectarInstance> list = NectarInstance.decode(instances);
+    System.out.println("Loaded: " + list);
 
     if (list != null) {
       for (NectarInstance inst : list) {
@@ -203,11 +203,16 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       throw new IllegalStateException("Unable to add new instance with an empty url or label!");
     }
     List<NectarInstance> list = loadManualNectarInstances();
+    System.out.println("save before: " + list);
     list.remove(ni); // when editing - id is the same, but props old, so lets kill old instance first
     list.add(ni);
+
+    nectarRegistry.remove(new NectarService(ni));
+
+    System.out.println("save after: " + list);
     Collections.sort(list);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
-        .putValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
+        .setValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
   }
 
   public void removeNectarInstance(NectarInstance ni) {
@@ -217,13 +222,13 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     List<NectarInstance> list = loadManualNectarInstances();
     list.remove(ni);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
-        .putValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
+        .setValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
   }
 
-  public List<NectarInstanceResponse> getManualNectarsInfo() throws CloudBeesException {
+  public List<NectarInstanceResponse> getManualNectarsInfo(IProgressMonitor monitor) throws CloudBeesException {
     List<NectarInstance> instances = new ArrayList<NectarInstance>(loadManualNectarInstances());
 
-    List<NectarInstanceResponse> resp = pollInstances(instances);
+    List<NectarInstanceResponse> resp = pollInstances(instances, monitor);
 
     return resp;
   }
@@ -231,17 +236,17 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   public List<NectarInstanceResponse> getDevAtCloudNectarsInfo(IProgressMonitor monitor) throws CloudBeesException {
     List<NectarInstance> instances = new ArrayList<NectarInstance>(loadDevAtCloudInstances(monitor));
 
-    List<NectarInstanceResponse> resp = pollInstances(instances);
+    List<NectarInstanceResponse> resp = pollInstances(instances, monitor);
 
     return resp;
   }
 
-  private List<NectarInstanceResponse> pollInstances(List<NectarInstance> instances) {
+  private List<NectarInstanceResponse> pollInstances(List<NectarInstance> instances, IProgressMonitor monitor) {
     List<NectarInstanceResponse> resp = new ArrayList<NectarInstanceResponse>();
     for (NectarInstance inst : instances) {
       NectarService service = lookupNectarService(inst);
       try {
-        resp.add(service.getInstance());
+        resp.add(service.getInstance(monitor));
       } catch (CloudBeesException e) {
         System.out.println("Failed to contact " + service + ". Not adding to the list for now.");//TODO log
 
@@ -277,7 +282,14 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
    * @throws CloudBeesException
    */
   public void showJobs(String serviceUrl, String viewUrl) throws CloudBeesException {
+    System.out.println("Show jobs: " + serviceUrl + " - " + viewUrl);
+
+    if (serviceUrl == null && viewUrl == null) {
+      return; // no info
+    }
+
     try {
+      IProgressMonitor monitor = new NullProgressMonitor(); // TODO add progress monitor instance from somewhere
 
       PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(JobsView.ID);
 
@@ -287,7 +299,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         serviceUrl = getNectarServiceForUrl(viewUrl).getUrl();
       }
 
-      NectarJobsResponse jobs = getNectarServiceForUrl(serviceUrl).getJobs(viewUrl);
+      NectarJobsResponse jobs = getNectarServiceForUrl(serviceUrl).getJobs(viewUrl, monitor);
 
       Iterator<NectarChangeListener> iterator = nectarChangeListeners.iterator();
       while (iterator.hasNext()) {

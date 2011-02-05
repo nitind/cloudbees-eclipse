@@ -67,24 +67,39 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
   private JobsContentProvider contentProvider;
 
+  private String serviceUrl;
+  private String viewUrl;
+
   public JobsView() {
     super();
   }
 
   protected void setInput(NectarJobsResponse newView) {
-    if (newView.jobs == null) {
-      contentProvider.setJobs(new ArrayList<NectarJobsResponse.Job>());
+    System.out.println("New Jobs view: " + newView);
+
+    if (newView == null || newView.jobs == null) {
       setContentDescription("No jobs available.");
+      contentProvider.setJobs(new ArrayList<NectarJobsResponse.Job>());
     } else {
       String label = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(newView.serviceUrl).getLabel();
 
-      String viewInfo="";
-        if (newView.name!=null && newView.name.length()>0) {
+      String viewInfo = "";
+      if (newView.name != null && newView.name.length() > 0) {
         viewInfo = newView.name + " [";
       }
       setContentDescription(viewInfo + label + (viewInfo.length() > 0 ? "]" : "") + " (" + new Date() + ")");
+      contentProvider.setJobs(Arrays.asList(newView.jobs));
     }
-    contentProvider.setJobs(Arrays.asList(newView.jobs));
+
+    if (newView != null) {
+      serviceUrl = newView.serviceUrl;
+      viewUrl = newView.viewUrl;
+    } else {
+      serviceUrl = null;
+      viewUrl = null;
+    }
+
+    enableJaasButton();
 
     table.refresh();
   }
@@ -430,24 +445,32 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     action4 = new Action() {
       public void run() {
-        //        try {
-        //          //CloudBeesUIPlugin.getDefault().reloadJaasInstances();
-        //        } catch (CloudBeesException e) {
-        //          //TODO I18n!
-        //          CloudBeesUIPlugin.showError("Failed to reload JaaS repositories!", e);
-        //        }
+        try {
+          CloudBeesUIPlugin.getDefault().showJobs(serviceUrl, viewUrl);
+        } catch (CloudBeesException e) {
+          //TODO I18n!
+          CloudBeesUIPlugin.showError("Failed to reload Nectar jobs!", e);
+        }
       }
     };
-    action4.setText("Reload Nectar instances...");
-    action4.setToolTipText("Reload Nectar instances");
+    action4.setText("Reload Nectar jobs...");
+    action4.setToolTipText("Reload Nectar jobs");
     /*    action4.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
             .getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
     */
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 
+    enableJaasButton();
+  }
+
+  protected void enableJaasButton() {
+    if (action4 == null) {
+      return;
+    }
+
     boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
         .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
-    action4.setEnabled(jaasEnabled);
+    action4.setEnabled(jaasEnabled && (serviceUrl != null || viewUrl != null));
   }
 
   public void setFocus() {
@@ -464,7 +487,20 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())) {
       boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
           .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
-      action4.setEnabled(jaasEnabled);
+      if (!jaasEnabled) {
+        setInput(null); // all gone
+      }
+
+      enableJaasButton();
+    }
+    
+    if (PreferenceConstants.P_NECTAR_INSTANCES.equals(event.getProperty())) {
+      try {
+        CloudBeesUIPlugin.getDefault().showJobs(serviceUrl, viewUrl);
+      } catch (CloudBeesException e) {
+        //TODO I18n!
+        CloudBeesUIPlugin.showError("Failed to reload Nectar jobs!", e);
+      }
     }
   }
 

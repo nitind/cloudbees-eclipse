@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -33,7 +34,7 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
     if (parent.equals(site)) {
       if (root == null) {
         try {
-          initialize(null);
+          initialize(new NullProgressMonitor());
         } catch (Exception e) {
           e.printStackTrace();
           return new InstanceGroup[0];//service not available
@@ -77,7 +78,7 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
     //TreeObject to1 = new TreeObject("job 1");
     InstanceGroup p1 = new InstanceGroup("Nectar", false);
 
-    List<NectarInstanceResponse> services = CloudBeesUIPlugin.getDefault().getManualNectarsInfo();
+    List<NectarInstanceResponse> services = CloudBeesUIPlugin.getDefault().getManualNectarsInfo(monitor);
     Iterator<NectarInstanceResponse> it = services.iterator();
     while (it.hasNext()) {
       NectarInstanceResponse resp = (NectarInstanceResponse) it.next();
