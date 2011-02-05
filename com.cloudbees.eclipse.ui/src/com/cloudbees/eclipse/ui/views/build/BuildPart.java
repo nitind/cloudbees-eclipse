@@ -145,7 +145,8 @@ public class BuildPart extends EditorPart {
       NectarService service = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(details.getLastBuild().url);
 
       try {
-        detail = service.getJobDetails(details.getLastBuild().url);
+        //TODO Add progress monitoring
+        detail = service.getJobDetails(details.getLastBuild().url, null);
         this.lastBuildAvailable = true;
       } catch (CloudBeesException e) {
         //throw new PartInitException("Failed to load build information from the remote host!", e);
