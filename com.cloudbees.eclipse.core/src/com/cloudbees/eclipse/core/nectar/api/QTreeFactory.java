@@ -13,21 +13,8 @@ public class QTreeFactory {
 
   private final static StringBuffer buildTreeQuery(final String pkg, final Class<?> baseClass, final StringBuffer sb) {
 
-    int excluded = 0;
 
     Field[] fields = baseClass.getFields();
-
-    for (int i = 0; i < fields.length; i++) {
-      Field field = fields[i];
-
-      Expose exposed = field.getAnnotation(Expose.class);
-      if (exposed != null) {
-        if (!(exposed.deserialize() && exposed.serialize())) {
-          excluded++;
-          continue;
-        }
-      }
-    }
 
     for (int i = 0; i < fields.length; i++) {
       Field field = fields[i];
@@ -53,10 +40,14 @@ public class QTreeFactory {
         sb.append("]");
       }
 
-      if (i < fields.length - 1 - excluded) {
+      if (i < fields.length) {
         sb.append(",");
       }
 
+    }
+    if (sb.charAt(sb.length() - 1) == ',') {
+      // trailing comma, remove. due to not-serialized fields it's not too trivial to detect the condition beforehand. so let's just remove it here.
+      sb.replace(sb.length() - 1, sb.length(), "");
     }
 
     return sb;

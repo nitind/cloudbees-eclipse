@@ -1,11 +1,13 @@
 package com.cloudbees.eclipse.core;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import com.cloudbees.eclipse.core.domain.NectarInstance;
 import com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse;
+import com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse.ChangeSet;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
 
@@ -49,9 +51,16 @@ public class NectarServiceTest {
     NectarBuildDetailsResponse details = s
         .getJobDetails("http://deadlock.netbeans.org/hudson/job/jackpot30/301/", null);
 
+    System.out.println("QTree: http://deadlock.netbeans.org/hudson/job/jackpot30/301/api/json/?tree="
+        + NectarBuildDetailsResponse.QTREE);
+
     System.out.println("Received details:");
 
-    for (NectarBuildDetailsResponse.ChangeSet.ChangeSetItem set : details.changeSet.items) {
+    ChangeSet changeset = details.changeSet;
+
+    assertNotNull(changeset);
+
+    for (NectarBuildDetailsResponse.ChangeSet.ChangeSetItem set : changeset.items) {
       System.out.println("item: " + set.msg);
     }
 
@@ -59,7 +68,7 @@ public class NectarServiceTest {
 
     assertTrue(details.fullDisplayName.length() > 0);
 
-    assertTrue(details.changeSet.items.length > 0);
+    assertTrue(changeset.items.length > 0);
 
   }
 

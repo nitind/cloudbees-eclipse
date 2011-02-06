@@ -56,6 +56,11 @@
             class="com.cloudbees.eclipse.ui.views.jobs.JobsView"
             id="com.cloudbees.eclipse.ui.views.JobsView">
       </view>
+      <view
+            class="com.cloudbees.eclipse.ui.views.build.Tee"
+            id="com.cloudbees.eclipse.ui.views.build.Tee"
+            name="New ViewPart">
+      </view>
 
    </extension>
    

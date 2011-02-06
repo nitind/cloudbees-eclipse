@@ -16,3 +16,4 @@ Require-Bundle: com.cloudbees.eclipse.core;bundle-version="1.0.0",
  org.eclipse.equinox.security,
  org.eclipse.core.net,
  org.eclipse.ui.forms
+
