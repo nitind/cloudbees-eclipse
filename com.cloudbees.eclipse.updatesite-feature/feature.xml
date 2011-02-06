@@ -2,7 +2,7 @@
 <feature
       id="com.cloudbees.eclipse.updatesite"
       label="CloudBees Eclipse Toolkit Update Site"
-      version="1.0.0.qualifier"
+      version="1.0.1.qualifier"
       provider-name="Cloud Bees, Inc">
 
    <description url="http://www.example.com/description">
