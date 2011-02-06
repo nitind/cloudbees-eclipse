@@ -9,14 +9,11 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.ColumnLayout;
-import org.eclipse.ui.forms.widgets.ColumnLayoutData;
-import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
@@ -39,7 +36,10 @@ public class BuildPart extends EditorPart {
   private ScrolledForm form;
   private Label textTopSummary;
   private Composite composite_1;
-  private Text txtSeeOnIkka;
+  private Label contentBuildSummary;
+  private Label contentBuildHistory;
+  private Label contentJUnitTests;
+  private Label contentRecentChanges;
 
   public BuildPart() {
     super();
@@ -90,9 +90,7 @@ public class BuildPart extends EditorPart {
     cl_composite_1.maxNumColumns = 1;
     composite_1.setLayout(cl_composite_1);
 
-    FormText formText = formToolkit.createFormText(composite_1, false);
-    formToolkit.paintBordersFor(formText);
-    formText.setText("AAAAAA\nAAAAA", false, false);
+    contentBuildSummary = formToolkit.createLabel(composite_1, "n/a", SWT.NONE);
 
     Section sectBuildHistory = formToolkit.createSection(composite, Section.TITLE_BAR);
     formToolkit.paintBordersFor(sectBuildHistory);
@@ -106,26 +104,7 @@ public class BuildPart extends EditorPart {
     cl_composite_2.maxNumColumns = 1;
     composite_2.setLayout(cl_composite_2);
 
-    FormText formText_2 = formToolkit.createFormText(composite_2, false);
-    formText_2.setLayoutData(new ColumnLayoutData());
-    formToolkit.paintBordersFor(formText_2);
-    formText_2.setText("BBBBBBBBBBBB", false, false);
-
-    Section sectRecentChanges = formToolkit.createSection(composite, Section.DESCRIPTION | Section.TITLE_BAR);
-    formToolkit.paintBordersFor(sectRecentChanges);
-    sectRecentChanges.setText("Recent Changes");
-
-    Composite composite_3 = new Composite(sectRecentChanges, SWT.NONE);
-    formToolkit.adapt(composite_3);
-    formToolkit.paintBordersFor(composite_3);
-    sectRecentChanges.setClient(composite_3);
-    ColumnLayout cl_composite_3 = new ColumnLayout();
-    cl_composite_3.maxNumColumns = 1;
-    composite_3.setLayout(cl_composite_3);
-
-    FormText formText_1 = formToolkit.createFormText(composite_3, false);
-    formToolkit.paintBordersFor(formText_1);
-    formText_1.setText("CCCCCCCCCCCCCCC", false, false);
+    contentBuildHistory = formToolkit.createLabel(composite_2, "n/a", SWT.NONE);
 
     Section sectTests = formToolkit.createSection(composite, Section.TITLE_BAR);
     formToolkit.paintBordersFor(sectTests);
@@ -139,8 +118,21 @@ public class BuildPart extends EditorPart {
     cl_composite_4.maxNumColumns = 1;
     composite_4.setLayout(cl_composite_4);
 
-    txtSeeOnIkka = formToolkit.createText(composite_4, "New Text", SWT.NONE);
-    txtSeeOnIkka.setText("SEE on ikka päris tekst!\\nKahel real");
+    contentJUnitTests = formToolkit.createLabel(composite_4, "n/a", SWT.NONE);
+
+    Section sectRecentChanges = formToolkit.createSection(composite, Section.TITLE_BAR);
+    formToolkit.paintBordersFor(sectRecentChanges);
+    sectRecentChanges.setText("Changes");
+
+    Composite composite_3 = new Composite(sectRecentChanges, SWT.NONE);
+    formToolkit.adapt(composite_3);
+    formToolkit.paintBordersFor(composite_3);
+    sectRecentChanges.setClient(composite_3);
+    ColumnLayout cl_composite_3 = new ColumnLayout();
+    cl_composite_3.maxNumColumns = 1;
+    composite_3.setLayout(cl_composite_3);
+
+    contentRecentChanges = formToolkit.createLabel(composite_3, "n/a", SWT.NONE);
 
     Action haction = new Action("hor", Action.AS_PUSH_BUTTON) { //$NON-NLS-1$
       public void run() {
@@ -200,7 +192,7 @@ public class BuildPart extends EditorPart {
       System.out.println("Loaded " + detail);
 
       //setPartName();
-      setPartName(details.getJob().displayName);
+      setPartName(details.getJob().displayName + " #" + detail.number);
 
       //setContentDescription(detail.fullDisplayName);
 
@@ -213,20 +205,48 @@ public class BuildPart extends EditorPart {
         //TODO Add image for build status! form.setImage(image);
       }
 
-      // Recent Changes
-      StringBuffer changes = new StringBuffer();
-      changes.append("HEI");
-      if (detail.changeSet != null && detail.changeSet.items != null) {
-        for (ChangeSetItem item : detail.changeSet.items) {
-          String line = "#" + item.rev + " " + item.msg + "<br/>";
-          changes.append(line);
-        }
-      }
-      //textChanges.setText(changes.toString(), false, false);
+      // Recent Changes      
+      loadRecentChanges();
 
-      System.out.println("CHANGED:" + changes.toString());
+      // Load JUnit Tests
+      loadUnitTests();
 
+      System.out.println("here");
     }
+  }
+
+  private void loadUnitTests() {
+    
+    if (detail.actions==null) {
+      contentJUnitTests.setText("No Tests");
+      return;
+    }
+    
+    for (com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse.Action action: detail.actions) {
+      if ("testReport".equalsIgnoreCase(action.urlName)) {
+        String val = "Total: " + action.totalCount + " Failed: " + action.failCount + " Skipped: " + action.skipCount;
+        contentJUnitTests.setText(val);
+        return;
+       }
+    }
+
+    contentJUnitTests.setText("No Tests");
+
+  }
+
+  private void loadRecentChanges() {
+    StringBuffer changes = new StringBuffer();
+    if (detail.changeSet != null && detail.changeSet.items != null) {
+      for (ChangeSetItem item : detail.changeSet.items) {
+        String authinfo = item.author != null && item.author.fullName != null ? " by " + item.author.fullName : "";
+        String line = "rev" + item.rev + ": '" + item.msg + "' " + authinfo + "\n";
+        changes.append(line);
+      }
+    }
+    if (changes.length() == 0) {
+      changes.append("none");
+    }
+    contentRecentChanges.setText(changes.toString());
   }
 
   @Override

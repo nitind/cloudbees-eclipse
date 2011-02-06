@@ -171,7 +171,14 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     TableViewerColumn namecol = createColumn("Job", 250, JobSorter.JOB, new CellLabelProvider() {
       public void update(ViewerCell cell) {
         NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
-        cell.setText(job.displayName);
+        String val = job.displayName;
+        if (job.inQueue) {
+          val = val + " (in queue)";
+        } else if (job.color != null && job.color.indexOf('_') > 0) {
+          val = val + " (running)";
+        }
+        cell.setText(val);
+
       }
     });
 

@@ -3,7 +3,9 @@ package com.cloudbees.eclipse.core.nectar.api;
 import com.google.gson.annotations.Expose;
 
 /**
- * Main response object for the job view
+ * Main response object for the job view For more detailed test buld a new class for
+ * /.../job/.../391/testReport/api/json
+ * ?tree=duration,failCount,passCount,skipCount,suites[cases[className,duration,name,status]]
  * 
  * @author ahti
  */
