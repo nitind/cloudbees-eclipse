@@ -15,6 +15,7 @@ public class NectarJobBuildsResponse extends BaseNectarResponse {
     public long number;
     public String url;
     public long timestamp;
+    public String result;
   }
 
 }

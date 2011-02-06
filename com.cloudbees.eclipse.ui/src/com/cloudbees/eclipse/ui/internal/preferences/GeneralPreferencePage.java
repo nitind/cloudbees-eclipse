@@ -1,8 +1,6 @@
 package com.cloudbees.eclipse.ui.internal.preferences;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
@@ -25,10 +23,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.browser.IWebBrowser;
-import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
@@ -249,18 +244,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
   }
 
   private void openSignupPage() {
-    IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
-    try {
-      IWebBrowser browser = browserSupport.createBrowser(IWorkbenchBrowserSupport.LOCATION_BAR
-          | IWorkbenchBrowserSupport.NAVIGATION_BAR, null, null, null);
-      browser.openURL(new URL("https://grandcentral.cloudbees.com/account/signup"));
-    } catch (PartInitException e) {
-      // TODO Log!
-      e.printStackTrace();
-    } catch (MalformedURLException e) {
-      // TODO Log!
-      e.printStackTrace();
-    }
+    CloudBeesUIPlugin.getDefault().openWithBrowser("https://grandcentral.cloudbees.com/account/signup");
   }
 
   /*

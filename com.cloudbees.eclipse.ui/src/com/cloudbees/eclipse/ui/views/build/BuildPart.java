@@ -28,6 +28,7 @@ import com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse.ChangeSet.ChangeSetItem;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobBuildsResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job.HealthReport;
+import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class BuildPart extends EditorPart {
@@ -71,7 +72,7 @@ public class BuildPart extends EditorPart {
     form.getBody().setLayout(columnLayout);
 
     textTopSummary = formToolkit.createLabel(form.getBody(), "n/a", SWT.BOLD);
-    
+
     Composite composite = formToolkit.createComposite(form.getBody(), SWT.NONE);
     formToolkit.paintBordersFor(composite);
     ColumnLayout cl_composite = new ColumnLayout();
@@ -157,29 +158,50 @@ public class BuildPart extends EditorPart {
 
     contentRecentChanges = formToolkit.createLabel(composite_3, "n/a", SWT.NONE);
 
-    Action haction = new Action("hor", Action.AS_PUSH_BUTTON) { //$NON-NLS-1$
-      public void run() {
-        //form.reflow(true);
-      }
-    };
-    //haction.setChecked(true);
-    haction.setText("HEI");
-    haction.setToolTipText("TOOLTIP"); //$NON-NLS-1$
-    haction.setImageDescriptor(CloudBeesUIPlugin.getDefault().getImageRegistry()
-        .getDescriptor(ISharedImages.IMG_OBJ_ELEMENT));
-
-
-    //IToolBarManager tbm = getEditorSite().getPage()
-
-    //tbm.add(haction);
-    form.getToolBarManager().add(haction);
-    form.getToolBarManager().add(new Separator());
-    form.getToolBarManager().update(false);
-
-
+    createActions();
 
     loadData(null);//TODO Add monitor
 
+  }
+
+  private void createActions() {
+    Action openInWeb = new Action("", Action.AS_PUSH_BUTTON) { //$NON-NLS-1$
+      public void run() {
+        BuildPart.this.openBuildWithBrowser();
+      }
+    };
+    //haction.setChecked(true);
+    //haction.setText("HEI");
+    openInWeb.setToolTipText("Open with Browser"); //TODO i18n
+    openInWeb.setImageDescriptor(CloudBeesUIPlugin.getDefault().getImageRegistry()
+        .getDescriptor(ISharedImages.IMG_OBJ_ELEMENT));
+
+    Action openLogs = new Action("", Action.AS_PUSH_BUTTON) { //$NON-NLS-1$
+      public void run() {
+        BuildPart.this.openBuildWithBrowser();
+      }
+    };
+    //haction.setChecked(true);
+    //haction.setText("HEI");
+    openLogs.setToolTipText("Open build log"); //TODO i18n
+    openLogs.setImageDescriptor(CloudBeesUIPlugin.getDefault().getImageRegistry()
+        .getDescriptor(ISharedImages.IMG_OBJ_ELEMENT));
+
+    form.getToolBarManager().add(openInWeb);
+    form.getToolBarManager().add(new Separator());
+    form.getToolBarManager().add(openInWeb);
+    form.getToolBarManager().update(false);
+  }
+
+  protected void openBuildWithBrowser() {
+    if (dataBuildDetail != null && dataBuildDetail.url != null) {
+      CloudBeesUIPlugin.getDefault().openWithBrowser(dataBuildDetail.url);
+      return;
+    }
+
+    // for some reason build details not available (for example, no build was available). fall back to job url
+    BuildEditorInput details = (BuildEditorInput) getEditorInput();
+    CloudBeesUIPlugin.getDefault().openWithBrowser(details.getJob().url);
   }
 
   protected void switchToBuild(long buildNo) {
@@ -235,7 +257,7 @@ public class BuildPart extends EditorPart {
       }
 
       reloadUI();
-      
+
     }
   }
 
@@ -248,7 +270,8 @@ public class BuildPart extends EditorPart {
 
     //setContentDescription(detail.fullDisplayName);
 
-    String topStr = dataBuildDetail.result != null ? dataBuildDetail.result + " (" + (new Date(dataBuildDetail.timestamp)) + ")" : "";
+    String topStr = dataBuildDetail.result != null ? dataBuildDetail.result + " ("
+        + new Date(dataBuildDetail.timestamp) + ")" : "";
 
     textTopSummary.setText(topStr);
 
@@ -277,13 +300,18 @@ public class BuildPart extends EditorPart {
 
     StringBuffer val = new StringBuffer();
     for (NectarJobBuildsResponse.Build b : dataJobBuilds.builds) {
+
+      String result = b.result != null && b.result.length() > 0 ? " - " + b.result : "";
+
+      String timeComp = (Utils.humanReadableTime((System.currentTimeMillis() - b.timestamp))) + " ago";
+
       if (b.number != dataBuildDetail.number) {
-        val.append("<a>#" + b.number + "</a>    " + new Date(b.timestamp) + "\n");
+        val.append("<a>#" + b.number + "</a>    " + timeComp + result.toLowerCase() + "\n");
       } else {
-        val.append("#" + b.number + "    " + new Date(b.timestamp) + " \n");
+        val.append("#" + b.number + "    " + timeComp + result.toLowerCase() + " \n");
       }
     }
-    
+
     contentBuildHistory.setText(val.toString());
 
   }
@@ -299,7 +327,7 @@ public class BuildPart extends EditorPart {
     if (dataBuildDetail.description != null) {
       summary.append(dataBuildDetail.description + "\n");
     }
-    
+
     if (dataBuildDetail.builtOn != null && dataBuildDetail.timestamp != null) {
       if (dataBuildDetail.builtOn != null && dataBuildDetail.builtOn.length() > 0) {
         summary.append("Built on: " + dataBuildDetail.builtOn + " at " + (new Date(dataBuildDetail.timestamp)) + "\n");
@@ -307,7 +335,7 @@ public class BuildPart extends EditorPart {
         summary.append("Built at " + (new Date(dataBuildDetail.timestamp)) + "\n");
       }
     }
-    
+
     summary.append("\n");
 
     summary.append("Building: " + dataBuildDetail.building + "\n");
@@ -323,23 +351,22 @@ public class BuildPart extends EditorPart {
 
     }
 
-
     contentBuildSummary.setText(summary.toString());
   }
 
   private void loadUnitTests() {
-    
-    if (dataBuildDetail.actions==null) {
+
+    if (dataBuildDetail.actions == null) {
       contentJUnitTests.setText("No Tests");
       return;
     }
-    
-    for (com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse.Action action: dataBuildDetail.actions) {
+
+    for (com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse.Action action : dataBuildDetail.actions) {
       if ("testReport".equalsIgnoreCase(action.urlName)) {
         String val = "Total: " + action.totalCount + " Failed: " + action.failCount + " Skipped: " + action.skipCount;
         contentJUnitTests.setText(val);
         return;
-       }
+      }
     }
 
     contentJUnitTests.setText("No Tests");

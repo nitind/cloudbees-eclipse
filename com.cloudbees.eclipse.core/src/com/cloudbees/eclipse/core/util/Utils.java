@@ -162,4 +162,28 @@ public class Utils {
     }
   }
 
+  public static String humanReadableTime(long duration) {
+    String unit = "";
+    long mins = duration / (60L * 1000);
+    long hr = mins / 60;
+    long yrs = hr / 24 / 365;
+
+    if (mins < 60) {
+      unit = mins + " min";
+      if (mins > 1) {
+        unit = unit + "s";
+      }
+    } else if (mins < 60 * 24) {
+      //long newmins = mins - (hr * 60);
+      unit = hr + " hr" + (hr > 1 ? "s" : "");/* + " " + newmins + " min" + (newmins > 1 ? "s" : "");*/
+    } else if (yrs < 1) {
+      long days = hr / 24L;
+      unit = days + " day" + (days > 1 ? "s" : "")/* + ", " + hr + " hr" + (hr > 1 ? "s" : "")*/;
+    } else {
+      unit = yrs + " year" + (yrs > 1 ? "s" : "");
+    }
+
+    return unit;
+  }
+
 }

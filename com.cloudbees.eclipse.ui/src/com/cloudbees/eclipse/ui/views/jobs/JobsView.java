@@ -40,6 +40,7 @@ import com.cloudbees.eclipse.core.NectarChangeListener;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job.Build;
+import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 
@@ -295,22 +296,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     String unit = "";
     if (build.duration != null) {
       //TODO Implement proper human-readable duration conversion, consider using the same conversion rules that Jenkins uses
-      //System.out.println("DURATION: " + build.timestamp);
-      long mins = (System.currentTimeMillis() - build.timestamp.longValue()) / (60L * 1000);
-      long hr = mins / 60;
-      if (mins < 60) {
-        unit = mins + " min";
-        if (mins > 1) {
-          unit = unit + "s";
-        }
-      } else if (mins < 60 * 60 * 24) {
-        //long newmins = mins - (hr * 60);
-        unit = hr + " hr" + (hr > 1 ? "s" : "");/* + " " + newmins + " min" + (newmins > 1 ? "s" : "");*/
-      } else {
-        long days = hr / 24L;
-        unit = days + " day" + (days > 1 ? "s" : "")/* + ", " + hr + " hr" + (hr > 1 ? "s" : "")*/;
-      }
-
+      //System.out.println("DURATION: " + build.timestamp);      
+      unit = Utils.humanReadableTime((System.currentTimeMillis() - build.timestamp.longValue()));
     }
     String timeComp = build.duration != null ? ", " + unit + " ago" : "";
     String buildComp = build.number != null ? "#" + build.number : "n/a";

@@ -1,6 +1,8 @@
 package com.cloudbees.eclipse.ui;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -15,10 +17,15 @@ import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -73,6 +80,23 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     logger = new Logger(getLog());
     loadAccountCredentials();
     hookPrefChangeListener();
+  }
+
+  @Override
+  protected void initializeImageRegistry(ImageRegistry reg) {
+    super.initializeImageRegistry(reg);
+    
+    reg.put(CBImages.IMG_CONSOLE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/monitor_obj.png")));
+    reg.put(CBImages.IMG_REFRESH, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/refresh.png")));
+    
+    reg.put(CBImages.IMG_FOLDER_HOSTED,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_run.png")));
+    reg.put(CBImages.IMG_FOLDER_LOCAL,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_run.png")));
+    reg.put(CBImages.IMG_INSTANCE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/jenkins.png")));
+    reg.put(CBImages.IMG_VIEW,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_big.png")));
+
   }
 
   private void hookPrefChangeListener() {
@@ -383,6 +407,25 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
    */
   public void fireSecureStorageChanged() throws CloudBeesException {
     loadAccountCredentials();
+  }
+
+  public void openWithBrowser(String url) {
+    IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
+    try {
+      IWebBrowser browser = browserSupport.createBrowser(IWorkbenchBrowserSupport.LOCATION_BAR
+          | IWorkbenchBrowserSupport.NAVIGATION_BAR, null, null, null);
+      browser.openURL(new URL(url));
+    } catch (PartInitException e) {
+      // TODO Log!
+      e.printStackTrace();
+    } catch (MalformedURLException e) {
+      // TODO Log!
+      e.printStackTrace();
+    }
+  }
+
+  public static Image getImage(String imgKey) {
+    return CloudBeesUIPlugin.getDefault().getImageRegistry().get(imgKey);
   }
 
 }
