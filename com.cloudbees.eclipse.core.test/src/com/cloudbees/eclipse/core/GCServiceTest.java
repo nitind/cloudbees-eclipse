@@ -17,7 +17,7 @@ public class GCServiceTest {
 
   @Test
   public void testAccountNamesRetrieval() throws CloudBeesException {
-    GrandCentralService gcs = new GrandCentralService("ahti@codehoop.com", "13DoF02l");
+    GrandCentralService gcs = new GrandCentralService("ahti@codehoop.com", "xxx");
 
     assertTrue(gcs.validateUser(null));
 
