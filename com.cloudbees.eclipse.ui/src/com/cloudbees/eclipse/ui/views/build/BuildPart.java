@@ -41,7 +41,7 @@ public class BuildPart extends EditorPart {
   private boolean lastBuildAvailable = false;
   private ScrolledForm form;
   private Label textTopSummary;
-  private Composite composite_1;
+  private Composite compBuildSummary;
   private Label contentBuildSummary;
   private Link contentBuildHistory;
   private Label contentJUnitTests;
@@ -87,38 +87,38 @@ public class BuildPart extends EditorPart {
     formToolkit.paintBordersFor(sectSummary);
     sectSummary.setText("Build Summary");
 
-    composite_1 = new Composite(sectSummary, SWT.NONE);
-    formToolkit.adapt(composite_1);
-    formToolkit.paintBordersFor(composite_1);
-    sectSummary.setClient(composite_1);
+    compBuildSummary = new Composite(sectSummary, SWT.NONE);
+    formToolkit.adapt(compBuildSummary);
+    formToolkit.paintBordersFor(compBuildSummary);
+    sectSummary.setClient(compBuildSummary);
     ColumnLayout cl_composite_1 = new ColumnLayout();
     cl_composite_1.maxNumColumns = 1;
-    composite_1.setLayout(cl_composite_1);
+    compBuildSummary.setLayout(cl_composite_1);
 
-    contentBuildSummary = formToolkit.createLabel(composite_1, "n/a", SWT.NONE);
+    contentBuildSummary = formToolkit.createLabel(compBuildSummary, "n/a", SWT.NONE);
 
     Section sectTests = formToolkit.createSection(composite, Section.TITLE_BAR);
     formToolkit.paintBordersFor(sectTests);
     sectTests.setText("JUnit Tests");
 
-    Composite composite_4 = new Composite(sectTests, SWT.NONE);
-    formToolkit.adapt(composite_4);
-    formToolkit.paintBordersFor(composite_4);
-    sectTests.setClient(composite_4);
+    Composite compTests = new Composite(sectTests, SWT.NONE);
+    formToolkit.adapt(compTests);
+    formToolkit.paintBordersFor(compTests);
+    sectTests.setClient(compTests);
     ColumnLayout cl_composite_4 = new ColumnLayout();
     cl_composite_4.maxNumColumns = 1;
-    composite_4.setLayout(cl_composite_4);
+    compTests.setLayout(cl_composite_4);
 
-    contentJUnitTests = formToolkit.createLabel(composite_4, "n/a", SWT.NONE);
+    contentJUnitTests = formToolkit.createLabel(compTests, "n/a", SWT.NONE);
 
-    Composite composite_5 = formToolkit.createComposite(form.getBody(), SWT.NONE);
-    formToolkit.paintBordersFor(composite_5);
+    Composite compBuildHistory = formToolkit.createComposite(form.getBody(), SWT.NONE);
+    formToolkit.paintBordersFor(compBuildHistory);
     ColumnLayout cl_composite_5 = new ColumnLayout();
     cl_composite_5.minNumColumns = 2;
     cl_composite_5.maxNumColumns = 2;
-    composite_5.setLayout(cl_composite_5);
+    compBuildHistory.setLayout(cl_composite_5);
 
-    Section sectBuildHistory = formToolkit.createSection(composite_5, Section.TITLE_BAR);
+    Section sectBuildHistory = formToolkit.createSection(compBuildHistory, Section.TITLE_BAR);
     formToolkit.paintBordersFor(sectBuildHistory);
     sectBuildHistory.setText("Build History");
 
@@ -142,7 +142,7 @@ public class BuildPart extends EditorPart {
       }
     });
 
-    Section sectRecentChanges = formToolkit.createSection(composite_5, Section.TITLE_BAR);
+    Section sectRecentChanges = formToolkit.createSection(compBuildHistory, Section.TITLE_BAR);
     formToolkit.paintBordersFor(sectRecentChanges);
     sectRecentChanges.setText("Changes");
 
