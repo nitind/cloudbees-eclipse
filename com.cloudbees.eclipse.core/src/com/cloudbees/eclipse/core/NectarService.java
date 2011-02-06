@@ -37,10 +37,13 @@ public class NectarService {
   private String label;*/
   private NectarInstance nectar;
 
+  private boolean devAtCloud = false;
+
   private static String lastJossoSessionId = null;
 
   public NectarService(NectarInstance nectar) {
     this.nectar = nectar;
+    devAtCloud = nectar.atCloud;
   }
 
   /**
@@ -85,7 +88,7 @@ public class NectarService {
         views = g.fromJson(bodyResponse, NectarJobsResponse.class);
       } catch (Exception e) {
         //FIXME log properly
-        System.out.println("Illegal JSON response from the server for the request:\n" + uri + ":\n" + bodyResponse);
+        //System.out.println("Illegal JSON response from the server for the request:\n" + uri + ":\n" + bodyResponse);
         throw e;
       }
 
@@ -110,7 +113,6 @@ public class NectarService {
 
     StringBuffer errMsg = new StringBuffer();
   
-    System.out.println("Nectar: " + nectar);
     String reqUrl = nectar.url;
     if (!reqUrl.endsWith("/")) {
       reqUrl += "/";
@@ -153,6 +155,12 @@ public class NectarService {
   }
 
   private String retrieveWithLogin(DefaultHttpClient httpclient, HttpPost post, IProgressMonitor monitor)
+      throws UnsupportedEncodingException, IOException, ClientProtocolException, CloudBeesException, Exception {
+    return retrieveWithLogin(httpclient, post, monitor, false);
+  }
+
+  private String retrieveWithLogin(DefaultHttpClient httpclient, HttpPost post, IProgressMonitor monitor,
+      boolean allowCIRedirect)
       throws UnsupportedEncodingException,
       IOException, ClientProtocolException, CloudBeesException, Exception {
     String bodyResponse = null;
@@ -163,7 +171,8 @@ public class NectarService {
 
     boolean tryToLogin = true;
     do {
-      if (lastJossoSessionId != null) {
+
+      if (devAtCloud && lastJossoSessionId != null) {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
         nvps.add(new BasicNameValuePair("JOSSO_SESSIONID", lastJossoSessionId));
         post.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8)); // 1
@@ -181,7 +190,7 @@ public class NectarService {
         //httpclient.getCookieStore().clear();
         tryToLogin = false;
       } else {
-        Utils.checkResponseCode(resp);
+        Utils.checkResponseCode(resp, allowCIRedirect);
         break;
       }
 
@@ -192,6 +201,10 @@ public class NectarService {
 
   private void login(DefaultHttpClient httpClient, final String referer, final String redirect,
       final IProgressMonitor monitor) throws Exception {
+
+    if (!devAtCloud) {
+      return;
+    }
 
     if (monitor != null) {
       monitor.subTask("Logging in to Nectar...");
@@ -240,13 +253,13 @@ public class NectarService {
       }
     }
 
-    System.out.println("JOSSO_SESSIONID=" + lastJossoSessionId);
+    //System.out.println("JOSSO_SESSIONID=" + lastJossoSessionId);
   }
 
   private HttpResponse visitSite(DefaultHttpClient httpClient, String url, String refererUrl)
       throws IOException, ClientProtocolException, CloudBeesException {
 
-    System.out.println("Visiting: " + url);
+    //System.out.println("Visiting: " + url);
 
     HttpPost post = new HttpPost(url);
     post.addHeader("Referer", refererUrl);
@@ -264,7 +277,7 @@ public class NectarService {
     String body = Utils.getResponseBody(resp);
 
     Header redir = resp.getFirstHeader("Location");
-    System.out.println("\t" + resp.getStatusLine() + (redir != null ? (" -> " + redir.getValue()) : ""));
+    //System.out.println("\t" + resp.getStatusLine() + (redir != null ? (" -> " + redir.getValue()) : ""));
 
     return resp;
   }
@@ -404,6 +417,38 @@ public class NectarService {
           + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr, e);
     }
 
+  }
+
+  public void invokeBuild(String jobUrl, IProgressMonitor monitor) throws CloudBeesException {
+    if (monitor != null) {
+      monitor.setTaskName("Invoking build request...");
+    }
+
+    if (jobUrl != null && !jobUrl.startsWith(nectar.url)) {
+      throw new CloudBeesException("Unexpected job url provided! Service url: " + nectar.url + "; job url: " + jobUrl);
+    }
+
+    StringBuffer errMsg = new StringBuffer();
+
+    String reqUrl = jobUrl;
+
+    if (!reqUrl.endsWith("/")) {
+      reqUrl = reqUrl + "/";
+    }
+
+    String reqStr = reqUrl + "build";
+
+    String bodyResponse = "";
+    try {
+      DefaultHttpClient httpclient = Utils.getAPIClient();
+
+      HttpPost post = new HttpPost(reqStr);
+
+      bodyResponse = retrieveWithLogin(httpclient, post, monitor, true);
+    } catch (Exception e) {
+      throw new CloudBeesException("Failed to get invoke Build for '" + jobUrl + "'. "
+          + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr, e);
+    }
   }
 
 }

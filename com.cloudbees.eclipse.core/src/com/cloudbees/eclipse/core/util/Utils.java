@@ -13,6 +13,7 @@ import java.net.URL;
 import java.security.KeyStore;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.CookiePolicy;
@@ -129,7 +130,6 @@ public class Utils {
     }
   }
 
-
   public static HttpPost jsonRequest(String url, Object req) throws UnsupportedEncodingException {
     HttpPost post = new HttpPost(url);
     Gson g = Utils.createGson();
@@ -152,9 +152,24 @@ public class Utils {
   }
 
   public final static void checkResponseCode(HttpResponse resp) throws CloudBeesException {
+    checkResponseCode(resp, false);
+  }
+
+  public final static void checkResponseCode(HttpResponse resp, boolean expectCIRedirect) throws CloudBeesException {
     int responseStatus = resp.getStatusLine().getStatusCode();
+
+    Header firstHeader = resp.getFirstHeader("Location");
+
+    if (expectCIRedirect && responseStatus == 302 && firstHeader != null && firstHeader.getValue() != null) {
+      //FIXME ugly way to detect a normal redirect within the site that does not redirect to signon but no good idea for better implementation
+      if (firstHeader.getValue().indexOf(".ci.") > 0) {
+        return;
+      }
+    }
+
     if (responseStatus == 302) {
-      throw new CloudBeesException("Authentication required! Either wrong or no credentials were provided!");
+      throw new CloudBeesException("Authentication required! Either wrong or no credentials were provided! Reason:"
+          + resp.getStatusLine().getReasonPhrase());
     }
     if (responseStatus != 200) {
       throw new CloudBeesException("Unexpected response code:" + responseStatus + ". Message:"
@@ -170,7 +185,7 @@ public class Utils {
 
     if (mins < 60) {
       unit = mins + " min";
-      if (mins > 1) {
+      if (mins < 1) {
         unit = unit + "s";
       }
     } else if (mins < 60 * 24) {

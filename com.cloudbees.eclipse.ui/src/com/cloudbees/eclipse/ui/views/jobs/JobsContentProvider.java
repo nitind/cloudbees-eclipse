@@ -21,7 +21,7 @@ public class JobsContentProvider implements IStructuredContentProvider {
   }
 
   public void inputChanged(Viewer v, Object oldInput, Object newInput) {
-    //System.out.println("INPUT CHANGED! " + v + "; " + oldInput + ";" + newInput);//TODO remove
+
   }
 
   public void dispose() {

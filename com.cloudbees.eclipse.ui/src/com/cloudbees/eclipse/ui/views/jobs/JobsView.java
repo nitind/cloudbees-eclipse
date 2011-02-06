@@ -76,7 +76,6 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   }
 
   protected void setInput(NectarJobsResponse newView) {
-    System.out.println("New Jobs view: " + newView);
 
     if (newView == null || newView.jobs == null) {
       setContentDescription("No jobs available.");
@@ -278,7 +277,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     nectarChangeListener = new NectarChangeListener() {
       public void activeJobViewChanged(NectarJobsResponse newView) {
-        System.out.println("Reloading items");//FIXME remove!
+        //System.out.println("Reloading items");//FIXME remove!
         JobsView.this.setInput(newView);
       }
     };
@@ -309,10 +308,10 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     String[] icons = { "blue", "red", "yellow" };
 
     for (int i = 0; i < icons.length; i++) {
+      //TODO Refactor to use CBImages!
       Image img = ImageDescriptor.createFromURL(
           CloudBeesUIPlugin.getDefault().getBundle().getResource("/icons/jenkins-icons/16x16/" + icons[i] + ".gif"))
           .createImage();
-      System.out.println("Created image " + img);
       stateIcons.put(icons[i], img);
     }
 

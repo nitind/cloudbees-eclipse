@@ -9,5 +9,7 @@ public interface CBImages {
   String IMG_FOLDER_LOCAL = "IMG_FOLDER_LOCAL";
   String IMG_INSTANCE = "IMG_INSTANCE";
   String IMG_VIEW = "IMG_VIEW";
+  String IMG_BROWSER = "IMG_BROWSER";
+  String IMG_RUN = "IMG_RUN";
 
 }

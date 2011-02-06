@@ -102,7 +102,6 @@ public class GrandCentralService {
       }
       Utils.checkResponseCode(resp);
 
-      // System.out.println("RECEIVED " + services.api_key + ";" + services.secret_key + ";" + services.uid);
       return new AuthInfo(services);
 
     } catch (Exception e) {

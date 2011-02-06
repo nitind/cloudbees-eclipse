@@ -14,7 +14,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.ColumnLayout;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -29,6 +28,7 @@ import com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse.ChangeSe
 import com.cloudbees.eclipse.core.nectar.api.NectarJobBuildsResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job.HealthReport;
 import com.cloudbees.eclipse.core.util.Utils;
+import com.cloudbees.eclipse.ui.CBImages;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class BuildPart extends EditorPart {
@@ -59,8 +59,6 @@ public class BuildPart extends EditorPart {
    */
   @Override
   public void createPartControl(Composite parent) {
-
-    System.out.println("Creating control");
 
     form = formToolkit.createScrolledForm(parent);
     formToolkit.decorateFormHeading(form.getForm());
@@ -165,32 +163,76 @@ public class BuildPart extends EditorPart {
   }
 
   private void createActions() {
-    Action openInWeb = new Action("", Action.AS_PUSH_BUTTON) { //$NON-NLS-1$
+
+    Action reload = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+      public void run() {
+        BuildPart.this.reloadData();
+      }
+    };
+    reload.setToolTipText("Reload"); //TODO i18n
+    reload.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_REFRESH));
+
+    Action openInWeb = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       public void run() {
         BuildPart.this.openBuildWithBrowser();
       }
     };
-    //haction.setChecked(true);
-    //haction.setText("HEI");
     openInWeb.setToolTipText("Open with Browser"); //TODO i18n
-    openInWeb.setImageDescriptor(CloudBeesUIPlugin.getDefault().getImageRegistry()
-        .getDescriptor(ISharedImages.IMG_OBJ_ELEMENT));
+    openInWeb.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_BROWSER));
 
-    Action openLogs = new Action("", Action.AS_PUSH_BUTTON) { //$NON-NLS-1$
+    Action openLogs = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       public void run() {
-        BuildPart.this.openBuildWithBrowser();
+        if (dataBuildDetail != null && dataBuildDetail.url != null) {
+          CloudBeesUIPlugin.getDefault().openWithBrowser(dataBuildDetail.url + "/consoleText");
+          return;
+        }
+
       }
     };
-    //haction.setChecked(true);
-    //haction.setText("HEI");
     openLogs.setToolTipText("Open build log"); //TODO i18n
-    openLogs.setImageDescriptor(CloudBeesUIPlugin.getDefault().getImageRegistry()
-        .getDescriptor(ISharedImages.IMG_OBJ_ELEMENT));
+    openLogs.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_CONSOLE));
 
-    form.getToolBarManager().add(openInWeb);
+    Action invokeBuild = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+      public void run() {
+        BuildEditorInput details = (BuildEditorInput) getEditorInput();
+        String jobUrl = details.getJob().url;
+        NectarService ns = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(jobUrl);
+
+        //TODO Add job monitor!
+        try {
+          ns.invokeBuild(jobUrl, null);
+        } catch (CloudBeesException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+
+      }
+    };
+    invokeBuild.setToolTipText("Run a new build for this job"); //TODO i18n
+    invokeBuild.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_RUN));
+
+    form.getToolBarManager().add(reload);
     form.getToolBarManager().add(new Separator());
+    form.getToolBarManager().add(invokeBuild);
+    form.getToolBarManager().add(new Separator());
+    form.getToolBarManager().add(openLogs);
     form.getToolBarManager().add(openInWeb);
+
     form.getToolBarManager().update(false);
+  }
+
+  protected void reloadData() {
+    //TODO Add monitor
+    try {
+      BuildEditorInput details = (BuildEditorInput) getEditorInput();
+      NectarService service = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(details.getJob().url);
+      dataBuildDetail = service.getJobDetails(details.getBuildUrl(), null);
+    } catch (CloudBeesException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    reloadUI();
   }
 
   protected void openBuildWithBrowser() {
@@ -208,11 +250,13 @@ public class BuildPart extends EditorPart {
     BuildEditorInput details = (BuildEditorInput) getEditorInput();
     String newJobUrl = details.getJob().url + "/" + buildNo + "/";
 
-    NectarService service = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(details.getLastBuild().url);
+    NectarService service = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(details.getJob().url);
 
     //TODO Add monitor
     try {
       dataBuildDetail = service.getJobDetails(newJobUrl, null);
+      details.setBuildUrl(dataBuildDetail.url);
+
     } catch (CloudBeesException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -407,8 +451,6 @@ public class BuildPart extends EditorPart {
   @Override
   public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 
-    System.out.println("INIT CALLED"); //TODO REMOVEME!
-
     // Initialize the editor part
     setSite(site);
     setInput(input);
@@ -429,7 +471,6 @@ public class BuildPart extends EditorPart {
   public void dispose() {
     form.dispose();
     form = null;
-    System.out.println("Form disposed");
     super.dispose();
   }
 }

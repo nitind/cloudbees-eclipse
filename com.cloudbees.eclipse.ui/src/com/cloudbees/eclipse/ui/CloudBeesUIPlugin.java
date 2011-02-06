@@ -88,7 +88,12 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     
     reg.put(CBImages.IMG_CONSOLE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/monitor_obj.png")));
     reg.put(CBImages.IMG_REFRESH, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/refresh.png")));
+
+    reg.put(CBImages.IMG_BROWSER,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/internal_browser.gif")));
     
+    reg.put(CBImages.IMG_RUN, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/lrun_obj.png")));
+
     reg.put(CBImages.IMG_FOLDER_HOSTED,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_run.png")));
     reg.put(CBImages.IMG_FOLDER_LOCAL,
@@ -193,7 +198,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     IPreferenceStore store = CloudBeesUIPlugin.getDefault().getPreferenceStore();
     String instances = store.getString(PreferenceConstants.P_NECTAR_INSTANCES);
     List<NectarInstance> list = NectarInstance.decode(instances);
-    System.out.println("Loaded: " + list);
 
     if (list != null) {
       for (NectarInstance inst : list) {
@@ -227,13 +231,13 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       throw new IllegalStateException("Unable to add new instance with an empty url or label!");
     }
     List<NectarInstance> list = loadManualNectarInstances();
-    System.out.println("save before: " + list);
+    //System.out.println("save before: " + list);
     list.remove(ni); // when editing - id is the same, but props old, so lets kill old instance first
     list.add(ni);
 
     nectarRegistry.remove(new NectarService(ni));
 
-    System.out.println("save after: " + list);
+    //System.out.println("save after: " + list);
     Collections.sort(list);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
         .setValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
@@ -272,7 +276,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       try {
         resp.add(service.getInstance(monitor));
       } catch (CloudBeesException e) {
-        System.out.println("Failed to contact " + service + ". Not adding to the list for now.");//TODO log
+        //System.out.println("Failed to contact " + service + ". Not adding to the list for now.");//TODO log
 
         //TODO Consider adding it to the list anyway, just mark it somehow as "Unreachable" in UI!
         NectarInstanceResponse fakeResp = new NectarInstanceResponse();
@@ -306,7 +310,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
    * @throws CloudBeesException
    */
   public void showJobs(String serviceUrl, String viewUrl) throws CloudBeesException {
-    System.out.println("Show jobs: " + serviceUrl + " - " + viewUrl);
+    //System.out.println("Show jobs: " + serviceUrl + " - " + viewUrl);
 
     if (serviceUrl == null && viewUrl == null) {
       return; // no info
@@ -386,7 +390,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   public void loadAccountCredentials() throws CloudBeesException {
     //TODO Remove
-    System.out.println("Reloading credentials from the preferences");
+    //System.out.println("Reloading credentials from the preferences");
 
     String password;
     try {
@@ -412,8 +416,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   public void openWithBrowser(String url) {
     IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
     try {
-      IWebBrowser browser = browserSupport.createBrowser(IWorkbenchBrowserSupport.LOCATION_BAR
-          | IWorkbenchBrowserSupport.NAVIGATION_BAR, null, null, null);
+
+      IWebBrowser browser = browserSupport.getExternalBrowser();/*createBrowser(IWorkbenchBrowserSupport.LOCATION_BAR
+                                                                | IWorkbenchBrowserSupport.NAVIGATION_BAR, null, null, null);*/
       browser.openURL(new URL(url));
     } catch (PartInitException e) {
       // TODO Log!
@@ -426,6 +431,10 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   public static Image getImage(String imgKey) {
     return CloudBeesUIPlugin.getDefault().getImageRegistry().get(imgKey);
+  }
+
+  public static ImageDescriptor getImageDescription(String imgKey) {
+    return CloudBeesUIPlugin.getDefault().getImageRegistry().getDescriptor(imgKey);
   }
 
 }

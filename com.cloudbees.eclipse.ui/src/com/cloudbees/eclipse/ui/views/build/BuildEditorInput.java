@@ -8,11 +8,16 @@ import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job.Build;
 public class BuildEditorInput extends NullEditorInput {
 
   private Job job;
+  private String buildUrl;
 
   public BuildEditorInput(Job job) {
     super();
-    System.out.println("Creating job details editor for url " + job.url);
+    //System.out.println("Creating job details editor for url " + job.url);
     this.job = job;
+    if (getLastBuild() != null && getLastBuild().url != null) {
+      buildUrl = getLastBuild().url;
+    }
+
   }
 
   @Override
@@ -26,6 +31,14 @@ public class BuildEditorInput extends NullEditorInput {
 
   public Job getJob() {
     return job;
+  }
+
+  public String getBuildUrl() {
+    return this.buildUrl;
+  }
+
+  public void setBuildUrl(String newBuildUrl) {
+    this.buildUrl = newBuildUrl;
   }
 
 }
