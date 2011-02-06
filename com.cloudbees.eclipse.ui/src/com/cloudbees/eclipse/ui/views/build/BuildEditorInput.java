@@ -16,6 +16,8 @@ public class BuildEditorInput extends NullEditorInput {
     this.job = job;
     if (getLastBuild() != null && getLastBuild().url != null) {
       buildUrl = getLastBuild().url;
+    } else {
+      buildUrl = job.url;
     }
 
   }

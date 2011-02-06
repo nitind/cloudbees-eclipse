@@ -9,16 +9,19 @@ import java.util.Map;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.OpenEvent;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -31,18 +34,20 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.ViewPart;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.NectarChangeListener;
+import com.cloudbees.eclipse.core.NectarService;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job.Build;
 import com.cloudbees.eclipse.core.util.Utils;
+import com.cloudbees.eclipse.ui.CBImages;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
+import com.cloudbees.eclipse.ui.internal.actions.ReloadJobsAction;
 
 /**
  * View showing jobs for both NectarInfo offline installations and JaaS NectarInfo instances
@@ -57,10 +62,10 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
   private final Logger log = CloudBeesUIPlugin.getDefault().getLogger();
 
-  private Action action1; // Configure Account
-  private Action action2; // Attach NectarInfo
-  private Action action3; // Reload Forge repositories
-  private Action action4; // Reload JaaS instances
+  private ReloadJobsAction actionReloadJobs; // Reload JaaS instances
+  private Action actionInvokeBuild; // Invoke Build
+  //private Action actionOpenLogs; // Open Logs
+  private Action actionOpenJobInBrowser; // Open Open Job in Browser
 
   private final Map<String, Image> stateIcons = new HashMap<String, Image>();
 
@@ -70,6 +75,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
   private String serviceUrl;
   private String viewUrl;
+
+  protected Object selectedJob;
 
   public JobsView() {
     super();
@@ -99,7 +106,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       viewUrl = null;
     }
 
-    enableJaasButton();
+    actionReloadJobs.serviceUrl = serviceUrl;
+    actionReloadJobs.viewUrl = viewUrl;
 
     table.refresh();
   }
@@ -275,6 +283,18 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     makeActions();
     contributeToActionBars();
 
+    table.addPostSelectionChangedListener(new ISelectionChangedListener() {
+      
+      public void selectionChanged(SelectionChangedEvent event) {
+        StructuredSelection sel = (StructuredSelection) event.getSelection();
+        JobsView.this.selectedJob = sel.getFirstElement();
+        boolean enable = sel.getFirstElement()!=null;
+        actionInvokeBuild.setEnabled(enable);
+        actionOpenJobInBrowser.setEnabled(enable);
+      }       
+    });
+    
+
     nectarChangeListener = new NectarChangeListener() {
       public void activeJobViewChanged(NectarJobsResponse newView) {
         //System.out.println("Reloading items");//FIXME remove!
@@ -283,11 +303,6 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     };
 
     CloudBeesUIPlugin.getDefault().addNectarChangeListener(nectarChangeListener);
-
-  }
-
-  private void configureSorting(int state) {
-    // TODO Auto-generated method stub
 
   }
 
@@ -368,114 +383,76 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   private void contributeToActionBars() {
     IActionBars bars = getViewSite().getActionBars();
     fillLocalPullDown(bars.getMenuManager());
-    //fillLocalToolBar(bars.getToolBarManager());
+    fillLocalToolBar(bars.getToolBarManager());
+  }
+
+  private void fillLocalToolBar(IToolBarManager manager) {
+    manager.add(actionReloadJobs);
+    manager.add(new Separator());
+    manager.add(actionInvokeBuild);
+    manager.add(actionOpenJobInBrowser);
   }
 
   private void fillLocalPullDown(IMenuManager manager) {
-    //manager.add(action1);
-    //manager.add(action2);
+    manager.add(actionReloadJobs);
     manager.add(new Separator());
-    manager.add(action3);
-    manager.add(action4);
+    manager.add(actionInvokeBuild);
+    manager.add(actionOpenJobInBrowser);
   }
 
   private void makeActions() {
-    action1 = new Action() {
-      public void run() {
-        PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(null,
-            "com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage", new String[] {
-                "com.cloudbees.eclipse.ui.preferences.NectarInstancesPreferencePage",
-                "com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage" }, null);
-        if (pref != null) {
-          pref.open();
-        }
-      }
-    };
-    action1.setText("Configure CloudBees access...");
-    action1.setToolTipText("Configure CloudBees account access");
-    /*		action1.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
-    				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-    */
-    action2 = new Action() {
-      public void run() {
-        PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(null,
-            "com.cloudbees.eclipse.ui.preferences.NectarInstancesPreferencePage", new String[] {
-                "com.cloudbees.eclipse.ui.preferences.NectarInstancesPreferencePage",
-                "com.cloudbees.eclipse.ui.internal.preferences.GeneralPreferencePage" }, null);
-        if (pref != null) {
-          pref.open();
-        }
-      }
-    };
-    action2.setText("Attach NectarInfo instances...");
-    action2.setToolTipText("Attach more NectarInfo instances to monitor");
 
-    /*		action2.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
-    				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-    */
-
-    action3 = new Action() {
-      public void run() {
-        try {
-          CloudBeesUIPlugin.getDefault().reloadForgeRepos();
-        } catch (CloudBeesException e) {
-          //TODO I18n!
-          CloudBeesUIPlugin.showError("Failed to reload Forge repositories!", e);
-        }
-      }
-    };
-
-    action3.setText("Reload Forge repositories...");
-    action3.setToolTipText("Reload Forge repositories and create local entries");
-    /*		action3.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
-    				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-    */
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 
-    boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-        .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
-    action3.setEnabled(forgeEnabled);
+    actionReloadJobs = new ReloadJobsAction();
 
-    action4 = new Action() {
-      public void run() {
-        try {
-          CloudBeesUIPlugin.getDefault().showJobs(serviceUrl, viewUrl);
-        } catch (CloudBeesException e) {
-          //TODO I18n!
-          CloudBeesUIPlugin.showError("Failed to reload Nectar jobs!", e);
+    actionOpenJobInBrowser = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+        public void run() {
+        if (JobsView.this.selectedJob != null) {
+          NectarJobsResponse.Job job = (Job) JobsView.this.selectedJob;
+          CloudBeesUIPlugin.getDefault().openWithBrowser(job.url);
         }
-      }
-    };
-    action4.setText("Reload Nectar jobs...");
-    action4.setToolTipText("Reload Nectar jobs");
+        }
+      };
+
+    actionOpenJobInBrowser.setToolTipText("Open with Browser"); //TODO i18n
+    actionOpenJobInBrowser.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_BROWSER));
+    actionOpenJobInBrowser.setEnabled(false);
+
+
+    actionInvokeBuild = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+        public void run() {
+
+          //TODO Add job monitor!
+          try {
+          NectarJobsResponse.Job job = (Job) JobsView.this.selectedJob;
+          NectarService ns = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(job.url);
+          ns.invokeBuild(job.url, null);
+          } catch (CloudBeesException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+
+        }
+      };
+    actionInvokeBuild.setToolTipText("Run a new build for this job"); //TODO i18n
+    actionInvokeBuild.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_RUN));
+    actionInvokeBuild.setEnabled(false);
+
+
     /*    action4.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
             .getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
     */
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
-
-    enableJaasButton();
+    
   }
 
-  protected void enableJaasButton() {
-    if (action4 == null) {
-      return;
-    }
-
-    boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-        .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
-    action4.setEnabled(jaasEnabled && (serviceUrl != null || viewUrl != null));
-  }
 
   public void setFocus() {
     table.getControl().setFocus();
   }
 
   public void propertyChange(PropertyChangeEvent event) {
-    if (PreferenceConstants.P_ENABLE_FORGE.equals(event.getProperty())) {
-      boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-          .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
-      action3.setEnabled(forgeEnabled);
-    }
 
     if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())) {
       boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
@@ -484,7 +461,6 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         setInput(null); // all gone
       }
 
-      enableJaasButton();
     }
     
     if (PreferenceConstants.P_NECTAR_INSTANCES.equals(event.getProperty())) {
@@ -516,5 +492,6 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     }
     stateIcons.clear();
   }
+
 
 }
