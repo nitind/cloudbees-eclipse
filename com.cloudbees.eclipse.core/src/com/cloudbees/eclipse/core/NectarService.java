@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import com.cloudbees.eclipse.core.domain.NectarInstance;
 import com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
+import com.cloudbees.eclipse.core.nectar.api.NectarJobBuildsResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.google.gson.Gson;
@@ -355,6 +356,54 @@ public class NectarService {
     } else if (!nectar.equals(other.nectar))
       return false;
     return true;
+  }
+
+  public NectarJobBuildsResponse getJobBuilds(String jobUrl, final IProgressMonitor monitor) throws CloudBeesException {
+
+    if (monitor != null) {
+      monitor.setTaskName("Fetching Job builds...");
+    }
+
+    if (jobUrl != null && !jobUrl.startsWith(nectar.url)) {
+      throw new CloudBeesException("Unexpected job url provided! Service url: " + nectar.url + "; job url: " + jobUrl);
+    }
+
+    StringBuffer errMsg = new StringBuffer();
+
+    String reqUrl = jobUrl;
+
+    if (!reqUrl.endsWith("/")) {
+      reqUrl = reqUrl + "/";
+    }
+
+    String reqStr = reqUrl + "api/json?tree=" + NectarJobBuildsResponse.QTREE;
+
+    try {
+      DefaultHttpClient httpclient = Utils.getAPIClient();
+
+      Gson g = Utils.createGson();
+
+      HttpPost post = new HttpPost(reqStr);
+      post.setHeader("Accept", "application/json");
+      post.setHeader("Content-type", "application/json");
+
+      String bodyResponse = retrieveWithLogin(httpclient, post, monitor);
+
+      NectarJobBuildsResponse details = g.fromJson(bodyResponse, NectarJobBuildsResponse.class);
+
+      if (details.name == null) {
+        throw new CloudBeesException("Response does not contain required fields!");
+      }
+
+      details.serviceUrl = nectar.url;
+
+      return details;
+
+    } catch (Exception e) {
+      throw new CloudBeesException("Failed to get Nectar jobs for '" + jobUrl + "'. "
+          + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr, e);
+    }
+
   }
 
 }

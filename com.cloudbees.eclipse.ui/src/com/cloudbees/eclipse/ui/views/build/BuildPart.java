@@ -6,9 +6,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.ISharedImages;
@@ -23,6 +26,8 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.NectarService;
 import com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse.ChangeSet.ChangeSetItem;
+import com.cloudbees.eclipse.core.nectar.api.NectarJobBuildsResponse;
+import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job.HealthReport;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class BuildPart extends EditorPart {
@@ -30,16 +35,17 @@ public class BuildPart extends EditorPart {
   public static final String ID = "com.cloudbees.eclipse.ui.views.build.BuildPart"; //$NON-NLS-1$
   private final FormToolkit formToolkit = new FormToolkit(Display.getDefault());
 
-  private NectarBuildDetailsResponse detail;
+  private NectarBuildDetailsResponse dataBuildDetail;
 
   private boolean lastBuildAvailable = false;
   private ScrolledForm form;
   private Label textTopSummary;
   private Composite composite_1;
   private Label contentBuildSummary;
-  private Label contentBuildHistory;
+  private Link contentBuildHistory;
   private Label contentJUnitTests;
   private Label contentRecentChanges;
+  private NectarJobBuildsResponse dataJobBuilds;
 
   public BuildPart() {
     super();
@@ -92,20 +98,6 @@ public class BuildPart extends EditorPart {
 
     contentBuildSummary = formToolkit.createLabel(composite_1, "n/a", SWT.NONE);
 
-    Section sectBuildHistory = formToolkit.createSection(composite, Section.TITLE_BAR);
-    formToolkit.paintBordersFor(sectBuildHistory);
-    sectBuildHistory.setText("Build History");
-
-    Composite composite_2 = new Composite(sectBuildHistory, SWT.NONE);
-    formToolkit.adapt(composite_2);
-    formToolkit.paintBordersFor(composite_2);
-    sectBuildHistory.setClient(composite_2);
-    ColumnLayout cl_composite_2 = new ColumnLayout();
-    cl_composite_2.maxNumColumns = 1;
-    composite_2.setLayout(cl_composite_2);
-
-    contentBuildHistory = formToolkit.createLabel(composite_2, "n/a", SWT.NONE);
-
     Section sectTests = formToolkit.createSection(composite, Section.TITLE_BAR);
     formToolkit.paintBordersFor(sectTests);
     sectTests.setText("JUnit Tests");
@@ -120,7 +112,38 @@ public class BuildPart extends EditorPart {
 
     contentJUnitTests = formToolkit.createLabel(composite_4, "n/a", SWT.NONE);
 
-    Section sectRecentChanges = formToolkit.createSection(composite, Section.TITLE_BAR);
+    Composite composite_5 = formToolkit.createComposite(form.getBody(), SWT.NONE);
+    formToolkit.paintBordersFor(composite_5);
+    ColumnLayout cl_composite_5 = new ColumnLayout();
+    cl_composite_5.minNumColumns = 2;
+    cl_composite_5.maxNumColumns = 2;
+    composite_5.setLayout(cl_composite_5);
+
+    Section sectBuildHistory = formToolkit.createSection(composite_5, Section.TITLE_BAR);
+    formToolkit.paintBordersFor(sectBuildHistory);
+    sectBuildHistory.setText("Build History");
+
+    Composite composite_2 = new Composite(sectBuildHistory, SWT.NONE);
+    formToolkit.adapt(composite_2);
+    formToolkit.paintBordersFor(composite_2);
+    sectBuildHistory.setClient(composite_2);
+    ColumnLayout cl_composite_2 = new ColumnLayout();
+    cl_composite_2.maxNumColumns = 1;
+    composite_2.setLayout(cl_composite_2);
+
+    //contentBuildHistory = formToolkit.createHyperlink(composite_2, "n/a", SWT.NONE);
+    contentBuildHistory = new Link(composite_2, SWT.NO_FOCUS);
+    contentBuildHistory.setText("n/a");
+    contentBuildHistory.addSelectionListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        if (e.text != null && e.text.startsWith("#")) {
+          long buildNo = new Long(e.text.substring(1)).longValue();
+          BuildPart.this.switchToBuild(buildNo);
+        }
+      }
+    });
+
+    Section sectRecentChanges = formToolkit.createSection(composite_5, Section.TITLE_BAR);
     formToolkit.paintBordersFor(sectRecentChanges);
     sectRecentChanges.setText("Changes");
 
@@ -155,15 +178,32 @@ public class BuildPart extends EditorPart {
 
 
 
-    loadData();
+    loadData(null);//TODO Add monitor
 
+  }
+
+  protected void switchToBuild(long buildNo) {
+    BuildEditorInput details = (BuildEditorInput) getEditorInput();
+    String newJobUrl = details.getJob().url + "/" + buildNo + "/";
+
+    NectarService service = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(details.getLastBuild().url);
+
+    //TODO Add monitor
+    try {
+      dataBuildDetail = service.getJobDetails(newJobUrl, null);
+    } catch (CloudBeesException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    reloadUI();
   }
 
   public IEditorSite getEditorSite() {
     return (IEditorSite) getSite();
   }
 
-  private void loadData() {
+  private void loadData(IProgressMonitor monitor) {
     if (getEditorInput() == null) {
       return;
     }
@@ -174,13 +214,18 @@ public class BuildPart extends EditorPart {
 
     if (details == null || details.getLastBuild() == null || details.getLastBuild().url == null) {
       // No last build available
+      contentBuildHistory.setText("No data available.");
+      contentJUnitTests.setText("No data available.");
     } else {
 
       NectarService service = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(details.getLastBuild().url);
 
       try {
         //TODO Add progress monitoring
-        detail = service.getJobDetails(details.getLastBuild().url, null);
+        dataBuildDetail = service.getJobDetails(details.getLastBuild().url, monitor);
+
+        dataJobBuilds = service.getJobBuilds(details.getJob().url, monitor);
+
         this.lastBuildAvailable = true;
       } catch (CloudBeesException e) {
         //throw new PartInitException("Failed to load build information from the remote host!", e);
@@ -189,40 +234,107 @@ public class BuildPart extends EditorPart {
         return;
       }
 
-      System.out.println("Loaded " + detail);
+      reloadUI();
+      
+    }
+  }
 
-      //setPartName();
-      setPartName(details.getJob().displayName + " #" + detail.number);
+  private void reloadUI() {
 
-      //setContentDescription(detail.fullDisplayName);
+    BuildEditorInput details = (BuildEditorInput) getEditorInput();
 
-      String topStr = detail.result != null ? detail.result + " (" + (new Date(detail.timestamp)) + ")" : "";
+    //setPartName();
+    setPartName(details.getJob().displayName + " #" + dataBuildDetail.number);
 
-      textTopSummary.setText(topStr);
+    //setContentDescription(detail.fullDisplayName);
 
-      if (form != null) {
-        form.setText("Build #" + detail.number + " [" + details.getJob().displayName + "]");
-        //TODO Add image for build status! form.setImage(image);
+    String topStr = dataBuildDetail.result != null ? dataBuildDetail.result + " (" + (new Date(dataBuildDetail.timestamp)) + ")" : "";
+
+    textTopSummary.setText(topStr);
+
+    if (form != null) {
+      form.setText("Build #" + dataBuildDetail.number + " [" + details.getJob().displayName + "]");
+      //TODO Add image for build status! form.setImage(image);
+    }
+
+    // Recent Changes      
+    loadRecentChanges();
+
+    // Load JUnit Tests
+    loadUnitTests();
+
+    loadBuildSummary();
+
+    loadBuildHistory();
+
+  }
+
+  private void loadBuildHistory() {
+    if (dataJobBuilds.builds == null || dataJobBuilds.builds.length == 0) {
+      contentBuildHistory.setText("No recent builds.");//TODO i18n
+      return;
+    }
+
+    StringBuffer val = new StringBuffer();
+    for (NectarJobBuildsResponse.Build b : dataJobBuilds.builds) {
+      if (b.number != dataBuildDetail.number) {
+        val.append("<a>#" + b.number + "</a>    " + new Date(b.timestamp) + "\n");
+      } else {
+        val.append("#" + b.number + "    " + new Date(b.timestamp) + " \n");
+      }
+    }
+    
+    contentBuildHistory.setText(val.toString());
+
+  }
+
+  private void loadBuildSummary() {
+    //details.getJob().buildable;
+    //details.getJob().inQueue;
+    //details.getJob().healthReport;
+
+    BuildEditorInput details = (BuildEditorInput) getEditorInput();
+
+    StringBuffer summary = new StringBuffer();
+    if (dataBuildDetail.description != null) {
+      summary.append(dataBuildDetail.description + "\n");
+    }
+    
+    if (dataBuildDetail.builtOn != null && dataBuildDetail.timestamp != null) {
+      if (dataBuildDetail.builtOn != null && dataBuildDetail.builtOn.length() > 0) {
+        summary.append("Built on: " + dataBuildDetail.builtOn + " at " + (new Date(dataBuildDetail.timestamp)) + "\n");
+      } else {
+        summary.append("Built at " + (new Date(dataBuildDetail.timestamp)) + "\n");
+      }
+    }
+    
+    summary.append("\n");
+
+    summary.append("Building: " + dataBuildDetail.building + "\n");
+    summary.append("Buildable: " + details.getJob().buildable + "\n");
+    summary.append("Build number: " + dataBuildDetail.number + "\n");
+
+    HealthReport[] hr = details.getJob().healthReport;
+    if (hr != null && hr.length > 0) {
+      summary.append("\nProject Health\n");
+      for (HealthReport rep : hr) {
+        summary.append("    " + rep.description + " Score:" + rep.score + "%\n");
       }
 
-      // Recent Changes      
-      loadRecentChanges();
-
-      // Load JUnit Tests
-      loadUnitTests();
-
-      System.out.println("here");
     }
+
+
+    contentBuildSummary.setText(summary.toString());
   }
 
   private void loadUnitTests() {
     
-    if (detail.actions==null) {
+    if (dataBuildDetail.actions==null) {
       contentJUnitTests.setText("No Tests");
       return;
     }
     
-    for (com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse.Action action: detail.actions) {
+    for (com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse.Action action: dataBuildDetail.actions) {
       if ("testReport".equalsIgnoreCase(action.urlName)) {
         String val = "Total: " + action.totalCount + " Failed: " + action.failCount + " Skipped: " + action.skipCount;
         contentJUnitTests.setText(val);
@@ -236,8 +348,8 @@ public class BuildPart extends EditorPart {
 
   private void loadRecentChanges() {
     StringBuffer changes = new StringBuffer();
-    if (detail.changeSet != null && detail.changeSet.items != null) {
-      for (ChangeSetItem item : detail.changeSet.items) {
+    if (dataBuildDetail.changeSet != null && dataBuildDetail.changeSet.items != null) {
+      for (ChangeSetItem item : dataBuildDetail.changeSet.items) {
         String authinfo = item.author != null && item.author.fullName != null ? " by " + item.author.fullName : "";
         String line = "rev" + item.rev + ": '" + item.msg + "' " + authinfo + "\n";
         changes.append(line);

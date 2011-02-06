@@ -41,7 +41,7 @@ public class NectarBuildDetailsResponse extends BaseNectarResponse {
   //public Boolean keepLog;
   public long number;
   public String result; // SUCCESS
-  public long timestamp;
+  public Long timestamp;
   public String url;
   public String builtOn;
 
