@@ -10,8 +10,9 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -27,6 +28,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.progress.IProgressService;
 import org.osgi.framework.BundleContext;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
@@ -149,33 +151,33 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return plugin;
   }
 
-  public void reloadForgeRepos() throws CloudBeesException {
-
-    try {
-      PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new IRunnableWithProgress() {
-
-        public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-          if (!getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_FORGE)) {
-            // Forge sync disabled. TODO Load?
-            return;
-          }
-
-          try {
-            CloudBeesCorePlugin.getDefault().getGrandCentralService().reloadForgeRepos(monitor);
-          } catch (CloudBeesException e) {
-            e.printStackTrace();
-            throw new InvocationTargetException(e);
-          }
-
+  public void reloadForgeRepos(boolean userAction) throws CloudBeesException {
+    //      PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new IRunnableWithProgress() {
+    //        public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Forge repositories") {
+      protected IStatus run(IProgressMonitor monitor) {
+        if (!getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_FORGE)) {
+          // Forge sync disabled. TODO Load?
+          return Status.CANCEL_STATUS;
         }
-      });
-    } catch (InvocationTargetException e) {
-      throw new CloudBeesException("Failed to reload Forge repositories!", e.getTargetException());
-    } catch (InterruptedException e) {
-      // Ignore. Log for debugging for now. TODO remove later
-      e.printStackTrace();
-    }
 
+        try {
+          monitor.beginTask("Loading Forge repositories", 1000);
+          CloudBeesCorePlugin.getDefault().getGrandCentralService().reloadForgeRepos(monitor);
+          monitor.worked(1000);
+          return Status.OK_STATUS;
+        } catch (Exception e) {
+          // TODO: handle exception
+          e.printStackTrace();
+          return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage());
+        } finally {
+          monitor.done();
+        }
+      }
+    };
+
+    job.setUser(userAction);
+    job.schedule();
   }
 
   public static void showError(String msg, Throwable e) {
@@ -253,44 +255,87 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         .setValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
   }
 
-  public List<NectarInstanceResponse> getManualNectarsInfo(IProgressMonitor monitor) throws CloudBeesException {
-    List<NectarInstance> instances = new ArrayList<NectarInstance>(loadManualNectarInstances());
+  public void reloadAllNectars(boolean userAction) {
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job(
+        "Loading DEV@Cloud & Jenkins instances") {
+      protected IStatus run(IProgressMonitor monitor) {
+        if (!getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
+          return new Status(Status.INFO, PLUGIN_ID, "DEV@Cloud Continuous Integration is not enabled");
+        }
 
-    List<NectarInstanceResponse> resp = pollInstances(instances, monitor);
+        try {
+          monitor.beginTask("Reading DEV@Cloud and Jenkins configuration", 1000);
 
-    return resp;
-  }
+          List<NectarInstance> instances = new ArrayList<NectarInstance>();
+          instances.addAll(loadManualNectarInstances());
+          monitor.worked(90);
+          instances.addAll(loadDevAtCloudInstances(monitor));
+          monitor.worked(150);
 
-  public List<NectarInstanceResponse> getDevAtCloudNectarsInfo(IProgressMonitor monitor) throws CloudBeesException {
-    List<NectarInstance> instances = new ArrayList<NectarInstance>(loadDevAtCloudInstances(monitor));
+          List<NectarInstanceResponse> resp = pollInstances(instances, new SubProgressMonitor(monitor, 750));
 
-    List<NectarInstanceResponse> resp = pollInstances(instances, monitor);
+          Iterator<NectarChangeListener> iterator = nectarChangeListeners.iterator();
+          while (iterator.hasNext()) {
+            NectarChangeListener listener = (NectarChangeListener) iterator.next();
+            listener.nectarsChanged(resp);
+          }
+          monitor.worked(10);
 
-    return resp;
+          return Status.OK_STATUS;
+        } catch (CloudBeesException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+
+          return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage());
+        } finally {
+          monitor.done();
+        }
+      }
+    };
+
+    job.setUser(userAction);
+    job.schedule();
   }
 
   private List<NectarInstanceResponse> pollInstances(List<NectarInstance> instances, IProgressMonitor monitor) {
-    List<NectarInstanceResponse> resp = new ArrayList<NectarInstanceResponse>();
-    for (NectarInstance inst : instances) {
-      NectarService service = lookupNectarService(inst);
-      try {
-        resp.add(service.getInstance(monitor));
-      } catch (CloudBeesException e) {
-        //System.out.println("Failed to contact " + service + ". Not adding to the list for now.");//TODO log
+    try {
+      int scale = 10;
+      monitor.beginTask("Fetching instance details", instances.size() * scale);
 
-        //TODO Consider adding it to the list anyway, just mark it somehow as "Unreachable" in UI!
-        NectarInstanceResponse fakeResp = new NectarInstanceResponse();
-        fakeResp.serviceUrl = inst.url;
-        fakeResp.nodeName = inst.label;
-        fakeResp.offline = true;
+      List<NectarInstanceResponse> resp = new ArrayList<NectarInstanceResponse>();
+      for (NectarInstance inst : instances) {
+        if (monitor.isCanceled()) {
+          throw new OperationCanceledException();
+        }
+        try {
+          NectarService service = lookupNectarService(inst);
+          monitor.setTaskName("Fetching instance details for '" + inst.label + "'...");
+          resp.add(service.getInstance(monitor));
+        } catch (OperationCanceledException e) {
+          throw e;
+        } catch (CloudBeesException e) {
+          //System.out.println("Failed to contact " + service + ". Not adding to the list for now.");//TODO log
 
-        //fakeResp.views = new NectarInstanceResponse.View[0];
-        resp.add(fakeResp);
+          //TODO Consider adding it to the list anyway, just mark it somehow as "Unreachable" in UI!
+          NectarInstanceResponse fakeResp = new NectarInstanceResponse();
+          fakeResp.serviceUrl = inst.url;
+          fakeResp.nodeName = inst.label;
+          fakeResp.offline = true;
+          fakeResp.atCloud = inst.atCloud;
 
-        e.printStackTrace();
+          //fakeResp.views = new NectarInstanceResponse.View[0];
+          resp.add(fakeResp);
+
+          e.printStackTrace();
+        } finally {
+          monitor.worked(1 * scale);
+        }
       }
+
+      return resp;
+    } finally {
+      monitor.done();
     }
-    return resp;
   }
 
   public NectarService lookupNectarService(NectarInstance inst) {
@@ -309,37 +354,55 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
    * @param viewUrl
    * @throws CloudBeesException
    */
-  public void showJobs(String serviceUrl, String viewUrl) throws CloudBeesException {
+  public void showJobs(final String serviceUrl, final String viewUrl) throws CloudBeesException {
     // System.out.println("Show jobs: " + serviceUrl + " - " + viewUrl);
 
     if (serviceUrl == null && viewUrl == null) {
       return; // no info
     }
 
+    IRunnableWithProgress op = new IRunnableWithProgress() {
+      public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+        try {
+          //      IProgressMonitor monitor = new NullProgressMonitor(); // TODO add progress monitor instance from somewhere
+
+          PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(JobsView.ID);
+
+          //TODO Start monitoring this job list
+          String servUrl = serviceUrl;
+          if (servUrl == null && viewUrl != null) {
+            servUrl = getNectarServiceForUrl(viewUrl).getUrl();
+          }
+
+          NectarJobsResponse jobs = getNectarServiceForUrl(servUrl).getJobs(viewUrl, monitor);
+
+          if (monitor.isCanceled()) {
+            throw new OperationCanceledException();
+          }
+
+          Iterator<NectarChangeListener> iterator = nectarChangeListeners.iterator();
+          while (iterator.hasNext()) {
+            NectarChangeListener listener = (NectarChangeListener) iterator.next();
+            listener.activeJobViewChanged(jobs);
+          }
+        } catch (CloudBeesException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        } catch (PartInitException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
+    };
+
+    IProgressService service = PlatformUI.getWorkbench().getProgressService();
     try {
-      IProgressMonitor monitor = new NullProgressMonitor(); // TODO add progress monitor instance from somewhere
-
-      PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(JobsView.ID);
-
-      //TODO Start monitoring this job list
-
-      if (serviceUrl == null && viewUrl != null) {
-        serviceUrl = getNectarServiceForUrl(viewUrl).getUrl();
-      }
-
-      NectarJobsResponse jobs = getNectarServiceForUrl(serviceUrl).getJobs(viewUrl, monitor);
-
-      Iterator<NectarChangeListener> iterator = nectarChangeListeners.iterator();
-      while (iterator.hasNext()) {
-        NectarChangeListener listener = (NectarChangeListener) iterator.next();
-        listener.activeJobViewChanged(jobs);
-      }
-
-    } catch (PartInitException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      service.run(false, true, op);
+    } catch (InvocationTargetException e) {
+      // Operation was canceled
+    } catch (InterruptedException e) {
+      // Handle the wrapped exception
     }
-
   }
 
   public void addNectarChangeListener(NectarChangeListener nectarChangeListener) {

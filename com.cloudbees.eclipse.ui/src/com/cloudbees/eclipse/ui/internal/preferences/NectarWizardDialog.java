@@ -31,7 +31,7 @@ public class NectarWizardDialog extends WizardDialog {
         run(false, true, new IRunnableWithProgress() {
           
           public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-            monitor.setTaskName("Validating Nectar URL...");
+            monitor.setTaskName("Validating Jenkins URL...");
 
             NectarService ns = CloudBeesUIPlugin.getDefault().lookupNectarService(
                 ((NectarWizard) getWizard()).getNectarInstance());

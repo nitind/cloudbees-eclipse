@@ -1,5 +1,7 @@
 package com.cloudbees.eclipse.ui.views.nectartree;
 
+import java.util.List;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
@@ -22,14 +24,16 @@ import org.eclipse.ui.part.ViewPart;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.Logger;
+import com.cloudbees.eclipse.core.NectarChangeListener;
 import com.cloudbees.eclipse.core.nectar.api.BaseNectarResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse.View;
+import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 
 /**
- * View showing jobs for both NectarInfo offline installations and JaaS Nectar instances
+ * View showing jobs for both Jenkins offline installations and JaaS Nectar instances
  * 
  * @author ahtik
  */
@@ -38,13 +42,14 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
   public static final String ID = "com.cloudbees.eclipse.ui.views.nectartree.NectarTreeView";
 
   private TreeViewer viewer;
+  private NectarChangeListener nectarChangeListener;
 
   private final Logger log = CloudBeesUIPlugin.getDefault().getLogger();
 
   private Action action1; // Configure Account
-  private Action action2; // Attach NectarInfo
+  private Action action2; // Attach Jenkins
   private Action action3; // Reload Forge repositories
-  private Action action4; // Reload Jaas repositories
+  private Action action4; // Reload Jenkins repositories
 
   class NameSorter extends ViewerSorter {
 
@@ -68,7 +73,7 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
 
   public void createPartControl(Composite parent) {
     viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-    viewer.setContentProvider(new InstanceContentProvider(getViewSite()));
+    viewer.setContentProvider(new InstanceContentProvider());
     viewer.setLabelProvider(new InstanceLabelProvider());
     viewer.setSorter(new NameSorter());
     viewer.setInput(getViewSite());
@@ -128,6 +133,34 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
     makeActions();
     contributeToActionBars();
 
+    nectarChangeListener = new NectarChangeListener() {
+      public void activeJobViewChanged(NectarJobsResponse newView) {
+      }
+
+      public void nectarsChanged(final List<NectarInstanceResponse> instances) {
+        //        try {
+        //          PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new IRunnableWithProgress() {
+        //          public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+          public void run() {
+            viewer.getContentProvider().inputChanged(viewer, null, instances); // make it refresh itself
+          }
+        });
+        //          }
+        //          });
+        //        } catch (InvocationTargetException e) {
+        //          // TODO Auto-generated catch block
+        //          e.printStackTrace();
+        //        } catch (InterruptedException e) {
+        //          // TODO Auto-generated catch block
+        //          e.printStackTrace();
+        //        }
+      }
+    };
+
+    CloudBeesUIPlugin.getDefault().addNectarChangeListener(nectarChangeListener);
+
+    CloudBeesUIPlugin.getDefault().reloadAllNectars(false);
   }
 
   private void contributeToActionBars() {
@@ -172,8 +205,8 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
         }
       }
     };
-    action2.setText("Attach NectarInfo instances...");
-    action2.setToolTipText("Attach more NectarInfo instances to monitor");
+    action2.setText("Attach Jenkins instances...");
+    action2.setToolTipText("Attach more Jenkins instances to monitor");
 
     /*		action2.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
     				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
@@ -182,7 +215,7 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
     action3 = new Action() {
       public void run() {
         try {
-          CloudBeesUIPlugin.getDefault().reloadForgeRepos();
+          CloudBeesUIPlugin.getDefault().reloadForgeRepos(true);
         } catch (CloudBeesException e) {
           //TODO I18n!
           CloudBeesUIPlugin.showError("Failed to reload Forge repositories!", e);
@@ -202,11 +235,11 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
 
     action4 = new Action() {
       public void run() {
-        refreshTree();
+        CloudBeesUIPlugin.getDefault().reloadAllNectars(true);
       }
     };
-    action4.setText("Reload Nectar instances...");
-    action4.setToolTipText("Reload Nectar instances");
+    action4.setText("Reload Jenkins instances...");
+    action4.setToolTipText("Reload Jenkins instances");
     /*    action4.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
             .getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
     */
@@ -236,34 +269,17 @@ public class NectarTreeView extends ViewPart implements IPropertyChangeListener 
 
     if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())
         || PreferenceConstants.P_NECTAR_INSTANCES.equals(event.getProperty())) {
-      refreshTree();
+      CloudBeesUIPlugin.getDefault().reloadAllNectars(false);
     }
   }
 
   @Override
   public void dispose() {
     CloudBeesUIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
+    CloudBeesUIPlugin.getDefault().removeNectarChangeListener(nectarChangeListener);
+    nectarChangeListener = null;
+
     super.dispose();
   }
 
-  protected void refreshTree() {
-    //        try {
-    //          PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new IRunnableWithProgress() {
-    //          public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-    PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-      public void run() {
-          viewer.getContentProvider().inputChanged(viewer, null, null); // make it refresh itself
-          viewer.refresh();
-        }
-      });
-    //          }
-    //          });
-    //        } catch (InvocationTargetException e) {
-    //          // TODO Auto-generated catch block
-    //          e.printStackTrace();
-    //        } catch (InterruptedException e) {
-    //          // TODO Auto-generated catch block
-    //          e.printStackTrace();
-    //        }
-  }
 }

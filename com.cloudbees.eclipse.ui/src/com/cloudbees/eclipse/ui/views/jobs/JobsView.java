@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jface.action.Action;
@@ -34,12 +35,14 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.NectarChangeListener;
 import com.cloudbees.eclipse.core.NectarService;
+import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job;
 import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job.Build;
@@ -296,14 +299,19 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     
 
     nectarChangeListener = new NectarChangeListener() {
-      public void activeJobViewChanged(NectarJobsResponse newView) {
-        //System.out.println("Reloading items");//FIXME remove!
-        JobsView.this.setInput(newView);
+      public void activeJobViewChanged(final NectarJobsResponse newView) {
+        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+          public void run() {
+            JobsView.this.setInput(newView);
+          }
+        });
+      }
+
+      public void nectarsChanged(List<NectarInstanceResponse> instances) {
       }
     };
 
     CloudBeesUIPlugin.getDefault().addNectarChangeListener(nectarChangeListener);
-
   }
 
   protected String formatBuildInfo(Build build) {
@@ -468,7 +476,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         CloudBeesUIPlugin.getDefault().showJobs(serviceUrl, viewUrl);
       } catch (CloudBeesException e) {
         //TODO I18n!
-        CloudBeesUIPlugin.showError("Failed to reload Nectar jobs!", e);
+        CloudBeesUIPlugin.showError("Failed to reload Jenkins jobs!", e);
       }
     }
   }

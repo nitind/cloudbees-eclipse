@@ -16,8 +16,8 @@ public class ReloadJobsAction extends Action {
   public ReloadJobsAction() {
     super();
 
-    setText("Reload Nectar jobs...");
-    setToolTipText("Reload Nectar jobs");
+    setText("Reload Jenkins jobs...");
+    setToolTipText("Reload Jenkins jobs");
     setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_REFRESH));
 
     setAccelerator(SWT.F5);
@@ -31,7 +31,7 @@ public class ReloadJobsAction extends Action {
       CloudBeesUIPlugin.getDefault().showJobs(serviceUrl, viewUrl);
     } catch (CloudBeesException e) {
       //TODO I18n!
-      CloudBeesUIPlugin.showError("Failed to reload Nectar jobs!", e);
+      CloudBeesUIPlugin.showError("Failed to reload Jenkins jobs!", e);
     }
 
   }

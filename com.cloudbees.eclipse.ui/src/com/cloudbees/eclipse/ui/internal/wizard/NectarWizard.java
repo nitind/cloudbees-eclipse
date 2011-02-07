@@ -25,9 +25,9 @@ public class NectarWizard extends Wizard {
         .getResource("/icons/cb_wiz_icon2.png"));
     setDefaultPageImageDescriptor(id);
     if (ni.label == null) {
-      setWindowTitle("New Nectar instance");
+      setWindowTitle("New Jenkins instance");
     } else {
-      setWindowTitle("Edit Nectar instance");
+      setWindowTitle("Edit Jenkins instance");
     }
     setForcePreviousAndNextButtons(true);
     setHelpAvailable(false);

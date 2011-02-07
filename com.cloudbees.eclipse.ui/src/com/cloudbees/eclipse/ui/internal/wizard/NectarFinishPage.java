@@ -32,13 +32,13 @@ public class NectarFinishPage extends AbstractNectarPage {
     }
 
     if (error == null) {
-      setTitle("Congratulations! Nectar is configured properly");
-      setMessage("Specified Nectar location is working well!");
+      setTitle("Congratulations! Jenkins is configured properly");
+      setMessage("Specified Jenkins location is working well!");
       //setDescription("Wizard Page description");
 
     } else {
-      setTitle("Failure! Nectar is not configured properly");
-      setMessage("Specified Nectar location is not working, but you can add it nonetheless!");
+      setTitle("Failure! Jenkins is not configured properly");
+      setMessage("Specified Jenkins location is not working, but you can add it nonetheless!");
       //setDescription("Wizard Page description");
     }
 

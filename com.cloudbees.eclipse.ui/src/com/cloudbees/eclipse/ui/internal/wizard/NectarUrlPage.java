@@ -35,12 +35,12 @@ public class NectarUrlPage extends AbstractNectarPage {
 
   private void init() {
     if (isEditMode()) {
-      setTitle("Edit Nectar location");
-      setDescription("Edit Nectar location");
+      setTitle("Edit Jenkins location");
+      setDescription("Edit Jenkins location");
       validate();
     } else {
-      setTitle("New Nectar location");
-      setDescription("New Nectar location");
+      setTitle("New Jenkins location");
+      setDescription("New Jenkins location");
       setPageComplete(false);
     }
   }
@@ -66,8 +66,8 @@ public class NectarUrlPage extends AbstractNectarPage {
 
     Label lblUrl = new Label(comp, SWT.NONE);
     lblUrl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-    lblUrl.setToolTipText("Nectar location URL");
-    lblUrl.setText("Nectar &URL:");
+    lblUrl.setToolTipText("Jenkins location URL");
+    lblUrl.setText("Jenkins &URL:");
 
     textUrl = new Text(comp, SWT.BORDER);
     textUrl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));

@@ -111,7 +111,7 @@ public class NectarInstance implements Comparable<NectarInstance> {
   @Override
   public String toString() {
     StringBuffer ret = new StringBuffer();
-    ret.append("NectarInstance[");
+    ret.append("JenkinsInstance[");
     ret.append("label=" + label + ";");
     ret.append("url=" + url + ";");
     ret.append("username=" + username + ";");

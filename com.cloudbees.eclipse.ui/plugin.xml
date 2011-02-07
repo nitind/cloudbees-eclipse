@@ -15,7 +15,7 @@
             class="com.cloudbees.eclipse.ui.internal.preferences.NectarInstancesPreferencePage"
             id="com.cloudbees.eclipse.ui.preferences.NectarInstancesPreferencePage"
             category="com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage"            
-            name="Nectar">
+            name="Jenkins">
       </page>
 
    </extension>

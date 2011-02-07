@@ -282,7 +282,7 @@ public class GrandCentralService {
       return instances;
 
     } catch (Exception e) {
-      throw new CloudBeesException("Failed to get remote Dev@cloud nectar instances"
+      throw new CloudBeesException("Failed to get remote DEV@cloud Jenkins instances"
           + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
     }
   }

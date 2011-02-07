@@ -11,6 +11,7 @@ public class NectarInstanceResponse extends BaseNectarResponse {
   public String nodeName;
   public String description;
   public Boolean useSecurity;
+  public boolean atCloud;
 
   public PrimaryView primaryView;
   public View[] views;

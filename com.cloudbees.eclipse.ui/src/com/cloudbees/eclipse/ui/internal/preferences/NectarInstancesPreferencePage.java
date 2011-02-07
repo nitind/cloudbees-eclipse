@@ -65,7 +65,7 @@ public class NectarInstancesPreferencePage extends PreferencePage implements IWo
     comp.setLayout(gl_comp);
 
     Label lblConfiguredNectars = new Label(comp, SWT.NONE);
-    lblConfiguredNectars.setText("Available Nectar instances:"); //TODO i18n
+    lblConfiguredNectars.setText("Available Jenkins instances:"); //TODO i18n
 
     Composite compositeNectarInstances = new Composite(comp, SWT.NONE);
     compositeNectarInstances.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
