@@ -8,6 +8,8 @@ import java.util.List;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -165,6 +167,11 @@ public class NectarService {
 
     boolean tryToLogin = true;
     do {
+
+      if (nectar.atCloud || nectar.authenticate) {
+        httpclient.getCredentialsProvider().setCredentials(new AuthScope(post.getURI().getHost(), AuthScope.ANY_PORT),
+            new UsernamePasswordCredentials(nectar.username, nectar.password));
+      }
 
       if (devAtCloud && lastJossoSessionId != null) {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
