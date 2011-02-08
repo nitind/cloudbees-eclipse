@@ -198,11 +198,11 @@ public class BuildPart extends EditorPart {
         String jobUrl = details.getJob().url;
         JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(jobUrl);
 
-        //TODO Add job monitor!
+        //TODO Add job monitor
         try {
           ns.invokeBuild(jobUrl, null);
         } catch (CloudBeesException e) {
-          // TODO Auto-generated catch block
+          // TODO handle
           e.printStackTrace();
         }
 
@@ -228,7 +228,7 @@ public class BuildPart extends EditorPart {
       JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(details.getJob().url);
       dataBuildDetail = service.getJobDetails(details.getBuildUrl(), null);
     } catch (CloudBeesException e) {
-      // TODO Auto-generated catch block
+      // TODO handle
       e.printStackTrace();
     }
 
@@ -258,7 +258,7 @@ public class BuildPart extends EditorPart {
       details.setBuildUrl(dataBuildDetail.url);
 
     } catch (CloudBeesException e) {
-      // TODO Auto-generated catch block
+      // TODO handle
       e.printStackTrace();
     }
 
@@ -287,7 +287,7 @@ public class BuildPart extends EditorPart {
       JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(details.getLastBuild().url);
 
       try {
-        //TODO Add progress monitoring
+        //TODO Add monitor
         dataBuildDetail = service.getJobDetails(details.getLastBuild().url, monitor);
 
         dataJobBuilds = service.getJobBuilds(details.getJob().url, monitor);
@@ -295,7 +295,7 @@ public class BuildPart extends EditorPart {
         this.lastBuildAvailable = true;
       } catch (CloudBeesException e) {
         //throw new PartInitException("Failed to load build information from the remote host!", e);
-        //TODO Handle!
+        //TODO handle
         e.printStackTrace();
         return;
       }

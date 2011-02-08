@@ -50,7 +50,7 @@ public class GrandCentralService {
   }
 
   /**
-   * Validates user credential against CloudBees SSO authentication server. FIXME Refactor to json-based validation
+   * Validates user credential against CloudBees SSO authentication server. TODO Refactor to json-based validation
    * 
    * @param email
    * @param password
@@ -130,7 +130,7 @@ public class GrandCentralService {
         HttpResponse resp = httpclient.execute(post);
         int code = resp.getStatusLine().getStatusCode();
         if (code == 302 || code == 301) {
-          // FIXME Temporarily until json API becomes available, validate
+          // TODO Temporarily until json API becomes available, validate
           // user by assuming redirect means successful login
           return true;
         }

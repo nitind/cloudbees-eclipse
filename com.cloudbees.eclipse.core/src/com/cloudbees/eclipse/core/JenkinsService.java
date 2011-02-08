@@ -83,7 +83,7 @@ public class JenkinsService {
       try {
         views = g.fromJson(bodyResponse, JenkinsJobsResponse.class);
       } catch (Exception e) {
-        //FIXME log properly
+        //TODO handle
         //System.out.println("Illegal JSON response from the server for the request:\n" + uri + ":\n" + bodyResponse);
         throw e;
       }

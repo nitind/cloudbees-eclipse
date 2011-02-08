@@ -153,7 +153,7 @@ public class JenkinsUrlPage extends AbstractJenkinsPage {
     }
 
     if (textLabel.getText().length() == 0) {
-      setErrorMessage("Label is empty!");// TODO I18n
+      setErrorMessage("Label is empty!");// TODO i18n
       setPageComplete(false);
       return;
     }
@@ -166,7 +166,7 @@ public class JenkinsUrlPage extends AbstractJenkinsPage {
       }
 
       if (textPassword.getText().trim().length() == 0) {
-        setErrorMessage("Password is empty!");// TODO I18n
+        setErrorMessage("Password is empty!");// TODO i18n
         setPageComplete(false);
         return;
       }
