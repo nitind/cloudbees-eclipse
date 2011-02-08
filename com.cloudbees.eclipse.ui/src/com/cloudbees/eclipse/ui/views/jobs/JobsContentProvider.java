@@ -8,12 +8,12 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IViewSite;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
-import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
 
 
 public class JobsContentProvider implements IStructuredContentProvider {
-  private List<NectarJobsResponse.Job> root;
+  private List<JenkinsJobsResponse.Job> root;
   private IViewSite site;
 
   public JobsContentProvider(IViewSite iViewSite) {
@@ -34,17 +34,17 @@ public class JobsContentProvider implements IStructuredContentProvider {
           initialize();
         } catch (Exception e) {
           e.printStackTrace();
-          return new NectarJobsResponse.Job[0];//service not available
+          return new JenkinsJobsResponse.Job[0];//service not available
         }
       }
-      return root.toArray(new NectarJobsResponse.Job[0]);
+      return root.toArray(new JenkinsJobsResponse.Job[0]);
     }
     return null;
   }
 
 
   private void initialize() throws CloudBeesException {
-    root = new ArrayList<NectarJobsResponse.Job>();
+    root = new ArrayList<JenkinsJobsResponse.Job>();
   }
 
   public void setJobs(List<Job> jobs) {

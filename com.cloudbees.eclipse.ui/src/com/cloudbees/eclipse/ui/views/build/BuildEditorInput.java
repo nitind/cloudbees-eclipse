@@ -2,8 +2,8 @@ package com.cloudbees.eclipse.ui.views.build;
 
 import org.eclipse.ui.internal.part.NullEditorInput;
 
-import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job;
-import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job.Build;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job.Build;
 
 public class BuildEditorInput extends NullEditorInput {
 

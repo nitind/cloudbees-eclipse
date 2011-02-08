@@ -13,6 +13,6 @@ public class PreferenceConstants {
   public static final String P_ENABLE_JAAS = "cloudbees.jaas.enable";
   public static final String P_ENABLE_FORGE = "cloudbees.forge.enable";
 
-  public static final String P_NECTAR_INSTANCES = "cloudbees.nectar.instances";
+  public static final String P_JENKINS_INSTANCES = "cloudbees.jenkins.instances";
 
 }

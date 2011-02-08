@@ -33,13 +33,13 @@ import org.osgi.framework.BundleContext;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.JenkinsChangeListener;
+import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
-import com.cloudbees.eclipse.core.NectarChangeListener;
-import com.cloudbees.eclipse.core.NectarService;
-import com.cloudbees.eclipse.core.domain.NectarInstance;
-import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
-import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
-import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job;
+import com.cloudbees.eclipse.core.domain.JenkinsInstance;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
 import com.cloudbees.eclipse.ui.views.build.BuildEditorInput;
 import com.cloudbees.eclipse.ui.views.build.BuildPart;
 import com.cloudbees.eclipse.ui.views.jobs.JobsView;
@@ -59,9 +59,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   private Logger logger;
 
-  private List<NectarService> nectarRegistry = new ArrayList<NectarService>();
+  private List<JenkinsService> jenkinsRegistry = new ArrayList<JenkinsService>();
 
-  private List<NectarChangeListener> nectarChangeListeners = new ArrayList<NectarChangeListener>();
+  private List<JenkinsChangeListener> jenkinsChangeListeners = new ArrayList<JenkinsChangeListener>();
 
   private IPropertyChangeListener prefListener;
 
@@ -100,7 +100,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_run.png")));
     reg.put(CBImages.IMG_FOLDER_LOCAL,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_run.png")));
-    reg.put(CBImages.IMG_INSTANCE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/jenkins.png")));
+    reg.put(CBImages.IMG_INSTANCE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/instance.png")));
     reg.put(CBImages.IMG_VIEW,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_big.png")));
 
@@ -196,66 +196,66 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return logger;
   }
 
-  public List<NectarInstance> loadManualNectarInstances() {
+  public List<JenkinsInstance> loadManualJenkinsInstances() {
     IPreferenceStore store = CloudBeesUIPlugin.getDefault().getPreferenceStore();
-    String instances = store.getString(PreferenceConstants.P_NECTAR_INSTANCES);
-    List<NectarInstance> list = NectarInstance.decode(instances);
+    String instances = store.getString(PreferenceConstants.P_JENKINS_INSTANCES);
+    List<JenkinsInstance> list = JenkinsInstance.decode(instances);
 
     if (list != null) {
-      for (NectarInstance inst : list) {
-        lookupNectarService(inst);
+      for (JenkinsInstance inst : list) {
+        lookupJenkinsService(inst);
       }
     }
 
     return list;
   }
 
-  public List<NectarInstance> loadDevAtCloudInstances(IProgressMonitor monitor) throws CloudBeesException {
+  public List<JenkinsInstance> loadDevAtCloudInstances(IProgressMonitor monitor) throws CloudBeesException {
 
     // TODO read from prefs
     //    String instances = store.getString(PreferenceConstants.P_DEVATCLOUD_INSTANCES);
-    //    List<NectarInstance> list = NectarInstance.decode(instances);
+    //    List<JenkinsInstance> list = JenkinsInstance.decode(instances);
 
-    List<NectarInstance> instances = CloudBeesCorePlugin.getDefault().getGrandCentralService()
-        .loadDACNectarInstances(monitor);
+    List<JenkinsInstance> instances = CloudBeesCorePlugin.getDefault().getGrandCentralService()
+        .loadDevAtCloudInstances(monitor);
 
-    for (NectarInstance ni : instances) {
-      if (getNectarServiceForUrl(ni.url) == null) {
-        nectarRegistry.add(new NectarService(ni));
+    for (JenkinsInstance ni : instances) {
+      if (getJenkinsServiceForUrl(ni.url) == null) {
+        jenkinsRegistry.add(new JenkinsService(ni));
       }
     }
 
     return instances;
   }
 
-  public void saveNectarInstance(NectarInstance ni) {
+  public void saveJenkinsInstance(JenkinsInstance ni) {
     if (ni == null || ni.label == null || ni.url == null || ni.label.length() == 0 || ni.url.length() == 0) {
       throw new IllegalStateException("Unable to add new instance with an empty url or label!");
     }
-    List<NectarInstance> list = loadManualNectarInstances();
+    List<JenkinsInstance> list = loadManualJenkinsInstances();
     //System.out.println("save before: " + list);
     list.remove(ni); // when editing - id is the same, but props old, so lets kill old instance first
     list.add(ni);
 
-    nectarRegistry.remove(new NectarService(ni));
+    jenkinsRegistry.remove(new JenkinsService(ni));
 
     //System.out.println("save after: " + list);
     Collections.sort(list);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
-        .setValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
+        .setValue(PreferenceConstants.P_JENKINS_INSTANCES, JenkinsInstance.encode(list));
   }
 
-  public void removeNectarInstance(NectarInstance ni) {
+  public void removeJenkinsInstance(JenkinsInstance ni) {
     if (ni == null) {
       throw new RuntimeException("Unable to remove null instance!");
     }
-    List<NectarInstance> list = loadManualNectarInstances();
+    List<JenkinsInstance> list = loadManualJenkinsInstances();
     list.remove(ni);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
-        .setValue(PreferenceConstants.P_NECTAR_INSTANCES, NectarInstance.encode(list));
+        .setValue(PreferenceConstants.P_JENKINS_INSTANCES, JenkinsInstance.encode(list));
   }
 
-  public void reloadAllNectars(boolean userAction) {
+  public void reloadAllJenkins(boolean userAction) {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job(
         "Loading DEV@Cloud & Jenkins instances") {
       protected IStatus run(IProgressMonitor monitor) {
@@ -266,18 +266,18 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         try {
           monitor.beginTask("Reading DEV@Cloud and Jenkins configuration", 1000);
 
-          List<NectarInstance> instances = new ArrayList<NectarInstance>();
-          instances.addAll(loadManualNectarInstances());
+          List<JenkinsInstance> instances = new ArrayList<JenkinsInstance>();
+          instances.addAll(loadManualJenkinsInstances());
           monitor.worked(90);
           instances.addAll(loadDevAtCloudInstances(monitor));
           monitor.worked(150);
 
-          List<NectarInstanceResponse> resp = pollInstances(instances, new SubProgressMonitor(monitor, 750));
+          List<JenkinsInstanceResponse> resp = pollInstances(instances, new SubProgressMonitor(monitor, 750));
 
-          Iterator<NectarChangeListener> iterator = nectarChangeListeners.iterator();
+          Iterator<JenkinsChangeListener> iterator = jenkinsChangeListeners.iterator();
           while (iterator.hasNext()) {
-            NectarChangeListener listener = (NectarChangeListener) iterator.next();
-            listener.nectarsChanged(resp);
+            JenkinsChangeListener listener = (JenkinsChangeListener) iterator.next();
+            listener.jenkinsChanged(resp);
           }
           monitor.worked(10);
 
@@ -297,18 +297,18 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     job.schedule();
   }
 
-  private List<NectarInstanceResponse> pollInstances(List<NectarInstance> instances, IProgressMonitor monitor) {
+  private List<JenkinsInstanceResponse> pollInstances(List<JenkinsInstance> instances, IProgressMonitor monitor) {
     try {
       int scale = 10;
       monitor.beginTask("Fetching instance details", instances.size() * scale);
 
-      List<NectarInstanceResponse> resp = new ArrayList<NectarInstanceResponse>();
-      for (NectarInstance inst : instances) {
+      List<JenkinsInstanceResponse> resp = new ArrayList<JenkinsInstanceResponse>();
+      for (JenkinsInstance inst : instances) {
         if (monitor.isCanceled()) {
           throw new OperationCanceledException();
         }
         try {
-          NectarService service = lookupNectarService(inst);
+          JenkinsService service = lookupJenkinsService(inst);
           monitor.setTaskName("Fetching instance details for '" + inst.label + "'...");
           resp.add(service.getInstance(monitor));
         } catch (OperationCanceledException e) {
@@ -317,13 +317,13 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           //System.out.println("Failed to contact " + service + ". Not adding to the list for now.");//TODO log
 
           //TODO Consider adding it to the list anyway, just mark it somehow as "Unreachable" in UI!
-          NectarInstanceResponse fakeResp = new NectarInstanceResponse();
+          JenkinsInstanceResponse fakeResp = new JenkinsInstanceResponse();
           fakeResp.serviceUrl = inst.url;
           fakeResp.nodeName = inst.label;
           fakeResp.offline = true;
           fakeResp.atCloud = inst.atCloud;
 
-          //fakeResp.views = new NectarInstanceResponse.View[0];
+          //fakeResp.views = new JenkinsInstanceResponse.View[0];
           resp.add(fakeResp);
 
           e.printStackTrace();
@@ -338,11 +338,11 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
   }
 
-  public NectarService lookupNectarService(NectarInstance inst) {
-    NectarService service = getNectarServiceForUrl(inst.url);
+  public JenkinsService lookupJenkinsService(JenkinsInstance inst) {
+    JenkinsService service = getJenkinsServiceForUrl(inst.url);
     if (service == null) {
-      service = new NectarService(inst);
-      nectarRegistry.add(service);
+      service = new JenkinsService(inst);
+      jenkinsRegistry.add(service);
     }
     return service;
   }
@@ -371,18 +371,18 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           //TODO Start monitoring this job list
           String servUrl = serviceUrl;
           if (servUrl == null && viewUrl != null) {
-            servUrl = getNectarServiceForUrl(viewUrl).getUrl();
+            servUrl = getJenkinsServiceForUrl(viewUrl).getUrl();
           }
 
-          NectarJobsResponse jobs = getNectarServiceForUrl(servUrl).getJobs(viewUrl, monitor);
+          JenkinsJobsResponse jobs = getJenkinsServiceForUrl(servUrl).getJobs(viewUrl, monitor);
 
           if (monitor.isCanceled()) {
             throw new OperationCanceledException();
           }
 
-          Iterator<NectarChangeListener> iterator = nectarChangeListeners.iterator();
+          Iterator<JenkinsChangeListener> iterator = jenkinsChangeListeners.iterator();
           while (iterator.hasNext()) {
-            NectarChangeListener listener = (NectarChangeListener) iterator.next();
+            JenkinsChangeListener listener = (JenkinsChangeListener) iterator.next();
             listener.activeJobViewChanged(jobs);
           }
         } catch (CloudBeesException e) {
@@ -405,18 +405,18 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
   }
 
-  public void addNectarChangeListener(NectarChangeListener nectarChangeListener) {
-    this.nectarChangeListeners.add(nectarChangeListener);
+  public void addJenkinsChangeListener(JenkinsChangeListener listener) {
+    this.jenkinsChangeListeners.add(listener);
   }
 
-  public void removeNectarChangeListener(NectarChangeListener listener) {
-    nectarChangeListeners.remove(listener);
+  public void removeJenkinsChangeListener(JenkinsChangeListener listener) {
+    jenkinsChangeListeners.remove(listener);
   }
 
-  public NectarService getNectarServiceForUrl(String serviceOrViewOrJobUrl) {
-    Iterator<NectarService> iter = nectarRegistry.iterator();
+  public JenkinsService getJenkinsServiceForUrl(String serviceOrViewOrJobUrl) {
+    Iterator<JenkinsService> iter = jenkinsRegistry.iterator();
     while (iter.hasNext()) {
-      NectarService service = (NectarService) iter.next();
+      JenkinsService service = (JenkinsService) iter.next();
       if (serviceOrViewOrJobUrl.startsWith(service.getUrl())) {
         return service;
       }
@@ -429,9 +429,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       return;
     }
     // Look up the service
-    Iterator<NectarService> it = nectarRegistry.iterator();
+    Iterator<JenkinsService> it = jenkinsRegistry.iterator();
     while (it.hasNext()) {
-      NectarService service = (NectarService) it.next();
+      JenkinsService service = (JenkinsService) it.next();
       if (el.url.startsWith(service.getUrl())) {
 
         try {

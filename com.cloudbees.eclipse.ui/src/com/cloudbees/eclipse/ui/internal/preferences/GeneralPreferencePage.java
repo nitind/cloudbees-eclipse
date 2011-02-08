@@ -73,7 +73,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
     addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_JAAS, Messages.pref_enable_jaas, groupInnerComp));
     addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_FORGE, Messages.pref_enable_forge, groupInnerComp));
 
-    createAttachNectarLink(groupInnerComp);
+    createAttachJenkinsLink(groupInnerComp);
   }
 
   private void createCompositeLogin() {
@@ -217,16 +217,16 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
   }
 
-  private void createAttachNectarLink(Composite parent) {
+  private void createAttachJenkinsLink(Composite parent) {
     final Link link = new Link(parent, SWT.NONE);
-    link.setText(Messages.pref_attach_nectar);
+    link.setText(Messages.pref_attach_jenkins);
     link.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         PreferencesUtil.createPreferenceDialogOn(link.getShell(),
-            "com.cloudbees.eclipse.ui.preferences.NectarInstancesPreferencePage", null, null);
+            "com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage", null, null);
       }
     });
-    String linktooltip = Messages.pref_attach_nectar_tooltip;
+    String linktooltip = Messages.pref_attach_jenkins_tooltip;
     link.setToolTipText(linktooltip);
   }
 

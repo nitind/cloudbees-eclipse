@@ -40,13 +40,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.JenkinsChangeListener;
+import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
-import com.cloudbees.eclipse.core.NectarChangeListener;
-import com.cloudbees.eclipse.core.NectarService;
-import com.cloudbees.eclipse.core.nectar.api.NectarInstanceResponse;
-import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
-import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job;
-import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job.Build;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job.Build;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.ui.CBImages;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -54,7 +54,7 @@ import com.cloudbees.eclipse.ui.PreferenceConstants;
 import com.cloudbees.eclipse.ui.internal.actions.ReloadJobsAction;
 
 /**
- * View showing jobs for both NectarInfo offline installations and JaaS NectarInfo instances
+ * View showing jobs for both Jenkins offline installations and JaaS Nectar instances
  * 
  * @author ahtik
  */
@@ -73,7 +73,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
   private final Map<String, Image> stateIcons = new HashMap<String, Image>();
 
-  private NectarChangeListener nectarChangeListener;
+  private JenkinsChangeListener jenkinsChangeListener;
 
   private JobsContentProvider contentProvider;
 
@@ -86,13 +86,13 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     super();
   }
 
-  protected void setInput(NectarJobsResponse newView) {
+  protected void setInput(JenkinsJobsResponse newView) {
 
     if (newView == null || newView.jobs == null) {
       setContentDescription("No jobs available.");
-      contentProvider.setJobs(new ArrayList<NectarJobsResponse.Job>());
+      contentProvider.setJobs(new ArrayList<JenkinsJobsResponse.Job>());
     } else {
-      String label = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(newView.serviceUrl).getLabel();
+      String label = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(newView.serviceUrl).getLabel();
 
       String viewInfo = "";
       if (newView.name != null && newView.name.length() > 0) {
@@ -121,9 +121,9 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     @Override
     public int compare(Viewer viewer, Object e1, Object e2) {
 
-      if (e1 instanceof NectarJobsResponse.Job && e2 instanceof NectarJobsResponse.Job) {
-        NectarJobsResponse.Job j1 = (NectarJobsResponse.Job) e1;
-        NectarJobsResponse.Job j2 = (NectarJobsResponse.Job) e2;
+      if (e1 instanceof JenkinsJobsResponse.Job && e2 instanceof JenkinsJobsResponse.Job) {
+        JenkinsJobsResponse.Job j1 = (JenkinsJobsResponse.Job) e1;
+        JenkinsJobsResponse.Job j2 = (JenkinsJobsResponse.Job) e2;
 
         if (j1.displayName != null && j2.displayName != null) {
           return j1.displayName.toLowerCase().compareTo(j2.displayName.toLowerCase());
@@ -150,7 +150,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     createColumn("S", 20, JobSorter.STATE, new CellLabelProvider() {
       public void update(ViewerCell cell) {
-        NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
+        JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
 
         String key = job.color;
 
@@ -182,7 +182,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     //TODO i18n
     TableViewerColumn namecol = createColumn("Job", 250, JobSorter.JOB, new CellLabelProvider() {
       public void update(ViewerCell cell) {
-        NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
+        JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
         String val = job.displayName;
         if (job.inQueue) {
           val = val + " (in queue)";
@@ -196,21 +196,21 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     /*    createColumn("Last build result", 100, new CellLabelProvider() {
           public void update(ViewerCell cell) {
-            NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
+            JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
             cell.setText("n/a");//TODO
           }
         });
 
         createColumn("Last Testsuite result", 100, new CellLabelProvider() {
           public void update(ViewerCell cell) {
-            NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
+            JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
             cell.setText("n/a");//TODO
           }
         });
     */
     createColumn("Last build", 150, JobSorter.LAST_BUILD, new CellLabelProvider() {
       public void update(ViewerCell cell) {
-        NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
+        JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
         try {
           cell.setText(JobsView.this.formatBuildInfo(job.lastBuild));
         } catch (Throwable t) {
@@ -220,7 +220,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     });
     createColumn("Last success", 150, JobSorter.LAST_SUCCESS, new CellLabelProvider() {
       public void update(ViewerCell cell) {
-        NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
+        JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
         try {
           cell.setText(JobsView.this.formatBuildInfo(job.lastSuccessfulBuild));
         } catch (Throwable t) {
@@ -230,7 +230,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     });
     createColumn("Last failure", 105, JobSorter.LAST_FAILURE, new CellLabelProvider() {
       public void update(ViewerCell cell) {
-        NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
+        JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
         try {
           cell.setText(JobsView.this.formatBuildInfo(job.lastFailedBuild));
         } catch (Throwable t) {
@@ -241,7 +241,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     /*    createColumn("Comment", 100, new CellLabelProvider() {
           public void update(ViewerCell cell) {
-            NectarJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
+            JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
             cell.setText("n/a");//TODO
           }
         });
@@ -272,8 +272,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
         if (sel instanceof IStructuredSelection) {
           Object el = ((IStructuredSelection) sel).getFirstElement();
-          if (el instanceof NectarJobsResponse.Job) {
-            CloudBeesUIPlugin.getDefault().showBuildForJob(((NectarJobsResponse.Job) el));
+          if (el instanceof JenkinsJobsResponse.Job) {
+            CloudBeesUIPlugin.getDefault().showBuildForJob(((JenkinsJobsResponse.Job) el));
           }
         }
 
@@ -299,8 +299,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     });
     
 
-    nectarChangeListener = new NectarChangeListener() {
-      public void activeJobViewChanged(final NectarJobsResponse newView) {
+    jenkinsChangeListener = new JenkinsChangeListener() {
+      public void activeJobViewChanged(final JenkinsJobsResponse newView) {
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
           public void run() {
             JobsView.this.setInput(newView);
@@ -308,11 +308,11 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         });
       }
 
-      public void nectarsChanged(List<NectarInstanceResponse> instances) {
+      public void jenkinsChanged(List<JenkinsInstanceResponse> instances) {
       }
     };
 
-    CloudBeesUIPlugin.getDefault().addNectarChangeListener(nectarChangeListener);
+    CloudBeesUIPlugin.getDefault().addJenkinsChangeListener(jenkinsChangeListener);
   }
 
   protected String formatBuildInfo(Build build) {
@@ -334,7 +334,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     for (int i = 0; i < icons.length; i++) {
       //TODO Refactor to use CBImages!
       Image img = ImageDescriptor.createFromURL(
-          CloudBeesUIPlugin.getDefault().getBundle().getResource("/icons/jenkins-icons/16x16/" + icons[i] + ".gif"))
+          CloudBeesUIPlugin.getDefault().getBundle().getResource("/icons/instance-icons/16x16/" + icons[i] + ".gif"))
           .createImage();
       stateIcons.put(icons[i], img);
     }
@@ -342,7 +342,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     stateIcons.put(
         "disabled",
         ImageDescriptor.createFromURL(
-            CloudBeesUIPlugin.getDefault().getBundle().getResource("/icons/jenkins-icons/16x16/grey.gif"))
+            CloudBeesUIPlugin.getDefault().getBundle().getResource("/icons/instance-icons/16x16/grey.gif"))
             .createImage());
 
   }
@@ -418,7 +418,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     actionOpenJobInBrowser = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
         public void run() {
         if (JobsView.this.selectedJob != null) {
-          NectarJobsResponse.Job job = (Job) JobsView.this.selectedJob;
+          JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
           CloudBeesUIPlugin.getDefault().openWithBrowser(job.url);
         }
         }
@@ -434,8 +434,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
           //TODO Add job monitor!
           try {
-          NectarJobsResponse.Job job = (Job) JobsView.this.selectedJob;
-          NectarService ns = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(job.url);
+          JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
+          JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(job.url);
           ns.invokeBuild(job.url, new NullProgressMonitor());
           } catch (CloudBeesException e) {
             // TODO Auto-generated catch block
@@ -472,7 +472,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     }
     
-    if (PreferenceConstants.P_NECTAR_INSTANCES.equals(event.getProperty())) {
+    if (PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())) {
       try {
         CloudBeesUIPlugin.getDefault().showJobs(serviceUrl, viewUrl);
       } catch (CloudBeesException e) {
@@ -485,8 +485,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   @Override
   public void dispose() {
     CloudBeesUIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
-    CloudBeesUIPlugin.getDefault().removeNectarChangeListener(nectarChangeListener);
-    nectarChangeListener = null;
+    CloudBeesUIPlugin.getDefault().removeJenkinsChangeListener(jenkinsChangeListener);
+    jenkinsChangeListener = null;
 
     disposeImages();
 

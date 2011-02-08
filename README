@@ -2,8 +2,8 @@ CloudBees Eclipse Toolkit
 
 CloudBees Eclipse Toolkit provides developer access to various CloudBees services:
  * Forge source repositories (supported Git and SVN)
- * HaaS instances
- * Nectar instances
+ * JaaS instances
+ * Jenkins/Hudson instances
 
 == Setting up the development environment == 
 

@@ -22,11 +22,11 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.core.NectarService;
-import com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse;
-import com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse.ChangeSet.ChangeSetItem;
-import com.cloudbees.eclipse.core.nectar.api.NectarJobBuildsResponse;
-import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job.HealthReport;
+import com.cloudbees.eclipse.core.JenkinsService;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet.ChangeSetItem;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobBuildsResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job.HealthReport;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.ui.CBImages;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -36,7 +36,7 @@ public class BuildPart extends EditorPart {
   public static final String ID = "com.cloudbees.eclipse.ui.views.build.BuildPart"; //$NON-NLS-1$
   private final FormToolkit formToolkit = new FormToolkit(Display.getDefault());
 
-  private NectarBuildDetailsResponse dataBuildDetail;
+  private JenkinsBuildDetailsResponse dataBuildDetail;
 
   private boolean lastBuildAvailable = false;
   private ScrolledForm form;
@@ -46,7 +46,7 @@ public class BuildPart extends EditorPart {
   private Link contentBuildHistory;
   private Label contentJUnitTests;
   private Label contentRecentChanges;
-  private NectarJobBuildsResponse dataJobBuilds;
+  private JenkinsJobBuildsResponse dataJobBuilds;
 
   public BuildPart() {
     super();
@@ -196,7 +196,7 @@ public class BuildPart extends EditorPart {
       public void run() {
         BuildEditorInput details = (BuildEditorInput) getEditorInput();
         String jobUrl = details.getJob().url;
-        NectarService ns = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(jobUrl);
+        JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(jobUrl);
 
         //TODO Add job monitor!
         try {
@@ -225,7 +225,7 @@ public class BuildPart extends EditorPart {
     //TODO Add monitor
     try {
       BuildEditorInput details = (BuildEditorInput) getEditorInput();
-      NectarService service = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(details.getJob().url);
+      JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(details.getJob().url);
       dataBuildDetail = service.getJobDetails(details.getBuildUrl(), null);
     } catch (CloudBeesException e) {
       // TODO Auto-generated catch block
@@ -250,7 +250,7 @@ public class BuildPart extends EditorPart {
     BuildEditorInput details = (BuildEditorInput) getEditorInput();
     String newJobUrl = details.getJob().url + "/" + buildNo + "/";
 
-    NectarService service = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(details.getJob().url);
+    JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(details.getJob().url);
 
     //TODO Add monitor
     try {
@@ -284,7 +284,7 @@ public class BuildPart extends EditorPart {
       contentJUnitTests.setText("No data available.");
     } else {
 
-      NectarService service = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(details.getLastBuild().url);
+      JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(details.getLastBuild().url);
 
       try {
         //TODO Add progress monitoring
@@ -343,7 +343,7 @@ public class BuildPart extends EditorPart {
     }
 
     StringBuffer val = new StringBuffer();
-    for (NectarJobBuildsResponse.Build b : dataJobBuilds.builds) {
+    for (JenkinsJobBuildsResponse.Build b : dataJobBuilds.builds) {
 
       String result = b.result != null && b.result.length() > 0 ? " - " + b.result : "";
 
@@ -405,7 +405,7 @@ public class BuildPart extends EditorPart {
       return;
     }
 
-    for (com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse.Action action : dataBuildDetail.actions) {
+    for (com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Action action : dataBuildDetail.actions) {
       if ("testReport".equalsIgnoreCase(action.urlName)) {
         String val = "Total: " + action.totalCount + " Failed: " + action.failCount + " Skipped: " + action.skipCount;
         contentJUnitTests.setText(val);

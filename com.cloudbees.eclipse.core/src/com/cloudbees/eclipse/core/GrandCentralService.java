@@ -9,7 +9,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import com.cloudbees.eclipse.core.domain.NectarInstance;
+import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.gc.api.AccountNameRequest;
 import com.cloudbees.eclipse.core.gc.api.AccountNameResponse;
 import com.cloudbees.eclipse.core.gc.api.AccountNamesRequest;
@@ -256,10 +256,10 @@ public class GrandCentralService {
     }
   }
 
-  public List<NectarInstance> loadDACNectarInstances(IProgressMonitor monitor) throws CloudBeesException {
+  public List<JenkinsInstance> loadDevAtCloudInstances(IProgressMonitor monitor) throws CloudBeesException {
 
     if (!hasAuthInfo()) {
-      return new ArrayList<NectarInstance>();
+      return new ArrayList<JenkinsInstance>();
     }
 
     StringBuffer errMsg = new StringBuffer();
@@ -268,13 +268,13 @@ public class GrandCentralService {
 
       String[] accounts = getAccounts(monitor);
 
-      List<NectarInstance> instances = new ArrayList<NectarInstance>();
+      List<JenkinsInstance> instances = new ArrayList<JenkinsInstance>();
 
       for (String account : accounts) {
 
         String url = "https://" + account + ".ci." + HOST;
 
-        NectarInstance inst = new NectarInstance(account, url, email, password, true, true);
+        JenkinsInstance inst = new JenkinsInstance(account, url, email, password, true, true);
 
         instances.add(inst);
       }

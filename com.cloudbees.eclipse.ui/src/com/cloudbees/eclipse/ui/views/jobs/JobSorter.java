@@ -4,9 +4,9 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 
-import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse;
-import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job;
-import com.cloudbees.eclipse.core.nectar.api.NectarJobsResponse.Job.Build;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job.Build;
 
 public class JobSorter extends ViewerSorter {
 
@@ -27,8 +27,8 @@ public class JobSorter extends ViewerSorter {
   @Override
   public int compare(Viewer viewer, Object e1, Object e2) {
 
-    NectarJobsResponse.Job j1 = (NectarJobsResponse.Job) e1;
-    NectarJobsResponse.Job j2 = (NectarJobsResponse.Job) e2;
+    JenkinsJobsResponse.Job j1 = (JenkinsJobsResponse.Job) e1;
+    JenkinsJobsResponse.Job j2 = (JenkinsJobsResponse.Job) e2;
 
     switch (sortCol) {
     case STATE:

@@ -27,7 +27,7 @@ public final class Messages extends NLS {
   public static String pref_group_devAtCloud;
   public static String pref_enable_jaas;
   public static String pref_enable_forge;
-  public static String pref_attach_nectar;
-  public static String pref_attach_nectar_tooltip;
+  public static String pref_attach_jenkins;
+  public static String pref_attach_jenkins_tooltip;
 
 }

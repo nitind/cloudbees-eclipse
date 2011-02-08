@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.cloudbees.eclipse.core.domain.NectarInstance;
+import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 
 public class GCServiceTest {
 
@@ -21,35 +21,35 @@ public class GCServiceTest {
 
     assertTrue(gcs.validateUser(null));
 
-    List<NectarInstance> instances = gcs.loadDACNectarInstances(null);
+    List<JenkinsInstance> instances = gcs.loadDevAtCloudInstances(null);
 
-    Iterator<NectarInstance> it = instances.iterator();
+    Iterator<JenkinsInstance> it = instances.iterator();
     while (it.hasNext()) {
-      NectarInstance inst = (NectarInstance) it.next();
+      JenkinsInstance inst = (JenkinsInstance) it.next();
       System.out.println("Inst url:" + inst.url);
     }
 
-    /*    NectarService s = new NectarService(new NectarInstance("12345", "Hudson", "http://deadlock.netbeans.org/hudson/"));
+    /*    JenkinsService s = new JenkinsService(new JenkinsInstance("12345", "Hudson", "http://deadlock.netbeans.org/hudson/"));
 
-        System.out.println("Query tree: " + NectarInstanceResponse.getTreeQuery());
+        System.out.println("Query tree: " + JenkinsInstanceResponse.getTreeQuery());
 
-        NectarInstanceResponse vs = s.getInstance();
-        NectarInstanceResponse.View[] views = vs.views;
+        JenkinsInstanceResponse vs = s.getInstance();
+        JenkinsInstanceResponse.View[] views = vs.views;
         System.out.println("Primary view: " + vs.primaryView.name + ";" + vs.primaryView.url);
         System.out.println("Received views:");
 
-        for (NectarInstanceResponse.View v : views) {
+        for (JenkinsInstanceResponse.View v : views) {
           System.out.println("view: " + v.name + "; " + v.url);
         }
 
         assertTrue(views.length > 0);
 
         System.err.println("Jobs:");
-        NectarJobsResponse jb = s.getJobs(null);
-        NectarJobsResponse.Job[] jobs = jb.jobs;
+        JenkinsJobsResponse jb = s.getJobs(null);
+        JenkinsJobsResponse.Job[] jobs = jb.jobs;
         System.out.println("Received builds:");
 
-        for (NectarJobsResponse.Job j : jobs) {
+        for (JenkinsJobsResponse.Job j : jobs) {
           System.out.println("job: " + j.displayName);
         }
 

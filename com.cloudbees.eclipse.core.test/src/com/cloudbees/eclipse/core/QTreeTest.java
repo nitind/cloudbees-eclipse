@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.cloudbees.eclipse.core.nectar.api.NectarBuildDetailsResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
 
 public class QTreeTest {
 
@@ -13,7 +13,7 @@ public class QTreeTest {
   @Test
   public void testQTree() throws CloudBeesException {
 
-    String qtree = NectarBuildDetailsResponse.QTREE;
+    String qtree = JenkinsBuildDetailsResponse.QTREE;
     System.out.println("Qtree: " + qtree);
 
     assertEquals(-1, qtree.indexOf("builtOnchangeSet"));
