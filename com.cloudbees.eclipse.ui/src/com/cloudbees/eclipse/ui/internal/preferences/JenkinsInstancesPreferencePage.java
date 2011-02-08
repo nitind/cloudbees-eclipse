@@ -188,7 +188,7 @@ public class JenkinsInstancesPreferencePage extends PreferencePage implements IW
   }
 
   private void loadTable() {
-    // FIXME preserve selection on reload
+    // TODO preserve selection on reload
 
     table.removeAll();
 

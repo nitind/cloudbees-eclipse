@@ -116,7 +116,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           try {
             loadAccountCredentials();
           } catch (CloudBeesException e) {
-            // TODO Auto-generated catch block
+            // TODO handle
             e.printStackTrace();
           }
         }
@@ -157,7 +157,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Forge repositories") {
       protected IStatus run(IProgressMonitor monitor) {
         if (!getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_FORGE)) {
-          // Forge sync disabled. TODO Load?
+          // Forge sync disabled.
           return Status.CANCEL_STATUS;
         }
 
@@ -167,7 +167,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           monitor.worked(1000);
           return Status.OK_STATUS;
         } catch (Exception e) {
-          // TODO: handle exception
+          // TODO handle
           e.printStackTrace();
           return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage());
         } finally {
@@ -211,10 +211,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   public List<JenkinsInstance> loadDevAtCloudInstances(IProgressMonitor monitor) throws CloudBeesException {
-
-    // TODO read from prefs
-    //    String instances = store.getString(PreferenceConstants.P_DEVATCLOUD_INSTANCES);
-    //    List<JenkinsInstance> list = JenkinsInstance.decode(instances);
 
     List<JenkinsInstance> instances = CloudBeesCorePlugin.getDefault().getGrandCentralService()
         .loadDevAtCloudInstances(monitor);
@@ -283,7 +279,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
           return Status.OK_STATUS;
         } catch (CloudBeesException e) {
-          // TODO Auto-generated catch block
+          // TODO handle
           e.printStackTrace();
 
           return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage());
@@ -314,19 +310,14 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         } catch (OperationCanceledException e) {
           throw e;
         } catch (CloudBeesException e) {
-          //System.out.println("Failed to contact " + service + ". Not adding to the list for now.");//TODO log
-
-          //TODO Consider adding it to the list anyway, just mark it somehow as "Unreachable" in UI!
           JenkinsInstanceResponse fakeResp = new JenkinsInstanceResponse();
           fakeResp.serviceUrl = inst.url;
           fakeResp.nodeName = inst.label;
           fakeResp.offline = true;
           fakeResp.atCloud = inst.atCloud;
-
-          //fakeResp.views = new JenkinsInstanceResponse.View[0];
           resp.add(fakeResp);
 
-          e.printStackTrace();
+          logger.info("Failed to fetch info about '" + inst.url + "':" + e.getLocalizedMessage(), e);
         } finally {
           monitor.worked(1 * scale);
         }
@@ -364,11 +355,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     IRunnableWithProgress op = new IRunnableWithProgress() {
       public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         try {
-          //      IProgressMonitor monitor = new NullProgressMonitor(); // TODO add progress monitor instance from somewhere
-
           PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(JobsView.ID);
 
-          //TODO Start monitoring this job list
+          //TODO Add job monitor
           String servUrl = serviceUrl;
           if (servUrl == null && viewUrl != null) {
             servUrl = getJenkinsServiceForUrl(viewUrl).getUrl();
@@ -386,10 +375,10 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
             listener.activeJobViewChanged(jobs);
           }
         } catch (CloudBeesException e) {
-          // TODO Auto-generated catch block
+          // TODO handle
           e.printStackTrace();
         } catch (PartInitException e) {
-          // TODO Auto-generated catch block
+          // TODO handle
           e.printStackTrace();
         }
       }
@@ -442,7 +431,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
               .openEditor(new BuildEditorInput(el), BuildPart.ID);
 
         } catch (PartInitException e) {
-          // TODO Auto-generated catch block
+          // TODO handle
           e.printStackTrace();
         }
         return;
@@ -452,9 +441,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   public void loadAccountCredentials() throws CloudBeesException {
-    //TODO Remove
-    //System.out.println("Reloading credentials from the preferences");
-
     String password;
     try {
       password = SecurePreferencesFactory.getDefault().get(PreferenceConstants.P_PASSWORD, "");
@@ -464,7 +450,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
     String email = getPreferenceStore().getString(PreferenceConstants.P_EMAIL);
     CloudBeesCorePlugin.getDefault().getGrandCentralService().setAuthInfo(email, password);
-
   }
 
   /**
@@ -484,10 +469,10 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
                                                                 | IWorkbenchBrowserSupport.NAVIGATION_BAR, null, null, null);*/
       browser.openURL(new URL(url));
     } catch (PartInitException e) {
-      // TODO Log!
+      // TODO handle
       e.printStackTrace();
     } catch (MalformedURLException e) {
-      // TODO Log!
+      // TODO handle
       e.printStackTrace();
     }
   }

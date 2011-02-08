@@ -64,8 +64,6 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
 
       }
 
-      //TODO Add ordering for the instance labels
-
       return super.compare(viewer, e1, e2);
     }
 
@@ -93,7 +91,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
             try {
               CloudBeesUIPlugin.getDefault().showJobs(resp.serviceUrl, resp.viewUrl);
             } catch (CloudBeesException e) {
-              // TODO Auto-generated catch block
+              // TODO handle
               e.printStackTrace();
             }
             return;
@@ -101,7 +99,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
             try {
               CloudBeesUIPlugin.getDefault().showJobs(null, ((JenkinsInstanceResponse.View) el).url);
             } catch (CloudBeesException e) {
-              // TODO Auto-generated catch block
+              // TODO handle
               e.printStackTrace();
             }
             return;
@@ -138,23 +136,11 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
       }
 
       public void jenkinsChanged(final List<JenkinsInstanceResponse> instances) {
-        //        try {
-        //          PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new IRunnableWithProgress() {
-        //          public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
           public void run() {
-            viewer.getContentProvider().inputChanged(viewer, null, instances); // make it refresh itself
+            viewer.getContentProvider().inputChanged(viewer, null, instances);
           }
         });
-        //          }
-        //          });
-        //        } catch (InvocationTargetException e) {
-        //          // TODO Auto-generated catch block
-        //          e.printStackTrace();
-        //        } catch (InterruptedException e) {
-        //          // TODO Auto-generated catch block
-        //          e.printStackTrace();
-        //        }
       }
     };
 
@@ -217,7 +203,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
         try {
           CloudBeesUIPlugin.getDefault().reloadForgeRepos(true);
         } catch (CloudBeesException e) {
-          //TODO I18n!
+          //TODO i18n
           CloudBeesUIPlugin.showError("Failed to reload Forge repositories!", e);
         }
       }

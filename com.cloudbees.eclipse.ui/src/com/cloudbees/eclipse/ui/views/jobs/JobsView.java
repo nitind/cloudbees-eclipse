@@ -197,14 +197,14 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     /*    createColumn("Last build result", 100, new CellLabelProvider() {
           public void update(ViewerCell cell) {
             JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
-            cell.setText("n/a");//TODO
+            cell.setText("n/a");
           }
         });
 
         createColumn("Last Testsuite result", 100, new CellLabelProvider() {
           public void update(ViewerCell cell) {
             JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
-            cell.setText("n/a");//TODO
+            cell.setText("n/a");
           }
         });
     */
@@ -242,7 +242,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     /*    createColumn("Comment", 100, new CellLabelProvider() {
           public void update(ViewerCell cell) {
             JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
-            cell.setText("n/a");//TODO
+            cell.setText("n/a");
           }
         });
     */
@@ -432,13 +432,13 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     actionInvokeBuild = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
         public void run() {
 
-          //TODO Add job monitor!
+        //TODO Add job monitor
           try {
           JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
           JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(job.url);
           ns.invokeBuild(job.url, new NullProgressMonitor());
           } catch (CloudBeesException e) {
-            // TODO Auto-generated catch block
+          // TODO handle
             e.printStackTrace();
           }
 
@@ -476,7 +476,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       try {
         CloudBeesUIPlugin.getDefault().showJobs(serviceUrl, viewUrl);
       } catch (CloudBeesException e) {
-        //TODO I18n!
+        //TODO i18n
         CloudBeesUIPlugin.showError("Failed to reload Jenkins jobs!", e);
       }
     }

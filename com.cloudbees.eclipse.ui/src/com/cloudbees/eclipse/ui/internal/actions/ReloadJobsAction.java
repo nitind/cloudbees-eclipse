@@ -30,7 +30,7 @@ public class ReloadJobsAction extends Action {
     try {
       CloudBeesUIPlugin.getDefault().showJobs(serviceUrl, viewUrl);
     } catch (CloudBeesException e) {
-      //TODO I18n!
+      //TODO i18n
       CloudBeesUIPlugin.showError("Failed to reload Jenkins jobs!", e);
     }
 

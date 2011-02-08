@@ -54,7 +54,7 @@ public class JenkinsWizard extends Wizard {
 
   private void saveInstanceInfo() {
 
-    // FIXME shouldn't we actually save only when Apply clicked on the preference page? 
+    // TODO shouldn't we actually save only when Apply clicked on the preference page? 
     CloudBeesUIPlugin.getDefault().saveJenkinsInstance(instance);
 
   }
