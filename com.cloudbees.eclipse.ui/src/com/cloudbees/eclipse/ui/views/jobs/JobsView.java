@@ -334,7 +334,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     for (int i = 0; i < icons.length; i++) {
       //TODO Refactor to use CBImages!
       Image img = ImageDescriptor.createFromURL(
-          CloudBeesUIPlugin.getDefault().getBundle().getResource("/icons/instance-icons/16x16/" + icons[i] + ".gif"))
+          CloudBeesUIPlugin.getDefault().getBundle().getResource("/icons/jenkins-icons/16x16/" + icons[i] + ".gif"))
           .createImage();
       stateIcons.put(icons[i], img);
     }
@@ -342,7 +342,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     stateIcons.put(
         "disabled",
         ImageDescriptor.createFromURL(
-            CloudBeesUIPlugin.getDefault().getBundle().getResource("/icons/instance-icons/16x16/grey.gif"))
+            CloudBeesUIPlugin.getDefault().getBundle().getResource("/icons/jenkins-icons/16x16/grey.gif"))
             .createImage());
 
   }

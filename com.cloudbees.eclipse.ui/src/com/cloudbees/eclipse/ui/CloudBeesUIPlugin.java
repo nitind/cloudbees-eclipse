@@ -52,7 +52,7 @@ import com.cloudbees.eclipse.ui.views.jobs.JobsView;
 public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   // The plug-in ID
-  public static final String PLUGIN_ID = "com.cloudbees.eclipse.core"; //$NON-NLS-1$
+  public static final String PLUGIN_ID = "com.cloudbees.eclipse.ui"; //$NON-NLS-1$
 
   // The shared instance
   private static CloudBeesUIPlugin plugin;
@@ -100,7 +100,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_run.png")));
     reg.put(CBImages.IMG_FOLDER_LOCAL,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_run.png")));
-    reg.put(CBImages.IMG_INSTANCE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/instance.png")));
+    reg.put(CBImages.IMG_INSTANCE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/jenkins.png")));
     reg.put(CBImages.IMG_VIEW,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_big.png")));
 
