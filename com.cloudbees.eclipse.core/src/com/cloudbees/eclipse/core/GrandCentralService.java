@@ -129,7 +129,7 @@ public class GrandCentralService {
 
         HttpResponse resp = httpclient.execute(post);
         int code = resp.getStatusLine().getStatusCode();
-        if (code == 302) {
+        if (code == 302 || code == 301) {
           // FIXME Temporarily until json API becomes available, validate
           // user by assuming redirect means successful login
           return true;

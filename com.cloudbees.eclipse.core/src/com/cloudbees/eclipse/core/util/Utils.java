@@ -160,14 +160,15 @@ public class Utils {
 
     Header firstHeader = resp.getFirstHeader("Location");
 
-    if (expectCIRedirect && responseStatus == 302 && firstHeader != null && firstHeader.getValue() != null) {
+    if (expectCIRedirect && (responseStatus == 302 || responseStatus == 301) && firstHeader != null
+        && firstHeader.getValue() != null) {
       //FIXME ugly way to detect a normal redirect within the site that does not redirect to signon but no good idea for better implementation
       if (firstHeader.getValue().indexOf(".ci.") > 0) {
         return;
       }
     }
 
-    if (responseStatus == 302) {
+    if (responseStatus == 302 || responseStatus == 301) {
       throw new CloudBeesException("Authentication required! Either wrong or no credentials were provided! Reason:"
           + resp.getStatusLine().getReasonPhrase());
     }

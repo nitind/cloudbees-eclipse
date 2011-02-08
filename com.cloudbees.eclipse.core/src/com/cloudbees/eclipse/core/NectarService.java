@@ -8,8 +8,6 @@ import java.util.List;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -41,13 +39,10 @@ public class NectarService {
   private String label;*/
   private NectarInstance nectar;
 
-  private boolean devAtCloud = false;
-
   private static String lastJossoSessionId = null;
 
   public NectarService(NectarInstance nectar) {
     this.nectar = nectar;
-    devAtCloud = nectar.atCloud;
   }
 
   /**
@@ -82,7 +77,7 @@ public class NectarService {
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
 
-      String bodyResponse = retrieveWithLogin(httpclient, post, new SubProgressMonitor(monitor, 5), nectar.atCloud);
+      String bodyResponse = retrieveWithLogin(httpclient, post, new SubProgressMonitor(monitor, 5), false);
 
       NectarJobsResponse views = null;
       try {
@@ -125,7 +120,7 @@ public class NectarService {
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
 
-      String bodyResponse = retrieveWithLogin(httpclient, post, monitor, nectar.atCloud);
+      String bodyResponse = retrieveWithLogin(httpclient, post, monitor, false);
 
       if (bodyResponse == null) {
         throw new CloudBeesException("Failed to receive response from server");
@@ -155,8 +150,7 @@ public class NectarService {
     }
   }
 
-  private String retrieveWithLogin(DefaultHttpClient httpclient, HttpPost post, IProgressMonitor monitor,
-      boolean allowCIRedirect)
+  private String retrieveWithLogin(DefaultHttpClient httpclient, HttpPost post, IProgressMonitor monitor, boolean expectRedirect)
       throws UnsupportedEncodingException,
       IOException, ClientProtocolException, CloudBeesException, Exception {
     String bodyResponse = null;
@@ -165,15 +159,15 @@ public class NectarService {
     //          reqUrl += "&JOSSO_SESSIONID=" + lastJossoCookie;
     //        }
 
-    boolean tryToLogin = true;
+    boolean tryToLogin = true; // false for BasicAuth, true for redirect login
     do {
 
-      if (nectar.atCloud || nectar.authenticate) {
-        httpclient.getCredentialsProvider().setCredentials(new AuthScope(post.getURI().getHost(), AuthScope.ANY_PORT),
-            new UsernamePasswordCredentials(nectar.username, nectar.password));
+      if ((nectar.atCloud || nectar.authenticate) && nectar.username != null && nectar.username.trim().length() > 0
+          && nectar.password != null && nectar.password.trim().length() > 0) {
+        //        post.addHeader("Authorization", "Basic " + Utils.toB64(nectar.username + ":" + nectar.password));
       }
 
-      if (devAtCloud && lastJossoSessionId != null) {
+      if (nectar.atCloud && lastJossoSessionId != null) { // basic auth failed
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
         nvps.add(new BasicNameValuePair("JOSSO_SESSIONID", lastJossoSessionId));
         post.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8)); // 1
@@ -186,14 +180,16 @@ public class NectarService {
       HttpResponse resp = httpclient.execute(post);
       bodyResponse = Utils.getResponseBody(resp);
 
-      if (devAtCloud && (resp.getStatusLine().getStatusCode() == 302 || resp.getStatusLine().getStatusCode() == 301)
-          && tryToLogin) { // redirect to login
+      if (nectar.atCloud && nectar.username != null && nectar.username.trim().length() > 0 && nectar.password != null
+          && nectar.password.trim().length() > 0
+          && (resp.getStatusLine().getStatusCode() == 302 || resp.getStatusLine().getStatusCode() == 301) && tryToLogin) { // redirect to login
         login(httpclient, post.getURI().toASCIIString(), resp.getFirstHeader("Location").getValue(),
             new SubProgressMonitor(monitor, 5));
         //httpclient.getCookieStore().clear();
         tryToLogin = false;
       } else {
-        Utils.checkResponseCode(resp, allowCIRedirect);
+        // check final outcome if we got what we asked for
+        Utils.checkResponseCode(resp, expectRedirect);
         break;
       }
 
@@ -204,11 +200,6 @@ public class NectarService {
 
   private void login(DefaultHttpClient httpClient, final String referer, final String redirect,
       final IProgressMonitor monitor) throws Exception {
-
-    if (!devAtCloud) {
-      return;
-    }
-
     try {
       String name = "Logging in to '" + nectar.label + "'...";
       monitor.beginTask(name, 5);
@@ -243,9 +234,18 @@ public class NectarService {
         if (cookie == null) {
           cookie = lastResp.getFirstHeader("SET-COOKIE");
         }
+        if (cookie == null) {
+          cookie = lastResp.getFirstHeader("Set-Cookie2");
+        }
+        if (cookie == null) {
+          cookie = lastResp.getFirstHeader("SET-COOKIE2");
+        }
 
         monitor.worked(1);
 
+        if (cookie != null) {
+          System.out.println("Cookie: " + cookie);
+        }
         if (cookie != null && cookie.getValue().startsWith("JOSSO_SESSIONID=")) {
           break; // logged in ok
         }
@@ -269,7 +269,7 @@ public class NectarService {
   private HttpResponse visitSite(DefaultHttpClient httpClient, String url, String refererUrl)
       throws IOException, ClientProtocolException, CloudBeesException {
 
-    //System.out.println("Visiting: " + url);
+    System.out.println("Visiting: " + url);
 
     HttpPost post = new HttpPost(url);
     post.addHeader("Referer", refererUrl);
@@ -287,7 +287,7 @@ public class NectarService {
     String body = Utils.getResponseBody(resp);
 
     Header redir = resp.getFirstHeader("Location");
-    //System.out.println("\t" + resp.getStatusLine() + (redir != null ? (" -> " + redir.getValue()) : ""));
+    System.out.println("\t" + resp.getStatusLine() + (redir != null ? (" -> " + redir.getValue()) : ""));
 
     return resp;
   }
@@ -339,7 +339,7 @@ public class NectarService {
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
 
-      String bodyResponse = retrieveWithLogin(httpclient, post, monitor, nectar.atCloud);
+      String bodyResponse = retrieveWithLogin(httpclient, post, monitor, false);
 
       NectarBuildDetailsResponse details = g.fromJson(bodyResponse, NectarBuildDetailsResponse.class);
 
@@ -410,7 +410,7 @@ public class NectarService {
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
 
-      String bodyResponse = retrieveWithLogin(httpclient, post, monitor, nectar.atCloud);
+      String bodyResponse = retrieveWithLogin(httpclient, post, monitor, false);
 
       NectarJobBuildsResponse details = g.fromJson(bodyResponse, NectarJobBuildsResponse.class);
 
@@ -430,9 +430,7 @@ public class NectarService {
   }
 
   public void invokeBuild(String jobUrl, IProgressMonitor monitor) throws CloudBeesException {
-    if (monitor != null) {
-      monitor.setTaskName("Invoking build request...");
-    }
+    monitor.setTaskName("Invoking build request...");
 
     if (jobUrl != null && !jobUrl.startsWith(nectar.url)) {
       throw new CloudBeesException("Unexpected job url provided! Service url: " + nectar.url + "; job url: " + jobUrl);
@@ -453,7 +451,7 @@ public class NectarService {
 
       HttpPost post = new HttpPost(reqStr);
 
-      String bodyResponse = retrieveWithLogin(httpclient, post, monitor, nectar.atCloud);
+      retrieveWithLogin(httpclient, post, monitor, true);
     } catch (Exception e) {
       throw new CloudBeesException("Failed to get invoke Build for '" + jobUrl + "'. "
           + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr, e);
