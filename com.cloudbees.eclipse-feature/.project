@@ -18,13 +18,7 @@
 		<link>
 			<name>README</name>
 			<type>1</type>
-			<locationURI>CLOUDBEES_GIT_LOC/README</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/README</locationURI>
 		</link>
 	</linkedResources>
-	<variableList>
-		<variable>
-			<name>CLOUDBEES_GIT_LOC</name>
-			<value>file:/home/ahti/cb/cloudbees-eclipse</value>
-		</variable>
-	</variableList>
 </projectDescription>
