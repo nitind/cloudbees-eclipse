@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -435,7 +436,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
           try {
           NectarJobsResponse.Job job = (Job) JobsView.this.selectedJob;
           NectarService ns = CloudBeesUIPlugin.getDefault().getNectarServiceForUrl(job.url);
-          ns.invokeBuild(job.url, null);
+          ns.invokeBuild(job.url, new NullProgressMonitor());
           } catch (CloudBeesException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
