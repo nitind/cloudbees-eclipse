@@ -43,7 +43,18 @@ public class ForgeEGitSync implements ForgeSync {
       //        clone = new CloneOperation(new URIish(url), true, Collections.EMPTY_LIST, new File(""), null, "origin", 5000);
       //      } catch (Throwable e) {
       //        try {
+      try {
           clone = new CloneOperation(new URIish(url), true, Collections.EMPTY_LIST, new File(""), null, "origin");
+      } catch (Throwable t) {
+        t.printStackTrace();
+        //Trying with another API, possibly different egit version
+        try {
+          clone = new CloneOperation(new URIish(url), true, Collections.EMPTY_LIST, new File(""), null, "origin", 5000);
+        } catch (Throwable t2) {
+          t2.printStackTrace();
+        }
+      }
+
       //        } catch (Throwable e2) {
       //          throw e;
       //        }
