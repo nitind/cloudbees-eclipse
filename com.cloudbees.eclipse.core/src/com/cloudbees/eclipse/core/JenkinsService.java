@@ -87,6 +87,7 @@ public class JenkinsService {
 
       if (views != null) {
         views.serviceUrl = jenkins.url;
+        views.viewUrl = viewUrl;
       }
 
       monitor.worked(4);
