@@ -9,7 +9,12 @@ public class JenkinsJobBuildsResponse extends BaseJenkinsResponse {
   @Expose(deserialize = false, serialize = false)
   public final static String QTREE = QTreeFactory.create(JenkinsJobBuildsResponse.class);
 
+  public Boolean inQueue;
+
   public Build[] builds;
+  public Boolean buildable;
+  public String color;
+  public HealthReport[] healthReport;
 
   public static class Build {
     public long number;

@@ -420,7 +420,7 @@ public class JenkinsService {
       }
 
       details.serviceUrl = jenkins.url;
-
+      
       return details;
 
     } catch (Exception e) {
