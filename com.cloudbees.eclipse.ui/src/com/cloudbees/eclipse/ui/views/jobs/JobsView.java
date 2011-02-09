@@ -432,16 +432,14 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     actionInvokeBuild = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
         public void run() {
 
-        //TODO Add job monitor
+        //TODO Add monitor
           try {
           JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
           JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(job.url);
           ns.invokeBuild(job.url, new NullProgressMonitor());
           } catch (CloudBeesException e) {
-          // TODO handle
-            e.printStackTrace();
+          CloudBeesUIPlugin.getDefault().getLogger().error(e);
           }
-
         }
       };
     actionInvokeBuild.setToolTipText("Run a new build for this job"); //TODO i18n

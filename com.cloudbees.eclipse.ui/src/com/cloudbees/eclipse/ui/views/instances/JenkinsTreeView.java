@@ -91,16 +91,14 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
             try {
               CloudBeesUIPlugin.getDefault().showJobs(resp.serviceUrl, resp.viewUrl);
             } catch (CloudBeesException e) {
-              // TODO handle
-              e.printStackTrace();
+              CloudBeesUIPlugin.getDefault().getLogger().error(e);
             }
             return;
           } else if (el instanceof JenkinsInstanceResponse.View) {
             try {
               CloudBeesUIPlugin.getDefault().showJobs(null, ((JenkinsInstanceResponse.View) el).url);
             } catch (CloudBeesException e) {
-              // TODO handle
-              e.printStackTrace();
+              CloudBeesUIPlugin.getDefault().getLogger().error(e);
             }
             return;
           } else if (el instanceof InstanceGroup) {

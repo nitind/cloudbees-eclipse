@@ -42,7 +42,7 @@ public class JenkinsWizardDialog extends WizardDialog {
             } catch (CloudBeesException e) {
               ((JenkinsFinishPage) ((JenkinsWizard) getWizard()).getPage("finish")).initText(e);
 
-              e.printStackTrace(); // TODO handle
+              CloudBeesUIPlugin.getDefault().getLogger().error(e);
             }
 
             monitor.done();
@@ -50,9 +50,9 @@ public class JenkinsWizardDialog extends WizardDialog {
 
         });
       } catch (InvocationTargetException e) {
-        e.printStackTrace(); // TODO handle
+        CloudBeesUIPlugin.getDefault().getLogger().error(e);
       } catch (InterruptedException e) {
-        e.printStackTrace(); // TODO handle
+        CloudBeesUIPlugin.getDefault().getLogger().error(e);
       }
       
     }

@@ -44,4 +44,8 @@ public class Logger {
     log(IStatus.ERROR, msg, exception);
   }
 
+  public void error(Throwable exception) {
+    log(IStatus.ERROR, exception.getLocalizedMessage(), exception);
+  }
+
 }

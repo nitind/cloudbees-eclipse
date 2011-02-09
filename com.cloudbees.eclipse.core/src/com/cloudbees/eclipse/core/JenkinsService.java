@@ -57,10 +57,8 @@ public class JenkinsService {
           + viewUrl);
     }
 
-    StringBuffer errMsg = new StringBuffer();
-
     try {
-      monitor.beginTask("Fetching Job list for '" + jenkins.label + "'...", IProgressMonitor.UNKNOWN);
+      monitor.beginTask("Fetching Job list for '" + jenkins.label + "'...", 10);
 
       DefaultHttpClient httpclient = Utils.getAPIClient();
 
@@ -76,6 +74,7 @@ public class JenkinsService {
       HttpPost post = new HttpPost(uri);
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
+      monitor.worked(1);
 
       String bodyResponse = retrieveWithLogin(httpclient, post, new SubProgressMonitor(monitor, 5), false);
 
@@ -83,20 +82,19 @@ public class JenkinsService {
       try {
         views = g.fromJson(bodyResponse, JenkinsJobsResponse.class);
       } catch (Exception e) {
-        //TODO handle
-        //System.out.println("Illegal JSON response from the server for the request:\n" + uri + ":\n" + bodyResponse);
-        throw e;
+        throw new CloudBeesException("Illegal JSON response for '" + uri + "'", e);
       }
 
       if (views != null) {
         views.serviceUrl = jenkins.url;
       }
 
+      monitor.worked(4);
+
       return views;
 
     } catch (Exception e) {
-      throw new CloudBeesException("Failed to get Jenkins jobs for '" + jenkins.url + "'. "
-          + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
+      throw new CloudBeesException("Failed to get Jenkins jobs for '" + jenkins.url + "'.", e);
     } finally {
       monitor.done();
     }

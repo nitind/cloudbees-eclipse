@@ -116,8 +116,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           try {
             loadAccountCredentials();
           } catch (CloudBeesException e) {
-            // TODO handle
-            e.printStackTrace();
+            CloudBeesUIPlugin.getDefault().getLogger().error(e);
           }
         }
       }
@@ -167,8 +166,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           monitor.worked(1000);
           return Status.OK_STATUS;
         } catch (Exception e) {
-          // TODO handle
-          e.printStackTrace();
+          CloudBeesUIPlugin.getDefault().getLogger().error(e);
           return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage());
         } finally {
           monitor.done();
@@ -181,15 +179,15 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   public static void showError(String msg, Throwable e) {
-    Status status = new Status(IStatus.ERROR, "Error!", 0, e.getMessage(), e);
+    Status status = new Status(IStatus.ERROR, "Error!", 0, e.getClass().getSimpleName() + ": " + e.getMessage(), e);
     ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Error!", msg, status);
-    e.printStackTrace();
+    CloudBeesUIPlugin.getDefault().getLogger().error(msg, e);
   }
 
   public static void showError(String msg, String reason, Throwable e) {
     Status status = new Status(IStatus.ERROR, "Error!", 0, reason, e);
     ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Error!", msg, status);
-    e.printStackTrace();
+    CloudBeesUIPlugin.getDefault().getLogger().error(msg + " - " + reason, e);
   }
 
   public Logger getLogger() {
@@ -279,10 +277,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
           return Status.OK_STATUS;
         } catch (CloudBeesException e) {
-          // TODO handle
-          e.printStackTrace();
-
-          return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage());
+          CloudBeesUIPlugin.getDefault().getLogger().error(e);
+          return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage(), e);
         } finally {
           monitor.done();
         }
@@ -357,7 +353,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         try {
           PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(JobsView.ID);
 
-          //TODO Add job monitor
+          //TODO Add monitor
           String servUrl = serviceUrl;
           if (servUrl == null && viewUrl != null) {
             servUrl = getJenkinsServiceForUrl(viewUrl).getUrl();
@@ -375,11 +371,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
             listener.activeJobViewChanged(jobs);
           }
         } catch (CloudBeesException e) {
-          // TODO handle
-          e.printStackTrace();
+          showError(e.getLocalizedMessage(), e.getCause());
         } catch (PartInitException e) {
-          // TODO handle
-          e.printStackTrace();
+          CloudBeesUIPlugin.getDefault().getLogger().error(e);
         }
       }
     };
@@ -431,8 +425,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
               .openEditor(new BuildEditorInput(el), BuildPart.ID);
 
         } catch (PartInitException e) {
-          // TODO handle
-          e.printStackTrace();
+          CloudBeesUIPlugin.getDefault().getLogger().error(e);
         }
         return;
       }
@@ -469,11 +462,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
                                                                 | IWorkbenchBrowserSupport.NAVIGATION_BAR, null, null, null);*/
       browser.openURL(new URL(url));
     } catch (PartInitException e) {
-      // TODO handle
-      e.printStackTrace();
+      CloudBeesUIPlugin.getDefault().getLogger().error(e);
     } catch (MalformedURLException e) {
-      // TODO handle
-      e.printStackTrace();
+      CloudBeesUIPlugin.getDefault().getLogger().error(e);
     }
   }
 
