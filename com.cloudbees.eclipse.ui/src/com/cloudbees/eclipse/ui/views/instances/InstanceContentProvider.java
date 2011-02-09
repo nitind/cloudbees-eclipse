@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IViewSite;
 
@@ -43,6 +44,7 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
     }
 
     v.refresh();
+    ((TreeViewer) v).expandToLevel(2);
   }
 
   public void dispose() {

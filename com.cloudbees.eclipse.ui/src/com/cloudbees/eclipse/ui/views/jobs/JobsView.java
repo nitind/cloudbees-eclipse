@@ -470,7 +470,9 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     }
     
-    if (PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())) {
+    if (PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
+        || PreferenceConstants.P_EMAIL.equals(event.getProperty())
+        || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {
       try {
         CloudBeesUIPlugin.getDefault().showJobs(serviceUrl, viewUrl);
       } catch (CloudBeesException e) {

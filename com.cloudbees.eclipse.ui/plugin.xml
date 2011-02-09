@@ -64,9 +64,9 @@
       <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaPerspective">
          <view
-               ratio="0.5"
-               relative="org.eclipse.ui.views.TaskList"
-               relationship="right"
+               ratio="0.7"
+               relative="org.eclipse.jdt.ui.PackageExplorer"
+               relationship="bottom"
                id="com.cloudbees.eclipse.ui.views.instances.JenkinsTreeView">
          </view>
       </perspectiveExtension>
@@ -74,13 +74,30 @@
       <perspectiveExtension
             targetID="org.eclipse.ui.resourcePerspective">
          <view
-               ratio="0.5"
-               relative="org.eclipse.ui.views.TaskList"
-               relationship="right"
+               ratio="0.7"
+               relative="org.eclipse.ui.views.ContentOutline"               
+               relationship="stack"
                id="com.cloudbees.eclipse.ui.views.instances.JenkinsTreeView">
          </view>
       </perspectiveExtension>
 
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               relative="org.eclipse.ui.views.ProblemView"
+               relationship="stack"
+               id="com.cloudbees.eclipse.ui.views.JobsView">
+         </view>
+      </perspectiveExtension>
+
+      <perspectiveExtension
+            targetID="org.eclipse.ui.resourcePerspective">
+         <view
+               relative="org.eclipse.ui.views.TaskList"               
+               relationship="stack"
+               id="com.cloudbees.eclipse.ui.views.JobsView">
+         </view>
+      </perspectiveExtension>
    </extension>
 
  <extension point="org.eclipse.ui.editors">
@@ -91,4 +108,6 @@
              name="Build details">
        </editor>
   </extension>
+
+  
 </plugin>

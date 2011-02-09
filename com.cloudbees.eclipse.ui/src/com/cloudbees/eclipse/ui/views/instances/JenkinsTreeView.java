@@ -31,6 +31,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse.View;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
+import com.cloudbees.eclipse.ui.internal.actions.ConfigureCloudBeesAction;
 
 /**
  * View showing both Jenkins offline installations and JaaS Nectar instances
@@ -46,7 +47,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
 
   private final Logger log = CloudBeesUIPlugin.getDefault().getLogger();
 
-  private Action action1; // Configure Account
+  private ConfigureCloudBeesAction action1; // Configure Account
   private Action action2; // Attach Jenkins
   private Action action3; // Reload Forge repositories
   private Action action4; // Reload Jenkins repositories
@@ -124,7 +125,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
       }
     });
 
-    viewer.expandToLevel(2);
+    //viewer.expandToLevel(2);
 
     makeActions();
     contributeToActionBars();
@@ -162,22 +163,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
   }
 
   private void makeActions() {
-    action1 = new Action() {
-      public void run() {
-        PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(null,
-            "com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage", new String[] {
-                "com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage",
-                "com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage" }, null);
-        if (pref != null) {
-          pref.open();
-        }
-      }
-    };
-    action1.setText("Configure CloudBees access...");
-    action1.setToolTipText("Configure CloudBees account access");
-    /*		action1.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
-    				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-    */
+    action1 = new ConfigureCloudBeesAction();
     action2 = new Action() {
       public void run() {
         PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(null,
@@ -252,7 +238,9 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
     }
 
     if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())
-        || PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())) {
+        || PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
+        || PreferenceConstants.P_EMAIL.equals(event.getProperty())
+        || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {
       CloudBeesUIPlugin.getDefault().reloadAllJenkins(false);
     }
   }
