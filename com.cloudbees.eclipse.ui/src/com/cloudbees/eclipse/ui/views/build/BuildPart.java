@@ -503,10 +503,12 @@ public class BuildPart extends EditorPart {
     StringBuffer causeBuffer = new StringBuffer();
     if (dataBuildDetail.actions != null && dataBuildDetail.actions.length > 0) {
       for (int i = 0; i < dataBuildDetail.actions.length; i++) {
-        if (dataBuildDetail.actions[i].causes != null) {
-          for (int c = 0; c < dataBuildDetail.actions[i].causes.length; c++) {
-            Cause cause = dataBuildDetail.actions[i].causes[c];
+        com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Action action = dataBuildDetail.actions[i];
+        if (action.causes != null) {
+          for (int c = 0; c < action.causes.length; c++) {
+            Cause cause = action.causes[c];
             causeBuffer.append(cause.shortDescription + "\n");
+            break; // For now let's just show the first cause
           }
         }
       }
