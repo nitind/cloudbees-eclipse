@@ -90,7 +90,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     if (newView == null || newView.jobs == null) {
       setContentDescription("No jobs available.");
-      contentProvider.setJobs(new ArrayList<JenkinsJobsResponse.Job>());
+      contentProvider.inputChanged(table, null, new ArrayList<JenkinsJobsResponse.Job>());
     } else {
       String label = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(newView.serviceUrl).getLabel();
 
@@ -99,7 +99,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         viewInfo = newView.name + " [";
       }
       setContentDescription(viewInfo + label + (viewInfo.length() > 0 ? "]" : "") + " (" + new Date() + ")");
-      contentProvider.setJobs(Arrays.asList(newView.jobs));
+      contentProvider.inputChanged(table, null, Arrays.asList(newView.jobs));
     }
 
     if (newView != null) {
@@ -247,7 +247,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         });
     */
 
-    contentProvider = new JobsContentProvider(getViewSite());
+    contentProvider = new JobsContentProvider();
 
     table.setContentProvider(contentProvider);
     //viewer.setLabelProvider(new InstanceLabelProvider());
