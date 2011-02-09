@@ -100,7 +100,7 @@ public class BuildPart extends EditorPart {
     statusIcon = formToolkit.createLabel(compStatusHead, "", SWT.NONE);
 
     textTopSummary = formToolkit.createLabel(compStatusHead, "n/a", SWT.BOLD);
-    textTopSummary.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+    textTopSummary.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false, 1, 1));
 
     Section sectSummary = formToolkit.createSection(compMain, Section.TITLE_BAR);
     GridData gd_sectSummary = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
@@ -435,8 +435,8 @@ public class BuildPart extends EditorPart {
 
         }
 
-        String topStr = dataBuildDetail.result != null ? dataBuildDetail.result + " ("
-            + new Date(dataBuildDetail.timestamp) + ")" : "";
+        String topStr = dataBuildDetail.result != null ? dataBuildDetail.result /*+ " ("
+                                                                                + new Date(dataBuildDetail.timestamp) + ")"*/ : "";
 
         if (dataBuildDetail.building) {
           topStr = "BUILDING";
@@ -457,6 +457,14 @@ public class BuildPart extends EditorPart {
         loadBuildHistory();
 
         invokeBuild.setEnabled(dataJobDetails.buildable);
+
+        if ("SUCCESS".equalsIgnoreCase(dataBuildDetail.result)) {
+          statusIcon.setImage(CloudBeesUIPlugin.getImage(CBImages.IMG_COLOR_16_BLUE));
+        } else if ("FAILURE".equalsIgnoreCase(dataBuildDetail.result)) {
+          statusIcon.setImage(CloudBeesUIPlugin.getImage(CBImages.IMG_COLOR_16_RED));
+        } else {
+          statusIcon.setImage(null);
+        }
 
         BuildPart.this.compMain.layout();
 
@@ -492,8 +500,6 @@ public class BuildPart extends EditorPart {
     //details.getJob().buildable;
     //details.getJob().inQueue;
     //details.getJob().healthReport;
-
-    BuildEditorInput details = (BuildEditorInput) getEditorInput();
 
     StringBuffer summary = new StringBuffer();
     if (dataBuildDetail.description != null) {

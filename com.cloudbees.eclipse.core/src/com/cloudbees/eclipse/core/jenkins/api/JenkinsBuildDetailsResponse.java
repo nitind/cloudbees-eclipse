@@ -13,6 +13,7 @@ public class JenkinsBuildDetailsResponse extends BaseJenkinsResponse {
 
   public Action[] actions;
 
+
   @Expose(deserialize = false, serialize = false)
   public final static String QTREE = QTreeFactory.create(JenkinsBuildDetailsResponse.class);
 
@@ -33,6 +34,8 @@ public class JenkinsBuildDetailsResponse extends BaseJenkinsResponse {
   }
 
   public Artifact[] artifacts;
+
+  public Long duration;
 
   public Boolean building;
   public String description;

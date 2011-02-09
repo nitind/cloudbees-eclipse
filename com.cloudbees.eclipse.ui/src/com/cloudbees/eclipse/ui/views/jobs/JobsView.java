@@ -176,7 +176,6 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
       }
 
-
     });
 
     //TODO i18n
@@ -190,6 +189,34 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
           val = val + " (running)";
         }
         cell.setText(val);
+
+      }
+    });
+
+    createColumn("Build stability", 250, -1, new CellLabelProvider() {
+      public void update(ViewerCell cell) {
+
+        JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
+
+        cell.setText("");
+        cell.setImage(null);
+
+        try {
+          if (job.healthReport != null) {
+            for (int h = 0; h < job.healthReport.length; h++) {
+              String icon = job.healthReport[h].iconUrl;
+              String desc = job.healthReport[h].description;
+              String matchStr = "Build stability: ";
+              if (desc != null && desc.startsWith(matchStr)) {
+                cell.setText(" " + desc.substring(matchStr.length()));
+                cell.setImage(CloudBeesUIPlugin.getDefault().getImage(
+                    CBImages.IMG_HEALTH_REFIX + CBImages.IMG_16 + icon));
+              }
+            }
+          }
+        } catch (Throwable t) {
+          t.printStackTrace();
+        }
 
       }
     });
@@ -214,7 +241,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         try {
           cell.setText(JobsView.this.formatBuildInfo(job.lastBuild));
         } catch (Throwable t) {
-          cell.setText("n/a");
+          cell.setText("");
         }
       }
     });
@@ -224,20 +251,22 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         try {
           cell.setText(JobsView.this.formatBuildInfo(job.lastSuccessfulBuild));
         } catch (Throwable t) {
-          cell.setText("n/a");
+          cell.setText("");
         }
       }
     });
-    createColumn("Last failure", 105, JobSorter.LAST_FAILURE, new CellLabelProvider() {
+    createColumn("Last failure", 150, JobSorter.LAST_FAILURE, new CellLabelProvider() {
       public void update(ViewerCell cell) {
         JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
         try {
           cell.setText(JobsView.this.formatBuildInfo(job.lastFailedBuild));
         } catch (Throwable t) {
-          cell.setText("n/a");
+          cell.setText("");
         }
       }
     });
+
+
 
     /*    createColumn("Comment", 100, new CellLabelProvider() {
           public void update(ViewerCell cell) {
@@ -288,16 +317,15 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     contributeToActionBars();
 
     table.addPostSelectionChangedListener(new ISelectionChangedListener() {
-      
+
       public void selectionChanged(SelectionChangedEvent event) {
         StructuredSelection sel = (StructuredSelection) event.getSelection();
         JobsView.this.selectedJob = sel.getFirstElement();
-        boolean enable = sel.getFirstElement()!=null;
+        boolean enable = sel.getFirstElement() != null;
         actionInvokeBuild.setEnabled(enable);
         actionOpenJobInBrowser.setEnabled(enable);
-      }       
+      }
     });
-    
 
     jenkinsChangeListener = new JenkinsChangeListener() {
       public void activeJobViewChanged(final JenkinsJobsResponse newView) {
@@ -416,44 +444,41 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     actionReloadJobs = new ReloadJobsAction();
 
     actionOpenJobInBrowser = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
-        public void run() {
+      public void run() {
         if (JobsView.this.selectedJob != null) {
           JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
           CloudBeesUIPlugin.getDefault().openWithBrowser(job.url);
         }
-        }
-      };
+      }
+    };
 
     actionOpenJobInBrowser.setToolTipText("Open with Browser"); //TODO i18n
     actionOpenJobInBrowser.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_BROWSER));
     actionOpenJobInBrowser.setEnabled(false);
 
-
     actionInvokeBuild = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
-        public void run() {
+      public void run() {
 
         //TODO Add monitor
-          try {
+        try {
           JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
           JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(job.url);
           ns.invokeBuild(job.url, new NullProgressMonitor());
-          } catch (CloudBeesException e) {
+        } catch (CloudBeesException e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
-          }
         }
-      };
+      }
+    };
     actionInvokeBuild.setToolTipText("Run a new build for this job"); //TODO i18n
     actionInvokeBuild.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_RUN));
     actionInvokeBuild.setEnabled(false);
-
 
     /*    action4.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
             .getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
     */
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
-    
-  }
 
+  }
 
   public void setFocus() {
     table.getControl().setFocus();
@@ -469,7 +494,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       }
 
     }
-    
+
     if (PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
         || PreferenceConstants.P_EMAIL.equals(event.getProperty())
         || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {
@@ -501,6 +526,5 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     }
     stateIcons.clear();
   }
-
 
 }

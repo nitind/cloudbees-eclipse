@@ -104,8 +104,45 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     reg.put(CBImages.IMG_FOLDER_LOCAL,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_run.png")));
     reg.put(CBImages.IMG_INSTANCE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/jenkins.png")));
+
     reg.put(CBImages.IMG_VIEW,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_big.png")));
+
+    reg.put(CBImages.IMG_COLOR_16_RED,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/red.gif")));
+
+    reg.put(CBImages.IMG_COLOR_16_BLUE,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/blue.gif")));
+
+    reg.put(CBImages.IMG_COLOR_24_RED,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/24x24/red.gif")));
+
+    reg.put(CBImages.IMG_COLOR_24_BLUE,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/24x24/blue.gif")));
+
+    // HEALTH 16px
+    reg.put(CBImages.IMG_HEALTH_16_00_to_19,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/health-00to19.gif")));
+    reg.put(CBImages.IMG_HEALTH_16_20_to_39,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/health-20to39.gif")));
+    reg.put(CBImages.IMG_HEALTH_16_40_to_59,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/health-40to59.gif")));
+    reg.put(CBImages.IMG_HEALTH_16_60_to_79,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/health-60to79.gif")));
+    reg.put(CBImages.IMG_HEALTH_16_80PLUS,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/health-80plus.gif")));
+
+    // HEALTH 24px
+    reg.put(CBImages.IMG_HEALTH_24_00_to_19,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/24x24/health-00to19.gif")));
+    reg.put(CBImages.IMG_HEALTH_24_20_to_39,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/24x24/health-20to39.gif")));
+    reg.put(CBImages.IMG_HEALTH_24_40_to_59,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/24x24/health-40to59.gif")));
+    reg.put(CBImages.IMG_HEALTH_24_60_to_79,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/24x24/health-60to79.gif")));
+    reg.put(CBImages.IMG_HEALTH_24_80PLUS,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/24x24/health-80plus.gif")));
 
   }
 
