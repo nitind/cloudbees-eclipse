@@ -8,6 +8,10 @@ public class CloudBeesException extends Exception {
     super(msg, t);
   }
 
+  public CloudBeesException(Throwable t) {
+    super(t);
+  }
+
   public CloudBeesException(String msg) {
     super(msg);
   }

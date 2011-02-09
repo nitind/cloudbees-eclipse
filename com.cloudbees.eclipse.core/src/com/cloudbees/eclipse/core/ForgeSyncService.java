@@ -31,7 +31,7 @@ public class ForgeSyncService {
     if (bundleActive("org.eclipse.team.svn.core")) {
       providers.add(new ForgeSubversiveSync());
     }
-    if (bundleActive("org.eclipse.egit.core") && bundleActive("org.eclipse.jgit")) {
+    if ((bundleActive("org.eclipse.egit.core") || bundleActive("org.eclipse.egit")) && bundleActive("org.eclipse.jgit")) {
       providers.add(new ForgeEGitSync());
     }
 
@@ -48,7 +48,11 @@ public class ForgeSyncService {
   public void sync(ForgeSync.TYPE type, Properties props, IProgressMonitor monitor) throws CloudBeesException {
     int ticksPerProcess = 100 / providers.size();
     for (ForgeSync provider : providers) {
-      provider.sync(type, props, new SubProgressMonitor(monitor, ticksPerProcess));
+      try {
+        provider.sync(type, props, new SubProgressMonitor(monitor, ticksPerProcess));
+      } catch (Exception e) {
+        CloudBeesCorePlugin.getDefault().getLogger().error(e);
+      }
     }
   }
 

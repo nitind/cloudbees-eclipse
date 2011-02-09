@@ -9,6 +9,8 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
@@ -211,6 +213,21 @@ public class Utils {
     }
 
     return unit;
+  }
+
+  public static <T> T createInstance(Class<T> clazz, Class[] types, Object[] params) {
+    try {
+      Constructor<T> cnst;
+      cnst = clazz.getConstructor(types);
+      return cnst.newInstance(params);
+    } catch (SecurityException e) {
+    } catch (NoSuchMethodException e) {
+    } catch (IllegalArgumentException e) {
+    } catch (InstantiationException e) {
+    } catch (IllegalAccessException e) {
+    } catch (InvocationTargetException e) {
+    }
+    return null;
   }
 
 }
