@@ -51,6 +51,8 @@ import com.cloudbees.eclipse.ui.views.jobs.JobsView;
  */
 public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
+  private final static boolean USE_SECURE_STORAGE = false;
+
   // The plug-in ID
   public static final String PLUGIN_ID = "com.cloudbees.eclipse.ui"; //$NON-NLS-1$
 
@@ -87,13 +89,13 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   @Override
   protected void initializeImageRegistry(ImageRegistry reg) {
     super.initializeImageRegistry(reg);
-    
+
     reg.put(CBImages.IMG_CONSOLE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/monitor_obj.png")));
     reg.put(CBImages.IMG_REFRESH, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/refresh.png")));
 
     reg.put(CBImages.IMG_BROWSER,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/internal_browser.gif")));
-    
+
     reg.put(CBImages.IMG_RUN, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/lrun_obj.png")));
 
     reg.put(CBImages.IMG_FOLDER_HOSTED,
@@ -434,7 +436,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   public void loadAccountCredentials() throws CloudBeesException {
     String password;
     try {
-      password = SecurePreferencesFactory.getDefault().get(PreferenceConstants.P_PASSWORD, "");
+      password = readP();
     } catch (StorageException e) {
       throw new CloudBeesException("Failed to load GrandCentral password from the storage!", e);
     }
@@ -472,6 +474,24 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   public static ImageDescriptor getImageDescription(String imgKey) {
     return CloudBeesUIPlugin.getDefault().getImageRegistry().getDescriptor(imgKey);
+  }
+
+  public void storeP(String text) throws StorageException, CloudBeesException {
+    if (USE_SECURE_STORAGE) {
+      SecurePreferencesFactory.getDefault().put(PreferenceConstants.P_PASSWORD, text, true);
+    } else {
+      getPreferenceStore().putValue(PreferenceConstants.P_PASSWORD, text);
+    }
+    // Call programmatically as SecurePreferences does not provide change listeners          
+    CloudBeesUIPlugin.getDefault().fireSecureStorageChanged();
+
+  }
+
+  public String readP() throws StorageException {
+    if (USE_SECURE_STORAGE) {
+      return SecurePreferencesFactory.getDefault().get(PreferenceConstants.P_PASSWORD, "");
+    }
+    return getPreferenceStore().getString(PreferenceConstants.P_PASSWORD);
   }
 
 }
