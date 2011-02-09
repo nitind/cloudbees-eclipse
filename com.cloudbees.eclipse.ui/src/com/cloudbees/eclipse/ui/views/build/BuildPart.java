@@ -466,6 +466,8 @@ public class BuildPart extends EditorPart {
           statusIcon.setImage(null);
         }
 
+        //form.layout();
+        //form.getBody().layout();
         BuildPart.this.compMain.layout();
 
       }

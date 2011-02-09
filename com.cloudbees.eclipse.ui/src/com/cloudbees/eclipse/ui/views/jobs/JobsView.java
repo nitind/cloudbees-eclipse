@@ -443,7 +443,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     actionReloadJobs = new ReloadJobsAction();
 
-    actionOpenJobInBrowser = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+    actionOpenJobInBrowser = new Action("Open with Browser...", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       public void run() {
         if (JobsView.this.selectedJob != null) {
           JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
@@ -456,7 +456,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     actionOpenJobInBrowser.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_BROWSER));
     actionOpenJobInBrowser.setEnabled(false);
 
-    actionInvokeBuild = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+    actionInvokeBuild = new Action("Run a new build for this job...", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       public void run() {
 
         //TODO Add monitor
