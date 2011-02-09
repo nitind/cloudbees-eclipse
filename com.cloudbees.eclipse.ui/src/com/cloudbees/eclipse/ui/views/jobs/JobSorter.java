@@ -4,6 +4,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 
+import com.cloudbees.eclipse.core.jenkins.api.HealthReport;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job.Build;
@@ -15,6 +16,8 @@ public class JobSorter extends ViewerSorter {
   public final static int LAST_BUILD = 3;
   public final static int LAST_SUCCESS = 4;
   public final static int LAST_FAILURE = 5;
+  public static final int BUILD_STABILITY = 6;
+
   private int sortCol;
   private int direction;
 
@@ -46,10 +49,58 @@ public class JobSorter extends ViewerSorter {
     case LAST_FAILURE:
       return rev() * compareBuildTimestamps(j1.lastFailedBuild, j2.lastFailedBuild);
 
+    case BUILD_STABILITY:
+      return rev() * compareBuildStability(j1.healthReport, j2.healthReport);
     default:
       break;
     }
     return rev() * super.compare(viewer, e1, e2);
+  }
+
+  private int compareBuildStability(HealthReport[] b1, HealthReport[] b2) {
+    if (b1 == null || b2 == null) {
+      if (b1 != null) {
+        return -1;
+      }
+      if (b2 != null) {
+        return 1;
+      }
+      return 0;
+    }
+    if (b1.length == 0 || b2.length == 0) {
+      if (b1.length != 0) {
+        return -1;
+      }
+      if (b2.length != 0) {
+        return 1;
+      }
+      return 0;
+    }
+
+    long b1Score = 0;
+    for (int h = 0; h < b1.length; h++) {
+      String desc = b1[h].description;
+      if (desc != null && desc.startsWith("Build stability: ")) {
+        if (b1[h].score != null) {
+          b1Score = b1[h].score.longValue();
+        }
+      }
+    }
+
+    long b2Score = 0;
+    for (int h = 0; h < b2.length; h++) {
+      String desc = b2[h].description;
+      if (desc != null && desc.startsWith("Build stability: ")) {
+        if (b2[h].score != null) {
+          b2Score = b2[h].score.longValue();
+        }
+      }
+    }
+
+    if (b1Score == b2Score) {
+      return 0;
+    }
+    return b1Score > b2Score ? -1 : 1;
   }
 
   private int rev() {

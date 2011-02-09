@@ -193,7 +193,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       }
     });
 
-    createColumn("Build stability", 250, -1, new CellLabelProvider() {
+    createColumn("Build stability", 250, JobSorter.BUILD_STABILITY, new CellLabelProvider() {
       public void update(ViewerCell cell) {
 
         JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
