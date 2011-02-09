@@ -11,11 +11,13 @@ class InstanceGroup {
   private List<JenkinsInstanceHolder> instances;
   private String name;
   private boolean cloudHosted;
+  private boolean loading;
 
   public InstanceGroup(String name, boolean cloudHosted) {
-    instances = new ArrayList<JenkinsInstanceHolder>();
+    this.instances = new ArrayList<JenkinsInstanceHolder>();
     this.name = name;
     this.cloudHosted = cloudHosted;
+    this.loading = true;
   }
 
   public boolean isCloudHosted() {
@@ -23,11 +25,19 @@ class InstanceGroup {
   }
 
   public String getName() {
-    return name;
+    String result = name;
+    if (loading) {
+      result += " (loading)";
+    }
+    return result;
+  }
+
+  public void setLoading(boolean loading) {
+    this.loading = loading;
   }
 
   public void addChild(JenkinsInstanceResponse child) {
-    instances.add(new JenkinsInstanceHolder(this, child));
+    this.instances.add(new JenkinsInstanceHolder(this, child));
   }
 
   public JenkinsInstanceResponse[] getChildren() {
@@ -44,6 +54,10 @@ class InstanceGroup {
 
   public boolean hasChildren() {
     return instances.size() > 0;
+  }
+
+  public void clear() {
+    instances.clear();
   }
 
   @Override

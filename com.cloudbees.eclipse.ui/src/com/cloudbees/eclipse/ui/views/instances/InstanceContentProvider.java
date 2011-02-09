@@ -1,6 +1,5 @@
 package com.cloudbees.eclipse.ui.views.instances;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -12,25 +11,22 @@ import org.eclipse.ui.IViewSite;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 
 public class InstanceContentProvider implements IStructuredContentProvider, ITreeContentProvider {
-  private List<InstanceGroup> root;
+  private InstanceGroup jenkinsGroup = new InstanceGroup("Jenkins", false);
+  private InstanceGroup cloudGroup = new InstanceGroup("DEV@cloud", true);
 
   public InstanceContentProvider() {
+    jenkinsGroup.setLoading(true);
+    cloudGroup.setLoading(true);
   }
 
   public void inputChanged(Viewer v, Object oldInput, Object newInput) {
+    jenkinsGroup.clear();
+    cloudGroup.clear();
+
     if (newInput == null || !(newInput instanceof List)) {
-      root = null; // gone
       v.refresh();
       return;
     }
-
-    //TreeObject to1 = new TreeObject("job 1");
-    InstanceGroup jenkinsGroup = new InstanceGroup("Jenkins", false);
-    InstanceGroup cloudGroup = new InstanceGroup("DEV@cloud", true);
-
-    root = new ArrayList<InstanceGroup>();
-    root.add(jenkinsGroup);
-    root.add(cloudGroup);
 
     for (Object instance : (List) newInput) {
       if (instance instanceof JenkinsInstanceResponse) {
@@ -43,12 +39,16 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
       }
     }
 
+    jenkinsGroup.setLoading(false);
+    cloudGroup.setLoading(false);
+
     v.refresh();
     ((TreeViewer) v).expandToLevel(2);
   }
 
   public void dispose() {
-    root = null;
+    jenkinsGroup = null;
+    cloudGroup = null;
   }
 
   public Object[] getElements(Object parent) {
@@ -63,8 +63,8 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
   }
 
   public Object[] getChildren(Object parent) {
-    if (parent instanceof IViewSite && root != null) {
-      return root.toArray(new InstanceGroup[root.size()]);
+    if (parent instanceof IViewSite) {
+      return new InstanceGroup[] { cloudGroup, jenkinsGroup };
     } else
     if (parent instanceof InstanceGroup) {
       return ((InstanceGroup) parent).getChildren();
