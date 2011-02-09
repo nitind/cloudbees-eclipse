@@ -60,8 +60,7 @@ public class GrandCentralService {
    * @return
    * @throws CloudBeesException
    */
-  public boolean validateUser(IProgressMonitor monitor)
-      throws CloudBeesException {
+  public boolean validateUser(IProgressMonitor monitor) throws CloudBeesException {
 
     if (!hasAuthInfo()) {
       return false;
@@ -176,7 +175,7 @@ public class GrandCentralService {
       }
     }
 
-  */  public void start() {
+  */public void start() {
     // Do nothing for now.
   }
 
@@ -255,7 +254,14 @@ public class GrandCentralService {
       }
       Properties props = new Properties();
       props.put("url", forge.url);
-      forgeSyncService.sync(type, props, monitor);
+
+      try {
+        monitor.beginTask("Syncing repository: " + forge.url, 10);
+        forgeSyncService.sync(type, props, monitor);
+      } finally {
+        monitor.done();
+      }
+
     }
   }
 
@@ -373,6 +379,7 @@ public class GrandCentralService {
     }
 
   }
+
   private static class AuthInfo {
 
     private KeysUsingAuthResponse auth;

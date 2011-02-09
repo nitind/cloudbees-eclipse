@@ -8,6 +8,9 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -47,6 +50,7 @@ public class BuildPart extends EditorPart {
   private Label contentJUnitTests;
   private Label contentRecentChanges;
   private JenkinsJobBuildsResponse dataJobBuilds;
+  private Action invokeBuild;
 
   public BuildPart() {
     super();
@@ -64,26 +68,27 @@ public class BuildPart extends EditorPart {
     formToolkit.decorateFormHeading(form.getForm());
     formToolkit.paintBordersFor(form);
     form.setText("n/a");
+    form.getBody().setLayout(new GridLayout(1, false));
 
-    ColumnLayout columnLayout = new ColumnLayout();
-    columnLayout.maxNumColumns = 1;
-    form.getBody().setLayout(columnLayout);
+    Composite compStatusHead = new Composite(form.getBody(), SWT.NONE);
+    RowLayout rl_compStatusHead = new RowLayout(SWT.HORIZONTAL);
+    rl_compStatusHead.fill = true;
+    compStatusHead.setLayout(rl_compStatusHead);
+    compStatusHead.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+    formToolkit.adapt(compStatusHead);
+    formToolkit.paintBordersFor(compStatusHead);
 
-    textTopSummary = formToolkit.createLabel(form.getBody(), "n/a", SWT.BOLD);
+    Label statusIcon = formToolkit.createLabel(compStatusHead, "", SWT.NONE);
 
-    Composite composite = formToolkit.createComposite(form.getBody(), SWT.NONE);
-    formToolkit.paintBordersFor(composite);
-    ColumnLayout cl_composite = new ColumnLayout();
-    cl_composite.bottomMargin = 0;
-    cl_composite.horizontalSpacing = 10;
-    cl_composite.rightMargin = 0;
-    cl_composite.verticalSpacing = 10;
-    cl_composite.leftMargin = 0;
-    cl_composite.minNumColumns = 2;
-    cl_composite.maxNumColumns = 2;
-    composite.setLayout(cl_composite);
+    textTopSummary = formToolkit.createLabel(compStatusHead, "n/a", SWT.BOLD);
 
-    Section sectSummary = formToolkit.createSection(composite, Section.TITLE_BAR);
+    Composite compUpper = formToolkit.createComposite(form.getBody(), SWT.NONE);
+    compUpper.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+    formToolkit.paintBordersFor(compUpper);
+    compUpper.setLayout(new GridLayout(2, true));
+
+    Section sectSummary = formToolkit.createSection(compUpper, Section.TITLE_BAR);
+    sectSummary.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
     formToolkit.paintBordersFor(sectSummary);
     sectSummary.setText("Build Summary");
 
@@ -97,7 +102,8 @@ public class BuildPart extends EditorPart {
 
     contentBuildSummary = formToolkit.createLabel(compBuildSummary, "n/a", SWT.NONE);
 
-    Section sectTests = formToolkit.createSection(composite, Section.TITLE_BAR);
+    Section sectTests = formToolkit.createSection(compUpper, Section.TITLE_BAR);
+    sectTests.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
     formToolkit.paintBordersFor(sectTests);
     sectTests.setText("JUnit Tests");
 
@@ -111,14 +117,13 @@ public class BuildPart extends EditorPart {
 
     contentJUnitTests = formToolkit.createLabel(compTests, "n/a", SWT.NONE);
 
-    Composite compBuildHistory = formToolkit.createComposite(form.getBody(), SWT.NONE);
-    formToolkit.paintBordersFor(compBuildHistory);
-    ColumnLayout cl_composite_5 = new ColumnLayout();
-    cl_composite_5.minNumColumns = 2;
-    cl_composite_5.maxNumColumns = 2;
-    compBuildHistory.setLayout(cl_composite_5);
+    Composite compLower = formToolkit.createComposite(form.getBody(), SWT.NONE);
+    compLower.setLayout(new GridLayout(2, true));
+    compLower.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+    formToolkit.paintBordersFor(compLower);
 
-    Section sectBuildHistory = formToolkit.createSection(compBuildHistory, Section.TITLE_BAR);
+    Section sectBuildHistory = formToolkit.createSection(compLower, Section.TITLE_BAR);
+    sectBuildHistory.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
     formToolkit.paintBordersFor(sectBuildHistory);
     sectBuildHistory.setText("Build History");
 
@@ -142,7 +147,8 @@ public class BuildPart extends EditorPart {
       }
     });
 
-    Section sectRecentChanges = formToolkit.createSection(compBuildHistory, Section.TITLE_BAR);
+    Section sectRecentChanges = formToolkit.createSection(compLower, Section.TITLE_BAR);
+    sectRecentChanges.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
     formToolkit.paintBordersFor(sectRecentChanges);
     sectRecentChanges.setText("Changes");
 
@@ -192,7 +198,7 @@ public class BuildPart extends EditorPart {
     openLogs.setToolTipText("Open build log"); //TODO i18n
     openLogs.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_CONSOLE));
 
-    Action invokeBuild = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+    invokeBuild = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       public void run() {
         BuildEditorInput details = (BuildEditorInput) getEditorInput();
         String jobUrl = details.getJob().url;
@@ -329,6 +335,8 @@ public class BuildPart extends EditorPart {
 
     loadBuildHistory();
 
+    invokeBuild.setEnabled(details.getJob().buildable);
+
   }
 
   private void loadBuildHistory() {
@@ -378,7 +386,7 @@ public class BuildPart extends EditorPart {
     summary.append("\n");
 
     summary.append("Building: " + dataBuildDetail.building + "\n");
-    summary.append("Buildable: " + details.getJob().buildable + "\n");
+    //summary.append("Buildable: " + details.getJob().buildable + "\n");
     summary.append("Build number: " + dataBuildDetail.number + "\n");
 
     HealthReport[] hr = details.getJob().healthReport;
