@@ -167,13 +167,17 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
         try {
           dialog.run(true, true, new IRunnableWithProgress() {
             public void run(IProgressMonitor monitor) {
-              monitor.beginTask("Validating CloudBees account...", 100); //TODO i18n
               try {
-                monitor.subTask("Connecting..");//TODO i18n
-                monitor.internalWorked(10d);
+                monitor.beginTask("Validating CloudBees account...", 100); //TODO i18n
 
+                monitor.subTask("Connecting...");//TODO i18n
+                monitor.worked(10);
                 GrandCentralService gcs = new GrandCentralService(email, password);
+                monitor.worked(20);
+
+                monitor.subTask("Validating...");//TODO i18n
                 final boolean loginValid = gcs.validateUser(monitor);
+                monitor.worked(50);
 
                 PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 
@@ -190,11 +194,13 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
                 });
 
+                monitor.worked(20);
+
               } catch (CloudBeesException e1) {
                 throw new RuntimeException(e1);
+              } finally {
+                monitor.done();
               }
-
-              monitor.done();
             }
           });
         } catch (InvocationTargetException e1) {
