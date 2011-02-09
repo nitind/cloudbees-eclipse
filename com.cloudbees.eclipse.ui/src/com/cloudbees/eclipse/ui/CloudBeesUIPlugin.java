@@ -108,6 +108,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     reg.put(CBImages.IMG_VIEW,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_big.png")));
 
+    reg.put(CBImages.IMG_COLOR_16_GREY,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/grey.gif")));
+
     reg.put(CBImages.IMG_COLOR_16_RED,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/red.gif")));
 

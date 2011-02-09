@@ -8,11 +8,14 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -24,7 +27,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.forms.widgets.ColumnLayout;
+import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
@@ -53,13 +56,16 @@ public class BuildPart extends EditorPart {
   private Label textTopSummary;
   private Composite compBuildSummary;
   private Label contentBuildSummary;
-  private Link contentBuildHistory;
+  private Composite contentBuildHistory;
   private Label contentJUnitTests;
   private Label contentRecentChanges;
   private JenkinsJobBuildsResponse dataJobDetails;
   private Action invokeBuild;
   private Label statusIcon;
   private Composite compMain;
+  private Composite healthTest;
+  private Composite healthBuild;
+  private Composite contentBuildHistoryHolder;
 
   public BuildPart() {
     super();
@@ -101,6 +107,8 @@ public class BuildPart extends EditorPart {
 
     textTopSummary = formToolkit.createLabel(compStatusHead, "n/a", SWT.BOLD);
     textTopSummary.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false, 1, 1));
+    textTopSummary.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT));
+    textTopSummary.setForeground(formToolkit.getColors().getColor(IFormColors.TITLE));
 
     Section sectSummary = formToolkit.createSection(compMain, Section.TITLE_BAR);
     GridData gd_sectSummary = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
@@ -114,11 +122,10 @@ public class BuildPart extends EditorPart {
     formToolkit.adapt(compBuildSummary);
     formToolkit.paintBordersFor(compBuildSummary);
     sectSummary.setClient(compBuildSummary);
-    ColumnLayout cl_composite_1 = new ColumnLayout();
-    cl_composite_1.maxNumColumns = 1;
-    compBuildSummary.setLayout(cl_composite_1);
+    compBuildSummary.setLayout(new GridLayout(1, false));
 
     contentBuildSummary = formToolkit.createLabel(compBuildSummary, "n/a", SWT.NONE);
+    contentBuildSummary.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 
     Section sectTests = formToolkit.createSection(compMain, Section.TITLE_BAR);
     GridData gd_sectTests = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
@@ -139,63 +146,38 @@ public class BuildPart extends EditorPart {
 
     Section sectBuildHistory = formToolkit.createSection(compMain, Section.TITLE_BAR);
     GridData gd_sectBuildHistory = new GridData(SWT.FILL, SWT.TOP, true, true, 1, 1);
-    gd_sectBuildHistory.verticalIndent = 30;
+    gd_sectBuildHistory.verticalIndent = 20;
     sectBuildHistory.setLayoutData(gd_sectBuildHistory);
     sectBuildHistory.setSize(94, 55);
     formToolkit.paintBordersFor(sectBuildHistory);
     sectBuildHistory.setText("Build History");
 
-    Composite composite_2 = new Composite(sectBuildHistory, SWT.NONE);
-    formToolkit.adapt(composite_2);
-    formToolkit.paintBordersFor(composite_2);
-    sectBuildHistory.setClient(composite_2);
-    GridLayout gl_composite_2 = new GridLayout(1, false);
-    gl_composite_2.verticalSpacing = 0;
-    gl_composite_2.horizontalSpacing = 0;
-    gl_composite_2.marginHeight = 0;
-    gl_composite_2.marginWidth = 0;
-    composite_2.setLayout(gl_composite_2);
+    ScrolledComposite scrolledHistory = new ScrolledComposite(sectBuildHistory, SWT.H_SCROLL | SWT.V_SCROLL);
+    contentBuildHistoryHolder = new Composite(scrolledHistory, SWT.NONE);
 
-    ScrolledComposite scrolledComposite = new ScrolledComposite(composite_2, SWT.H_SCROLL | SWT.V_SCROLL);
-    scrolledComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-    formToolkit.adapt(scrolledComposite);
-    formToolkit.paintBordersFor(scrolledComposite);
-    scrolledComposite.setExpandHorizontal(true);
-    scrolledComposite.setExpandVertical(true);
+    scrolledHistory.setExpandHorizontal(true);
+    scrolledHistory.setExpandVertical(true);
 
-    Composite composite = new Composite(scrolledComposite, SWT.NONE);
-    formToolkit.adapt(composite);
-    formToolkit.paintBordersFor(composite);
-    GridLayout gl_composite = new GridLayout(1, false);
-    gl_composite.horizontalSpacing = 0;
-    gl_composite.marginHeight = 0;
-    gl_composite.marginWidth = 0;
-    gl_composite.verticalSpacing = 0;
-    composite.setLayout(gl_composite);
+    scrolledHistory.setContent(contentBuildHistoryHolder);
+
+    sectBuildHistory.setClient(scrolledHistory);
+
+    formToolkit.adapt(contentBuildHistoryHolder);
+    formToolkit.paintBordersFor(contentBuildHistoryHolder);
+    contentBuildHistoryHolder.setLayout(new GridLayout(1, false));
+
+    formToolkit.adapt(scrolledHistory);
+    formToolkit.paintBordersFor(scrolledHistory);
+    scrolledHistory.setLayout(new GridLayout(1, false));
 
     //contentBuildHistory = formToolkit.createHyperlink(composite_2, "n/a", SWT.NONE);
-    contentBuildHistory = new Link(composite, SWT.NO_FOCUS);
-    GridData gd_contentBuildHistory = new GridData(SWT.FILL, SWT.TOP, true, true, 1, 1);
-    gd_contentBuildHistory.verticalIndent = 5;
-    gd_contentBuildHistory.horizontalIndent = 5;
-    contentBuildHistory.setLayoutData(gd_contentBuildHistory);
-    contentBuildHistory.setText("n/a");
-    contentBuildHistory.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent e) {
-        if (e.text != null && e.text.startsWith("#")) {
-          long buildNo = new Long(e.text.substring(1)).longValue();
-          BuildPart.this.switchToBuild(buildNo);
-        }
-      }
-    });
-    contentBuildHistory.setBackground(composite.getBackground());
 
-    scrolledComposite.setContent(composite);
-    scrolledComposite.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    contentBuildHistory = formToolkit.createComposite(contentBuildHistoryHolder, SWT.NONE);
+    contentBuildHistory.setLayout(new GridLayout(1, false));
 
     Section sectRecentChanges = formToolkit.createSection(compMain, Section.TITLE_BAR);
     GridData gd_sectRecentChanges = new GridData(SWT.FILL, SWT.TOP, true, true, 1, 1);
-    gd_sectRecentChanges.verticalIndent = 30;
+    gd_sectRecentChanges.verticalIndent = 20;
     sectRecentChanges.setLayoutData(gd_sectRecentChanges);
     sectRecentChanges.setSize(68, 45);
     formToolkit.paintBordersFor(sectRecentChanges);
@@ -368,8 +350,12 @@ public class BuildPart extends EditorPart {
     final BuildEditorInput details = (BuildEditorInput) getEditorInput();
 
     if (details == null || details.getBuildUrl() == null || !getBuildEditorInput().isLastBuildAvailable()) {
+
       // No last build available
-      contentBuildHistory.setText("No data available.");
+      if (contentBuildHistory != null && !contentBuildHistory.isDisposed()) {
+        contentBuildHistory.dispose();
+      }
+
       contentJUnitTests.setText("No data available.");
       textTopSummary.setText("Latest build not available.");
       form.setText(getBuildEditorInput().getDisplayName());
@@ -436,25 +422,30 @@ public class BuildPart extends EditorPart {
         }
 
         String topStr = dataBuildDetail.result != null ? dataBuildDetail.result /*+ " ("
-                                                                                + new Date(dataBuildDetail.timestamp) + ")"*/ : "";
+                                                                                + new Date(dataBuildDetail.timestamp) + ")"*/
+        : "";
 
         if (dataBuildDetail.building) {
           topStr = "BUILDING";
         } else if (dataJobDetails.inQueue) {
           topStr = "IN QUEUE";
-        }
-
+        } /*else {
+          topStr = topStr + " " + Utils.humanReadableTime((System.currentTimeMillis() - dataBuildDetail.timestamp))
+              + " ago";
+          }
+          */
         textTopSummary.setText(topStr);
 
-        // Recent Changes      
-        loadRecentChanges();
+
+        loadBuildSummary();
 
         // Load JUnit Tests
         loadUnitTests();
 
-        loadBuildSummary();
-
         loadBuildHistory();
+
+        // Recent Changes      
+        loadRecentChanges();
 
         invokeBuild.setEnabled(dataJobDetails.buildable);
 
@@ -468,33 +459,79 @@ public class BuildPart extends EditorPart {
 
         //form.layout();
         //form.getBody().layout();
+        //BuildPart.this.compMain.pack(true);
+        //form.pack();
         BuildPart.this.compMain.layout();
+        form.reflow(true);
+        //form.layout();
 
       }
     });
   }
 
   private void loadBuildHistory() {
+
+    if (contentBuildHistory != null && !contentBuildHistory.isDisposed()) {
+      contentBuildHistory.dispose();
+    }
+
+    //contentBuildHistoryHolder.layout(true);
+
+    contentBuildHistory = formToolkit.createComposite(contentBuildHistoryHolder, SWT.NONE);
+    GridLayout gl = new GridLayout(1, false);
+    gl.marginHeight = 0;
+    gl.marginWidth = 0;
+    gl.verticalSpacing = 0;
+    contentBuildHistory.setLayout(gl);
+    
+
     if (dataJobDetails.builds == null || dataJobDetails.builds.length == 0) {
-      contentBuildHistory.setText("No recent builds.");//TODO i18n
+      formToolkit.createLabel(contentBuildHistory, "No recent builds.");//TODO i18n
+      contentBuildHistoryHolder.layout(true);
       return;
     }
+
+    //contentBuildHistory.setBackground(composite.getBackground());
 
     StringBuffer val = new StringBuffer();
     for (JenkinsJobBuildsResponse.Build b : dataJobDetails.builds) {
 
-      String result = b.result != null && b.result.length() > 0 ? " - " + b.result : "";
+      //String result = b.result != null && b.result.length() > 0 ? " - " + b.result : "";
 
       String timeComp = (Utils.humanReadableTime((System.currentTimeMillis() - b.timestamp))) + " ago";
 
-      if (b.number != dataBuildDetail.number) {
-        val.append("<a>#" + b.number + "</a>    " + timeComp + result.toLowerCase() + "\n");
+      Image image = null;
+      if ("success".equalsIgnoreCase(b.result)) {
+        image = CloudBeesUIPlugin.getImage(CBImages.IMG_COLOR_16_BLUE);
+      } else if ("failure".equalsIgnoreCase(b.result)) {
+        image = CloudBeesUIPlugin.getImage(CBImages.IMG_COLOR_16_RED);
       } else {
-        val.append("#" + b.number + "    " + timeComp + result.toLowerCase() + " \n");
+        image = CloudBeesUIPlugin.getImage(CBImages.IMG_COLOR_16_GREY);
       }
+
+      Composite comp;
+      if (b.number != dataBuildDetail.number) {
+        comp = createImageLink(contentBuildHistory, "<a>#" + b.number + "</a>  " + timeComp, image, new SelectionAdapter() {
+          public void widgetSelected(SelectionEvent e) {
+            if (e.text != null && e.text.startsWith("#")) {
+              long buildNo = new Long(e.text.substring(1)).longValue();
+              BuildPart.this.switchToBuild(buildNo);
+            }
+          }
+        });
+      } else {
+        comp = createImageLabel(contentBuildHistory, "#" + b.number + "  " + timeComp, image);        
+      }
+
+      GridData gd = new GridData();
+      gd.verticalIndent = 2;
+      comp.setLayoutData(gd);
+
     }
 
-    contentBuildHistory.setText(val.toString());
+    //BuildPart.this.compMain.layout();
+    contentBuildHistoryHolder.layout(true);
+    //contentBuildHistory.setText(val.toString());
 
   }
 
@@ -533,22 +570,75 @@ public class BuildPart extends EditorPart {
       }
     }
 
-    summary.append("\n");
-
     //summary.append("Buildable: " + details.getJob().buildable + "\n");
     //summary.append("Build number: " + dataBuildDetail.number + "\n");
+
+    contentBuildSummary.setText(summary.toString());
+
+    if (healthTest != null && !healthTest.isDisposed()) {
+      healthTest.dispose();
+    }
+
+    if (healthBuild != null && !healthBuild.isDisposed()) {
+      healthBuild.dispose();
+    }
+
+    //compBuildSummary.redraw();
+    //compBuildSummary.layout(true);
 
     HealthReport[] hr = dataJobDetails.healthReport;
     if (hr != null && hr.length > 0) {
       //summary.append("\nProject Health\n");
       for (HealthReport rep : hr) {
-        summary.append(rep.description + "\n"); // + " Score:" + rep.score + "%\n"
-        System.out.println("ICON URL: " + rep.iconUrl);
+        //summary.append(rep.description + "\n"); // + " Score:" + rep.score + "%\n"
+        //System.out.println("ICON URL: " + rep.iconUrl);
+        String testMatch = "Test Result: ";
+        if (rep.description.startsWith(testMatch)) {
+          healthTest = createImageLabel(compBuildSummary, rep.description.substring(testMatch.length()),
+              CloudBeesUIPlugin.getDefault().getImage(CBImages.IMG_HEALTH_PREFIX + CBImages.IMG_24 + rep.iconUrl));
+        } else {
+          String buildMatch = "Build stability: ";
+          if (rep.description.startsWith(buildMatch)) {
+            healthBuild = createImageLabel(compBuildSummary, rep.description.substring(buildMatch.length()),
+                CloudBeesUIPlugin.getDefault().getImage(CBImages.IMG_HEALTH_PREFIX + CBImages.IMG_24 + rep.iconUrl));
+          }
+        }
       }
 
     }
 
-    contentBuildSummary.setText(summary.toString());
+    compBuildSummary.layout(true);
+
+  }
+
+  private Composite createImageLabel(Composite parent, String text, Image image) {
+    Composite comp = formToolkit.createComposite(parent);
+    GridLayout gl = new GridLayout(2, false);
+    comp.setLayout(gl);
+    gl.marginHeight = 0;
+    gl.marginWidth = 0;
+    gl.verticalSpacing = 0;
+    Label imgLabel = formToolkit.createLabel(comp, "", SWT.NONE);
+    imgLabel.setImage(image);
+    Label label = formToolkit.createLabel(comp, text, SWT.NONE);
+    return comp;
+  }
+
+  private Composite createImageLink(Composite parent, String text, Image image, SelectionListener selectionListener) {
+    Composite comp = formToolkit.createComposite(parent);
+    GridLayout gl = new GridLayout(2, false);
+    comp.setLayout(gl);
+    gl.marginHeight = 0;
+    gl.marginWidth = 0;
+    gl.verticalSpacing = 0;
+
+    Label imgLabel = formToolkit.createLabel(comp, "", SWT.NONE);
+    imgLabel.setImage(image);
+    Link link = new Link(comp, SWT.NONE);
+    link.setText(text);
+    link.addSelectionListener(selectionListener);
+    link.setBackground(formToolkit.getColors().getBackground());
+    return comp;
   }
 
   private void loadUnitTests() {

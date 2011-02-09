@@ -210,7 +210,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
               if (desc != null && desc.startsWith(matchStr)) {
                 cell.setText(" " + desc.substring(matchStr.length()));
                 cell.setImage(CloudBeesUIPlugin.getDefault().getImage(
-                    CBImages.IMG_HEALTH_REFIX + CBImages.IMG_16 + icon));
+                    CBImages.IMG_HEALTH_PREFIX + CBImages.IMG_16 + icon));
               }
             }
           }
@@ -350,9 +350,10 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       //CloudBeesUIPlugin.getDefault().getLogger().info("DURATION: " + build.timestamp);      
       unit = Utils.humanReadableTime((System.currentTimeMillis() - build.timestamp.longValue()));
     }
-    String timeComp = build.duration != null ? ", " + unit + " ago" : "";
-    String buildComp = build.number != null ? "#" + build.number : "n/a";
-    return buildComp + timeComp;
+    String timeComp = build.duration != null ? /*", " + */unit + " ago" : "";
+    //String buildComp = build.number != null ? "#" + build.number : "n/a";
+    String buildComp = build.number != null ? " #" + build.number : "n/a";
+    return timeComp + buildComp;
   }
 
   private void initImages() {
