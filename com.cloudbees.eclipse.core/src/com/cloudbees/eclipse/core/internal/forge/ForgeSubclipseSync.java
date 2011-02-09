@@ -36,13 +36,22 @@ public class ForgeSubclipseSync implements ForgeSync {
     }
 
     try {
+      monitor.beginTask("Validating SVN repository connection...", 10);
+      monitor.worked(1);
+
       ISVNRepositoryLocation rep = SVNProviderPlugin.getPlugin().getRepositories().createRepository(props);
+      monitor.worked(5);
+
       //rep.validateConnection(monitor);
       SVNProviderPlugin.getPlugin().getRepositories().addOrUpdateRepository(rep);
+      monitor.worked(4);
+
     } catch (SVNException e) {
       throw new CloudBeesException("Failed to create missing repository!", e);
+    } finally {
+      monitor.worked(10);
+      monitor.done();
     }
-
   }
 
 }

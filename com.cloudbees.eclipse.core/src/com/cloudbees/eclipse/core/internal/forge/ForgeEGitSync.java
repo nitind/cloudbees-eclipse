@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.egit.core.op.CloneOperation;
 import org.eclipse.jgit.transport.URIish;
 
+import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 
 /**
@@ -32,17 +33,27 @@ public class ForgeEGitSync implements ForgeSync {
 
     //File repoFile = new File(url);
 
-    monitor.setTaskName("Creating EGit repository:");
-    monitor.worked(2);
     //TODO Implement Clone operation after more git info is available from the Forge repo meta data
     try {
-      CloneOperation clone = new CloneOperation(new URIish(url), true, Collections.EMPTY_LIST, new File(""), null,
-          "origin", 5000);
-      monitor.worked(5);
+      monitor.beginTask("Creating EGit repository...", 10);
+      monitor.worked(2);
+
+      CloneOperation clone;
+      //      try {
+      //        clone = new CloneOperation(new URIish(url), true, Collections.EMPTY_LIST, new File(""), null, "origin", 5000);
+      //      } catch (Throwable e) {
+      //        try {
+          clone = new CloneOperation(new URIish(url), true, Collections.EMPTY_LIST, new File(""), null, "origin");
+      //        } catch (Throwable e2) {
+      //          throw e;
+      //        }
+      //      }
+      monitor.worked(8);
+
     } catch (URISyntaxException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      CloudBeesCorePlugin.getDefault().getLogger().error(e);
     } finally {
+      monitor.worked(10);
       monitor.done();
     }
   }

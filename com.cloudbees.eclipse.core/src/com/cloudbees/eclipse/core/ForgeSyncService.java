@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.osgi.framework.Bundle;
 
 import com.cloudbees.eclipse.core.internal.forge.ForgeEGitSync;
@@ -45,8 +46,9 @@ public class ForgeSyncService {
   }
 
   public void sync(ForgeSync.TYPE type, Properties props, IProgressMonitor monitor) throws CloudBeesException {
+    int ticksPerProcess = 100 / providers.size();
     for (ForgeSync provider : providers) {
-      provider.sync(type, props, monitor);
+      provider.sync(type, props, new SubProgressMonitor(monitor, ticksPerProcess));
     }
   }
 

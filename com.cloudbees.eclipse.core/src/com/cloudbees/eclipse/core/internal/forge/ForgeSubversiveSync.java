@@ -23,17 +23,28 @@ public class ForgeSubversiveSync implements ForgeSync {
       throw new IllegalArgumentException("url not provided!");
     }
 
-    IRepositoryLocation loc = SVNRemoteStorage.instance().newRepositoryLocation();
-    monitor.setTaskName("Validating SVN repository connection.");
+    try {
+      monitor.beginTask("Validating SVN repository connection...", 10);
 
-    Exception ex = SVNUtility.validateRepositoryLocation(loc);
-    if (ex != null) {
-      throw new CloudBeesException("Failed to validate SVN connection to " + url, ex);
+      monitor.worked(1);
+      IRepositoryLocation loc = SVNRemoteStorage.instance().newRepositoryLocation();
+
+      monitor.worked(1);
+
+      Exception ex = SVNUtility.validateRepositoryLocation(loc);
+      if (ex != null) {
+        throw new CloudBeesException("Failed to validate SVN connection to " + url, ex);
+      }
+
+      monitor.worked(1);
+
+      monitor.setTaskName("Adding repository...");
+      SVNRemoteStorage.instance().addRepositoryLocation(loc);
+      monitor.worked(7);
+    } finally {
+      monitor.worked(10);
+      monitor.done();
     }
-
-    monitor.setTaskName("Adding repository.");
-    SVNRemoteStorage.instance().addRepositoryLocation(loc);
-    monitor.done();
   }
 
 }

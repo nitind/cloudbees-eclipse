@@ -256,7 +256,7 @@ public class GrandCentralService {
       props.put("url", forge.url);
 
       try {
-        monitor.beginTask("Syncing repository: " + forge.url, 10);
+        monitor.beginTask("Syncing repository '" + forge.url + "'", 100);
         forgeSyncService.sync(type, props, monitor);
       } finally {
         monitor.done();
