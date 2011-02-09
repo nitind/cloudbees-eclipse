@@ -23,6 +23,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
@@ -178,16 +179,36 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     job.schedule();
   }
 
-  public static void showError(String msg, Throwable e) {
-    Status status = new Status(IStatus.ERROR, "Error!", 0, e.getClass().getSimpleName() + ": " + e.getMessage(), e);
-    ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Error!", msg, status);
-    CloudBeesUIPlugin.getDefault().getLogger().error(msg, e);
+  public static IStatus showError(final String msg, final Throwable e) {
+    final Status status = new Status(IStatus.ERROR, PLUGIN_ID, 0, msg, e);
+    try {
+      CloudBeesUIPlugin.getDefault().getLogger().error(msg, e);
+      PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+        public void run() {
+          Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+          ErrorDialog.openError(shell, "Error!", msg, status);
+        }
+      });
+    } catch (Exception e2) {
+      CloudBeesUIPlugin.getDefault().getLogger().error(msg, e2);
+    }
+    return status;
   }
 
-  public static void showError(String msg, String reason, Throwable e) {
-    Status status = new Status(IStatus.ERROR, "Error!", 0, reason, e);
-    ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Error!", msg, status);
-    CloudBeesUIPlugin.getDefault().getLogger().error(msg + " - " + reason, e);
+  public static IStatus showError(final String msg, final String reason, final Throwable e) {
+    final Status status = new Status(IStatus.ERROR, PLUGIN_ID, 0, reason, e);
+    try {
+      CloudBeesUIPlugin.getDefault().getLogger().error(msg + " - " + reason, e);
+      PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+        public void run() {
+      Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+      ErrorDialog.openError(shell, "Error!", msg, status);
+        }
+      });
+    } catch (Exception e2) {
+      CloudBeesUIPlugin.getDefault().getLogger().error(msg, e2);
+    }
+    return status;
   }
 
   public Logger getLogger() {
@@ -255,16 +276,30 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           return new Status(Status.INFO, PLUGIN_ID, "DEV@Cloud Continuous Integration is not enabled");
         }
 
+        Exception toReport = null;
+
         try {
           monitor.beginTask("Reading DEV@Cloud and Jenkins configuration", 1000);
 
           List<JenkinsInstance> instances = new ArrayList<JenkinsInstance>();
-          instances.addAll(loadManualJenkinsInstances());
-          monitor.worked(90);
-          instances.addAll(loadDevAtCloudInstances(monitor));
-          monitor.worked(150);
+          try {
+            instances.addAll(loadDevAtCloudInstances(monitor));
+          } catch (Exception e) {
+            if (toReport == null) {
+              toReport = e;
+            }
+          }
+          monitor.worked(125);
+          try {
+            instances.addAll(loadManualJenkinsInstances());
+          } catch (Exception e) {
+            if (toReport == null) {
+              toReport = e;
+            }
+          }
+          monitor.worked(125);
 
-          List<JenkinsInstanceResponse> resp = pollInstances(instances, new SubProgressMonitor(monitor, 750));
+          List<JenkinsInstanceResponse> resp = pollInstances(instances, new SubProgressMonitor(monitor, 740));
 
           Iterator<JenkinsChangeListener> iterator = jenkinsChangeListeners.iterator();
           while (iterator.hasNext()) {
@@ -273,10 +308,18 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           }
           monitor.worked(10);
 
+          if (toReport != null) {
+            throw toReport;
+          }
+
           return Status.OK_STATUS;
-        } catch (CloudBeesException e) {
-          CloudBeesUIPlugin.getDefault().getLogger().error(e);
-          return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage(), e);
+        } catch (Exception e) {
+          String msg = e.getLocalizedMessage();
+          if (e instanceof CloudBeesException) {
+            e = (Exception) e.getCause();
+          }
+          CloudBeesUIPlugin.getDefault().getLogger().error(msg, e);
+          return new Status(IStatus.ERROR, PLUGIN_ID, 0, msg, e);
         } finally {
           monitor.done();
         }
@@ -311,7 +354,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           fakeResp.atCloud = inst.atCloud;
           resp.add(fakeResp);
 
-          logger.info("Failed to fetch info about '" + inst.url + "':" + e.getLocalizedMessage(), e);
+          logger.warn("Failed to fetch info about '" + inst.url + "':" + e.getLocalizedMessage(), e.getCause());
         } finally {
           monitor.worked(1 * scale);
         }
