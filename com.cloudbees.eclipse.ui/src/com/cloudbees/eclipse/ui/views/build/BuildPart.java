@@ -35,6 +35,7 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.jenkins.api.HealthReport;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Action.Cause;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet.ChangeSetItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobBuildsResponse;
 import com.cloudbees.eclipse.core.util.Utils;
@@ -135,11 +136,6 @@ public class BuildPart extends EditorPart {
 
     contentJUnitTests = formToolkit.createLabel(compTests, "n/a", SWT.NONE);
     contentJUnitTests.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-
-    TreeViewer treeViewerTest = new TreeViewer(compTests, SWT.NONE);
-    Tree treeTest = treeViewerTest.getTree();
-    treeTest.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
-    formToolkit.paintBordersFor(treeTest);
 
     Section sectBuildHistory = formToolkit.createSection(compMain, Section.TITLE_BAR);
     GridData gd_sectBuildHistory = new GridData(SWT.FILL, SWT.TOP, true, true, 1, 1);
@@ -427,7 +423,6 @@ public class BuildPart extends EditorPart {
           setPartName(details.getDisplayName());
         }
 
-
         //setContentDescription(detail.fullDisplayName);
 
         if (form != null) {
@@ -505,6 +500,21 @@ public class BuildPart extends EditorPart {
       summary.append(dataBuildDetail.description + "\n");
     }
 
+    StringBuffer causeBuffer = new StringBuffer();
+    if (dataBuildDetail.actions != null && dataBuildDetail.actions.length > 0) {
+      for (int i = 0; i < dataBuildDetail.actions.length; i++) {
+        if (dataBuildDetail.actions[i].causes != null) {
+          for (int c = 0; c < dataBuildDetail.actions[i].causes.length; c++) {
+            Cause cause = dataBuildDetail.actions[i].causes[c];
+            causeBuffer.append(cause.shortDescription + "\n");
+          }
+        }
+      }
+    }
+    if (causeBuffer.length() > 0) {
+      summary.append(causeBuffer.toString() + "\n");
+    }
+
     if (dataBuildDetail.builtOn != null && dataBuildDetail.timestamp != null) {
       if (dataBuildDetail.builtOn != null && dataBuildDetail.builtOn.length() > 0) {
         summary.append("Built on: " + dataBuildDetail.builtOn + " at " + (new Date(dataBuildDetail.timestamp)) + "\n");
@@ -522,7 +532,7 @@ public class BuildPart extends EditorPart {
     if (hr != null && hr.length > 0) {
       //summary.append("\nProject Health\n");
       for (HealthReport rep : hr) {
-        summary.append(rep.description + " Score:" + rep.score + "%\n");
+        summary.append(rep.description + "\n"); // + " Score:" + rep.score + "%\n"
         System.out.println("ICON URL: " + rep.iconUrl);
       }
 

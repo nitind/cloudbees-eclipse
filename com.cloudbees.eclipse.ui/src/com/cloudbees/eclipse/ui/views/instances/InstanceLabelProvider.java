@@ -28,7 +28,8 @@ public class InstanceLabelProvider extends LabelProvider implements IFontProvide
   public String getText(Object obj) {
     if (obj instanceof InstanceGroup) {
       InstanceGroup gr = (InstanceGroup) obj;
-      return gr.getName();
+
+      return gr.isLoading() ? gr.getName() + " (loading)" : gr.getName();
     }
     if (obj instanceof JenkinsInstanceResponse) {
       JenkinsInstanceResponse inst = (JenkinsInstanceResponse) obj;
@@ -79,6 +80,13 @@ public class InstanceLabelProvider extends LabelProvider implements IFontProvide
   }
 
   public Font getFont(Object element) {
+    if (element instanceof InstanceGroup) {
+      InstanceGroup gr = (InstanceGroup) element;
+      if (gr.isLoading()) {
+        return JFaceResources.getFontRegistry().getItalic(JFaceResources.DEFAULT_FONT);
+      }
+    }
+
     if (element instanceof JenkinsInstanceResponse.View) {
       View view = (JenkinsInstanceResponse.View) element;
       if (view.isPrimary) {

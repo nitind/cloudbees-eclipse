@@ -25,15 +25,15 @@ class InstanceGroup {
   }
 
   public String getName() {
-    String result = name;
-    if (loading) {
-      result += " (loading)";
-    }
-    return result;
+    return name;
   }
 
   public void setLoading(boolean loading) {
     this.loading = loading;
+  }
+
+  public boolean isLoading() {
+    return loading;
   }
 
   public void addChild(JenkinsInstanceResponse child) {
@@ -89,5 +89,6 @@ class InstanceGroup {
     }
     return true;
   }
+
 
 }
