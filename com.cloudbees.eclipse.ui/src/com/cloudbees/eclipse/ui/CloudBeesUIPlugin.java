@@ -425,9 +425,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     try {
       service.run(false, true, op);
     } catch (InvocationTargetException e) {
-      // Operation was canceled
+      CloudBeesUIPlugin.getDefault().getLogger().error(e);
     } catch (InterruptedException e) {
-      // Handle the wrapped exception
+      CloudBeesUIPlugin.getDefault().getLogger().error(e);
     }
   }
 

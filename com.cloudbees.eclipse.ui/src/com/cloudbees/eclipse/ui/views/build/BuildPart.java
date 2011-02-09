@@ -1,10 +1,13 @@
 package com.cloudbees.eclipse.ui.views.build;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -18,11 +21,13 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.ColumnLayout;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
+import org.eclipse.ui.progress.IProgressService;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsService;
@@ -131,12 +136,17 @@ public class BuildPart extends EditorPart {
     formToolkit.adapt(composite_2);
     formToolkit.paintBordersFor(composite_2);
     sectBuildHistory.setClient(composite_2);
-    ColumnLayout cl_composite_2 = new ColumnLayout();
-    cl_composite_2.maxNumColumns = 1;
-    composite_2.setLayout(cl_composite_2);
+    composite_2.setLayout(new GridLayout(1, false));
+
+    Composite composite = new Composite(composite_2, SWT.NONE);
+    composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true, 1, 1));
+    formToolkit.adapt(composite);
+    formToolkit.paintBordersFor(composite);
+    composite.setLayout(new GridLayout(1, false));
 
     //contentBuildHistory = formToolkit.createHyperlink(composite_2, "n/a", SWT.NONE);
-    contentBuildHistory = new Link(composite_2, SWT.NO_FOCUS);
+    contentBuildHistory = new Link(composite, SWT.NO_FOCUS);
+    contentBuildHistory.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true, 1, 1));
     contentBuildHistory.setText("n/a");
     contentBuildHistory.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
@@ -164,8 +174,7 @@ public class BuildPart extends EditorPart {
 
     createActions();
 
-    loadData(null);//TODO Add monitor
-
+    loadData();
   }
 
   private void createActions() {
@@ -204,9 +213,8 @@ public class BuildPart extends EditorPart {
         String jobUrl = details.getJob().url;
         JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(jobUrl);
 
-        //TODO Add monitor
         try {
-          ns.invokeBuild(jobUrl, null);
+          ns.invokeBuild(jobUrl, new NullProgressMonitor());
         } catch (CloudBeesException e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
         }
@@ -227,16 +235,29 @@ public class BuildPart extends EditorPart {
   }
 
   protected void reloadData() {
-    //TODO Add monitor
+    IRunnableWithProgress op = new IRunnableWithProgress() {
+      public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+
+        try {
+          BuildEditorInput details = (BuildEditorInput) getEditorInput();
+          JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(details.getJob().url);
+          dataBuildDetail = service.getJobDetails(details.getBuildUrl(), monitor);
+        } catch (CloudBeesException e) {
+          CloudBeesUIPlugin.getDefault().getLogger().error(e);
+        }
+
+        reloadUI();
+      }
+    };
+
+    IProgressService service = PlatformUI.getWorkbench().getProgressService();
     try {
-      BuildEditorInput details = (BuildEditorInput) getEditorInput();
-      JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(details.getJob().url);
-      dataBuildDetail = service.getJobDetails(details.getBuildUrl(), null);
-    } catch (CloudBeesException e) {
+      service.run(false, true, op);
+    } catch (InvocationTargetException e) {
+      CloudBeesUIPlugin.getDefault().getLogger().error(e);
+    } catch (InterruptedException e) {
       CloudBeesUIPlugin.getDefault().getLogger().error(e);
     }
-
-    reloadUI();
   }
 
   protected void openBuildWithBrowser() {
@@ -250,34 +271,50 @@ public class BuildPart extends EditorPart {
     CloudBeesUIPlugin.getDefault().openWithBrowser(details.getJob().url);
   }
 
-  protected void switchToBuild(long buildNo) {
-    BuildEditorInput details = (BuildEditorInput) getEditorInput();
-    String newJobUrl = details.getJob().url + "/" + buildNo + "/";
+  protected void switchToBuild(final long buildNo) {
+    IRunnableWithProgress op = new IRunnableWithProgress() {
+      public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 
-    JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(details.getJob().url);
+        BuildEditorInput details = (BuildEditorInput) getEditorInput();
+        String newJobUrl = details.getJob().url + "/" + buildNo + "/";
 
-    //TODO Add monitor
+        JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(details.getJob().url);
+
+        try {
+          dataBuildDetail = service.getJobDetails(newJobUrl, monitor);
+          details.setBuildUrl(dataBuildDetail.url);
+
+        } catch (CloudBeesException e) {
+          CloudBeesUIPlugin.getDefault().getLogger().error(e);
+        }
+
+        reloadUI();
+
+      }
+    };
+
+    IProgressService service = PlatformUI.getWorkbench().getProgressService();
     try {
-      dataBuildDetail = service.getJobDetails(newJobUrl, null);
-      details.setBuildUrl(dataBuildDetail.url);
-
-    } catch (CloudBeesException e) {
+      service.run(false, true, op);
+    } catch (InvocationTargetException e) {
+      CloudBeesUIPlugin.getDefault().getLogger().error(e);
+    } catch (InterruptedException e) {
       CloudBeesUIPlugin.getDefault().getLogger().error(e);
     }
-
-    reloadUI();
   }
 
   public IEditorSite getEditorSite() {
     return (IEditorSite) getSite();
   }
 
-  private void loadData(IProgressMonitor monitor) {
+  private void loadData() {
     if (getEditorInput() == null) {
       return;
     }
 
-    BuildEditorInput details = (BuildEditorInput) getEditorInput();
+    IProgressMonitor monitor = new NullProgressMonitor();
+
+    final BuildEditorInput details = (BuildEditorInput) getEditorInput();
 
     this.lastBuildAvailable = false;
 
@@ -287,56 +324,73 @@ public class BuildPart extends EditorPart {
       contentJUnitTests.setText("No data available.");
     } else {
 
-      JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(details.getLastBuild().url);
+      IRunnableWithProgress op = new IRunnableWithProgress() {
+        public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 
+          JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(details.getLastBuild().url);
+
+          try {
+
+            dataBuildDetail = service.getJobDetails(details.getLastBuild().url, monitor);
+
+            dataJobBuilds = service.getJobBuilds(details.getJob().url, monitor);
+
+            BuildPart.this.lastBuildAvailable = true;
+          } catch (CloudBeesException e) {
+            CloudBeesUIPlugin.getDefault().getLogger().error(e);
+            return;
+          }
+
+          reloadUI();
+
+        }
+      };
+
+      IProgressService service = PlatformUI.getWorkbench().getProgressService();
       try {
-        //TODO Add monitor
-        dataBuildDetail = service.getJobDetails(details.getLastBuild().url, monitor);
-
-        dataJobBuilds = service.getJobBuilds(details.getJob().url, monitor);
-
-        this.lastBuildAvailable = true;
-      } catch (CloudBeesException e) {
+        service.run(false, true, op);
+      } catch (InvocationTargetException e) {
         CloudBeesUIPlugin.getDefault().getLogger().error(e);
-        return;
+      } catch (InterruptedException e) {
+        CloudBeesUIPlugin.getDefault().getLogger().error(e);
       }
-
-      reloadUI();
-
     }
   }
 
-  private void reloadUI() {
+  protected void reloadUI() {
+    PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+      public void run() {
 
-    BuildEditorInput details = (BuildEditorInput) getEditorInput();
+        BuildEditorInput details = (BuildEditorInput) getEditorInput();
 
-    //setPartName();
-    setPartName(details.getJob().displayName + " #" + dataBuildDetail.number);
+        //setPartName();
+        setPartName(details.getJob().displayName + " #" + dataBuildDetail.number);
 
-    //setContentDescription(detail.fullDisplayName);
+        //setContentDescription(detail.fullDisplayName);
 
-    String topStr = dataBuildDetail.result != null ? dataBuildDetail.result + " ("
-        + new Date(dataBuildDetail.timestamp) + ")" : "";
+        String topStr = dataBuildDetail.result != null ? dataBuildDetail.result + " ("
+            + new Date(dataBuildDetail.timestamp) + ")" : "";
 
-    textTopSummary.setText(topStr);
+        textTopSummary.setText(topStr);
 
-    if (form != null) {
-      form.setText("Build #" + dataBuildDetail.number + " [" + details.getJob().displayName + "]");
-      //TODO Add image for build status! form.setImage(image);
-    }
+        if (form != null) {
+          form.setText("Build #" + dataBuildDetail.number + " [" + details.getJob().displayName + "]");
+          //TODO Add image for build status! form.setImage(image);
+        }
 
-    // Recent Changes      
-    loadRecentChanges();
+        // Recent Changes      
+        loadRecentChanges();
 
-    // Load JUnit Tests
-    loadUnitTests();
+        // Load JUnit Tests
+        loadUnitTests();
 
-    loadBuildSummary();
+        loadBuildSummary();
 
-    loadBuildHistory();
+        loadBuildHistory();
 
-    invokeBuild.setEnabled(details.getJob().buildable);
-
+        invokeBuild.setEnabled(details.getJob().buildable);
+      }
+    });
   }
 
   private void loadBuildHistory() {
