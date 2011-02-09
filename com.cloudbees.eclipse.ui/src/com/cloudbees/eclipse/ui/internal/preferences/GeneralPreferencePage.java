@@ -3,7 +3,6 @@ package com.cloudbees.eclipse.ui.internal.preferences;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -108,7 +107,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
       protected void doLoad() {
         try {
           if (getTextControl() != null) {
-            String value = SecurePreferencesFactory.getDefault().get(PreferenceConstants.P_PASSWORD, "");
+            String value = CloudBeesUIPlugin.getDefault().readP();
             getTextControl().setText(value);
             oldValue = value;
           }
@@ -120,10 +119,8 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
       protected void doStore() {
         try {
-          SecurePreferencesFactory.getDefault().put(PreferenceConstants.P_PASSWORD, getTextControl().getText(), true);
 
-          // Call programmatically as SecurePreferences does not provide change listeners          
-          CloudBeesUIPlugin.getDefault().fireSecureStorageChanged();
+          CloudBeesUIPlugin.getDefault().storeP(getTextControl().getText());
 
         } catch (Exception e) {
           CloudBeesUIPlugin.showError(
