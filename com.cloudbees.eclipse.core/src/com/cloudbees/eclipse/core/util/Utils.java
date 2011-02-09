@@ -11,6 +11,8 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URL;
 import java.security.KeyStore;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
@@ -20,6 +22,7 @@ import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -119,7 +122,15 @@ public class Utils {
         instream.close();
       }
 
-      SSLSocketFactory socketFactory = new SSLSocketFactory(trustStore);
+      TrustStrategy trustAllStrategy = new TrustStrategy() {
+        public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+          return true;
+        }
+      };
+
+      SSLSocketFactory socketFactory = new SSLSocketFactory(SSLSocketFactory.TLS, null, null, trustStore, null,
+          trustAllStrategy,
+          SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
       // Override https handling to use provided truststore
       Scheme sch = new Scheme("https", socketFactory, 443);
       httpclient.getConnectionManager().getSchemeRegistry().register(sch);
