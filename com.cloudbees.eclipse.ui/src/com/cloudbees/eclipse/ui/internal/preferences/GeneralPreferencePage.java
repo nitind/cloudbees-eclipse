@@ -126,7 +126,6 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
           CloudBeesUIPlugin.getDefault().fireSecureStorageChanged();
 
         } catch (Exception e) {
-          e.printStackTrace();
           CloudBeesUIPlugin.showError(
               "Saving password failed!\nPossible cause: Eclipse security master password is not set.", e);
         }
@@ -202,7 +201,6 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
             }
           });
         } catch (InvocationTargetException e1) {
-          e1.printStackTrace();
           Throwable t1 = e1.getTargetException().getCause() != null ? e1.getTargetException().getCause() : e1
               .getTargetException();
           Throwable t2 = t1.getCause() != null ? t1.getCause() : null;

@@ -319,7 +319,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     String unit = "";
     if (build.duration != null) {
       //TODO Implement proper human-readable duration conversion, consider using the same conversion rules that Jenkins uses
-      //System.out.println("DURATION: " + build.timestamp);      
+      //CloudBeesUIPlugin.getDefault().getLogger().info("DURATION: " + build.timestamp);      
       unit = Utils.humanReadableTime((System.currentTimeMillis() - build.timestamp.longValue()));
     }
     String timeComp = build.duration != null ? ", " + unit + " ago" : "";

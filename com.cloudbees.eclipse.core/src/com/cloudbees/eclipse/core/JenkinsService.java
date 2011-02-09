@@ -242,7 +242,7 @@ public class JenkinsService {
         monitor.worked(1);
 
         if (cookie != null) {
-          System.out.println("Cookie: " + cookie);
+          CloudBeesCorePlugin.getDefault().getLogger().info("Cookie: " + cookie);
         }
         if (cookie != null && cookie.getValue().startsWith("JOSSO_SESSIONID=")) {
           break; // logged in ok
@@ -261,13 +261,13 @@ public class JenkinsService {
       monitor.done();
     }
 
-    //System.out.println("JOSSO_SESSIONID=" + lastJossoSessionId);
+    //CloudBeesCorePlugin.getDefault().getLogger().info("JOSSO_SESSIONID=" + lastJossoSessionId);
   }
 
   private HttpResponse visitSite(DefaultHttpClient httpClient, String url, String refererUrl)
       throws IOException, ClientProtocolException, CloudBeesException {
 
-    System.out.println("Visiting: " + url);
+    CloudBeesCorePlugin.getDefault().getLogger().info("Visiting: " + url);
 
     HttpPost post = new HttpPost(url);
     post.addHeader("Referer", refererUrl);
@@ -285,7 +285,9 @@ public class JenkinsService {
     String body = Utils.getResponseBody(resp);
 
     Header redir = resp.getFirstHeader("Location");
-    System.out.println("\t" + resp.getStatusLine() + (redir != null ? (" -> " + redir.getValue()) : ""));
+
+    CloudBeesCorePlugin.getDefault().getLogger()
+        .info("\t" + resp.getStatusLine() + (redir != null ? (" -> " + redir.getValue()) : ""));
 
     return resp;
   }

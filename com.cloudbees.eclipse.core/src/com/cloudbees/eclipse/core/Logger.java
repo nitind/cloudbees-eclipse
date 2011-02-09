@@ -36,6 +36,10 @@ public class Logger {
     log(IStatus.WARNING, msg, exception);
   }
 
+  public void warn(Throwable exception) {
+    log(IStatus.WARNING, exception.getLocalizedMessage(), exception);
+  }
+
   public void error(String msg) {
     log(IStatus.ERROR, msg);
   }

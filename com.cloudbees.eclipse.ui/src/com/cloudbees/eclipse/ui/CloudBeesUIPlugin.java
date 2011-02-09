@@ -227,13 +227,11 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       throw new IllegalStateException("Unable to add new instance with an empty url or label!");
     }
     List<JenkinsInstance> list = loadManualJenkinsInstances();
-    //System.out.println("save before: " + list);
     list.remove(ni); // when editing - id is the same, but props old, so lets kill old instance first
     list.add(ni);
 
     jenkinsRegistry.remove(new JenkinsService(ni));
 
-    //System.out.println("save after: " + list);
     Collections.sort(list);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
         .setValue(PreferenceConstants.P_JENKINS_INSTANCES, JenkinsInstance.encode(list));
@@ -342,7 +340,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
    * @throws CloudBeesException
    */
   public void showJobs(final String serviceUrl, final String viewUrl) throws CloudBeesException {
-    // System.out.println("Show jobs: " + serviceUrl + " - " + viewUrl);
+    // CloudBeesUIPlugin.getDefault().getLogger().info("Show jobs: " + serviceUrl + " - " + viewUrl);
 
     if (serviceUrl == null && viewUrl == null) {
       return; // no info

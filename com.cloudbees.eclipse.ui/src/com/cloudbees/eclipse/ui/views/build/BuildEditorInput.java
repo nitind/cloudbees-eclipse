@@ -12,7 +12,7 @@ public class BuildEditorInput extends NullEditorInput {
 
   public BuildEditorInput(Job job) {
     super();
-    //System.out.println("Creating job details editor for url " + job.url);
+    //CloudBeesUIPlugin.getDefault().getLogger().info("Creating job details editor for url " + job.url);
     this.job = job;
     if (getLastBuild() != null && getLastBuild().url != null) {
       buildUrl = getLastBuild().url;
