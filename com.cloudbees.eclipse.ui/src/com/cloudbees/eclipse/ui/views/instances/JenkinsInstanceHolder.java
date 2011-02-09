@@ -34,4 +34,34 @@ class JenkinsInstanceHolder implements IAdaptable {
   public JenkinsInstanceResponse getBacking() {
     return backing;
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((backing == null) ? 0 : backing.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (!(obj instanceof JenkinsInstanceHolder)) {
+      return false;
+    }
+    JenkinsInstanceHolder other = (JenkinsInstanceHolder) obj;
+    if (backing == null) {
+      if (other.backing != null) {
+        return false;
+      }
+    } else if (!backing.equals(other.backing)) {
+      return false;
+    }
+    return true;
+  }
 }
