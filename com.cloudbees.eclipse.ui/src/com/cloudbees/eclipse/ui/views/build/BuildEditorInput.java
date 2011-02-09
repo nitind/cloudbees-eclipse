@@ -3,21 +3,32 @@ package com.cloudbees.eclipse.ui.views.build;
 import org.eclipse.ui.internal.part.NullEditorInput;
 
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job.Build;
 
 public class BuildEditorInput extends NullEditorInput {
 
-  private Job job;
-  private String buildUrl;
+  //private Job job;
 
+  private String buildUrl;
+  private String jobUrl;
+  private String displayName;
+
+  private boolean lastBuildAvailable = false;
+
+  
   public BuildEditorInput(Job job) {
     super();
     //CloudBeesUIPlugin.getDefault().getLogger().info("Creating job details editor for url " + job.url);
-    this.job = job;
-    if (getLastBuild() != null && getLastBuild().url != null) {
-      buildUrl = getLastBuild().url;
+    //this.job = job;
+
+    this.displayName = job.displayName;
+
+    setJobUrl(job.url);
+
+    if (job.lastBuild != null && job.lastBuild.url != null) {
+      setBuildUrl(job.lastBuild.url);
+      lastBuildAvailable = true;
     } else {
-      buildUrl = job.url;
+      setBuildUrl(job.url);
     }
 
   }
@@ -27,20 +38,32 @@ public class BuildEditorInput extends NullEditorInput {
     return true;
   }
 
-  public Build getLastBuild() {
-    return job.lastBuild;
-  }
-
-  public Job getJob() {
-    return job;
+  public void setBuildUrl(String buildUrl) {
+    this.buildUrl = buildUrl;
   }
 
   public String getBuildUrl() {
-    return this.buildUrl;
+    return buildUrl;
   }
 
-  public void setBuildUrl(String newBuildUrl) {
-    this.buildUrl = newBuildUrl;
+  public void setJobUrl(String jobUrl) {
+    this.jobUrl = jobUrl;
+  }
+
+  public String getJobUrl() {
+    return jobUrl;
+  }
+
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  public void setLastBuildAvailable(boolean lastBuildAvailable) {
+    this.lastBuildAvailable = lastBuildAvailable;
+  }
+
+  public boolean isLastBuildAvailable() {
+    return lastBuildAvailable;
   }
 
 }

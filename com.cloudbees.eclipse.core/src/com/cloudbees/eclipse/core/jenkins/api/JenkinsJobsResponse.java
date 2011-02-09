@@ -48,14 +48,6 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
 
     }
 
-    public static class HealthReport {
-
-      public String description;
-      public String iconUrl;
-      public Long score;
-
-    }
-
   }
 
 }
