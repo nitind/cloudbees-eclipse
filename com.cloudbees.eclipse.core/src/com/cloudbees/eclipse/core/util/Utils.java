@@ -142,8 +142,8 @@ public class Utils {
       HttpParams params = httpclient.getParams();
 
       //TODO Make configurable from the UI?
-      HttpConnectionParams.setConnectionTimeout(params, 5000);
-      HttpConnectionParams.setSoTimeout(params, 5000);
+      HttpConnectionParams.setConnectionTimeout(params, 10000);
+      HttpConnectionParams.setSoTimeout(params, 10000);
 
       return httpclient;
 

@@ -28,8 +28,8 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.IFormColors;
+import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.progress.IProgressService;
@@ -52,7 +52,7 @@ public class BuildPart extends EditorPart {
 
   private JenkinsBuildDetailsResponse dataBuildDetail;
 
-  private ScrolledForm form;
+  private Form form;
   private Label textTopSummary;
   private Composite compBuildSummary;
   private Label contentBuildSummary;
@@ -71,6 +71,7 @@ public class BuildPart extends EditorPart {
   private Composite compInterm;
   private ScrolledComposite scrolledComposite;
   private RecentChangesContentProvider changesContentProvider;
+  private Label changesetLabel;
 
   public BuildPart() {
     super();
@@ -84,11 +85,12 @@ public class BuildPart extends EditorPart {
   @Override
   public void createPartControl(Composite parent) {
 
-    form = formToolkit.createScrolledForm(parent);
-    formToolkit.decorateFormHeading(form.getForm());
+    form = formToolkit.createForm(parent);
+    //form.setDelayedReflow(true);
+    formToolkit.decorateFormHeading(form/*.getForm()*/);
     formToolkit.paintBordersFor(form);
     form.setText("n/a");
-    form.getBody().setLayout(new GridLayout(1, false));
+    form.getBody().setLayout(new GridLayout(1, true));
 
     compMain = new Composite(form.getBody(), SWT.NONE);
     GridLayout gl_compMain = new GridLayout(2, true);
@@ -116,7 +118,7 @@ public class BuildPart extends EditorPart {
     textTopSummary.setForeground(formToolkit.getColors().getColor(IFormColors.TITLE));
 
     Section sectSummary = formToolkit.createSection(compMain, Section.TITLE_BAR);
-    GridData gd_sectSummary = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
+    GridData gd_sectSummary = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
     gd_sectSummary.verticalIndent = 10;
     sectSummary.setLayoutData(gd_sectSummary);
     sectSummary.setSize(107, 45);
@@ -133,7 +135,7 @@ public class BuildPart extends EditorPart {
     contentBuildSummary.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 
     Section sectTests = formToolkit.createSection(compMain, Section.TITLE_BAR);
-    GridData gd_sectTests = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
+    GridData gd_sectTests = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
     gd_sectTests.verticalIndent = 10;
     sectTests.setLayoutData(gd_sectTests);
     sectTests.setSize(80, 45);
@@ -181,7 +183,7 @@ public class BuildPart extends EditorPart {
     contentBuildHistory.setLayout(new GridLayout(1, false));
 
     sectRecentChanges = formToolkit.createSection(compMain, Section.TITLE_BAR);
-    GridData gd_sectRecentChanges = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
+    GridData gd_sectRecentChanges = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
     gd_sectRecentChanges.verticalIndent = 20;
     sectRecentChanges.setLayoutData(gd_sectRecentChanges);
 
@@ -200,6 +202,8 @@ public class BuildPart extends EditorPart {
 
     sectRecentChanges.setClient(compInterm);
 
+    changesetLabel = formToolkit.createLabel(compInterm, "");
+
     scrolledComposite = new ScrolledComposite(compInterm, SWT.H_SCROLL | SWT.V_SCROLL);
     scrolledComposite.setExpandHorizontal(true);
     scrolledComposite.setExpandVertical(true);
@@ -207,14 +211,15 @@ public class BuildPart extends EditorPart {
     formToolkit.adapt(scrolledComposite);
     formToolkit.paintBordersFor(scrolledComposite);
 
-    treeViewerRecentChanges = new TreeViewer(scrolledComposite, SWT.NONE);
+
+    treeViewerRecentChanges = new TreeViewer(scrolledComposite, SWT.BORDER);
     Tree treeRecentChanges = treeViewerRecentChanges.getTree();
 
     changesContentProvider = new RecentChangesContentProvider();
     treeViewerRecentChanges.setContentProvider(changesContentProvider);
     treeViewerRecentChanges.setLabelProvider(new RecentChangesLabelProvider());
 
-    treeViewerRecentChanges.setInput(new ChangeSetItem[0]);
+    treeViewerRecentChanges.setInput("n/a");
 
     formToolkit.adapt(treeRecentChanges);
     formToolkit.paintBordersFor(treeRecentChanges);
@@ -491,8 +496,9 @@ public class BuildPart extends EditorPart {
         //form.pack();
         BuildPart.this.compMain.layout(true);
 
-        form.reflow(true);
+        //form.reflow(true);
         form.layout(true);
+        form.getBody().layout(true);
         //details..form.layout();
 
       }
@@ -694,19 +700,24 @@ public class BuildPart extends EditorPart {
 
     //StringBuffer changes = new StringBuffer();
     //Point origSize = treeViewerRecentChanges.getTree().getSize();
-    if (dataBuildDetail.changeSet != null && dataBuildDetail.changeSet.items != null) {
-      changesContentProvider.setModel(dataBuildDetail.changeSet.items);
-      //treeViewerRecentChanges.setInput(dataBuildDetail.changeSet.items);
+    if (dataBuildDetail.changeSet != null && dataBuildDetail.changeSet.items != null
+        && dataBuildDetail.changeSet.items.length > 0) {
+      //changesContentProvider.setModel(dataBuildDetail.changeSet.items);
+      treeViewerRecentChanges.setInput(dataBuildDetail.changeSet.items);
+      changesetLabel.setVisible(false);
+      treeViewerRecentChanges.getTree().setVisible(true);
+      treeViewerRecentChanges.refresh();
       //createChangeTreeViewer(dataBuildDetail.changeSet.items);
     } else {
-      changesContentProvider.setModel(new ChangeSetItem[0]);
-      //treeViewerRecentChanges.setInput(new ChangeSetItem[0]);
+      //changesContentProvider.setModel(new ChangeSetItem[0]);
+      treeViewerRecentChanges.setInput(new ChangeSetItem[0]);
+      changesetLabel.setVisible(true);
+      changesetLabel.setText("No changes");
+      treeViewerRecentChanges.getTree().setVisible(false);
       //createChangeTreeViewer(new ChangeSetItem[0]);
     }
 
-    treeViewerRecentChanges.refresh();
 
-    //compInterm.layout(true);
 
     //treeViewerRecentChanges.refresh();
     //treeViewerRecentChanges.getTree().setSize(origSize);

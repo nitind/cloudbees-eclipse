@@ -17,11 +17,11 @@ public class RecentChangesContentProvider implements ITreeContentProvider {
   }
 
   public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-    // model = (ChangeSetItem[]) newInput;
-  }
+    
+    if (newInput instanceof ChangeSetItem[]) {
+      model = (ChangeSetItem[]) newInput;
+    }
 
-  public void setModel(ChangeSetItem[] model) {
-    this.model = model;
   }
 
   public Object[] getElements(Object inputElement) {
@@ -29,9 +29,12 @@ public class RecentChangesContentProvider implements ITreeContentProvider {
   }
 
   public Object[] getChildren(Object parentElement) {
-
     if (parentElement == null) {
       return model;
+    }
+
+    if (parentElement instanceof String) {
+      return new String[0];
     }
 
     if (parentElement instanceof ChangeSetItem[]) {
@@ -64,7 +67,6 @@ public class RecentChangesContentProvider implements ITreeContentProvider {
   }
 
   public Object getParent(Object element) {
-    System.out.println("Asked parent for " + element);
     if (element instanceof PathItem) {
       return ((PathItem) element).parent;
     }
