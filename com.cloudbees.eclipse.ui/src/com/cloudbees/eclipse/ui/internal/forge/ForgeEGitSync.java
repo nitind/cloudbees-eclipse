@@ -29,10 +29,10 @@ import com.cloudbees.eclipse.core.forge.api.ForgeSync;
  */
 public class ForgeEGitSync implements ForgeSync {
 
-  public void sync(TYPE type, Properties props, final IProgressMonitor monitor) throws CloudBeesException {
+  public ACTION sync(TYPE type, Properties props, final IProgressMonitor monitor) throws CloudBeesException {
 
     if (!ForgeSync.TYPE.GIT.equals(type)) {
-      return;
+      return ACTION.SKIPPED;
     }
 
     final String url = props.getProperty("url");
@@ -40,6 +40,8 @@ public class ForgeEGitSync implements ForgeSync {
     if (url == null) {
       throw new IllegalArgumentException("url not provided!");
     }
+
+    final ACTION[] result = new ACTION[] { ACTION.SKIPPED };
 
     try {
       monitor.beginTask("Syncing EGit repository '" + url + "'", 10);
@@ -51,6 +53,7 @@ public class ForgeEGitSync implements ForgeSync {
 
           if (isAlreadyCloned(url)) {
             monitor.worked(8);
+            result[0] = ACTION.CHECKED;
             return;
           }
 
@@ -64,7 +67,8 @@ public class ForgeEGitSync implements ForgeSync {
           WizardDialog dlg = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
               cloneWizard);
           dlg.setHelpAvailable(true);
-          if (dlg.open() == Window.OK) {
+          int res = dlg.open();
+          if (res == Window.OK) {
             //         cloneWizard.runCloneOperation(getContainer());
           }
 
@@ -79,29 +83,39 @@ public class ForgeEGitSync implements ForgeSync {
           //            File.class, String.class, String.class }, new Object[] { new URIish(url), true, Collections.EMPTY_LIST,
           //            new File(""), null, "origin" });
           //      }
+
+          monitor.worked(2);
+
+          //      clone.run(monitor);
+          //
+          //      if (clone == null) {
+          //        throw new CloudBeesException("Failed to create EGit clone operation");
+          //      }
+
+          monitor.worked(5);
+
+          //    } catch (URISyntaxException e) {
+          //      throw new CloudBeesException(e);
+          //    } catch (InvocationTargetException e) {
+          //      throw new CloudBeesException(e);
+          //    } catch (InterruptedException e) {
+          //      throw new CloudBeesException(e);
+
+          if (res == Window.OK) {
+            result[0] = ACTION.CLONED;
+          } else {
+            result[0] = ACTION.CANCELLED;
+          }
         }
       });
 
-      monitor.worked(2);
 
-      //      clone.run(monitor);
-      //
-      //      if (clone == null) {
-      //        throw new CloudBeesException("Failed to create EGit clone operation");
-      //      }
-
-      monitor.worked(5);
-
-      //    } catch (URISyntaxException e) {
-      //      throw new CloudBeesException(e);
-      //    } catch (InvocationTargetException e) {
-      //      throw new CloudBeesException(e);
-      //    } catch (InterruptedException e) {
-      //      throw new CloudBeesException(e);
     } finally {
       monitor.worked(10);
       monitor.done();
     }
+
+    return result[0];
   }
 
   protected boolean isAlreadyCloned(final String url) {

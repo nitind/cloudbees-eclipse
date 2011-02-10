@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -222,12 +223,34 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
         try {
           monitor.beginTask("Loading Forge repositories", 1000);
-          CloudBeesCorePlugin.getDefault().getGrandCentralService().reloadForgeRepos(monitor);
+          String[] status = CloudBeesCorePlugin.getDefault().getGrandCentralService().reloadForgeRepos(monitor);
+
+          String mess = "";
+          if (status != null) {
+            for (String st : status) {
+              mess += st + "\n";
+            }
+          }
+
+          if (mess.length() == 0) {
+            mess = "Found no Forge repositories!";
+          }
+
           monitor.worked(1000);
-          return Status.OK_STATUS;
+
+          final String msg = mess;
+          PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+            public void run() {
+              MessageDialog.openInformation(
+                  CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay().getActiveShell(),
+                  "Synced Forge repositories", msg);
+            }
+          });
+
+          return Status.OK_STATUS; // new Status(Status.INFO, PLUGIN_ID, mess);
         } catch (Exception e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
-          return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage());
+          return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage(), e);
         } finally {
           monitor.done();
         }

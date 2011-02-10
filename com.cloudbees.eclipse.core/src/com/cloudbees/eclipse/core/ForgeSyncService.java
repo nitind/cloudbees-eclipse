@@ -44,18 +44,24 @@ public class ForgeSyncService {
     return false;
   }
 
-  public void sync(ForgeSync.TYPE type, Properties props, IProgressMonitor monitor) throws CloudBeesException {
+  public String[] sync(ForgeSync.TYPE type, Properties props, IProgressMonitor monitor) throws CloudBeesException {
     int ticksPerProcess = 100 / providers.size();
     if (ticksPerProcess <= 0) {
       ticksPerProcess = 1;
     }
+    List<String> status = new ArrayList<String>();
     for (ForgeSync provider : providers) {
       try {
-        provider.sync(type, props, new SubProgressMonitor(monitor, ticksPerProcess));
+        ForgeSync.ACTION act = provider.sync(type, props, new SubProgressMonitor(monitor, ticksPerProcess));
+        if (!ForgeSync.ACTION.SKIPPED.equals(act)) {
+          status.add(act.getLabel() + " " + type + ": " + props.getProperty("url"));
+        }
       } catch (Exception e) {
         CloudBeesCorePlugin.getDefault().getLogger().error(e);
       }
     }
+
+    return status.toArray(new String[status.size()]);
   }
 
 }

@@ -18,10 +18,10 @@ import com.cloudbees.eclipse.core.forge.api.ForgeSync;
  */
 public class ForgeSubclipseSync implements ForgeSync {
 
-  public void sync(TYPE type, Properties props, IProgressMonitor monitor) throws CloudBeesException {
+  public ACTION sync(TYPE type, Properties props, IProgressMonitor monitor) throws CloudBeesException {
 
     if (!ForgeSync.TYPE.SVN.equals(type)) {
-      return;
+      return ACTION.SKIPPED;
     }
 
     String url = props.getProperty("url");
@@ -30,15 +30,16 @@ public class ForgeSubclipseSync implements ForgeSync {
       throw new IllegalArgumentException("url not provided!");
     }
 
-    SVNRepositories repos = SVNProviderPlugin.getPlugin().getRepositories();
-    boolean exists = repos.isKnownRepository(url, false);
-    if (exists) {
-      return;
-    }
-
     try {
-      monitor.beginTask("Validating SVN repository connection...", 10);
+      monitor.beginTask("Validating SVN repository connection '" + url + "'...", 10);
       monitor.worked(1);
+
+      SVNRepositories repos = SVNProviderPlugin.getPlugin().getRepositories();
+      boolean exists = repos.isKnownRepository(url, false);
+      if (exists) {
+        monitor.worked(9);
+        return ACTION.CHECKED;
+      }
 
       ISVNRepositoryLocation rep = SVNProviderPlugin.getPlugin().getRepositories().createRepository(props);
       monitor.worked(5);
@@ -46,6 +47,8 @@ public class ForgeSubclipseSync implements ForgeSync {
       //rep.validateConnection(monitor);
       SVNProviderPlugin.getPlugin().getRepositories().addOrUpdateRepository(rep);
       monitor.worked(4);
+
+      return ACTION.ADDED;
 
     } catch (SVNException e) {
       throw new CloudBeesException("Failed to create missing repository!", e);

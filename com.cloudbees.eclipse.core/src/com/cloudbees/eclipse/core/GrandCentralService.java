@@ -1,6 +1,7 @@
 package com.cloudbees.eclipse.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -237,15 +238,17 @@ public class GrandCentralService {
   return r;
   */
 
-  public void reloadForgeRepos(IProgressMonitor monitor) throws CloudBeesException {
+  public String[] reloadForgeRepos(IProgressMonitor monitor) throws CloudBeesException {
 
     if (!hasAuthInfo()) {
-      return;
+      return null;
     }
 
     String primaryAccount = getPrimaryAccount(monitor);
 
     AccountServiceStatusResponse services = loadAccountServices(primaryAccount);
+
+    List<String> status = new ArrayList<String>();
 
     for (AccountServiceStatusResponse.AccountServices.ForgeService.Repo forge : services.services.forge.repos) {
       ForgeSync.TYPE type = ForgeSync.TYPE.valueOf(forge.type.toUpperCase());
@@ -257,12 +260,25 @@ public class GrandCentralService {
 
       try {
         monitor.beginTask("Syncing repository '" + forge.url + "'", 100);
-        forgeSyncService.sync(type, props, monitor);
+        String[] sts = forgeSyncService.sync(type, props, monitor);
+        if (sts != null && sts.length > 0) {
+          status.addAll(Arrays.asList(sts));
+        }
       } finally {
         monitor.done();
       }
-
     }
+
+    if (services.services.forge.repos.length == 0) { // Forge down, demo mode 
+      Properties props = new Properties();
+      props.put("url", "ahtik@i.codehoop.com:/opt/git/cb");
+      String[] sts = forgeSyncService.sync(ForgeSync.TYPE.GIT, props, monitor);
+      if (sts != null && sts.length > 0) {
+        status.addAll(Arrays.asList(sts));
+      }
+    }
+
+    return status.toArray(new String[status.size()]);
   }
 
   public void addForgeSyncProvider(ForgeSync provider) {
