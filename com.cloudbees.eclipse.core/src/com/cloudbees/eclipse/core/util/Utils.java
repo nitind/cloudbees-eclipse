@@ -27,6 +27,8 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
@@ -136,6 +138,13 @@ public class Utils {
       // Override https handling to use provided truststore
       Scheme sch = new Scheme("https", socketFactory, 443);
       httpclient.getConnectionManager().getSchemeRegistry().register(sch);
+
+      HttpParams params = httpclient.getParams();
+
+      //TODO Make configurable from the UI?
+      HttpConnectionParams.setConnectionTimeout(params, 5000);
+      HttpConnectionParams.setSoTimeout(params, 5000);
+
       return httpclient;
 
     } catch (Exception e) {

@@ -9,6 +9,12 @@ public interface CBImages {
   String IMG_FOLDER_LOCAL = "IMG_FOLDER_LOCAL";
   String IMG_INSTANCE = "IMG_INSTANCE";
   String IMG_VIEW = "IMG_VIEW";
+
+  String IMG_FILE = "IMG_FILE";
+  String IMG_FILE_ADDED = "IMG_FILE_ADDED";
+  String IMG_FILE_DELETED = "IMG_FILE_DELETED";
+  String IMG_FILE_MODIFIED = "IMG_FILE_MODIFIED";
+
   String IMG_BROWSER = "IMG_BROWSER";
   String IMG_RUN = "IMG_RUN";
 
@@ -37,5 +43,6 @@ public interface CBImages {
   String IMG_HEALTH_24_40_to_59 = IMG_HEALTH_PREFIX + IMG_24 + "health-40to59.gif";
   String IMG_HEALTH_24_60_to_79 = IMG_HEALTH_PREFIX + IMG_24 + "health-60to79.gif";
   String IMG_HEALTH_24_80PLUS = IMG_HEALTH_PREFIX + IMG_24 + "health-80plus.gif";
+
 
 }

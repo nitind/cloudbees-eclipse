@@ -105,8 +105,17 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_run.png")));
     reg.put(CBImages.IMG_INSTANCE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/jenkins.png")));
 
-    reg.put(CBImages.IMG_VIEW,
-        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_big.png")));
+    /*reg.put(CBImages.IMG_VIEW,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_big.png")));*/
+    reg.put(CBImages.IMG_VIEW, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/det_pane_hide.gif")));
+
+    reg.put(CBImages.IMG_FILE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/file_obj.gif")));
+
+    reg.put(CBImages.IMG_FILE_ADDED, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/add_stat.gif")));
+    reg.put(CBImages.IMG_FILE_MODIFIED,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/mod_stat.gif")));
+    reg.put(CBImages.IMG_FILE_DELETED,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/del_stat.gif")));
 
     reg.put(CBImages.IMG_COLOR_16_GREY,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/grey.gif")));

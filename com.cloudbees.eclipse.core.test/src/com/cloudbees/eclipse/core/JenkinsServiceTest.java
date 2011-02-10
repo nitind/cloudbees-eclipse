@@ -3,13 +3,14 @@ package com.cloudbees.eclipse.core;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.Test;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet;
 
 public class JenkinsServiceTest {
 
@@ -32,7 +33,7 @@ public class JenkinsServiceTest {
     assertTrue(views.length > 0);
 
     System.err.println("Jobs:");
-    JenkinsJobsResponse jb = s.getJobs(null, null);
+    JenkinsJobsResponse jb = s.getJobs(null, new NullProgressMonitor());
     JenkinsJobsResponse.Job[] jobs = jb.jobs;
     System.out.println("Received builds:");
 
@@ -49,9 +50,10 @@ public class JenkinsServiceTest {
     JenkinsService s = new JenkinsService(new JenkinsInstance("Hudson", "http://deadlock.netbeans.org/hudson/"));
 
     JenkinsBuildDetailsResponse details = s
-        .getJobDetails("http://deadlock.netbeans.org/hudson/job/jackpot30/301/", null);
+.getJobDetails("http://deadlock.netbeans.org/hudson/job/jackpot30/304/",
+        null);
 
-    System.out.println("QTree: http://deadlock.netbeans.org/hudson/job/jackpot30/301/api/json/?tree="
+    System.out.println("QTree: http://deadlock.netbeans.org/hudson/job/jackpot30/304/api/json/?tree="
         + JenkinsBuildDetailsResponse.QTREE);
 
     System.out.println("Received details:");
@@ -69,6 +71,7 @@ public class JenkinsServiceTest {
     assertTrue(details.fullDisplayName.length() > 0);
 
     assertTrue(changeset.items.length > 0);
+
 
   }
 

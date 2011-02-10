@@ -58,7 +58,6 @@ public class BuildPart extends EditorPart {
   private Label contentBuildSummary;
   private Composite contentBuildHistory;
   private Label contentJUnitTests;
-  private Label contentRecentChanges;
   private JenkinsJobBuildsResponse dataJobDetails;
   private Action invokeBuild;
   private Label statusIcon;
@@ -66,6 +65,12 @@ public class BuildPart extends EditorPart {
   private Composite healthTest;
   private Composite healthBuild;
   private Composite contentBuildHistoryHolder;
+  private TreeViewer treeViewerRecentChanges;
+  private Section sectBuildHistory;
+  private Section sectRecentChanges;
+  private Composite compInterm;
+  private ScrolledComposite scrolledComposite;
+  private RecentChangesContentProvider changesContentProvider;
 
   public BuildPart() {
     super();
@@ -144,8 +149,8 @@ public class BuildPart extends EditorPart {
     contentJUnitTests = formToolkit.createLabel(compTests, "n/a", SWT.NONE);
     contentJUnitTests.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
-    Section sectBuildHistory = formToolkit.createSection(compMain, Section.TITLE_BAR);
-    GridData gd_sectBuildHistory = new GridData(SWT.FILL, SWT.TOP, true, true, 1, 1);
+    sectBuildHistory = formToolkit.createSection(compMain, Section.TITLE_BAR);
+    GridData gd_sectBuildHistory = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
     gd_sectBuildHistory.verticalIndent = 20;
     sectBuildHistory.setLayoutData(gd_sectBuildHistory);
     sectBuildHistory.setSize(94, 55);
@@ -175,35 +180,58 @@ public class BuildPart extends EditorPart {
     contentBuildHistory = formToolkit.createComposite(contentBuildHistoryHolder, SWT.NONE);
     contentBuildHistory.setLayout(new GridLayout(1, false));
 
-    Section sectRecentChanges = formToolkit.createSection(compMain, Section.TITLE_BAR);
-    GridData gd_sectRecentChanges = new GridData(SWT.FILL, SWT.TOP, true, true, 1, 1);
+    sectRecentChanges = formToolkit.createSection(compMain, Section.TITLE_BAR);
+    GridData gd_sectRecentChanges = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
     gd_sectRecentChanges.verticalIndent = 20;
     sectRecentChanges.setLayoutData(gd_sectRecentChanges);
-    sectRecentChanges.setSize(68, 45);
+
     formToolkit.paintBordersFor(sectRecentChanges);
     sectRecentChanges.setText("Changes");
 
-    Composite composite_3 = new Composite(sectRecentChanges, SWT.NONE);
-    formToolkit.adapt(composite_3);
-    formToolkit.paintBordersFor(composite_3);
-    sectRecentChanges.setClient(composite_3);
-    GridLayout gl_composite_3 = new GridLayout(1, false);
-    gl_composite_3.horizontalSpacing = 0;
-    gl_composite_3.verticalSpacing = 0;
-    composite_3.setLayout(gl_composite_3);
 
-    contentRecentChanges = formToolkit.createLabel(composite_3, "n/a", SWT.NONE);
-    contentRecentChanges.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+    compInterm = formToolkit.createComposite(sectRecentChanges, SWT.NONE);
 
-    TreeViewer treeViewerRecentChanges = new TreeViewer(composite_3, SWT.NONE);
+    GridLayout gl_compInterm = new GridLayout(1, false);
+    gl_compInterm.verticalSpacing = 0;
+    gl_compInterm.marginWidth = 0;
+    gl_compInterm.marginHeight = 0;
+    compInterm.setLayout(gl_compInterm);
+    compInterm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
+    sectRecentChanges.setClient(compInterm);
+
+    scrolledComposite = new ScrolledComposite(compInterm, SWT.H_SCROLL | SWT.V_SCROLL);
+    scrolledComposite.setExpandHorizontal(true);
+    scrolledComposite.setExpandVertical(true);
+    scrolledComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    formToolkit.adapt(scrolledComposite);
+    formToolkit.paintBordersFor(scrolledComposite);
+
+    treeViewerRecentChanges = new TreeViewer(scrolledComposite, SWT.NONE);
     Tree treeRecentChanges = treeViewerRecentChanges.getTree();
-    treeRecentChanges.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+
+    changesContentProvider = new RecentChangesContentProvider();
+    treeViewerRecentChanges.setContentProvider(changesContentProvider);
+    treeViewerRecentChanges.setLabelProvider(new RecentChangesLabelProvider());
+
+    treeViewerRecentChanges.setInput(new ChangeSetItem[0]);
+
+    formToolkit.adapt(treeRecentChanges);
     formToolkit.paintBordersFor(treeRecentChanges);
+    scrolledComposite.setContent(treeRecentChanges);
+    scrolledComposite.setMinSize(treeRecentChanges.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+    //new Label(recentChangesComp, SWT.NONE);
+
+    //compMain.layout(true);
+
+    //recentChangesComp.layout(true);
 
     createActions();
 
     loadInitialData();
   }
+
 
   private void createActions() {
 
@@ -458,12 +486,14 @@ public class BuildPart extends EditorPart {
         }
 
         //form.layout();
-        //form.getBody().layout();
+        //form.getBody().layout(true);
         //BuildPart.this.compMain.pack(true);
         //form.pack();
-        BuildPart.this.compMain.layout();
+        BuildPart.this.compMain.layout(true);
+
         form.reflow(true);
-        //form.layout();
+        form.layout(true);
+        //details..form.layout();
 
       }
     });
@@ -661,18 +691,41 @@ public class BuildPart extends EditorPart {
   }
 
   private void loadRecentChanges() {
-    StringBuffer changes = new StringBuffer();
+
+    //StringBuffer changes = new StringBuffer();
+    //Point origSize = treeViewerRecentChanges.getTree().getSize();
     if (dataBuildDetail.changeSet != null && dataBuildDetail.changeSet.items != null) {
-      for (ChangeSetItem item : dataBuildDetail.changeSet.items) {
-        String authinfo = item.author != null && item.author.fullName != null ? " by " + item.author.fullName : "";
-        String line = "rev" + item.rev + ": '" + item.msg + "' " + authinfo + "\n";
-        changes.append(line);
-      }
+      changesContentProvider.setModel(dataBuildDetail.changeSet.items);
+      //treeViewerRecentChanges.setInput(dataBuildDetail.changeSet.items);
+      //createChangeTreeViewer(dataBuildDetail.changeSet.items);
+    } else {
+      changesContentProvider.setModel(new ChangeSetItem[0]);
+      //treeViewerRecentChanges.setInput(new ChangeSetItem[0]);
+      //createChangeTreeViewer(new ChangeSetItem[0]);
     }
-    if (changes.length() == 0) {
-      changes.append("none");
-    }
-    contentRecentChanges.setText(changes.toString());
+
+    treeViewerRecentChanges.refresh();
+
+    //compInterm.layout(true);
+
+    //treeViewerRecentChanges.refresh();
+    //treeViewerRecentChanges.getTree().setSize(origSize);
+
+    //treeViewerRecentChanges.setAutoExpandLevel(2);
+    /*    if (changes.length() == 0) {
+          changes.append("none");
+        }
+    */   
+
+    //recentChangesComp.layout(true);
+    //recentChangesScroll.setMinSize(recentChangesComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    //recentChangesComp.setSize(recentChangesComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+    //recentChangesScroll.setMinSize(sectRecentChanges.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    
+
+    //contentRecentChanges.setText(changes.toString());
+
   }
 
   @Override

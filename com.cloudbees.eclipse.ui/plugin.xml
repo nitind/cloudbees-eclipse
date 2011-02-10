@@ -31,9 +31,28 @@
          point="org.eclipse.ui.intro.configExtension">
       <configExtension
             configId="org.eclipse.ui.intro.universalConfig"
-            content="intro/intro.xml">
+            content="intro/intro.xml"            
+            >
       </configExtension>
+    <action
+     name="com.cloudbees.eclipse.actions.openPrefs"
+     replaces="http://org.eclipse.ui.intro/configureCB"/>            
    </extension>
+
+<extension
+      point="org.eclipse.ui.actionSets">
+   <actionSet
+         id="com.cloudbees.eclipse.ui.actionSet1"
+         label="label">
+         <action
+               id="com.cloudbees.eclipse.actions.openPrefs"
+               label="Configure CloudBees Account"               
+               class="com.cloudbees.eclipse.ui.internal.actions.ConfigureCloudBeesAction"
+               >
+         </action>
+   </actionSet>
+</extension>
+
 
    <extension
          point="org.eclipse.ui.views">
