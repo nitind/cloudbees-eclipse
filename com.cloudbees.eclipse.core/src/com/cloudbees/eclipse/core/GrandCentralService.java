@@ -271,7 +271,7 @@ public class GrandCentralService {
 
     if (services.services.forge.repos.length == 0) { // Forge down, demo mode 
       Properties props = new Properties();
-      props.put("url", "ahtik@i.codehoop.com:/opt/git/cb");
+      props.put("url", "ahti@i.codehoop.com:/opt/git/cb");
       String[] sts = forgeSyncService.sync(ForgeSync.TYPE.GIT, props, monitor);
       if (sts != null && sts.length > 0) {
         status.addAll(Arrays.asList(sts));
