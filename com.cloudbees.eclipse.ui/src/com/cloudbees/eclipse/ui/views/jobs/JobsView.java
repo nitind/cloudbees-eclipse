@@ -8,7 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -457,17 +458,26 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     actionOpenJobInBrowser.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_BROWSER));
     actionOpenJobInBrowser.setEnabled(false);
 
-    actionInvokeBuild = new Action("Run a new build for this job...", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+    actionInvokeBuild = new Action("Run a new build for this job", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       public void run() {
+        final JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
+        final JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(job.url);
 
-        //TODO Add monitor
-        try {
-          JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
-          JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(job.url);
-          ns.invokeBuild(job.url, new NullProgressMonitor());
-        } catch (CloudBeesException e) {
-          CloudBeesUIPlugin.getDefault().getLogger().error(e);
-        }
+        org.eclipse.core.runtime.jobs.Job sjob = new org.eclipse.core.runtime.jobs.Job("Building job...") {
+          protected IStatus run(IProgressMonitor monitor) {
+            try {
+              ns.invokeBuild(job.url, monitor);
+              return org.eclipse.core.runtime.Status.OK_STATUS;
+            } catch (CloudBeesException e) {
+              //CloudBeesUIPlugin.getDefault().getLogger().error(e);
+              return new org.eclipse.core.runtime.Status(org.eclipse.core.runtime.Status.ERROR,
+                  CloudBeesUIPlugin.PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
+            }
+          }
+        };
+
+        sjob.setUser(true);
+        sjob.schedule();
       }
     };
     actionInvokeBuild.setToolTipText("Run a new build for this job"); //TODO i18n

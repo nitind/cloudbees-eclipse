@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -270,15 +270,24 @@ public class BuildPart extends EditorPart {
 
     invokeBuild = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       public void run() {
-        String jobUrl = BuildPart.this.getBuildEditorInput().getJobUrl();
-        JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(jobUrl);
+        final String jobUrl = BuildPart.this.getBuildEditorInput().getJobUrl();
+        final JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(jobUrl);
 
-        try {
-          ns.invokeBuild(jobUrl, new NullProgressMonitor());
-        } catch (CloudBeesException e) {
-          CloudBeesUIPlugin.getDefault().getLogger().error(e);
-        }
+        org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Building job...") {
+          protected IStatus run(IProgressMonitor monitor) {
+            try {
+              ns.invokeBuild(jobUrl, monitor);
+              return org.eclipse.core.runtime.Status.OK_STATUS;
+            } catch (CloudBeesException e) {
+              //CloudBeesUIPlugin.getDefault().getLogger().error(e);
+              return new org.eclipse.core.runtime.Status(org.eclipse.core.runtime.Status.ERROR,
+                  CloudBeesUIPlugin.PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
+            }
+          }
+        };
 
+        job.setUser(true);
+        job.schedule();
       }
     };
     invokeBuild.setToolTipText("Run a new build for this job"); //TODO i18n

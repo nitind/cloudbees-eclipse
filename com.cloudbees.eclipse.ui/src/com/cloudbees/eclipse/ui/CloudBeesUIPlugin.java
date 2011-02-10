@@ -228,7 +228,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           String mess = "";
           if (status != null) {
             for (String st : status) {
-              mess += st + "\n";
+              mess += st + "\n\n";
             }
           }
 
@@ -476,7 +476,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         try {
           PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(JobsView.ID);
 
-          //TODO Add monitor
           String servUrl = serviceUrl;
           if (servUrl == null && viewUrl != null) {
             servUrl = getJenkinsServiceForUrl(viewUrl).getUrl();
