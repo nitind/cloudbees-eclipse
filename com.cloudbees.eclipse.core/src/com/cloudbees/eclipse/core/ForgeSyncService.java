@@ -9,10 +9,9 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.osgi.framework.Bundle;
 
-import com.cloudbees.eclipse.core.internal.forge.ForgeEGitSync;
+import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.internal.forge.ForgeSubclipseSync;
 import com.cloudbees.eclipse.core.internal.forge.ForgeSubversiveSync;
-import com.cloudbees.eclipse.core.internal.forge.ForgeSync;
 
 /**
  * Main service for syncing Forge repositories and Eclipse repository entries. Currently supported providers are EGit,
@@ -31,13 +30,13 @@ public class ForgeSyncService {
     if (bundleActive("org.eclipse.team.svn.core")) {
       providers.add(new ForgeSubversiveSync());
     }
-    if ((bundleActive("org.eclipse.egit.core") || bundleActive("org.eclipse.egit")) && bundleActive("org.eclipse.jgit")) {
-      providers.add(new ForgeEGitSync());
-    }
-
   }
 
-  private boolean bundleActive(String bundleName) {
+  public void addProvider(ForgeSync provider) {
+    providers.add(provider);
+  }
+
+  public static boolean bundleActive(String bundleName) {
     Bundle bundle = Platform.getBundle(bundleName);
     if (bundle != null && (bundle.getState() == Bundle.ACTIVE || bundle.getState() == Bundle.STARTING)) {
       return true;
@@ -47,6 +46,9 @@ public class ForgeSyncService {
 
   public void sync(ForgeSync.TYPE type, Properties props, IProgressMonitor monitor) throws CloudBeesException {
     int ticksPerProcess = 100 / providers.size();
+    if (ticksPerProcess <= 0) {
+      ticksPerProcess = 1;
+    }
     for (ForgeSync provider : providers) {
       try {
         provider.sync(type, props, new SubProgressMonitor(monitor, ticksPerProcess));

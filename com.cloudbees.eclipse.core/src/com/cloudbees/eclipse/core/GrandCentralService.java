@@ -10,6 +10,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
+import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.gc.api.AccountNameRequest;
 import com.cloudbees.eclipse.core.gc.api.AccountNameResponse;
 import com.cloudbees.eclipse.core.gc.api.AccountNamesRequest;
@@ -18,7 +19,6 @@ import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusRequest;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse;
 import com.cloudbees.eclipse.core.gc.api.KeysUsingAuthRequest;
 import com.cloudbees.eclipse.core.gc.api.KeysUsingAuthResponse;
-import com.cloudbees.eclipse.core.internal.forge.ForgeSync;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.google.gson.Gson;
 
@@ -263,6 +263,10 @@ public class GrandCentralService {
       }
 
     }
+  }
+
+  public void addForgeSyncProvider(ForgeSync provider) {
+    forgeSyncService.addProvider(provider);
   }
 
   public List<JenkinsInstance> loadDevAtCloudInstances(IProgressMonitor monitor) throws CloudBeesException {

@@ -16,7 +16,7 @@ public class ReloadJobsAction extends Action {
   public ReloadJobsAction() {
     super();
 
-    setText("Reload Jenkins jobs...");
+    setText("Reload Jenkins jobs");
     setToolTipText("Reload Jenkins jobs");
     setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_REFRESH));
 

@@ -192,7 +192,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
         }
       }
     };
-    action3.setText("Reload Forge repositories...");
+    action3.setText("Reload Forge repositories");
     action3.setToolTipText("Reload Forge repositories and create local entries");
     /*		action3.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
     				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
@@ -208,7 +208,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
         CloudBeesUIPlugin.getDefault().reloadAllJenkins(true);
       }
     };
-    action4.setText("Reload Jenkins instances...");
+    action4.setText("Reload Jenkins instances");
     action4.setToolTipText("Reload Jenkins instances");
     /*    action4.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
             .getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));

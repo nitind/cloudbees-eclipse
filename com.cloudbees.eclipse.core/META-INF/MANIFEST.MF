@@ -10,11 +10,9 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.equinox.security,
  org.eclipse.jface,
- org.eclipse.egit.core;resolution:=optional,
  org.tigris.subversion.subclipse.core;resolution:=optional,
  org.eclipse.team.svn.core;resolution:=optional,
  org.eclipse.team.core;resolution:=optional,
- org.eclipse.jgit;resolution:=optional,
  org.eclipse.core.net
 Bundle-ClassPath: .,
  lib/gson-1.6.jar,
@@ -27,5 +25,6 @@ Bundle-ClassPath: .,
  lib/httpmime-4.1.jar
 Export-Package: com.cloudbees.eclipse.core,
  com.cloudbees.eclipse.core.domain,
+ com.cloudbees.eclipse.core.forge.api,
  com.cloudbees.eclipse.core.jenkins.api,
  com.cloudbees.eclipse.core.util

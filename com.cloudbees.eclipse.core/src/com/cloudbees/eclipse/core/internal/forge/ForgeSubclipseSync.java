@@ -9,6 +9,7 @@ import org.tigris.subversion.subclipse.core.SVNProviderPlugin;
 import org.tigris.subversion.subclipse.core.repo.SVNRepositories;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 
 /**
  * Forge repo sync provider for Subclipse

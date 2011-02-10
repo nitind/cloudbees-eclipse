@@ -8,6 +8,7 @@ import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
 import org.eclipse.team.svn.core.utility.SVNUtility;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 
 public class ForgeSubversiveSync implements ForgeSync {
 

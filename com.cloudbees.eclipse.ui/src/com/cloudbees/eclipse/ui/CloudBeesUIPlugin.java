@@ -34,6 +34,7 @@ import org.osgi.framework.BundleContext;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.ForgeSyncService;
 import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
@@ -41,6 +42,7 @@ import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
+import com.cloudbees.eclipse.ui.internal.forge.ForgeEGitSync;
 import com.cloudbees.eclipse.ui.views.build.BuildEditorInput;
 import com.cloudbees.eclipse.ui.views.build.BuildPart;
 import com.cloudbees.eclipse.ui.views.jobs.JobsView;
@@ -85,6 +87,12 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     logger = new Logger(getLog());
     loadAccountCredentials();
     hookPrefChangeListener();
+
+    if ((ForgeSyncService.bundleActive("org.eclipse.egit.core") || ForgeSyncService.bundleActive("org.eclipse.egit"))
+        && ForgeSyncService.bundleActive("org.eclipse.jgit")) {
+      CloudBeesCorePlugin.getDefault().getGrandCentralService().addForgeSyncProvider(new ForgeEGitSync());
+    }
+
   }
 
   @Override
