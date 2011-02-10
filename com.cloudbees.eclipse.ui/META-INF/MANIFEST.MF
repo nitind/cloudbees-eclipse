@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Core
 Bundle-SymbolicName: com.cloudbees.eclipse.ui;singleton:=true
-Bundle-Version: 1.0.1.qualifier
+Bundle-Version: 1.0.2.qualifier
 Bundle-Activator: com.cloudbees.eclipse.ui.CloudBeesUIPlugin
 Bundle-Vendor: Cloud Bees, Inc
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
@@ -17,5 +17,5 @@ Require-Bundle: com.cloudbees.eclipse.core,
  org.eclipse.core.net,
  org.eclipse.ui.forms,
  org.eclipse.ui.ide,
- org.eclipse.team.ui;bundle-version="3.5.101"
+ org.eclipse.team.ui;bundle-version="3.4.0"
 
