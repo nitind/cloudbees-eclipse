@@ -43,7 +43,6 @@ import org.eclipse.ui.part.ViewPart;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.JenkinsService;
-import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
@@ -65,9 +64,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
   private TableViewer table;
 
-  private final Logger log = CloudBeesUIPlugin.getDefault().getLogger();
-
-  private ReloadJobsAction actionReloadJobs; // Reload JaaS instances
+  protected ReloadJobsAction actionReloadJobs; // Reload JaaS instances
   private Action actionInvokeBuild; // Invoke Build
   //private Action actionOpenLogs; // Open Logs
   private Action actionOpenJobInBrowser; // Open Open Job in Browser
@@ -77,6 +74,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   private JenkinsChangeListener jenkinsChangeListener;
 
   private JobsContentProvider contentProvider;
+
+  protected Runnable regularRefresher;
 
   private String serviceUrl;
   private String viewUrl;
@@ -113,6 +112,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     actionReloadJobs.serviceUrl = serviceUrl;
     actionReloadJobs.viewUrl = viewUrl;
+
+    actionReloadJobs.setEnabled(actionReloadJobs.serviceUrl != null || actionReloadJobs.viewUrl != null);
 
     table.refresh();
   }
@@ -342,6 +343,28 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     };
 
     CloudBeesUIPlugin.getDefault().addJenkinsChangeListener(jenkinsChangeListener);
+    
+    final int time = 30000;
+    regularRefresher = new Runnable() {
+
+      public void run() {
+        if (regularRefresher == null) {
+          return;
+        }
+        try {
+          CloudBeesUIPlugin.getDefault().showJobs(JobsView.this.actionReloadJobs.serviceUrl,
+              JobsView.this.actionReloadJobs.viewUrl, false);
+        } catch (CloudBeesException e) {
+          CloudBeesUIPlugin.getDefault().getLogger().error(e);
+        } finally {
+          if (regularRefresher != null) {
+            PlatformUI.getWorkbench().getDisplay().timerExec(time, regularRefresher);
+          }
+        }
+      }
+    };
+
+    PlatformUI.getWorkbench().getDisplay().timerExec(time, regularRefresher);
   }
 
   protected String formatBuildInfo(Build build) {
@@ -444,6 +467,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 
     actionReloadJobs = new ReloadJobsAction();
+    actionReloadJobs.setEnabled(false);
 
     actionOpenJobInBrowser = new Action("Open with Browser...", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       public void run() {
@@ -510,7 +534,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         || PreferenceConstants.P_EMAIL.equals(event.getProperty())
         || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {
       try {
-        CloudBeesUIPlugin.getDefault().showJobs(serviceUrl, viewUrl);
+        CloudBeesUIPlugin.getDefault().showJobs(serviceUrl, viewUrl, false);
       } catch (CloudBeesException e) {
         //TODO i18n
         CloudBeesUIPlugin.showError("Failed to reload Jenkins jobs!", e);
@@ -523,6 +547,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     CloudBeesUIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
     CloudBeesUIPlugin.getDefault().removeJenkinsChangeListener(jenkinsChangeListener);
     jenkinsChangeListener = null;
+    regularRefresher = null;
 
     disposeImages();
 

@@ -1,6 +1,5 @@
 package com.cloudbees.eclipse.ui;
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -17,7 +16,6 @@ import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -25,12 +23,12 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.eclipse.ui.progress.IProgressService;
 import org.osgi.framework.BundleContext;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
@@ -94,6 +92,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       CloudBeesCorePlugin.getDefault().getGrandCentralService().addForgeSyncProvider(new ForgeEGitSync());
     }
 
+    reloadForgeRepos(false);
   }
 
   @Override
@@ -258,7 +257,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     };
 
     job.setUser(userAction);
-    job.schedule();
+    if (getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_FORGE)) {
+      job.schedule();
+    }
   }
 
   public static IStatus showError(final String msg, final Throwable e) {
@@ -283,8 +284,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       CloudBeesUIPlugin.getDefault().getLogger().error(msg + " - " + reason, e);
       PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
         public void run() {
-      Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-      ErrorDialog.openError(shell, "Error!", msg, status);
+          Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+          ErrorDialog.openError(shell, "Error!", msg, status);
         }
       });
     } catch (Exception e2) {
@@ -409,7 +410,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     };
 
     job.setUser(userAction);
-    job.schedule();
+    if (getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
+      job.schedule();
+    }
   }
 
   private List<JenkinsInstanceResponse> pollInstances(List<JenkinsInstance> instances, IProgressMonitor monitor) {
@@ -462,23 +465,46 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
    * 
    * @param serviceUrl
    * @param viewUrl
+   * @param userAction
+   *          TODO
    * @throws CloudBeesException
    */
-  public void showJobs(final String serviceUrl, final String viewUrl) throws CloudBeesException {
+  public void showJobs(final String serviceUrl, final String viewUrl, final boolean userAction)
+      throws CloudBeesException {
     // CloudBeesUIPlugin.getDefault().getLogger().info("Show jobs: " + serviceUrl + " - " + viewUrl);
+    System.out.println("Show jobs: " + serviceUrl + " - " + viewUrl);
 
     if (serviceUrl == null && viewUrl == null) {
       return; // no info
     }
 
-    IRunnableWithProgress op = new IRunnableWithProgress() {
-      public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-        try {
-          PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(JobsView.ID);
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Jenkins jobs") {
+      protected IStatus run(IProgressMonitor monitor) {
+        if (!getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
+          return Status.CANCEL_STATUS;
+        }
 
-          String servUrl = serviceUrl;
-          if (servUrl == null && viewUrl != null) {
-            servUrl = getJenkinsServiceForUrl(viewUrl).getUrl();
+        String servUrl = serviceUrl;
+        if (servUrl == null && viewUrl != null) {
+          servUrl = getJenkinsServiceForUrl(viewUrl).getUrl();
+        }
+
+        final String viewId = Long.toString(servUrl.hashCode());
+        try {
+          PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+            public void run() {
+              try {
+                PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
+                    .showView(JobsView.ID, viewId,
+                        userAction ? IWorkbenchPage.VIEW_ACTIVATE : IWorkbenchPage.VIEW_CREATE);
+              } catch (PartInitException e) {
+                showError("Failed to show Jobs view", e);
+              }
+            }
+          });
+
+          if (monitor.isCanceled()) {
+            throw new OperationCanceledException();
           }
 
           JenkinsJobsResponse jobs = getJenkinsServiceForUrl(servUrl).getJobs(viewUrl, monitor);
@@ -492,21 +518,18 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
             JenkinsChangeListener listener = (JenkinsChangeListener) iterator.next();
             listener.activeJobViewChanged(jobs);
           }
+
+          return Status.OK_STATUS;
         } catch (CloudBeesException e) {
-          showError(e.getLocalizedMessage(), e.getCause());
-        } catch (PartInitException e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
+          return new Status(Status.ERROR, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
         }
       }
     };
 
-    IProgressService service = PlatformUI.getWorkbench().getProgressService();
-    try {
-      service.run(false, true, op);
-    } catch (InvocationTargetException e) {
-      CloudBeesUIPlugin.getDefault().getLogger().error(e);
-    } catch (InterruptedException e) {
-      CloudBeesUIPlugin.getDefault().getLogger().error(e);
+    job.setUser(userAction);
+    if (getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
+      job.schedule();
     }
   }
 

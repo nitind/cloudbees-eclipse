@@ -73,7 +73,8 @@
             icon="icons/jobs_view6.png"
             category="com.cloudbees.eclipse"
             class="com.cloudbees.eclipse.ui.views.jobs.JobsView"
-            id="com.cloudbees.eclipse.ui.views.JobsView">
+            id="com.cloudbees.eclipse.ui.views.JobsView"
+            allowMultiple="true">
       </view>
 
    </extension>

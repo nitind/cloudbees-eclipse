@@ -28,7 +28,7 @@ public class ReloadJobsAction extends Action {
   public void runWithEvent(Event event) {
 
     try {
-      CloudBeesUIPlugin.getDefault().showJobs(serviceUrl, viewUrl);
+      CloudBeesUIPlugin.getDefault().showJobs(serviceUrl, viewUrl, true);
     } catch (CloudBeesException e) {
       //TODO i18n
       CloudBeesUIPlugin.showError("Failed to reload Jenkins jobs!", e);

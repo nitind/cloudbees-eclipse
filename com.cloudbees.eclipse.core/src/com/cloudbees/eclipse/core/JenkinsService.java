@@ -119,7 +119,7 @@ public class JenkinsService {
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
 
-      String bodyResponse = retrieveWithLogin(httpclient, post, monitor, false);
+      String bodyResponse = retrieveWithLogin(httpclient, post, new SubProgressMonitor(monitor, 10), false);
 
       if (bodyResponse == null) {
         throw new CloudBeesException("Failed to receive response from server");
@@ -149,7 +149,8 @@ public class JenkinsService {
     }
   }
 
-  private String retrieveWithLogin(DefaultHttpClient httpclient, HttpPost post, IProgressMonitor monitor, boolean expectRedirect)
+  private String retrieveWithLogin(DefaultHttpClient httpclient, HttpPost post, SubProgressMonitor monitor,
+      boolean expectRedirect)
       throws UnsupportedEncodingException,
       IOException, ClientProtocolException, CloudBeesException, Exception {
     String bodyResponse = null;
@@ -311,10 +312,7 @@ public class JenkinsService {
 
   public JenkinsBuildDetailsResponse getJobDetails(String jobUrl, final IProgressMonitor monitor)
       throws CloudBeesException {
-
-    if (monitor != null) {
-      monitor.setTaskName("Fetching Job details...");
-    }
+    monitor.setTaskName("Fetching Job details...");
 
     if (jobUrl != null && !jobUrl.startsWith(jenkins.url)) {
       throw new CloudBeesException("Unexpected view url provided! Service url: " + jenkins.url + "; job url: " + jobUrl);
@@ -340,7 +338,7 @@ public class JenkinsService {
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
 
-      String bodyResponse = retrieveWithLogin(httpclient, post, monitor, false);
+      String bodyResponse = retrieveWithLogin(httpclient, post, new SubProgressMonitor(monitor, 10), false);
 
       JenkinsBuildDetailsResponse details = g.fromJson(bodyResponse, JenkinsBuildDetailsResponse.class);
 
@@ -383,10 +381,7 @@ public class JenkinsService {
   }
 
   public JenkinsJobBuildsResponse getJobBuilds(String jobUrl, final IProgressMonitor monitor) throws CloudBeesException {
-
-    if (monitor != null) {
-      monitor.setTaskName("Fetching Job builds...");
-    }
+    monitor.setTaskName("Fetching Job builds...");
 
     if (jobUrl != null && !jobUrl.startsWith(jenkins.url)) {
       throw new CloudBeesException("Unexpected job url provided! Service url: " + jenkins.url + "; job url: " + jobUrl);
@@ -411,7 +406,7 @@ public class JenkinsService {
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
 
-      String bodyResponse = retrieveWithLogin(httpclient, post, monitor, false);
+      String bodyResponse = retrieveWithLogin(httpclient, post, new SubProgressMonitor(monitor, 10), false);
 
       JenkinsJobBuildsResponse details = g.fromJson(bodyResponse, JenkinsJobBuildsResponse.class);
 
@@ -452,7 +447,7 @@ public class JenkinsService {
 
       HttpPost post = new HttpPost(reqStr);
 
-      retrieveWithLogin(httpclient, post, monitor, true);
+      retrieveWithLogin(httpclient, post, new SubProgressMonitor(monitor, 10), true);
     } catch (Exception e) {
       throw new CloudBeesException("Failed to get invoke Build for '" + jobUrl + "'. "
           + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr, e);

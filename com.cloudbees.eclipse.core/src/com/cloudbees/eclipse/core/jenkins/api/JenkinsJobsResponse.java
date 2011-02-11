@@ -1,5 +1,7 @@
 package com.cloudbees.eclipse.core.jenkins.api;
 
+import java.util.Arrays;
+
 import com.google.gson.annotations.Expose;
 
 /**
@@ -12,6 +14,40 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
   public Job[] jobs;
 
   public String name;
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result + Arrays.hashCode(jobs);
+    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (!super.equals(obj)) {
+      return false;
+    }
+    if (!(obj instanceof JenkinsJobsResponse)) {
+      return false;
+    }
+    JenkinsJobsResponse other = (JenkinsJobsResponse) obj;
+    if (!Arrays.equals(jobs, other.jobs)) {
+      return false;
+    }
+    if (name == null) {
+      if (other.name != null) {
+        return false;
+      }
+    } else if (!name.equals(other.name)) {
+      return false;
+    }
+    return true;
+  }
 
   @Expose(deserialize = false, serialize = false)
   public final static String QTREE = QTreeFactory.create(JenkinsJobsResponse.class);
@@ -34,6 +70,36 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
     public Build lastSuccessfulBuild;
     public Build lastUnstableBuild;
     public Build lastUnsuccessfulBuild;
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((url == null) ? 0 : url.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (!(obj instanceof Job)) {
+        return false;
+      }
+      Job other = (Job) obj;
+      if (url == null) {
+        if (other.url != null) {
+          return false;
+        }
+      } else if (!url.equals(other.url)) {
+        return false;
+      }
+      return true;
+    }
 
     public static class Build {
       public String fullDisplayName;
