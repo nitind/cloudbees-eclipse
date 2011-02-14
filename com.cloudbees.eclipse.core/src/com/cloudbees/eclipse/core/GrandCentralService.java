@@ -75,7 +75,7 @@ public class GrandCentralService {
   }
 
   private boolean hasAuthInfo() {
-    return email != null && password != null;
+    return email != null && email.trim().length() > 0 && password != null && password.trim().length() > 0;
   }
 
   private AuthInfo getAuthInfo(IProgressMonitor monitor) throws CloudBeesException {
