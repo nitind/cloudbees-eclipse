@@ -34,7 +34,7 @@ public class InstanceLabelProvider extends LabelProvider implements IFontProvide
     if (obj instanceof JenkinsInstanceResponse) {
       JenkinsInstanceResponse inst = (JenkinsInstanceResponse) obj;
 
-      JenkinsService s = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(inst.serviceUrl);
+      JenkinsService s = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(inst.viewUrl);
       if (s != null) {
         return s.getLabel() + (inst.offline ? " (offline)" : "");//TODO i18n
       }

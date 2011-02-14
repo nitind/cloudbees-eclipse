@@ -9,6 +9,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -56,6 +57,9 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
     createCompositeServices();
 
+    new Label(getFieldEditorParent(), SWT.NONE);
+
+    createAllJenkins();
   }
 
   private void createCompositeServices() {
@@ -73,6 +77,21 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
     addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_FORGE, Messages.pref_enable_forge, groupInnerComp));
 
     createAttachJenkinsLink(groupInnerComp);
+  }
+
+  private void createAllJenkins() {
+    Group group = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_IN);
+    group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    group.setLayout(new GridLayout(1, false));
+
+    Composite groupInnerComp = new Composite(group, SWT.NONE);
+    groupInnerComp.setLayout(new GridLayout(2, false));
+    groupInnerComp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+    group.setText(Messages.pref_group_allJenkins);
+
+    addField(new IntegerFieldEditor(PreferenceConstants.P_JENKINS_REFRESH, Messages.pref_jenkins_refresh,
+        groupInnerComp));
   }
 
   private void createCompositeLogin() {

@@ -10,7 +10,6 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class ReloadJobsAction extends Action {
 
-  public String serviceUrl;
   public String viewUrl;
 
   public ReloadJobsAction() {
@@ -28,7 +27,7 @@ public class ReloadJobsAction extends Action {
   public void runWithEvent(Event event) {
 
     try {
-      CloudBeesUIPlugin.getDefault().showJobs(serviceUrl, viewUrl, true);
+      CloudBeesUIPlugin.getDefault().showJobs(viewUrl, true);
     } catch (CloudBeesException e) {
       //TODO i18n
       CloudBeesUIPlugin.showError("Failed to reload Jenkins jobs!", e);

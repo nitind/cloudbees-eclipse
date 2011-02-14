@@ -210,7 +210,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return plugin;
   }
 
-  public void reloadForgeRepos(boolean userAction) throws CloudBeesException {
+  public void reloadForgeRepos(final boolean userAction) throws CloudBeesException {
     //      PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new IRunnableWithProgress() {
     //        public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Forge repositories") {
@@ -237,14 +237,15 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
           monitor.worked(1000);
 
-          final String msg = mess;
-          PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-            public void run() {
-              MessageDialog.openInformation(
-                  CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay().getActiveShell(),
-                  "Synced Forge repositories", msg);
-            }
-          });
+          if (userAction) {
+            final String msg = mess;
+            PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+              public void run() {
+                MessageDialog.openInformation(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay()
+                    .getActiveShell(), "Synced Forge repositories", msg);
+              }
+            });
+          }
 
           return Status.OK_STATUS; // new Status(Status.INFO, PLUGIN_ID, mess);
         } catch (Exception e) {
@@ -433,7 +434,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           throw e;
         } catch (CloudBeesException e) {
           JenkinsInstanceResponse fakeResp = new JenkinsInstanceResponse();
-          fakeResp.serviceUrl = inst.url;
+          fakeResp.viewUrl = inst.url;
           fakeResp.nodeName = inst.label;
           fakeResp.offline = true;
           fakeResp.atCloud = inst.atCloud;
@@ -460,21 +461,12 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return service;
   }
 
-  /**
-   * Either viewUrl or serviceUrl can be null. If both are provided then viewUrl must belong to serviceUrl.
-   * 
-   * @param serviceUrl
-   * @param viewUrl
-   * @param userAction
-   *          TODO
-   * @throws CloudBeesException
-   */
-  public void showJobs(final String serviceUrl, final String viewUrl, final boolean userAction)
+  public void showJobs(final String viewUrl, final boolean userAction)
       throws CloudBeesException {
-    // CloudBeesUIPlugin.getDefault().getLogger().info("Show jobs: " + serviceUrl + " - " + viewUrl);
-    System.out.println("Show jobs: " + serviceUrl + " - " + viewUrl);
+    // CloudBeesUIPlugin.getDefault().getLogger().info("Show jobs: " + viewUrl);
+    System.out.println("Show jobs: " + viewUrl);
 
-    if (serviceUrl == null && viewUrl == null) {
+    if (viewUrl == null) {
       return; // no info
     }
 
@@ -484,18 +476,12 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           return Status.CANCEL_STATUS;
         }
 
-        String servUrl = serviceUrl;
-        if (servUrl == null && viewUrl != null) {
-          servUrl = getJenkinsServiceForUrl(viewUrl).getUrl();
-        }
-
-        final String viewId = Long.toString(servUrl.hashCode());
         try {
           PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
             public void run() {
               try {
                 PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-                    .showView(JobsView.ID, viewId,
+                    .showView(JobsView.ID, Long.toString(viewUrl.hashCode()),
                         userAction ? IWorkbenchPage.VIEW_ACTIVATE : IWorkbenchPage.VIEW_CREATE);
               } catch (PartInitException e) {
                 showError("Failed to show Jobs view", e);
@@ -507,7 +493,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
             throw new OperationCanceledException();
           }
 
-          JenkinsJobsResponse jobs = getJenkinsServiceForUrl(servUrl).getJobs(viewUrl, monitor);
+          JenkinsJobsResponse jobs = getJenkinsServiceForUrl(viewUrl).getJobs(viewUrl, monitor);
 
           if (monitor.isCanceled()) {
             throw new OperationCanceledException();

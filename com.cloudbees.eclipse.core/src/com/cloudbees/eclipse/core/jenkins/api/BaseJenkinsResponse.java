@@ -4,9 +4,6 @@ import com.google.gson.annotations.Expose;
 
 abstract public class BaseJenkinsResponse {
 
-  @Expose(deserialize = false, serialize = false)
-  public String serviceUrl;
-
   /**
    * <code>null</code> if default view
    */
@@ -17,7 +14,6 @@ abstract public class BaseJenkinsResponse {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((serviceUrl == null) ? 0 : serviceUrl.hashCode());
     result = prime * result + ((viewUrl == null) ? 0 : viewUrl.hashCode());
     return result;
   }
@@ -34,13 +30,6 @@ abstract public class BaseJenkinsResponse {
       return false;
     }
     BaseJenkinsResponse other = (BaseJenkinsResponse) obj;
-    if (serviceUrl == null) {
-      if (other.serviceUrl != null) {
-        return false;
-      }
-    } else if (!serviceUrl.equals(other.serviceUrl)) {
-      return false;
-    }
     if (viewUrl == null) {
       if (other.viewUrl != null) {
         return false;

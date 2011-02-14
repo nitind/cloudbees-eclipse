@@ -64,10 +64,10 @@ public class JenkinsService {
 
       Gson g = Utils.createGson();
 
-      String reqUrl = viewUrl != null ? viewUrl : jenkins.url;
+      String reqUrl = viewUrl; // != null ? viewUrl : jenkins.url;
 
       if (!reqUrl.endsWith("/")) {
-        reqUrl = reqUrl + "/";
+        reqUrl += "/";
       }
 
       String uri = reqUrl + "api/json?tree=" + JenkinsJobsResponse.QTREE;
@@ -86,7 +86,6 @@ public class JenkinsService {
       }
 
       if (views != null) {
-        views.serviceUrl = jenkins.url;
         views.viewUrl = viewUrl;
       }
 
@@ -125,21 +124,21 @@ public class JenkinsService {
         throw new CloudBeesException("Failed to receive response from server");
       }
 
-      JenkinsInstanceResponse instance = g.fromJson(bodyResponse, JenkinsInstanceResponse.class);
+      JenkinsInstanceResponse response = g.fromJson(bodyResponse, JenkinsInstanceResponse.class);
 
-      if (instance != null) {
-        instance.serviceUrl = jenkins.url;
-        instance.atCloud = jenkins.atCloud;
+      if (response != null) {
+        response.viewUrl = jenkins.url;
+        response.atCloud = jenkins.atCloud;
 
-        if (instance.views != null) {
-          for (int i = 0; i < instance.views.length; i++) {
-            instance.views[i].response = instance;
-            instance.views[i].isPrimary = instance.primaryView.url.equals(instance.views[i].url);
+        if (response.views != null) {
+          for (int i = 0; i < response.views.length; i++) {
+            response.views[i].response = response;
+            response.views[i].isPrimary = response.primaryView.url.equals(response.views[i].url);
           }
         }
       }
 
-      return instance;
+      return response;
 
     } catch (OperationCanceledException e) {
       throw e;
@@ -414,7 +413,7 @@ public class JenkinsService {
         throw new CloudBeesException("Response does not contain required fields!");
       }
 
-      details.serviceUrl = jenkins.url;
+      details.viewUrl = jenkins.url;
       
       return details;
 

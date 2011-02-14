@@ -37,6 +37,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
@@ -77,7 +78,6 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
   protected Runnable regularRefresher;
 
-  private String serviceUrl;
   private String viewUrl;
 
   protected Object selectedJob;
@@ -87,12 +87,17 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   }
 
   protected void setInput(JenkinsJobsResponse newView) {
+    IViewSite site = getViewSite();
+    String secId = site.getSecondaryId();
+    if (newView != null && newView.viewUrl != null && !secId.equals(Long.toString(newView.viewUrl.hashCode()))) {
+      return; // another view
+    }
 
     if (newView == null || newView.jobs == null) {
       setContentDescription("No jobs available.");
       contentProvider.inputChanged(table, null, new ArrayList<JenkinsJobsResponse.Job>());
     } else {
-      String label = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(newView.serviceUrl).getLabel();
+      String label = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(newView.viewUrl).getLabel();
 
       String viewInfo = "";
       if (newView.name != null && newView.name.length() > 0) {
@@ -103,19 +108,68 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     }
 
     if (newView != null) {
-      serviceUrl = newView.serviceUrl;
       viewUrl = newView.viewUrl;
     } else {
-      serviceUrl = null;
       viewUrl = null;
     }
 
-    actionReloadJobs.serviceUrl = serviceUrl;
     actionReloadJobs.viewUrl = viewUrl;
 
-    actionReloadJobs.setEnabled(actionReloadJobs.serviceUrl != null || actionReloadJobs.viewUrl != null);
-
     table.refresh();
+
+    boolean reloadable = newView != null;
+    actionReloadJobs.setEnabled(reloadable);
+
+    if (reloadable) {
+      startRefresher();
+    } else {
+      stopRefresher();
+    }
+  }
+
+  protected synchronized void stopRefresher() {
+    regularRefresher = null;
+  }
+
+  protected synchronized void startRefresher() {
+    if (regularRefresher != null) {
+      return; // already running
+    }
+
+    if (viewUrl == null) {
+      return; // nothing to refresh anyway
+    }
+
+    int secs = CloudBeesUIPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.P_JENKINS_REFRESH);
+    if (secs <= 0) {
+      return; // disabled
+    }
+
+    regularRefresher = new Runnable() {
+
+      public void run() {
+        if (regularRefresher == null) {
+          return;
+        }
+        try {
+          CloudBeesUIPlugin.getDefault().showJobs(JobsView.this.actionReloadJobs.viewUrl, false);
+        } catch (CloudBeesException e) {
+          CloudBeesUIPlugin.getDefault().getLogger().error(e);
+        } finally {
+          if (regularRefresher != null) { // not already stopped
+            int secs = CloudBeesUIPlugin.getDefault().getPreferenceStore()
+                .getInt(PreferenceConstants.P_JENKINS_REFRESH);
+            if (secs > 0) {
+              PlatformUI.getWorkbench().getDisplay().timerExec(secs * 1000, regularRefresher);
+            } else {
+              stopRefresher();
+            }
+          }
+        }
+      }
+    };
+
+    PlatformUI.getWorkbench().getDisplay().timerExec(secs * 1000, regularRefresher);
   }
 
   class NameSorter extends ViewerSorter {
@@ -343,28 +397,6 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     };
 
     CloudBeesUIPlugin.getDefault().addJenkinsChangeListener(jenkinsChangeListener);
-    
-    final int time = 30000;
-    regularRefresher = new Runnable() {
-
-      public void run() {
-        if (regularRefresher == null) {
-          return;
-        }
-        try {
-          CloudBeesUIPlugin.getDefault().showJobs(JobsView.this.actionReloadJobs.serviceUrl,
-              JobsView.this.actionReloadJobs.viewUrl, false);
-        } catch (CloudBeesException e) {
-          CloudBeesUIPlugin.getDefault().getLogger().error(e);
-        } finally {
-          if (regularRefresher != null) {
-            PlatformUI.getWorkbench().getDisplay().timerExec(time, regularRefresher);
-          }
-        }
-      }
-    };
-
-    PlatformUI.getWorkbench().getDisplay().timerExec(time, regularRefresher);
   }
 
   protected String formatBuildInfo(Build build) {
@@ -527,17 +559,25 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       if (!jaasEnabled) {
         setInput(null); // all gone
       }
-
     }
 
     if (PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
         || PreferenceConstants.P_EMAIL.equals(event.getProperty())
         || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {
       try {
-        CloudBeesUIPlugin.getDefault().showJobs(serviceUrl, viewUrl, false);
+        CloudBeesUIPlugin.getDefault().showJobs(viewUrl, false);
       } catch (CloudBeesException e) {
         //TODO i18n
         CloudBeesUIPlugin.showError("Failed to reload Jenkins jobs!", e);
+      }
+    }
+
+    if (PreferenceConstants.P_JENKINS_REFRESH.equals(event.getProperty())) {
+      int secs = CloudBeesUIPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.P_JENKINS_REFRESH);
+      if (secs > 0) {
+        startRefresher(); // start it if it was disabled by 0 value, do nothing if it was already running
+      } else {
+        stopRefresher();
       }
     }
   }
@@ -547,7 +587,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     CloudBeesUIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
     CloudBeesUIPlugin.getDefault().removeJenkinsChangeListener(jenkinsChangeListener);
     jenkinsChangeListener = null;
-    regularRefresher = null;
+    stopRefresher();
 
     disposeImages();
 

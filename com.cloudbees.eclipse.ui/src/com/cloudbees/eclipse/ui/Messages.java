@@ -29,5 +29,7 @@ public final class Messages extends NLS {
   public static String pref_enable_forge;
   public static String pref_attach_jenkins;
   public static String pref_attach_jenkins_tooltip;
+  public static String pref_group_allJenkins;
+  public static String pref_jenkins_refresh;
 
 }
