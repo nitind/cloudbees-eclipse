@@ -159,7 +159,7 @@ public class Utils {
     post.setHeader("Accept", "application/json");
     post.setHeader("Content-type", "application/json");
 
-    System.out.println("JSON REQUEST STRING " + json);
+    //System.out.println("JSON REQUEST STRING " + json);
     StringEntity se = new StringEntity(json);
     post.setEntity(se);
     return post;
