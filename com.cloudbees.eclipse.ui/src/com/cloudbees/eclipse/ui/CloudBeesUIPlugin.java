@@ -481,7 +481,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
             public void run() {
               try {
                 PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-                    .showView(JobsView.ID, Long.toString(viewUrl.hashCode()),
+                    .showView(JobsView.ID, Long.toString(getJenkinsServiceForUrl(viewUrl).getUrl().hashCode()),
                         userAction ? IWorkbenchPage.VIEW_ACTIVATE : IWorkbenchPage.VIEW_CREATE);
               } catch (PartInitException e) {
                 showError("Failed to show Jobs view", e);

@@ -87,10 +87,13 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   }
 
   protected void setInput(JenkinsJobsResponse newView) {
-    IViewSite site = getViewSite();
-    String secId = site.getSecondaryId();
-    if (newView != null && newView.viewUrl != null && !secId.equals(Long.toString(newView.viewUrl.hashCode()))) {
-      return; // another view
+    if (newView != null && newView.viewUrl != null) {
+      IViewSite site = getViewSite();
+      String secId = site.getSecondaryId();
+      String servUrl = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(newView.viewUrl).getUrl();
+      if (!secId.equals(Long.toString(servUrl.hashCode()))) {
+        return; // another view
+      }
     }
 
     if (newView == null || newView.jobs == null) {
