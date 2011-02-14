@@ -140,8 +140,10 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       return; // nothing to refresh anyway
     }
 
-    int secs = CloudBeesUIPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.P_JENKINS_REFRESH);
-    if (secs <= 0) {
+    boolean enabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
+        .getBoolean(PreferenceConstants.P_JENKINS_REFRESH_ENABLED);
+    int secs = CloudBeesUIPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.P_JENKINS_REFRESH_INTERVAL);
+    if (!enabled || secs <= 0) {
       return; // disabled
     }
 
@@ -157,9 +159,11 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
         } finally {
           if (regularRefresher != null) { // not already stopped
+            boolean enabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
+                .getBoolean(PreferenceConstants.P_JENKINS_REFRESH_ENABLED);
             int secs = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-                .getInt(PreferenceConstants.P_JENKINS_REFRESH);
-            if (secs > 0) {
+                .getInt(PreferenceConstants.P_JENKINS_REFRESH_INTERVAL);
+            if (enabled && secs > 0) {
               PlatformUI.getWorkbench().getDisplay().timerExec(secs * 1000, regularRefresher);
             } else {
               stopRefresher();
@@ -572,9 +576,12 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       }
     }
 
-    if (PreferenceConstants.P_JENKINS_REFRESH.equals(event.getProperty())) {
-      int secs = CloudBeesUIPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.P_JENKINS_REFRESH);
-      if (secs > 0) {
+    if (PreferenceConstants.P_JENKINS_REFRESH_INTERVAL.equals(event.getProperty())
+        || PreferenceConstants.P_JENKINS_REFRESH_ENABLED.equals(event.getProperty())) {
+      boolean enabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
+          .getBoolean(PreferenceConstants.P_JENKINS_REFRESH_ENABLED);
+      int secs = CloudBeesUIPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.P_JENKINS_REFRESH_INTERVAL);
+      if (enabled && secs > 0) {
         startRefresher(); // start it if it was disabled by 0 value, do nothing if it was already running
       } else {
         stopRefresher();

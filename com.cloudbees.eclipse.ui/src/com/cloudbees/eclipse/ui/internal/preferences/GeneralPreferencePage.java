@@ -40,6 +40,8 @@ import com.cloudbees.eclipse.ui.PreferenceConstants;
 
 public class GeneralPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
+  protected IntegerFieldEditor intervRefresh;
+
   public GeneralPreferencePage() {
     super(GRID);
     setPreferenceStore(CloudBeesUIPlugin.getDefault().getPreferenceStore());
@@ -84,14 +86,29 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
     group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     group.setLayout(new GridLayout(1, false));
 
-    Composite groupInnerComp = new Composite(group, SWT.NONE);
+    final Composite groupInnerComp = new Composite(group, SWT.NONE);
     groupInnerComp.setLayout(new GridLayout(2, false));
     groupInnerComp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
     group.setText(Messages.pref_group_allJenkins);
 
-    addField(new IntegerFieldEditor(PreferenceConstants.P_JENKINS_REFRESH, Messages.pref_jenkins_refresh,
-        groupInnerComp));
+    BooleanFieldEditor intervEnable = new BooleanFieldEditor(PreferenceConstants.P_JENKINS_REFRESH_ENABLED,
+        Messages.pref_jenkins_refresh_enabled, groupInnerComp) {
+      @Override
+      protected void valueChanged(boolean oldValue, boolean newValue) {
+        super.valueChanged(oldValue, newValue);
+        intervRefresh.setEnabled(newValue, groupInnerComp);
+      }
+    };
+
+    intervRefresh = new IntegerFieldEditor(PreferenceConstants.P_JENKINS_REFRESH_INTERVAL,
+        Messages.pref_jenkins_refresh_interval, groupInnerComp);
+
+    addField(intervEnable);
+    addField(intervRefresh);
+
+    intervRefresh.setEnabled(getPreferenceStore().getBoolean(PreferenceConstants.P_JENKINS_REFRESH_ENABLED),
+        groupInnerComp);
   }
 
   private void createCompositeLogin() {

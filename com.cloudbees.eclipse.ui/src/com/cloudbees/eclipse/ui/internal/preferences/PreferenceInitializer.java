@@ -22,7 +22,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
     IPreferenceStore store = CloudBeesUIPlugin.getDefault().getPreferenceStore();
     store.setDefault(PreferenceConstants.P_ENABLE_FORGE, true);
     store.setDefault(PreferenceConstants.P_ENABLE_JAAS, true);
-    store.setDefault(PreferenceConstants.P_JENKINS_REFRESH, 60);
+    store.setDefault(PreferenceConstants.P_JENKINS_REFRESH_ENABLED, true);
+    store.setDefault(PreferenceConstants.P_JENKINS_REFRESH_INTERVAL, 60);
   }
 
 }
