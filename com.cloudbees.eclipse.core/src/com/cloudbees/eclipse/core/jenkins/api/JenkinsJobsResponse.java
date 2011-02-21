@@ -71,6 +71,8 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
     public Build lastUnstableBuild;
     public Build lastUnsuccessfulBuild;
 
+    public JenkinsJobProperty[] property;
+
     @Override
     public int hashCode() {
       final int prime = 31;

@@ -4,8 +4,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CancellationException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -15,6 +18,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -39,6 +43,7 @@ import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobProperty;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
 import com.cloudbees.eclipse.ui.internal.forge.ForgeEGitSync;
@@ -536,6 +541,30 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       }
     }
     return null;
+  }
+
+  public Map<String, String> getJobPropValues(final JenkinsJobProperty[] jobProps) {
+    final Map<String, String> props = new HashMap<String, String>();
+
+    if (jobProps != null && jobProps.length > 0) {
+      for (JenkinsJobProperty prop : jobProps) {
+        if (prop.parameterDefinitions != null && prop.parameterDefinitions.length > 0) {
+          for (JenkinsJobProperty.ParameterDefinition def : prop.parameterDefinitions) {
+            JenkinsJobProperty.ParameterValue val = def.defaultParameterValue;
+            InputDialog propDialog = new InputDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+                "Job parameter is missing",
+                "Specify value for job parameter '" + def.name + "':", val != null ? val.value : "", null);
+            propDialog.setBlockOnOpen(true);
+            if (propDialog.open() != InputDialog.OK) {
+              throw new CancellationException();
+            }
+            props.put(def.name, propDialog.getValue());
+          }
+        }
+      }
+    }
+
+    return props;
   }
 
   public void showBuildForJob(Job el) {

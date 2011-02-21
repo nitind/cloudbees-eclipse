@@ -2,6 +2,7 @@ package com.cloudbees.eclipse.ui.views.build;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -40,7 +41,7 @@ import com.cloudbees.eclipse.core.jenkins.api.HealthReport;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Action.Cause;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet.ChangeSetItem;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobBuildsResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.ui.CBImages;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -58,7 +59,7 @@ public class BuildPart extends EditorPart {
   private Label contentBuildSummary;
   private Composite contentBuildHistory;
   private Label contentJUnitTests;
-  private JenkinsJobBuildsResponse dataJobDetails;
+  protected JenkinsJobAndBuildsResponse dataJobDetails;
   private Action invokeBuild;
   private Label statusIcon;
   private Composite compMain;
@@ -273,10 +274,13 @@ public class BuildPart extends EditorPart {
         final String jobUrl = BuildPart.this.getBuildEditorInput().getJobUrl();
         final JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(jobUrl);
 
+        final Map<String, String> props = CloudBeesUIPlugin.getDefault().getJobPropValues(
+            BuildPart.this.dataJobDetails.property);
+
         org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Building job...") {
           protected IStatus run(IProgressMonitor monitor) {
             try {
-              ns.invokeBuild(jobUrl, monitor);
+              ns.invokeBuild(jobUrl, props, monitor);
               return org.eclipse.core.runtime.Status.OK_STATUS;
             } catch (CloudBeesException e) {
               //CloudBeesUIPlugin.getDefault().getLogger().error(e);
@@ -539,7 +543,7 @@ public class BuildPart extends EditorPart {
     //contentBuildHistory.setBackground(composite.getBackground());
 
     StringBuffer val = new StringBuffer();
-    for (JenkinsJobBuildsResponse.Build b : dataJobDetails.builds) {
+    for (JenkinsJobAndBuildsResponse.Build b : dataJobDetails.builds) {
 
       //String result = b.result != null && b.result.length() > 0 ? " - " + b.result : "";
 

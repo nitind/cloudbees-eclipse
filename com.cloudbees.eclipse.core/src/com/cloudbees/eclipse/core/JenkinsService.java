@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -23,7 +24,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobBuildsResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.google.gson.Gson;
@@ -76,13 +77,13 @@ public class JenkinsService {
       post.setHeader("Content-type", "application/json");
       monitor.worked(1);
 
-      String bodyResponse = retrieveWithLogin(httpclient, post, new SubProgressMonitor(monitor, 5), false);
+      String bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 5));
 
       JenkinsJobsResponse views = null;
       try {
         views = g.fromJson(bodyResponse, JenkinsJobsResponse.class);
       } catch (Exception e) {
-        throw new CloudBeesException("Illegal JSON response for '" + uri + "'", e);
+        throw new CloudBeesException("Illegal JSON response for '" + uri + "': " + bodyResponse, e);
       }
 
       if (views != null) {
@@ -118,7 +119,7 @@ public class JenkinsService {
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
 
-      String bodyResponse = retrieveWithLogin(httpclient, post, new SubProgressMonitor(monitor, 10), false);
+      String bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 10));
 
       if (bodyResponse == null) {
         throw new CloudBeesException("Failed to receive response from server");
@@ -148,8 +149,8 @@ public class JenkinsService {
     }
   }
 
-  private String retrieveWithLogin(DefaultHttpClient httpclient, HttpPost post, SubProgressMonitor monitor,
-      boolean expectRedirect)
+  private String retrieveWithLogin(DefaultHttpClient httpclient, HttpPost post, List<NameValuePair> params,
+      boolean expectRedirect, SubProgressMonitor monitor)
       throws UnsupportedEncodingException,
       IOException, ClientProtocolException, CloudBeesException, Exception {
     String bodyResponse = null;
@@ -166,15 +167,18 @@ public class JenkinsService {
         //        post.addHeader("Authorization", "Basic " + Utils.toB64(jenkins.username + ":" + jenkins.password));
       }
 
+      List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+      if (params != null) {
+        nvps.addAll(params);
+      }
+
       if (jenkins.atCloud && lastJossoSessionId != null) { // basic auth failed
-        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-        nvps.add(new BasicNameValuePair("JOSSO_SESSIONID", lastJossoSessionId));
-        post.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8)); // 1
-
+        nvps.add(new BasicNameValuePair("JOSSO_SESSIONID", lastJossoSessionId)); // 1
         post.addHeader("Cookie", "JOSSO_SESSIONID=" + lastJossoSessionId); // 2
-
         httpclient.getCookieStore().addCookie(new BasicClientCookie("JOSSO_SESSIONID", lastJossoSessionId)); // 3
       }
+
+      post.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
 
       HttpResponse resp = httpclient.execute(post);
       bodyResponse = Utils.getResponseBody(resp);
@@ -337,7 +341,7 @@ public class JenkinsService {
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
 
-      String bodyResponse = retrieveWithLogin(httpclient, post, new SubProgressMonitor(monitor, 10), false);
+      String bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 10));
 
       JenkinsBuildDetailsResponse details = g.fromJson(bodyResponse, JenkinsBuildDetailsResponse.class);
 
@@ -379,7 +383,7 @@ public class JenkinsService {
     return true;
   }
 
-  public JenkinsJobBuildsResponse getJobBuilds(String jobUrl, final IProgressMonitor monitor) throws CloudBeesException {
+  public JenkinsJobAndBuildsResponse getJobBuilds(String jobUrl, final IProgressMonitor monitor) throws CloudBeesException {
     monitor.setTaskName("Fetching Job builds...");
 
     if (jobUrl != null && !jobUrl.startsWith(jenkins.url)) {
@@ -394,7 +398,7 @@ public class JenkinsService {
       reqUrl = reqUrl + "/";
     }
 
-    String reqStr = reqUrl + "api/json?tree=" + JenkinsJobBuildsResponse.QTREE;
+    String reqStr = reqUrl + "api/json?tree=" + JenkinsJobAndBuildsResponse.QTREE;
 
     try {
       DefaultHttpClient httpclient = Utils.getAPIClient();
@@ -405,9 +409,9 @@ public class JenkinsService {
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
 
-      String bodyResponse = retrieveWithLogin(httpclient, post, new SubProgressMonitor(monitor, 10), false);
+      String bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 10));
 
-      JenkinsJobBuildsResponse details = g.fromJson(bodyResponse, JenkinsJobBuildsResponse.class);
+      JenkinsJobAndBuildsResponse details = g.fromJson(bodyResponse, JenkinsJobAndBuildsResponse.class);
 
       if (details.name == null) {
         throw new CloudBeesException("Response does not contain required fields!");
@@ -424,7 +428,7 @@ public class JenkinsService {
 
   }
 
-  public void invokeBuild(String jobUrl, IProgressMonitor monitor) throws CloudBeesException {
+  public void invokeBuild(String jobUrl, Map<String, String> props, IProgressMonitor monitor) throws CloudBeesException {
     monitor.setTaskName("Invoking build request...");
 
     if (jobUrl != null && !jobUrl.startsWith(jenkins.url)) {
@@ -439,14 +443,29 @@ public class JenkinsService {
       reqUrl = reqUrl + "/";
     }
 
-    String reqStr = reqUrl + "build";
+    String reqStr;
+    if (props == null || props.isEmpty()) {
+      reqStr = reqUrl + "build";
+    } else {
+      reqStr = reqUrl + "buildWithParameters";
+    }
+
+    List<NameValuePair> params = null;
+    if (props != null) {
+      for (Map.Entry entry : props.entrySet()) {
+        if (params == null) {
+          params = new ArrayList<NameValuePair>();
+        }
+        params.add(new BasicNameValuePair((String) entry.getKey(), (String) entry.getValue()));
+      }
+    }
 
     try {
       DefaultHttpClient httpclient = Utils.getAPIClient();
 
       HttpPost post = new HttpPost(reqStr);
 
-      retrieveWithLogin(httpclient, post, new SubProgressMonitor(monitor, 10), true);
+      retrieveWithLogin(httpclient, post, params, true, new SubProgressMonitor(monitor, 10));
     } catch (Exception e) {
       throw new CloudBeesException("Failed to get invoke Build for '" + jobUrl + "'. "
           + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr, e);

@@ -526,10 +526,12 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         final JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
         final JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(job.url);
 
+        final Map<String, String> props = CloudBeesUIPlugin.getDefault().getJobPropValues(job.property);
+
         org.eclipse.core.runtime.jobs.Job sjob = new org.eclipse.core.runtime.jobs.Job("Building job...") {
           protected IStatus run(IProgressMonitor monitor) {
             try {
-              ns.invokeBuild(job.url, monitor);
+              ns.invokeBuild(job.url, props, monitor);
               return org.eclipse.core.runtime.Status.OK_STATUS;
             } catch (CloudBeesException e) {
               //CloudBeesUIPlugin.getDefault().getLogger().error(e);
