@@ -3,6 +3,7 @@ package com.cloudbees.eclipse.ui.views.build;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -271,27 +272,28 @@ public class BuildPart extends EditorPart {
 
     invokeBuild = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       public void run() {
-        final String jobUrl = BuildPart.this.getBuildEditorInput().getJobUrl();
-        final JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(jobUrl);
-
-        final Map<String, String> props = CloudBeesUIPlugin.getDefault().getJobPropValues(
-            BuildPart.this.dataJobDetails.property);
-
-        org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Building job...") {
-          protected IStatus run(IProgressMonitor monitor) {
-            try {
-              ns.invokeBuild(jobUrl, props, monitor);
-              return org.eclipse.core.runtime.Status.OK_STATUS;
-            } catch (CloudBeesException e) {
-              //CloudBeesUIPlugin.getDefault().getLogger().error(e);
-              return new org.eclipse.core.runtime.Status(org.eclipse.core.runtime.Status.ERROR,
-                  CloudBeesUIPlugin.PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
+        try {
+          final String jobUrl = BuildPart.this.getBuildEditorInput().getJobUrl();
+          final JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(jobUrl);
+          final Map<String, String> props = CloudBeesUIPlugin.getDefault().getJobPropValues(
+              BuildPart.this.dataJobDetails.property);
+          org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Building job...") {
+            protected IStatus run(IProgressMonitor monitor) {
+              try {
+                ns.invokeBuild(jobUrl, props, monitor);
+                return org.eclipse.core.runtime.Status.OK_STATUS;
+              } catch (CloudBeesException e) {
+                //CloudBeesUIPlugin.getDefault().getLogger().error(e);
+                return new org.eclipse.core.runtime.Status(org.eclipse.core.runtime.Status.ERROR,
+                    CloudBeesUIPlugin.PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
+              }
             }
-          }
-        };
-
-        job.setUser(true);
-        job.schedule();
+          };
+          job.setUser(true);
+          job.schedule();
+        } catch (CancellationException e) {
+          // cancelled by user
+        }
       }
     };
     invokeBuild.setToolTipText("Run a new build for this job"); //TODO i18n
