@@ -78,7 +78,6 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
     addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_JAAS, Messages.pref_enable_jaas, groupInnerComp));
     addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_FORGE, Messages.pref_enable_forge, groupInnerComp));
 
-    createAttachJenkinsLink(groupInnerComp);
   }
 
   private void createAllJenkins() {
@@ -109,6 +108,9 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
     intervRefresh.setEnabled(getPreferenceStore().getBoolean(PreferenceConstants.P_JENKINS_REFRESH_ENABLED),
         groupInnerComp);
+    
+    createAttachJenkinsLink(groupInnerComp);
+    
   }
 
   private void createCompositeLogin() {

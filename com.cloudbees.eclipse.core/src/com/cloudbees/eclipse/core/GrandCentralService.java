@@ -34,7 +34,8 @@ public class GrandCentralService {
 
   private static final String HOST = System.getProperty("cloudbees.host", "cloudbees.com");
 
-  //private static final String BASE_URL = "https://grandcentral.cloudbees.com/api/";
+  // private static final String BASE_URL =
+  // "https://grandcentral.cloudbees.com/api/";
   private static final String BASE_URL = "https://grandcentral." + HOST + "/api/";
 
   private ForgeSyncService forgeSyncService = new ForgeSyncService();
@@ -113,70 +114,61 @@ public class GrandCentralService {
 
   }
 
-  /*  private boolean webValidateUser(String email, String password) throws CloudBeesException {
-      String url = "https://sso.cloudbees.com/sso-gateway/signon/usernamePasswordLogin.do";
+  /*
+   * private boolean webValidateUser(String email, String password) throws
+   * CloudBeesException { String url =
+   * "https://sso.cloudbees.com/sso-gateway/signon/usernamePasswordLogin.do";
+   * 
+   * HttpClient httpclient = getAPIClient();
+   * 
+   * HttpPost post = new HttpPost(url);
+   * 
+   * List<NameValuePair> formparams = new ArrayList<NameValuePair>();
+   * formparams.add(new BasicNameValuePair("josso_cmd", "login"));
+   * formparams.add(new BasicNameValuePair("josso_username", email));
+   * formparams.add(new BasicNameValuePair("josso_password", password));
+   * 
+   * try { UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams,
+   * "UTF-8"); post.setEntity(entity);
+   * 
+   * HttpResponse resp = httpclient.execute(post); int code =
+   * resp.getStatusLine().getStatusCode(); if (code == 302 || code == 301) {
+   * // TODO Temporarily until json API becomes available, validate // user by
+   * assuming redirect means successful login return true; }
+   * 
+   * return false; // wrong response code means invalid user or //
+   * unrecognized response page
+   * 
+   * } catch (ClientProtocolException e) { throw new
+   * CloudBeesException("Failed to validate user", e); } catch (IOException e)
+   * { throw new CloudBeesException("Failed to validate user", e); } }
+   */
 
-      HttpClient httpclient = getAPIClient();
-
-      HttpPost post = new HttpPost(url);
-
-      List<NameValuePair> formparams = new ArrayList<NameValuePair>();
-      formparams.add(new BasicNameValuePair("josso_cmd", "login"));
-      formparams.add(new BasicNameValuePair("josso_username", email));
-      formparams.add(new BasicNameValuePair("josso_password", password));
-
-      try {
-        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, "UTF-8");
-        post.setEntity(entity);
-
-        HttpResponse resp = httpclient.execute(post);
-        int code = resp.getStatusLine().getStatusCode();
-        if (code == 302 || code == 301) {
-          // TODO Temporarily until json API becomes available, validate
-          // user by assuming redirect means successful login
-          return true;
-        }
-
-        return false; // wrong response code means invalid user or
-        // unrecognized response page
-
-      } catch (ClientProtocolException e) {
-        throw new CloudBeesException("Failed to validate user", e);
-      } catch (IOException e) {
-        throw new CloudBeesException("Failed to validate user", e);
-      }
-    }*/
-
-  /*  public String remoteGetDomainId() throws CloudBeesException {
-
-      try {
-        HttpClient httpclient = Utils.getAPIClient();
-
-        KeysUsingAuthRequest req = new KeysUsingAuthRequest();
-        req.email = email;
-        req.password = password;
-
-        Gson g = Utils.createGson();
-        String json = g.toJson(req);
-
-        String url = BASE_URL + "api_key";
-        HttpPost post = new HttpPost(url);
-        post.getParams().setParameter("json", json);
-        HttpResponse resp = httpclient.execute(post);
-
-        Utils.checkResponseCode(resp);
-        String bodyResponse = Utils.getResponseBody(resp);
-
-        KeysUsingAuthResponse domainId = g.fromJson(bodyResponse, KeysUsingAuthResponse.class);
-
-        return domainId.api_key;
-
-      } catch (Exception e) {
-        throw new CloudBeesException("Failed to get api_key", e);
-      }
-    }
-
-  */public void start() {
+  /*
+   * public String remoteGetDomainId() throws CloudBeesException {
+   * 
+   * try { HttpClient httpclient = Utils.getAPIClient();
+   * 
+   * KeysUsingAuthRequest req = new KeysUsingAuthRequest(); req.email = email;
+   * req.password = password;
+   * 
+   * Gson g = Utils.createGson(); String json = g.toJson(req);
+   * 
+   * String url = BASE_URL + "api_key"; HttpPost post = new HttpPost(url);
+   * post.getParams().setParameter("json", json); HttpResponse resp =
+   * httpclient.execute(post);
+   * 
+   * Utils.checkResponseCode(resp); String bodyResponse =
+   * Utils.getResponseBody(resp);
+   * 
+   * KeysUsingAuthResponse domainId = g.fromJson(bodyResponse,
+   * KeysUsingAuthResponse.class);
+   * 
+   * return domainId.api_key;
+   * 
+   * } catch (Exception e) { throw new
+   * CloudBeesException("Failed to get api_key", e); } }
+   */public void start() {
     // Do nothing for now.
   }
 
@@ -222,23 +214,25 @@ public class GrandCentralService {
     }
   }
 
-  /*AccountServiceStatusResponse r = new AccountServiceStatusResponse();
-  //r.api_version = "1.0";
-
-      AccountServiceStatusResponse.ForgeService forge1 = new AccountServiceStatusResponse.ForgeService();
-      forge1.type = "SVN";
-      forge1.url = "http://anonsvn.jboss.org/repos/jbpm/jbpm4/trunk/";
-
-      AccountServiceStatusResponse.ForgeService forge2 = new AccountServiceStatusResponse.ForgeService();
-      forge2.type = "GIT";
-      forge2.url = "https://github.com/vivek/hudson.git";
-
-      r.forge = new AccountServiceStatusResponse.ForgeService[] { forge1, forge2 };
-
-      r.jaas = new AccountServiceStatusResponse.JaasService[] {};
-  
-  return r;
-  */
+  /*
+   * AccountServiceStatusResponse r = new AccountServiceStatusResponse();
+   * //r.api_version = "1.0";
+   * 
+   * AccountServiceStatusResponse.ForgeService forge1 = new
+   * AccountServiceStatusResponse.ForgeService(); forge1.type = "SVN";
+   * forge1.url = "http://anonsvn.jboss.org/repos/jbpm/jbpm4/trunk/";
+   * 
+   * AccountServiceStatusResponse.ForgeService forge2 = new
+   * AccountServiceStatusResponse.ForgeService(); forge2.type = "GIT";
+   * forge2.url = "https://github.com/vivek/hudson.git";
+   * 
+   * r.forge = new AccountServiceStatusResponse.ForgeService[] { forge1,
+   * forge2 };
+   * 
+   * r.jaas = new AccountServiceStatusResponse.JaasService[] {};
+   * 
+   * return r;
+   */
 
   public String[] reloadForgeRepos(IProgressMonitor monitor) throws CloudBeesException {
 
@@ -246,40 +240,43 @@ public class GrandCentralService {
       return null;
     }
 
-    String primaryAccount = getPrimaryAccount(monitor);
+    String[] accounts = getAccounts(monitor);
 
-    AccountServiceStatusResponse services = loadAccountServices(primaryAccount);
+    // String primaryAccount = getPrimaryAccount(monitor);
 
     List<String> status = new ArrayList<String>();
 
-    for (AccountServiceStatusResponse.AccountServices.ForgeService.Repo forge : services.services.forge.repos) {
-      ForgeSync.TYPE type = ForgeSync.TYPE.valueOf(forge.type.toUpperCase());
-      if (type == null) {
-        throw new CloudBeesException("Unexpected Forge repository type " + type + "!");
-      }
-      Properties props = new Properties();
-      props.put("url", forge.url);
+    for (String acc : accounts) {
 
-      try {
-        monitor.beginTask("Syncing repository '" + forge.url + "'", 100);
-        String[] sts = forgeSyncService.sync(type, props, monitor);
-        if (sts != null && sts.length > 0) {
-          status.addAll(Arrays.asList(sts));
+      AccountServiceStatusResponse services = loadAccountServices(acc);
+
+      for (AccountServiceStatusResponse.AccountServices.ForgeService.Repo forge : services.services.forge.repos) {
+        ForgeSync.TYPE type = ForgeSync.TYPE.valueOf(forge.type.toUpperCase());
+        if (type == null) {
+          throw new CloudBeesException("Unexpected Forge repository type " + type + "!");
         }
-      } finally {
-        monitor.done();
+        Properties props = new Properties();
+        props.put("url", forge.url);
+
+        try {
+          monitor.beginTask("Syncing repository '" + forge.url + "'", 100);
+          String[] sts = forgeSyncService.sync(type, props, monitor);
+          if (sts != null && sts.length > 0) {
+            status.addAll(Arrays.asList(sts));
+          }
+        } finally {
+          monitor.done();
+        }
       }
     }
 
-    if (services.services.forge.repos.length == 0) { // Forge down, demo mode 
-      Properties props = new Properties();
-      props.put("url", "ahti@i.codehoop.com:/opt/git/cb");
-      String[] sts = forgeSyncService.sync(ForgeSync.TYPE.GIT, props, monitor);
-      if (sts != null && sts.length > 0) {
-        status.addAll(Arrays.asList(sts));
-      }
-    }
-
+    /*
+     * if (services.services.forge.repos.length == 0) { // Forge down, demo
+     * mode Properties props = new Properties(); props.put("url",
+     * "ahti@i.codehoop.com:/opt/git/cb"); String[] sts =
+     * forgeSyncService.sync(ForgeSync.TYPE.GIT, props, monitor); if (sts !=
+     * null && sts.length > 0) { status.addAll(Arrays.asList(sts)); } }
+     */
     return status.toArray(new String[status.size()]);
   }
 
@@ -392,10 +389,6 @@ public class GrandCentralService {
         errMsg.append(account.message);
       }
       Utils.checkResponseCode(resp);
-
-      if ("ahtikaccount2".equals(account.account)) {
-        return "grandomstate";
-      }
 
       return account.account;
 
