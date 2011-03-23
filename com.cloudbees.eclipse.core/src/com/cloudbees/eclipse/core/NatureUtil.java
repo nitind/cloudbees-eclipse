@@ -11,8 +11,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 public class NatureUtil {
 
-  public static final String[] DEFAULT_NATURES = new String[] { CloudBeesNature.NATURE_ID };
-
   public static void addNatures(final IProject project, final String[] natureIds,
       final IProgressMonitor progressMonitor) throws CoreException {
     //JavaCore.create(project);
