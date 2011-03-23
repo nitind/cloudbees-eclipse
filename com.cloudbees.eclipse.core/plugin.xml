@@ -2,4 +2,21 @@
 <?eclipse version="3.4"?>
 <plugin>
 
+    <extension
+         id="cloudbeesNature"
+         name="CloudBees support"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="com.cloudbees.eclipse.core.CloudBeesNature">
+         </run>
+      </runtime>
+      <!--builder
+            id="com.cloudbees.eclipse.core.builder.cloudbeesBuilder">
+      </builder-->
+      <options
+            allowLinking="true">
+      </options>
+    </extension>
+
 </plugin>
