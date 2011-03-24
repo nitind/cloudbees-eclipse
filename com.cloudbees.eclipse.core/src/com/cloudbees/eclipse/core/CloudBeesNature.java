@@ -43,7 +43,7 @@ public class CloudBeesNature implements IProjectNature {
     //    IProjectDescription description = getProject().getDescription();
     //    ICommand[] commands = description.getBuildSpec();
     //    for (int i = 0; i < commands.length; ++i) {
-    //      if (commands[i].getBuilderName().equals(LaszloNature.BUILDER_ID)) {
+    //      if (commands[i].getBuilderName().equals(BUILDER_ID)) {
     //        ICommand[] newCommands = new ICommand[commands.length - 1];
     //        System.arraycopy(commands, 0, newCommands, 0, i);
     //        System.arraycopy(commands, i + 1, newCommands, i, commands.length - i - 1);
