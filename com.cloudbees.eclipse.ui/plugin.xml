@@ -1,133 +1,216 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-
-
-   <extension
-         point="org.eclipse.ui.preferencePages">
-      <page
+    <extension
+        point="org.eclipse.ui.preferencePages">
+        <page
             class="com.cloudbees.eclipse.ui.internal.preferences.GeneralPreferencePage"
             id="com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage"
             name="CloudBees">
-      </page>
-
-      <page
+        </page>
+        <page
             class="com.cloudbees.eclipse.ui.internal.preferences.JenkinsInstancesPreferencePage"
             id="com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage"
-            category="com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage"            
+            category="com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage"
             name="Jenkins">
-      </page>
-
-   </extension>
-
-   <extension
-         point="org.eclipse.core.runtime.preferences">
-      <initializer
+        </page>
+    </extension>
+    
+    <extension
+        point="org.eclipse.core.runtime.preferences">
+        <initializer
             class="com.cloudbees.eclipse.ui.internal.preferences.PreferenceInitializer">
-      </initializer>
-   </extension>
-
-   <extension
-         point="org.eclipse.ui.intro.configExtension">
-      <configExtension
+        </initializer>
+    </extension>
+    
+    <extension
+        point="org.eclipse.ui.intro.configExtension">
+        <configExtension
             configId="org.eclipse.ui.intro.universalConfig"
-            content="intro/intro.xml"            
-            >
-      </configExtension>
-    <action
-     name="com.cloudbees.eclipse.actions.openPrefs"
-     replaces="http://org.eclipse.ui.intro/configureCB"/>            
-   </extension>
-
-<extension
-      point="org.eclipse.ui.actionSets">
-   <actionSet
-         id="com.cloudbees.eclipse.ui.actionSet1"
-         label="label">
-         <action
-               id="com.cloudbees.eclipse.actions.openPrefs"
-               label="Configure CloudBees Account"               
-               class="com.cloudbees.eclipse.ui.internal.actions.ConfigureCloudBeesAction"
-               >
-         </action>
-   </actionSet>
-</extension>
-
-
-   <extension
-         point="org.eclipse.ui.views">
-      <category
+            content="intro/intro.xml">
+        </configExtension>
+        <action
+            name="com.cloudbees.eclipse.actions.openPrefs"
+            replaces="http://org.eclipse.ui.intro/configureCB" />
+    </extension>
+    
+    <extension
+        point="org.eclipse.ui.actionSets">
+        <actionSet
+            id="com.cloudbees.eclipse.ui.actionSet1"
+            label="label">
+            <action
+                id="com.cloudbees.eclipse.actions.openPrefs"
+                label="Configure CloudBees Account"
+                class="com.cloudbees.eclipse.ui.internal.actions.ConfigureCloudBeesAction">
+            </action>
+        </actionSet>
+    </extension>
+    
+    <extension
+        point="org.eclipse.ui.views">
+        <category
             name="CloudBees"
             id="com.cloudbees.eclipse">
-      </category>
-      
-      <view
+        </category>
+        <view
             name="CloudBees"
             icon="icons/16x16/cb_plain.png"
             category="com.cloudbees.eclipse"
             class="com.cloudbees.eclipse.ui.views.instances.JenkinsTreeView"
             id="com.cloudbees.eclipse.ui.views.instances.JenkinsTreeView">
-      </view>
-      <view
+        </view>
+        <view
             name="Build Jobs"
             icon="icons/jobs_view6.png"
             category="com.cloudbees.eclipse"
             class="com.cloudbees.eclipse.ui.views.jobs.JobsView"
             id="com.cloudbees.eclipse.ui.views.JobsView"
             allowMultiple="true">
-      </view>
-
-   </extension>
-   
-   <extension
-         point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension
+        </view>
+    </extension>
+    
+    <extension
+        point="org.eclipse.ui.perspectiveExtensions">
+        <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaPerspective">
-         <view
-               ratio="0.7"
-               relative="org.eclipse.jdt.ui.PackageExplorer"
-               relationship="bottom"
-               id="com.cloudbees.eclipse.ui.views.instances.JenkinsTreeView">
-         </view>
-      </perspectiveExtension>
-
-      <perspectiveExtension
+            <view
+                ratio="0.7"
+                relative="org.eclipse.jdt.ui.PackageExplorer"
+                relationship="bottom"
+                id="com.cloudbees.eclipse.ui.views.instances.JenkinsTreeView">
+            </view>
+        </perspectiveExtension>
+        <perspectiveExtension
             targetID="org.eclipse.ui.resourcePerspective">
-         <view
-               ratio="0.7"
-               relative="org.eclipse.ui.views.ContentOutline"               
-               relationship="stack"
-               id="com.cloudbees.eclipse.ui.views.instances.JenkinsTreeView">
-         </view>
-      </perspectiveExtension>
-
-      <perspectiveExtension
+            <view
+                ratio="0.7"
+                relative="org.eclipse.ui.views.ContentOutline"
+                relationship="stack"
+                id="com.cloudbees.eclipse.ui.views.instances.JenkinsTreeView">
+            </view>
+        </perspectiveExtension>
+        <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaPerspective">
-         <view
-               relative="org.eclipse.ui.views.ProblemView"
-               relationship="stack"
-               id="com.cloudbees.eclipse.ui.views.JobsView">
-         </view>
-      </perspectiveExtension>
-
-      <perspectiveExtension
+            <view
+                relative="org.eclipse.ui.views.ProblemView"
+                relationship="stack"
+                id="com.cloudbees.eclipse.ui.views.JobsView">
+            </view>
+        </perspectiveExtension>
+        <perspectiveExtension
             targetID="org.eclipse.ui.resourcePerspective">
-         <view
-               relative="org.eclipse.ui.views.TaskList"               
-               relationship="stack"
-               id="com.cloudbees.eclipse.ui.views.JobsView">
-         </view>
-      </perspectiveExtension>
-   </extension>
-
- <extension point="org.eclipse.ui.editors">
-       <editor
-             class="com.cloudbees.eclipse.ui.views.build.BuildPart"
-             id="com.cloudbees.eclipse.ui.views.build.BuildPart"
-             icon="icons/epl/debugt_obj.png"
-             name="Build details">
-       </editor>
-  </extension>
-
-  
+            <view
+                relative="org.eclipse.ui.views.TaskList"
+                relationship="stack"
+                id="com.cloudbees.eclipse.ui.views.JobsView">
+            </view>
+        </perspectiveExtension>
+    </extension>
+    
+    <extension
+        point="org.eclipse.ui.editors">
+        <editor
+            class="com.cloudbees.eclipse.ui.views.build.BuildPart"
+            id="com.cloudbees.eclipse.ui.views.build.BuildPart"
+            icon="icons/epl/debugt_obj.png"
+            name="Build details">
+        </editor>
+    </extension>
+    
+    <extension
+        point="org.eclipse.ui.decorators">
+        <decorator
+            adaptable="true"
+            icon="icons/16x16/cb_project.png"
+            id="com.cloudbees.eclipse.ui.project"
+            label="%project.decorator.label"
+            lightweight="true"
+            location="BOTTOM_RIGHT"
+            state="true">
+            <enablement>
+                <and>
+                    <objectClass
+                        name="org.eclipse.core.resources.IProject">
+                    </objectClass>
+                    <objectState
+                        name="projectNature"
+                        value="com.cloudbees.eclipse.core.cloudbeesNature">
+                    </objectState>
+                </and>
+            </enablement>
+        </decorator>
+    </extension>
+    
+    <extension
+        point="org.eclipse.ui.popupMenus">
+        <objectContribution
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IProject"
+            nameFilter="*"
+            id="com.cloudbees.eclipse.ui.popup.contribution">
+            <menu
+                label="%cloudbees.popup.menu.label"
+                path="additions"
+                icon="icons/16x16/cb_plain.png"
+                id="com.cloudbees.eclipse.ui.popup.cloudbees">
+                <separator
+                    name="cloudbeesGroup"></separator>
+            </menu>
+        </objectContribution>
+        
+        <objectContribution
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IProject"
+            nameFilter="*"
+            id="com.cloudbees.eclipse.ui.cloudbeessupport.add">
+            <visibility>
+                <and>
+                    <objectClass
+                        name="org.eclipse.core.resources.IProject">
+                    </objectClass>
+                    <not>
+                        <objectState
+                            name="projectNature"
+                            value="com.cloudbees.eclipse.core.cloudbeesNature">
+                        </objectState>
+                    </not>
+                </and>
+            </visibility>
+            <action
+                class="com.cloudbees.eclipse.ui.action.ToggleCloudBeesSupportAction"
+                enablesFor="1"
+                id="com.cloudbees.eclipse.ui.popup.addNatureAction"
+                label="%add.cloudbees.support.action.label"
+                menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup"
+                tooltip="%add.cloudbees.support.action.tooltip">
+            </action>
+        </objectContribution>
+        
+        <objectContribution
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IProject"
+            nameFilter="*"
+            id="com.cloudbees.eclipse.ui.cloudbeessupport.remove">
+            <visibility>
+                <and>
+                    <objectClass
+                        name="org.eclipse.core.resources.IProject">
+                    </objectClass>
+                    <objectState
+                        name="projectNature"
+                        value="com.cloudbees.eclipse.core.cloudbeesNature">
+                    </objectState>
+                </and>
+            </visibility>
+            <action
+                class="com.cloudbees.eclipse.ui.action.ToggleCloudBeesSupportAction"
+                enablesFor="1"
+                id="com.cloudbees.eclipse.ui.popup.removeNatureAction"
+                label="%remove.cloudbees.support.action.label"
+                menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup"
+                tooltip="%remove.cloudbees.support.action.tooltip">
+            </action>
+        </objectContribution>
+    </extension>
 </plugin>

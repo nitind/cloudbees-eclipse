@@ -25,4 +25,11 @@
 		<nature>org.eclipse.pde.PluginNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>plugin_.xml</name>
+			<type>1</type>
+			<location>C:/Master/work/CloudBees/cloudbees-eclipse/com.cloudbees.eclipse.ui/plugin.xml</location>
+		</link>
+	</linkedResources>
 </projectDescription>
