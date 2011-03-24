@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Cloudbees Run Ui
+Bundle-SymbolicName: com.cloudbees.eclipse.run.ui;singleton:=true
+Bundle-Version: 1.0.2.qualifier
+Bundle-Activator: com.cloudbees.eclipse.run.ui.CBRunUiActivator
+Bundle-Vendor: Cloud Bees, Inc
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ com.cloudbees.eclipse.run.core;bundle-version="1.0.2"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
