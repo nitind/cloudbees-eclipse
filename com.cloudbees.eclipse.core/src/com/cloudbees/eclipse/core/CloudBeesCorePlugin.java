@@ -12,10 +12,11 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class CloudBeesCorePlugin extends Plugin {
 
-  // The plug-in ID
   public static final String PLUGIN_ID = "com.cloudbees.eclipse.core"; //$NON-NLS-1$
 
-  // The shared instance
+  public static final String[] DEFAULT_NATURES = new String[] { CloudBeesNature.NATURE_ID };
+
+  /** The shared instance */
   private static CloudBeesCorePlugin plugin;
 
   private GrandCentralService gcService;
@@ -34,16 +35,17 @@ public class CloudBeesCorePlugin extends Plugin {
    * (non-Javadoc)
    * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
    */
-  public void start(BundleContext context) throws Exception {
+  @Override
+  public void start(final BundleContext context) throws Exception {
     super.start(context);
     plugin = this;
-    gcService = new GrandCentralService(null, null);
-    gcService.start();
-    
-    proxyServiceTracker = new ServiceTracker(getBundle().getBundleContext(), IProxyService.class.getName(), null);
-    proxyServiceTracker.open();
+    this.gcService = new GrandCentralService(null, null);
+    this.gcService.start();
 
-    logger = new Logger(getLog());
+    this.proxyServiceTracker = new ServiceTracker(getBundle().getBundleContext(), IProxyService.class.getName(), null);
+    this.proxyServiceTracker.open();
+
+    this.logger = new Logger(getLog());
 
   }
 
@@ -51,15 +53,16 @@ public class CloudBeesCorePlugin extends Plugin {
    * (non-Javadoc)
    * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
    */
-  public void stop(BundleContext context) throws Exception {
-    logger = null;
+  @Override
+  public void stop(final BundleContext context) throws Exception {
+    this.logger = null;
     plugin = null;
-    if (gcService != null) {
-      gcService.stop();
-      gcService = null;
+    if (this.gcService != null) {
+      this.gcService.stop();
+      this.gcService = null;
     }
-    if (proxyServiceTracker!=null) {
-      proxyServiceTracker.close();
+    if (this.proxyServiceTracker!=null) {
+      this.proxyServiceTracker.close();
     }
     super.stop(context);
   }
@@ -74,14 +77,14 @@ public class CloudBeesCorePlugin extends Plugin {
   }
 
   public GrandCentralService getGrandCentralService() throws CloudBeesException {
-    if (gcService == null) {
+    if (this.gcService == null) {
       throw new CloudBeesException("CloudBeesCorePlugin not yet initialized!");
     }
-    return gcService;
+    return this.gcService;
   }
 
   public Logger getLogger() {
-    return logger;
+    return this.logger;
   }
 
 }
