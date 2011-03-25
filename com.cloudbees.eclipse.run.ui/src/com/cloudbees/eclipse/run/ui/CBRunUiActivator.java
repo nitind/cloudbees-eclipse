@@ -1,5 +1,7 @@
 package com.cloudbees.eclipse.run.ui;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -45,5 +47,10 @@ public class CBRunUiActivator extends AbstractUIPlugin {
 	 */
 	public static CBRunUiActivator getDefault() {
 		return plugin;
+	}
+	
+	public static void logError(Exception e) {
+	  IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage());
+	  plugin.getLog().log(status);
 	}
 }

@@ -52,7 +52,13 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
     String projectName = page.getProjectName();
     String worksapceLocation = workspaceRoot.getLocation().toPortableString();
     
-    CBRunCoreScrips.executeCopySampleWebAppScript(worksapceLocation, projectName);
+    try {
+      CBRunCoreScrips.executeCopySampleWebAppScript(worksapceLocation, projectName);
+    } catch (Exception e) {
+      CBRunUiActivator.logError(e);
+      MessageDialog.openError(getShell(), "Error", e.getMessage());
+      return false;
+    }
     
     IPath containerPath = workspaceRoot.getProject(projectName).getFullPath();
     File source = workspaceRoot.getLocation().append(projectName).toFile();
@@ -62,33 +68,36 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
       public String queryOverwrite(String pathString) {
         return IOverwriteQuery.ALL;
       }
-
     };
     
     final ImportOperation importOp = new ImportOperation(containerPath, source, structureProvider, overwriteQuery);
     
-    IRunnableWithProgress op = new IRunnableWithProgress() {
+    IRunnableWithProgress progress = new IRunnableWithProgress() {
+      
       public void run(IProgressMonitor monitor) throws InvocationTargetException {
+      
         try {
           importOp.setContext(getShell());
           importOp.setCreateContainerStructure(false);
           importOp.run(monitor);
         } catch (InterruptedException e) {
-          // TODO
-          e.printStackTrace();
+          CBRunUiActivator.logError(e);
         } finally {
           monitor.done();
         }
+        
       }
+      
     };
 
     try {
-      getContainer().run(true, false, op);
+      getContainer().run(true, false, progress);
     } catch (InterruptedException e) {
       return false;
     } catch (InvocationTargetException e) {
-      Throwable realException = e.getTargetException();
-      MessageDialog.openError(getShell(), "Error", realException.getMessage());
+      CBRunUiActivator.logError(e);
+      Throwable targetEx = e.getTargetException();
+      MessageDialog.openError(getShell(), "Error", targetEx.getMessage());
       return false;
     }
 

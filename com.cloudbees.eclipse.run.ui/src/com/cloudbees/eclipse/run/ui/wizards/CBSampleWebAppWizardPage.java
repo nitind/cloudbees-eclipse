@@ -1,5 +1,7 @@
 package com.cloudbees.eclipse.run.ui.wizards;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -16,7 +18,7 @@ public class CBSampleWebAppWizardPage extends WizardPage {
   private static final String PAGE_NAME = CBSampleWebAppWizardPage.class.getSimpleName();
   private static final String PAGE_TITLE = "Sample Web Application";
   private static final String PAGE_DESCRIPTION = "This wizard creates a new sample web application.";
-  private static final String PROJECT_NAME_LABEL = "&Project Name:";
+  private static final String PROJECT_NAME_LABEL = "Project Name:";
   private static final String PROJECT_NAME_HINT = "Please enter the project name";
   
   private Text text;
@@ -55,6 +57,7 @@ public class CBSampleWebAppWizardPage extends WizardPage {
 			  projectNameInputChanged(text.getText());
 			}
 		});
+		text.setFocus();
 		
 		setPageComplete(false);
 		setControl(container);
@@ -63,8 +66,11 @@ public class CBSampleWebAppWizardPage extends WizardPage {
 	private void projectNameInputChanged(String newName) {
 	  if(newName.isEmpty()) {
 	    updateErrorStatus("Project name must be specified");
+	    return;
+	  } else if (isProjectNameExists(newName)) {
+	    updateErrorStatus("Project with same name already exists in workspace");
+	    return;
 	  }
-	  // TODO check if project with same name exists
 	  updateErrorStatus(null);
 	}
 	
@@ -75,5 +81,16 @@ public class CBSampleWebAppWizardPage extends WizardPage {
 	
 	public String getProjectName() {
 	  return text.getText();
+	}
+	
+	private boolean isProjectNameExists(String projectName) {
+	  boolean nameExists = false;
+	  for(IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+	    if(project.getName().equals(projectName)) {
+	      nameExists = true;
+	      break;
+	    }
+	  }
+	  return nameExists;
 	}
 }
