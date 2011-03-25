@@ -29,7 +29,7 @@
 		<link>
 			<name>plugin_.xml</name>
 			<type>1</type>
-			<location>C:/Master/work/CloudBees/cloudbees-eclipse/com.cloudbees.eclipse.ui/plugin.xml</location>
+			<locationURI>PROJECT_LOC/plugin.xml</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
