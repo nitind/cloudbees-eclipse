@@ -1,61 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension
-         point="org.eclipse.ui.bindings">
-      <key
-            commandId="com.cloudbees.eclipse.run.ui.commands.helpCommand"
-            contextId="org.eclipse.ui.contexts.window"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+6">
-      </key>
-   </extension>
-   <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
-         <menu
-               id="com.cloudbees.eclipse.run.ui.menus.helpMenu"
-               label="Run@Cloud"
-               mnemonic="C">
-            <command
-                  commandId="com.cloudbees.eclipse.run.ui.commands.helpCommand"
-                  id="com.cloudbees.eclipse.run.ui.menus.helpCommand"
-                  mnemonic="S">
-            </command>
-         </menu>
-      </menuContribution>
-      <menuContribution
-            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
-         <toolbar
-               id="com.cloudbees.eclipse.run.ui.toolbars.mainToolbar">
-            <command
-                  commandId="com.cloudbees.eclipse.run.ui.commands.helpCommand"
-                  icon="icons/sample.gif"
-                  id="com.cloudbees.eclipse.run.ui.toolbars.helpCommand"
-                  tooltip="Say hello world">
-            </command>
-         </toolbar>
-      </menuContribution>
-   </extension>
-   <extension
-         point="org.eclipse.ui.commands">
-      <category
-            id="com.cloudbees.eclipse.run.ui.commands.category"
-            name="CloudBees Run@Cloud">
-      </category>
-      <command
-            categoryId="com.cloudbees.eclipse.run.ui.commands.category"
-            id="com.cloudbees.eclipse.run.ui.commands.helpCommand"
-            name="Bees Help">
-      </command>
-   </extension>
-   <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            class="com.cloudbees.eclipse.run.ui.handlers.CloudBeesRunHandler"
-            commandId="com.cloudbees.eclipse.run.ui.commands.helpCommand">
-      </handler>
-   </extension>
+	<extension point="org.eclipse.ui.commands">
+		<category id="com.cloudbees.eclipse.run.ui.commands.category"
+			name="CloudBees Run@Cloud">
+		</category>
+	</extension>
+ <extension
+       point="org.eclipse.ui.popupMenus">
+    <objectContribution
+          id="com.cloudbees.eclipse.run.ui.contribution"
+          objectClass="org.eclipse.core.resources.IProject">
+       <menu
+             id="com.cloudbees.eclipse.run.ui.menu1"
+             label="CloudBees Run@Cloud"
+             path="additions">
+          <separator
+                name="group1">
+          </separator>
+       </menu>
+       <action
+             class="com.cloudbees.eclipse.run.ui.popup.actions.DeployAction"
+             enablesFor="1"
+             id="com.cloudbees.eclipse.run.ui.newAction"
+             label="Deploy"
+             menubarPath="com.cloudbees.eclipse.run.ui.menu1/group1">
+       </action>
+    </objectContribution>
+ </extension>
 
 </plugin>

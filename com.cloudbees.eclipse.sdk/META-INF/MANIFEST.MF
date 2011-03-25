@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Cloudbees SDK
-Bundle-SymbolicName: com.cloudbees.eclipse.sdk
+Bundle-SymbolicName: com.cloudbees.eclipse.sdk;singleton:=true
 Bundle-Version: 0.6.0.qualifier
 Bundle-Vendor: Cloud Bees, Inc
 Require-Bundle: org.eclipse.core.runtime
@@ -40,6 +40,7 @@ Bundle-ClassPath: cloudbees-sdk/lib/annotations-api-6.0.26.jar,
  cloudbees-sdk/lib/xstream-1.3.1.jar,
  .
 Export-Package: com.cloudbees.appserver,
+ com.cloudbees.eclipse.sdk,
  com.cloudbees.jdbc,
  com.cloudbees.sdk,
  com.cloudbees.sdk.boot,
@@ -57,3 +58,5 @@ Export-Package: com.cloudbees.appserver,
  com.staxnet.jdbc,
  com.staxnet.repository,
  com.staxnet.utils
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: com.cloudbees.eclipse.sdk.CBSdkActivator
