@@ -66,8 +66,13 @@ public class JenkinsBuildDetailsResponse extends BaseJenkinsResponse {
       public Boolean merge;
       public String msg;
       //public String node;
+      public ChangePath[] paths;
       public long rev;
 
+      public static class ChangePath {
+        public String editType;
+        public String file;
+      }
     }
 
     public static class Author {

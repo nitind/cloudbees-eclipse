@@ -13,24 +13,24 @@ public class RecentChangesContentProvider implements ITreeContentProvider {
   private ChangeSetItem[] model;
 
   public void dispose() {
-    model = null;
+    this.model = null;
   }
 
-  public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-    
+  public void inputChanged(final Viewer viewer, final Object oldInput, final Object newInput) {
+
     if (newInput instanceof ChangeSetItem[]) {
-      model = (ChangeSetItem[]) newInput;
+      this.model = (ChangeSetItem[]) newInput;
     }
 
   }
 
-  public Object[] getElements(Object inputElement) {
+  public Object[] getElements(final Object inputElement) {
     return getChildren(inputElement);
   }
 
-  public Object[] getChildren(Object parentElement) {
+  public Object[] getChildren(final Object parentElement) {
     if (parentElement == null) {
-      return model;
+      return this.model;
     }
 
     if (parentElement instanceof String) {
@@ -48,32 +48,50 @@ public class RecentChangesContentProvider implements ITreeContentProvider {
       String[] added = el.addedPaths;
       String[] removed = el.deletedPaths;
       String[] modified = el.modifiedPaths;
+      ChangeSetItem.ChangePath[] changes = el.paths;
 
-      if (added != null)
+      if (added != null) {
         for (int i = 0; i < added.length; i++) {
-        ret.add(new PathItem(el, PathItem.TYPE.ADDED, added[i]));
+          ret.add(new PathItem(el, PathItem.TYPE.ADDED, added[i]));
+        }
       }
-      if (removed != null)
+      if (removed != null) {
         for (int i = 0; i < removed.length; i++) {
-        ret.add(new PathItem(el, PathItem.TYPE.DELETED, removed[i]));
+          ret.add(new PathItem(el, PathItem.TYPE.DELETED, removed[i]));
+        }
       }
-      if (modified != null)
+      if (modified != null) {
         for (int i = 0; i < modified.length; i++) {
-        ret.add(new PathItem(el, PathItem.TYPE.MODIFIED, modified[i]));
+          ret.add(new PathItem(el, PathItem.TYPE.MODIFIED, modified[i]));
+        }
+      }
+      if (changes != null) {
+        for (int i = 0; i < changes.length; i++) {
+          ChangeSetItem.ChangePath change = changes[i];
+
+          PathItem.TYPE type = PathItem.TYPE.MODIFIED;
+          if ("add".equalsIgnoreCase(change.editType)) {
+            type = PathItem.TYPE.ADDED;
+          } else if ("delete".equalsIgnoreCase(change.editType)) {
+            type = PathItem.TYPE.DELETED;
+          }
+
+          ret.add(new PathItem(el, type, change.file));
+        }
       }
       return ret.toArray(new PathItem[0]);
     }
     return null;
   }
 
-  public Object getParent(Object element) {
+  public Object getParent(final Object element) {
     if (element instanceof PathItem) {
       return ((PathItem) element).parent;
     }
     return null;
   }
 
-  public boolean hasChildren(Object element) {
+  public boolean hasChildren(final Object element) {
 
     if (element instanceof ChangeSetItem) {
       ChangeSetItem item = (ChangeSetItem) element;
@@ -86,7 +104,9 @@ public class RecentChangesContentProvider implements ITreeContentProvider {
       if (item.modifiedPaths != null && item.modifiedPaths.length > 0) {
         return true;
       }
-      
+      if (item.paths != null && item.paths.length > 0) {
+        return true;
+      }
     }
     if (element instanceof ChangeSetItem[]) {
       return ((ChangeSetItem[]) element).length > 0;
@@ -103,17 +123,17 @@ public class RecentChangesContentProvider implements ITreeContentProvider {
     String path;
     ChangeSetItem parent;
 
-    public PathItem(ChangeSetItem parent,
-        com.cloudbees.eclipse.ui.views.build.RecentChangesContentProvider.PathItem.TYPE added, String string) {
-      type = added;
-      path = string;
+    public PathItem(final ChangeSetItem parent,
+        final com.cloudbees.eclipse.ui.views.build.RecentChangesContentProvider.PathItem.TYPE added, final String string) {
+      this.type = added;
+      this.path = string;
       this.parent = parent;
     }
 
   }
 
   public ChangeSetItem[] getModel() {
-    return model;
+    return this.model;
   }
 
 }
