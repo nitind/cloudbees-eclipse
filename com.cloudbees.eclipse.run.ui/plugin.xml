@@ -5,7 +5,48 @@
 		<category id="com.cloudbees.eclipse.run.ui.commands.category"
 			name="CloudBees Run@Cloud">
 		</category>
+  <command
+        categoryId="com.cloudbees.eclipse.run.ui.commands.category"
+        defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.CBSampleWebAppHandler"
+        id="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp"
+        name="New Sample Web Application">
+  </command>
+  <command
+        categoryId="com.cloudbees.eclipse.run.ui.commands.category"
+        defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.ReferenceHandler"
+        id="com.cloudbees.eclipse.run.ui.commands.referenceToMenu"
+        name="Reference To CloudBess Menus">
+  </command>
 	</extension>
+ <extension
+       point="org.eclipse.ui.menus">
+    <menuContribution
+          allPopups="false"
+          locationURI="toolbar:org.eclipse.ui.main.toolbar">
+       <toolbar
+             id="com.cloudbees.eclipse.run.ui.toolbar"
+             label="CloudBees">
+          <command
+                commandId="com.cloudbees.eclipse.run.ui.commands.referenceToMenu"
+                icon="icons/16x16/cb_plain.png"
+                label="CloudBees"
+                style="pulldown">
+          </command>
+       </toolbar>
+    </menuContribution>
+    <menuContribution
+          allPopups="false"
+          locationURI="menu:com.cloudbees.eclipse.run.ui.commands.referenceToMenu">
+       <command
+             commandId="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp"
+             icon="icons/16x16/cb_plain.png"
+             label="New Sample Web Application"
+             mnemonic="N"
+             style="push"
+             tooltip="Create a sample web application">
+       </command>
+    </menuContribution>
+ </extension>
 	<extension point="org.eclipse.ui.popupMenus">
 		<objectContribution id="com.cloudbees.eclipse.run.ui.contribution"
 			objectClass="org.eclipse.core.resources.IProject">
