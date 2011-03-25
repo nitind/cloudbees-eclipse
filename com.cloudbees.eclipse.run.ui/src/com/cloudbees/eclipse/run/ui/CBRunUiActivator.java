@@ -46,5 +46,4 @@ public class CBRunUiActivator extends AbstractUIPlugin {
 	public static CBRunUiActivator getDefault() {
 		return plugin;
 	}
-
 }

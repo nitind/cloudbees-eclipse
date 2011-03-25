@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<project name="com.cloudbees.eclipse.run.ui" basedir="." default="copy-sample-webapp">
+
+	<property name="projects" location="../projects" />
+	<property name="sample-webapp" location="${projects}/sample-webapp" />
+
+	<target name="copy-sample-webapp" description="Copies the sample web app project to user workspace directory and replaces configuration tokens with project name">
+
+		<property name="destination" location="${workspacePath}/${projectName}" />
+
+		<mkdir dir="${destination}" />
+
+		<copy todir="${destination}">
+			<fileset dir="${sample-webapp}" />
+		</copy>
+
+		<replace file="${destination}/.project" token="@name-token@" value="${projectName}" />
+		<replace file="${destination}/webapp/WEB-INF/cloudbees-web.xml" token="@name-token@" value="${projectName}" />
+
+	</target>
+
+</project>

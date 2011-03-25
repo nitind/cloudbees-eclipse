@@ -57,5 +57,20 @@
             commandId="com.cloudbees.eclipse.run.ui.commands.helpCommand">
       </handler>
    </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="com.cloudbees.eclipse.run.ui"
+            name="CloudBees">
+      </category>
+      <wizard
+            category="com.cloudbees.eclipse.run.ui"
+            class="com.cloudbees.eclipse.run.ui.wizards.CBSampleWebAppWizard"
+            icon="icons/16x16/cb_plain.png"
+            id="com.cloudbees.eclipse.run.ui.wizards.CBSampleWebAppWizard"
+            name="Sample Web App"
+            project="true">
+      </wizard>
+   </extension>
 
 </plugin>
