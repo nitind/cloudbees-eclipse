@@ -10,7 +10,8 @@ Require-Bundle: org.eclipse.core.runtime,
  com.cloudbees.eclipse.sdk;bundle-version="0.6.0",
  org.apache.ant,
  org.eclipse.ant.core,
- com.cloudbees.eclipse.core;bundle-version="1.0.2"
+ com.cloudbees.eclipse.core;bundle-version="1.0.2",
+ org.apache.commons.codec;bundle-version="1.3.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: com.cloudbees.eclipse.run.core
