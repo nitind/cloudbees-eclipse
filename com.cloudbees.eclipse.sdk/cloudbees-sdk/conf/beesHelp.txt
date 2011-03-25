@@ -1,0 +1,1 @@
+Type 'bees help <subcommand>' for help on a specific subcommand.

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+<<<<<<< HEAD
    <extension
          point="org.eclipse.ui.bindings">
       <key
@@ -72,5 +73,34 @@
             project="true">
       </wizard>
    </extension>
+=======
+	<extension point="org.eclipse.ui.commands">
+		<category id="com.cloudbees.eclipse.run.ui.commands.category"
+			name="CloudBees Run@Cloud">
+		</category>
+	</extension>
+ <extension
+       point="org.eclipse.ui.popupMenus">
+    <objectContribution
+          id="com.cloudbees.eclipse.run.ui.contribution"
+          objectClass="org.eclipse.core.resources.IProject">
+       <menu
+             id="com.cloudbees.eclipse.run.ui.menu1"
+             label="CloudBees Run@Cloud"
+             path="additions">
+          <separator
+                name="group1">
+          </separator>
+       </menu>
+       <action
+             class="com.cloudbees.eclipse.run.ui.popup.actions.DeployAction"
+             enablesFor="1"
+             id="com.cloudbees.eclipse.run.ui.newAction"
+             label="Deploy"
+             menubarPath="com.cloudbees.eclipse.run.ui.menu1/group1">
+       </action>
+    </objectContribution>
+ </extension>
+>>>>>>> c02e1c287dc559c5a7ce9b4064fa7f8f7a8d87c6
 
 </plugin>

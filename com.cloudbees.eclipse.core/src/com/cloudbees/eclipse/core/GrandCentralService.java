@@ -38,7 +38,7 @@ public class GrandCentralService {
   // "https://grandcentral.cloudbees.com/api/";
   private static final String BASE_URL = "https://grandcentral." + HOST + "/api/";
 
-  private ForgeSyncService forgeSyncService = new ForgeSyncService();
+  private final ForgeSyncService forgeSyncService = new ForgeSyncService();
 
   private String email;
   private String password;
@@ -76,7 +76,16 @@ public class GrandCentralService {
   }
 
   private boolean hasAuthInfo() {
-    return email != null && email.trim().length() > 0 && password != null && password.trim().length() > 0;
+    return this.email != null && this.email.trim().length() > 0 && this.password != null
+        && this.password.trim().length() > 0;
+  }
+
+  public AuthInfo getCachedAuthInfo(boolean refresh) throws CloudBeesException {
+    AuthInfo authInfo = null;
+    if (refresh || authInfo == null) {
+      authInfo = getAuthInfo(null);
+    }
+    return authInfo;
   }
 
   private AuthInfo getAuthInfo(IProgressMonitor monitor) throws CloudBeesException {
@@ -86,8 +95,8 @@ public class GrandCentralService {
       HttpClient httpclient = Utils.getAPIClient();
 
       KeysUsingAuthRequest req = new KeysUsingAuthRequest();
-      req.email = email;
-      req.password = password;
+      req.email = this.email;
+      req.password = this.password;
 
       String url = BASE_URL + "user/keys_using_auth";
 
@@ -260,7 +269,7 @@ public class GrandCentralService {
 
         try {
           monitor.beginTask("Syncing repository '" + forge.url + "'", 100);
-          String[] sts = forgeSyncService.sync(type, props, monitor);
+          String[] sts = this.forgeSyncService.sync(type, props, monitor);
           if (sts != null && sts.length > 0) {
             status.addAll(Arrays.asList(sts));
           }
@@ -281,7 +290,7 @@ public class GrandCentralService {
   }
 
   public void addForgeSyncProvider(ForgeSync provider) {
-    forgeSyncService.addProvider(provider);
+    this.forgeSyncService.addProvider(provider);
   }
 
   public List<JenkinsInstance> loadDevAtCloudInstances(IProgressMonitor monitor) throws CloudBeesException {
@@ -302,7 +311,7 @@ public class GrandCentralService {
 
         String url = "https://" + account + ".ci." + HOST;
 
-        JenkinsInstance inst = new JenkinsInstance(account, url, email, password, true, true);
+        JenkinsInstance inst = new JenkinsInstance(account, url, this.email, this.password, true, true);
 
         instances.add(inst);
       }
@@ -399,16 +408,16 @@ public class GrandCentralService {
 
   }
 
-  private static class AuthInfo {
+  public static class AuthInfo {
 
-    private KeysUsingAuthResponse auth;
+    private final KeysUsingAuthResponse auth;
 
     public AuthInfo(KeysUsingAuthResponse services) {
       this.auth = services;
     }
 
     public KeysUsingAuthResponse getAuth() {
-      return auth;
+      return this.auth;
     }
 
   }

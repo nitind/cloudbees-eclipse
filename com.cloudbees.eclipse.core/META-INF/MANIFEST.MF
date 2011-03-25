@@ -27,5 +27,6 @@ Bundle-ClassPath: .,
 Export-Package: com.cloudbees.eclipse.core,
  com.cloudbees.eclipse.core.domain,
  com.cloudbees.eclipse.core.forge.api,
+ com.cloudbees.eclipse.core.gc.api,
  com.cloudbees.eclipse.core.jenkins.api,
  com.cloudbees.eclipse.core.util
