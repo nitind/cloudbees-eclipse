@@ -1,6 +1,8 @@
 package com.cloudbees.eclipse.run.ui.popup.actions;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -11,6 +13,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.internal.ObjectPluginAction;
 
 import com.cloudbees.eclipse.run.core.TestRunner;
+import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
 public class DeployAction implements IObjectActionDelegate {
 
@@ -43,13 +46,14 @@ public class DeployAction implements IObjectActionDelegate {
         if (firstElement instanceof IProject) {
           try {
             new TestRunner().deploy((IProject) firstElement);
+
           } catch (Exception e) {
-            e.printStackTrace();
+            Status status = new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, e.getMessage());
+            CBRunUiActivator.getDefault().getLog().log(status);
           }
         }
       }
     }
-
   }
 
   /**

@@ -88,6 +88,15 @@ public class GrandCentralService {
     return authInfo;
   }
 
+  public String getCachedPrimaryUser(boolean refresh) throws CloudBeesException {
+    String user = null;
+    if (refresh || user == null) {
+      user = getPrimaryAccount(null);
+    }
+    return user;
+
+  }
+
   private AuthInfo getAuthInfo(IProgressMonitor monitor) throws CloudBeesException {
     StringBuffer errMsg = new StringBuffer();
 
@@ -421,4 +430,5 @@ public class GrandCentralService {
     }
 
   }
+
 }
