@@ -6,7 +6,7 @@ import com.google.gson.annotations.Expose;
 
 public class QTreeFactory {
 
-  public static String create(final Class cls) {
+  public static String create(final Class<?> cls) {
     return buildTreeQuery(cls.getPackage().getName(), cls, new StringBuffer()).toString();
 
   }
