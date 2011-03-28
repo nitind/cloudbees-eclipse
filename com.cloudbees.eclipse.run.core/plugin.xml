@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="com.cloudbees.eclipse.run.core.CBLaunchConfigurationType"
+            id="com.cloudbees.eclipse.run.core.launchConfigurationType"
+            modes="run, debug"
+            name="CloudBees Application">
+      </launchConfigurationType>
+   </extension>
 
 </plugin>

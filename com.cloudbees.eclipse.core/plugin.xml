@@ -18,5 +18,15 @@
             allowLinking="true">
       </options>
     </extension>
+    <extension
+          point="org.eclipse.core.expressions.propertyTesters">
+       <propertyTester
+             class="com.cloudbees.eclipse.core.CloudBeesNaturePropertyTester"
+             id="com.cloudbees.eclipse.core.cloudbeesNaturePropertyTester"
+             namespace="com.cloudbees.eclipse.core"
+             properties="isCloudBeesNature, isNotCloudBeesNature"
+             type="org.eclipse.core.resources.IProject">
+       </propertyTester>
+    </extension>
 
 </plugin>
