@@ -10,6 +10,7 @@ Require-Bundle: org.eclipse.ui,
  com.cloudbees.eclipse.run.core,
  org.eclipse.core.resources,
  org.eclipse.ui.ide,
- com.cloudbees.eclipse.core
+ com.cloudbees.eclipse.core,
+ org.eclipse.debug.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

@@ -72,5 +72,55 @@
 			name="Sample Web App" project="true">
 		</wizard>
 	</extension>
+ <extension
+       point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+    <launchConfigurationTypeImage
+          configTypeID="com.cloudbees.eclipse.run.core.launchConfigurationType"
+          icon="icons/16x16/cb_plain.png"
+          id="com.cloudbees.eclipse.run.ui.launchConfigurationTypeImage">
+    </launchConfigurationTypeImage>
+ </extension>
+ <extension
+       point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+    <launchConfigurationTabGroup
+          class="com.cloudbees.eclipse.run.ui.CBLaunchConfigurationTabGroup"
+          id="com.cloudbees.eclipse.run.ui.launchConfigurationTabGroup"
+          type="com.cloudbees.eclipse.run.core.launchConfigurationType">
+    </launchConfigurationTabGroup>
+ </extension>
+ <extension
+       point="org.eclipse.debug.ui.launchShortcuts">
+    <shortcut
+          class="com.cloudbees.eclipse.run.ui.CBLaunchShortcut"
+          icon="icons/16x16/cb_plain.png"
+          id="com.cloudbees.eclipse.run.ui.shortcut"
+          label="CloudBees Application"
+          modes="run, debug">
+       <contextualLaunch>
+          <contextLabel
+                label="label"
+                mode="run, debug">
+          </contextLabel>
+          <enablement>
+             <with
+                   variable="selection">
+                <count
+                      value="1">
+                </count>
+                <iterate
+                      ifEmpty="false"
+                      operator="and">
+                   <instanceof
+                         value="org.eclipse.core.resources.IProject">
+                   </instanceof>
+                   <test
+                         property="com.cloudbees.eclipse.core.isCloudBeesNature">
+                   </test>
+                </iterate>
+             </with>
+          </enablement>
+       </contextualLaunch>
+    </shortcut>
+ </extension>
 
 </plugin>
