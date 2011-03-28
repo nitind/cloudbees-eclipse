@@ -11,10 +11,14 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.core.GrandCentralService.AuthInfo;
 
-public class TestRunner {
+public class BeesSDK {
 
   public void deploy(IProject project) throws Exception {
     runTargets(project, new String[] { "deploy" });
+  }
+
+  public void runLocal(IProject project) throws Exception {
+    runTargets(project, new String[] { "run" });
   }
 
   private void runTargets(IProject project, String[] targets) throws CloudBeesException, CoreException {

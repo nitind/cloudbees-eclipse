@@ -12,7 +12,7 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.internal.ObjectPluginAction;
 
-import com.cloudbees.eclipse.run.core.TestRunner;
+import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
 public class DeployAction implements IObjectActionDelegate {
@@ -45,7 +45,7 @@ public class DeployAction implements IObjectActionDelegate {
 
         if (firstElement instanceof IProject) {
           try {
-            new TestRunner().deploy((IProject) firstElement);
+            new BeesSDK().deploy((IProject) firstElement);
 
           } catch (Exception e) {
             Status status = new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, e.getMessage());

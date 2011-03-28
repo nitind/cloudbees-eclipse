@@ -50,15 +50,20 @@
 	<extension point="org.eclipse.ui.popupMenus">
 		<objectContribution id="com.cloudbees.eclipse.run.ui.contribution"
 			objectClass="org.eclipse.core.resources.IProject">
-			<menu id="com.cloudbees.eclipse.run.ui.menu1" label="CloudBees Run@Cloud"
-				path="additions">
-				<separator name="group1">
-				</separator>
-			</menu>
 			<action class="com.cloudbees.eclipse.run.ui.popup.actions.DeployAction"
-				enablesFor="1" id="com.cloudbees.eclipse.run.ui.newAction" label="Deploy"
-				menubarPath="com.cloudbees.eclipse.run.ui.menu1/group1">
-			</action>
+				enablesFor="1" id="com.cloudbees.eclipse.run.ui.deploy.cloud" label="Deploy"
+				menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup"></action>
+   <visibility>
+      <and>
+         <objectClass
+               name="org.eclipse.core.resources.IProject">
+         </objectClass>
+         <objectState
+               name="projectNature"
+               value="com.cloudbees.eclipse.core.cloudbeesNature">
+         </objectState>
+      </and>
+   </visibility>
 		</objectContribution>
 	</extension>
 
