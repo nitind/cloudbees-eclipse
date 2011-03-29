@@ -53,7 +53,7 @@ public class Utils {
    * @param str
    * @return
    */
-  public static String toB64(String str) {
+  public static String toB64(final String str) {
     try {
       if (str == null || str.length() == 0) {
         return new String(new byte[0], "US-ASCII");
@@ -70,7 +70,7 @@ public class Utils {
    * @param str
    * @return
    */
-  public static String fromB64(String str) {
+  public static String fromB64(final String str) {
     try {
       if (str == null || str.length() == 0) {
         return new String(new byte[0], "UTF-8");
@@ -81,7 +81,7 @@ public class Utils {
     }
   }
 
-  public final static String readString(InputStream is) throws CloudBeesException {
+  public final static String readString(final InputStream is) throws CloudBeesException {
     try {
       Writer writer = new StringWriter();
       char[] buffer = new char[1024];
@@ -127,7 +127,7 @@ public class Utils {
       }
 
       TrustStrategy trustAllStrategy = new TrustStrategy() {
-        public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        public boolean isTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
           return true;
         }
       };
@@ -136,6 +136,7 @@ public class Utils {
           trustAllStrategy,
           SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
       // Override https handling to use provided truststore
+      @SuppressWarnings("deprecation")
       Scheme sch = new Scheme("https", socketFactory, 443);
       httpclient.getConnectionManager().getSchemeRegistry().register(sch);
 
@@ -152,7 +153,7 @@ public class Utils {
     }
   }
 
-  public static HttpPost jsonRequest(String url, Object req) throws UnsupportedEncodingException {
+  public static HttpPost jsonRequest(final String url, final Object req) throws UnsupportedEncodingException {
     HttpPost post = new HttpPost(url);
     Gson g = Utils.createGson();
     String json = g.toJson(req);
@@ -165,7 +166,7 @@ public class Utils {
     return post;
   }
 
-  public final static String getResponseBody(HttpResponse resp) throws CloudBeesException {
+  public final static String getResponseBody(final HttpResponse resp) throws CloudBeesException {
     try {
       return Utils.readString(resp.getEntity().getContent());
     } catch (IllegalStateException e) {
@@ -175,11 +176,11 @@ public class Utils {
     }
   }
 
-  public final static void checkResponseCode(HttpResponse resp) throws CloudBeesException {
+  public final static void checkResponseCode(final HttpResponse resp) throws CloudBeesException {
     checkResponseCode(resp, false);
   }
 
-  public final static void checkResponseCode(HttpResponse resp, boolean expectCIRedirect) throws CloudBeesException {
+  public final static void checkResponseCode(final HttpResponse resp, final boolean expectCIRedirect) throws CloudBeesException {
     int responseStatus = resp.getStatusLine().getStatusCode();
 
     Header firstHeader = resp.getFirstHeader("Location");
@@ -202,7 +203,7 @@ public class Utils {
     }
   }
 
-  public static String humanReadableTime(long duration) {
+  public static String humanReadableTime(final long duration) {
     String unit = "";
     long mins = duration / (60L * 1000);
     long hr = mins / 60;
@@ -226,7 +227,7 @@ public class Utils {
     return unit;
   }
 
-  public static <T> T createInstance(Class<T> clazz, Class[] types, Object[] params) {
+  public static <T> T createInstance(final Class<T> clazz, final Class<?>[] types, final Object[] params) {
     try {
       Constructor<T> cnst;
       cnst = clazz.getConstructor(types);

@@ -42,7 +42,7 @@ public class JenkinsService {
 
   private static String lastJossoSessionId = null;
 
-  public JenkinsService(JenkinsInstance jenkins) {
+  public JenkinsService(final JenkinsInstance jenkins) {
     this.jenkins = jenkins;
   }
 
@@ -52,14 +52,14 @@ public class JenkinsService {
    * @return
    * @throws CloudBeesException
    */
-  public JenkinsJobsResponse getJobs(String viewUrl, IProgressMonitor monitor) throws CloudBeesException {
-    if (viewUrl != null && !viewUrl.startsWith(jenkins.url)) {
-      throw new CloudBeesException("Unexpected view url provided! Service url: " + jenkins.url + "; view url: "
+  public JenkinsJobsResponse getJobs(final String viewUrl, final IProgressMonitor monitor) throws CloudBeesException {
+    if (viewUrl != null && !viewUrl.startsWith(this.jenkins.url)) {
+      throw new CloudBeesException("Unexpected view url provided! Service url: " + this.jenkins.url + "; view url: "
           + viewUrl);
     }
 
     try {
-      monitor.beginTask("Fetching Job list for '" + jenkins.label + "'...", 10);
+      monitor.beginTask("Fetching Job list for '" + this.jenkins.label + "'...", 10);
 
       DefaultHttpClient httpclient = Utils.getAPIClient();
 
@@ -95,17 +95,17 @@ public class JenkinsService {
       return views;
 
     } catch (Exception e) {
-      throw new CloudBeesException("Failed to get Jenkins jobs for '" + jenkins.url + "'.", e);
+      throw new CloudBeesException("Failed to get Jenkins jobs for '" + this.jenkins.url + "'.", e);
     } finally {
       monitor.done();
     }
 
   }
 
-  public JenkinsInstanceResponse getInstance(IProgressMonitor monitor) throws CloudBeesException {
+  public JenkinsInstanceResponse getInstance(final IProgressMonitor monitor) throws CloudBeesException {
     StringBuffer errMsg = new StringBuffer();
-  
-    String reqUrl = jenkins.url;
+
+    String reqUrl = this.jenkins.url;
     if (!reqUrl.endsWith("/")) {
       reqUrl += "/";
     }
@@ -128,8 +128,8 @@ public class JenkinsService {
       JenkinsInstanceResponse response = g.fromJson(bodyResponse, JenkinsInstanceResponse.class);
 
       if (response != null) {
-        response.viewUrl = jenkins.url;
-        response.atCloud = jenkins.atCloud;
+        response.viewUrl = this.jenkins.url;
+        response.atCloud = this.jenkins.atCloud;
 
         if (response.views != null) {
           for (int i = 0; i < response.views.length; i++) {
@@ -149,10 +149,10 @@ public class JenkinsService {
     }
   }
 
-  private String retrieveWithLogin(DefaultHttpClient httpclient, HttpPost post, List<NameValuePair> params,
-      boolean expectRedirect, SubProgressMonitor monitor)
-      throws UnsupportedEncodingException,
-      IOException, ClientProtocolException, CloudBeesException, Exception {
+  private String retrieveWithLogin(final DefaultHttpClient httpclient, final HttpPost post, final List<NameValuePair> params,
+      final boolean expectRedirect, final SubProgressMonitor monitor)
+  throws UnsupportedEncodingException,
+  IOException, ClientProtocolException, CloudBeesException, Exception {
     String bodyResponse = null;
 
     //        if (lastJossoCookie != null) {
@@ -162,8 +162,8 @@ public class JenkinsService {
     boolean tryToLogin = true; // false for BasicAuth, true for redirect login
     do {
 
-      if ((jenkins.atCloud || jenkins.authenticate) && jenkins.username != null && jenkins.username.trim().length() > 0
-          && jenkins.password != null && jenkins.password.trim().length() > 0) {
+      if ((this.jenkins.atCloud || this.jenkins.authenticate) && this.jenkins.username != null && this.jenkins.username.trim().length() > 0
+          && this.jenkins.password != null && this.jenkins.password.trim().length() > 0) {
         //        post.addHeader("Authorization", "Basic " + Utils.toB64(jenkins.username + ":" + jenkins.password));
       }
 
@@ -172,7 +172,7 @@ public class JenkinsService {
         nvps.addAll(params);
       }
 
-      if (jenkins.atCloud && lastJossoSessionId != null) { // basic auth failed
+      if (this.jenkins.atCloud && lastJossoSessionId != null) { // basic auth failed
         nvps.add(new BasicNameValuePair("JOSSO_SESSIONID", lastJossoSessionId)); // 1
         post.addHeader("Cookie", "JOSSO_SESSIONID=" + lastJossoSessionId); // 2
         httpclient.getCookieStore().addCookie(new BasicClientCookie("JOSSO_SESSIONID", lastJossoSessionId)); // 3
@@ -180,11 +180,13 @@ public class JenkinsService {
 
       post.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
 
+      CloudBeesCorePlugin.getDefault().getLogger().info("Retrieve: " + post.getURI());
+
       HttpResponse resp = httpclient.execute(post);
       bodyResponse = Utils.getResponseBody(resp);
 
-      if (jenkins.atCloud && jenkins.username != null && jenkins.username.trim().length() > 0
-          && jenkins.password != null && jenkins.password.trim().length() > 0
+      if (this.jenkins.atCloud && this.jenkins.username != null && this.jenkins.username.trim().length() > 0
+          && this.jenkins.password != null && this.jenkins.password.trim().length() > 0
           && (resp.getStatusLine().getStatusCode() == 302 || resp.getStatusLine().getStatusCode() == 301) && tryToLogin) { // redirect to login
         login(httpclient, post.getURI().toASCIIString(), resp.getFirstHeader("Location").getValue(),
             new SubProgressMonitor(monitor, 5));
@@ -201,10 +203,10 @@ public class JenkinsService {
     return bodyResponse;
   }
 
-  private void login(DefaultHttpClient httpClient, final String referer, final String redirect,
+  private void login(final DefaultHttpClient httpClient, final String referer, final String redirect,
       final IProgressMonitor monitor) throws Exception {
     try {
-      String name = "Logging in to '" + jenkins.label + "'...";
+      String name = "Logging in to '" + this.jenkins.label + "'...";
       monitor.beginTask(name, 5);
       monitor.setTaskName(name);
 
@@ -269,8 +271,8 @@ public class JenkinsService {
     //CloudBeesCorePlugin.getDefault().getLogger().info("JOSSO_SESSIONID=" + lastJossoSessionId);
   }
 
-  private HttpResponse visitSite(DefaultHttpClient httpClient, String url, String refererUrl)
-      throws IOException, ClientProtocolException, CloudBeesException {
+  private HttpResponse visitSite(final DefaultHttpClient httpClient, final String url, final String refererUrl)
+  throws IOException, ClientProtocolException, CloudBeesException {
 
     CloudBeesCorePlugin.getDefault().getLogger().info("Visiting: " + url);
 
@@ -279,46 +281,46 @@ public class JenkinsService {
 
     if (url.endsWith("usernamePasswordLogin.do")) {
       List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-      nvps.add(new BasicNameValuePair("josso_username", jenkins.username));
-      nvps.add(new BasicNameValuePair("josso_password", jenkins.password));
+      nvps.add(new BasicNameValuePair("josso_username", this.jenkins.username));
+      nvps.add(new BasicNameValuePair("josso_password", this.jenkins.password));
       nvps.add(new BasicNameValuePair("josso_cmd", "login"));
       nvps.add(new BasicNameValuePair("josso_rememberme", "on"));
       post.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
     }
 
     HttpResponse resp = httpClient.execute(post);
-    String body = Utils.getResponseBody(resp);
+    //String body = Utils.getResponseBody(resp);
 
     Header redir = resp.getFirstHeader("Location");
 
     CloudBeesCorePlugin.getDefault().getLogger()
-        .info("\t" + resp.getStatusLine() + (redir != null ? (" -> " + redir.getValue()) : ""));
+    .info("\t" + resp.getStatusLine() + (redir != null ? (" -> " + redir.getValue()) : ""));
 
     return resp;
   }
 
   public String getLabel() {
-    return jenkins.label;
+    return this.jenkins.label;
   }
 
   public String getUrl() {
-    return jenkins.url;
+    return this.jenkins.url;
   }
 
   @Override
   public String toString() {
-    if (jenkins != null) {
-      return "JenkinsService[jenkinsInstance=" + jenkins + "]";
+    if (this.jenkins != null) {
+      return "JenkinsService[jenkinsInstance=" + this.jenkins + "]";
     }
     return super.toString();
   }
 
-  public JenkinsBuildDetailsResponse getJobDetails(String jobUrl, final IProgressMonitor monitor)
-      throws CloudBeesException {
+  public JenkinsBuildDetailsResponse getJobDetails(final String jobUrl, final IProgressMonitor monitor)
+  throws CloudBeesException {
     monitor.setTaskName("Fetching Job details...");
 
-    if (jobUrl != null && !jobUrl.startsWith(jenkins.url)) {
-      throw new CloudBeesException("Unexpected view url provided! Service url: " + jenkins.url + "; job url: " + jobUrl);
+    if (jobUrl != null && !jobUrl.startsWith(this.jenkins.url)) {
+      throw new CloudBeesException("Unexpected view url provided! Service url: " + this.jenkins.url + "; job url: " + jobUrl);
     }
 
     StringBuffer errMsg = new StringBuffer();
@@ -362,32 +364,37 @@ public class JenkinsService {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((jenkins == null) ? 0 : jenkins.hashCode());
+    result = prime * result + ((this.jenkins == null) ? 0 : this.jenkins.hashCode());
     return result;
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
+  public boolean equals(final Object obj) {
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null) {
       return false;
-    if (getClass() != obj.getClass())
+    }
+    if (getClass() != obj.getClass()) {
       return false;
+    }
     JenkinsService other = (JenkinsService) obj;
-    if (jenkins == null) {
-      if (other.jenkins != null)
+    if (this.jenkins == null) {
+      if (other.jenkins != null) {
         return false;
-    } else if (!jenkins.equals(other.jenkins))
+      }
+    } else if (!this.jenkins.equals(other.jenkins)) {
       return false;
+    }
     return true;
   }
 
-  public JenkinsJobAndBuildsResponse getJobBuilds(String jobUrl, final IProgressMonitor monitor) throws CloudBeesException {
+  public JenkinsJobAndBuildsResponse getJobBuilds(final String jobUrl, final IProgressMonitor monitor) throws CloudBeesException {
     monitor.setTaskName("Fetching Job builds...");
 
-    if (jobUrl != null && !jobUrl.startsWith(jenkins.url)) {
-      throw new CloudBeesException("Unexpected job url provided! Service url: " + jenkins.url + "; job url: " + jobUrl);
+    if (jobUrl != null && !jobUrl.startsWith(this.jenkins.url)) {
+      throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; job url: " + jobUrl);
     }
 
     StringBuffer errMsg = new StringBuffer();
@@ -417,8 +424,8 @@ public class JenkinsService {
         throw new CloudBeesException("Response does not contain required fields!");
       }
 
-      details.viewUrl = jenkins.url;
-      
+      details.viewUrl = this.jenkins.url;
+
       return details;
 
     } catch (Exception e) {
@@ -428,11 +435,11 @@ public class JenkinsService {
 
   }
 
-  public void invokeBuild(String jobUrl, Map<String, String> props, IProgressMonitor monitor) throws CloudBeesException {
+  public void invokeBuild(final String jobUrl, final Map<String, String> props, final IProgressMonitor monitor) throws CloudBeesException {
     monitor.setTaskName("Invoking build request...");
 
-    if (jobUrl != null && !jobUrl.startsWith(jenkins.url)) {
-      throw new CloudBeesException("Unexpected job url provided! Service url: " + jenkins.url + "; job url: " + jobUrl);
+    if (jobUrl != null && !jobUrl.startsWith(this.jenkins.url)) {
+      throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; job url: " + jobUrl);
     }
 
     StringBuffer errMsg = new StringBuffer();
@@ -452,11 +459,11 @@ public class JenkinsService {
 
     List<NameValuePair> params = null;
     if (props != null) {
-      for (Map.Entry entry : props.entrySet()) {
+      for (Map.Entry<String, String> entry : props.entrySet()) {
         if (params == null) {
           params = new ArrayList<NameValuePair>();
         }
-        params.add(new BasicNameValuePair((String) entry.getKey(), (String) entry.getValue()));
+        params.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
       }
     }
 
