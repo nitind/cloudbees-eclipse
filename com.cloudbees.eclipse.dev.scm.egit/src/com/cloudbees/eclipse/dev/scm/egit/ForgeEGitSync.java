@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.ui.internal.forge;
+package com.cloudbees.eclipse.dev.scm.egit;
 
 import java.io.File;
 import java.util.List;

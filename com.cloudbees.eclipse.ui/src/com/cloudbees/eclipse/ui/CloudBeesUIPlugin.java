@@ -37,7 +37,6 @@ import org.osgi.framework.BundleContext;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.core.ForgeSyncService;
 import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
@@ -46,7 +45,6 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobProperty;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
-import com.cloudbees.eclipse.ui.internal.forge.ForgeEGitSync;
 import com.cloudbees.eclipse.ui.views.build.BuildEditorInput;
 import com.cloudbees.eclipse.ui.views.build.BuildPart;
 import com.cloudbees.eclipse.ui.views.jobs.JobsView;
@@ -85,23 +83,19 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
    * org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext
    * )
    */
-  public void start(BundleContext context) throws Exception {
+  @Override
+  public void start(final BundleContext context) throws Exception {
     super.start(context);
     plugin = this;
-    logger = new Logger(getLog());
+    this.logger = new Logger(getLog());
     loadAccountCredentials();
     hookPrefChangeListener();
-
-    if ((ForgeSyncService.bundleActive("org.eclipse.egit.core") || ForgeSyncService.bundleActive("org.eclipse.egit"))
-        && ForgeSyncService.bundleActive("org.eclipse.jgit")) {
-      CloudBeesCorePlugin.getDefault().getGrandCentralService().addForgeSyncProvider(new ForgeEGitSync());
-    }
 
     reloadForgeRepos(false);
   }
 
   @Override
-  protected void initializeImageRegistry(ImageRegistry reg) {
+  protected void initializeImageRegistry(final ImageRegistry reg) {
     super.initializeImageRegistry(reg);
 
     reg.put(CBImages.IMG_CONSOLE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/monitor_obj.png")));
@@ -173,9 +167,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   private void hookPrefChangeListener() {
     //SecurePreferencesFactory.getDefault().// get(PreferenceConstants.P_PASSWORD, "");
-    prefListener = new IPropertyChangeListener() {
+    this.prefListener = new IPropertyChangeListener() {
 
-      public void propertyChange(PropertyChangeEvent event) {
+      public void propertyChange(final PropertyChangeEvent event) {
         if (PreferenceConstants.P_PASSWORD.equalsIgnoreCase(event.getProperty())
             || PreferenceConstants.P_EMAIL.equalsIgnoreCase(event.getProperty())) {
           try {
@@ -186,7 +180,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         }
       }
     };
-    getPreferenceStore().addPropertyChangeListener(prefListener);
+    getPreferenceStore().addPropertyChangeListener(this.prefListener);
   }
 
   /*
@@ -196,13 +190,14 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
    * org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext
    * )
    */
-  public void stop(BundleContext context) throws Exception {
-    logger = null;
+  @Override
+  public void stop(final BundleContext context) throws Exception {
+    this.logger = null;
     plugin = null;
     super.stop(context);
-    if (prefListener != null) {
-      getPreferenceStore().removePropertyChangeListener(prefListener);
-      prefListener = null;
+    if (this.prefListener != null) {
+      getPreferenceStore().removePropertyChangeListener(this.prefListener);
+      this.prefListener = null;
     }
   }
 
@@ -219,7 +214,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     //      PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new IRunnableWithProgress() {
     //        public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Forge repositories") {
-      protected IStatus run(IProgressMonitor monitor) {
+      @Override
+      protected IStatus run(final IProgressMonitor monitor) {
         if (!getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_FORGE)) {
           // Forge sync disabled.
           return Status.CANCEL_STATUS;
@@ -301,7 +297,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   public Logger getLogger() {
-    return logger;
+    return this.logger;
   }
 
   public List<JenkinsInstance> loadManualJenkinsInstances() {
@@ -318,21 +314,21 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return list;
   }
 
-  public List<JenkinsInstance> loadDevAtCloudInstances(IProgressMonitor monitor) throws CloudBeesException {
+  public List<JenkinsInstance> loadDevAtCloudInstances(final IProgressMonitor monitor) throws CloudBeesException {
 
     List<JenkinsInstance> instances = CloudBeesCorePlugin.getDefault().getGrandCentralService()
         .loadDevAtCloudInstances(monitor);
 
     for (JenkinsInstance ni : instances) {
       if (getJenkinsServiceForUrl(ni.url) == null) {
-        jenkinsRegistry.add(new JenkinsService(ni));
+        this.jenkinsRegistry.add(new JenkinsService(ni));
       }
     }
 
     return instances;
   }
 
-  public void saveJenkinsInstance(JenkinsInstance ni) {
+  public void saveJenkinsInstance(final JenkinsInstance ni) {
     if (ni == null || ni.label == null || ni.url == null || ni.label.length() == 0 || ni.url.length() == 0) {
       throw new IllegalStateException("Unable to add new instance with an empty url or label!");
     }
@@ -340,14 +336,14 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     list.remove(ni); // when editing - id is the same, but props old, so lets kill old instance first
     list.add(ni);
 
-    jenkinsRegistry.remove(new JenkinsService(ni));
+    this.jenkinsRegistry.remove(new JenkinsService(ni));
 
     Collections.sort(list);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
         .setValue(PreferenceConstants.P_JENKINS_INSTANCES, JenkinsInstance.encode(list));
   }
 
-  public void removeJenkinsInstance(JenkinsInstance ni) {
+  public void removeJenkinsInstance(final JenkinsInstance ni) {
     if (ni == null) {
       throw new RuntimeException("Unable to remove null instance!");
     }
@@ -357,10 +353,11 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         .setValue(PreferenceConstants.P_JENKINS_INSTANCES, JenkinsInstance.encode(list));
   }
 
-  public void reloadAllJenkins(boolean userAction) {
+  public void reloadAllJenkins(final boolean userAction) {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job(
         "Loading DEV@Cloud & Jenkins instances") {
-      protected IStatus run(IProgressMonitor monitor) {
+      @Override
+      protected IStatus run(final IProgressMonitor monitor) {
         if (!getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
           return new Status(Status.INFO, PLUGIN_ID, "DEV@Cloud Continuous Integration is not enabled");
         }
@@ -390,9 +387,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
           List<JenkinsInstanceResponse> resp = pollInstances(instances, new SubProgressMonitor(monitor, 740));
 
-          Iterator<JenkinsChangeListener> iterator = jenkinsChangeListeners.iterator();
+          Iterator<JenkinsChangeListener> iterator = CloudBeesUIPlugin.this.jenkinsChangeListeners.iterator();
           while (iterator.hasNext()) {
-            JenkinsChangeListener listener = (JenkinsChangeListener) iterator.next();
+            JenkinsChangeListener listener = iterator.next();
             listener.jenkinsChanged(resp);
           }
           monitor.worked(10);
@@ -421,7 +418,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
   }
 
-  private List<JenkinsInstanceResponse> pollInstances(List<JenkinsInstance> instances, IProgressMonitor monitor) {
+  private List<JenkinsInstanceResponse> pollInstances(final List<JenkinsInstance> instances, final IProgressMonitor monitor) {
     try {
       int scale = 10;
       monitor.beginTask("Fetching instance details", instances.size() * scale);
@@ -445,7 +442,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           fakeResp.atCloud = inst.atCloud;
           resp.add(fakeResp);
 
-          logger.warn("Failed to fetch info about '" + inst.url + "':" + e.getLocalizedMessage(), e.getCause());
+          this.logger.warn("Failed to fetch info about '" + inst.url + "':" + e.getLocalizedMessage(), e.getCause());
         } finally {
           monitor.worked(1 * scale);
         }
@@ -457,11 +454,11 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
   }
 
-  public JenkinsService lookupJenkinsService(JenkinsInstance inst) {
+  public JenkinsService lookupJenkinsService(final JenkinsInstance inst) {
     JenkinsService service = getJenkinsServiceForUrl(inst.url);
     if (service == null) {
       service = new JenkinsService(inst);
-      jenkinsRegistry.add(service);
+      this.jenkinsRegistry.add(service);
     }
     return service;
   }
@@ -476,7 +473,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
 
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Jenkins jobs") {
-      protected IStatus run(IProgressMonitor monitor) {
+      @Override
+      protected IStatus run(final IProgressMonitor monitor) {
         if (!getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
           return Status.CANCEL_STATUS;
         }
@@ -504,9 +502,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
             throw new OperationCanceledException();
           }
 
-          Iterator<JenkinsChangeListener> iterator = jenkinsChangeListeners.iterator();
+          Iterator<JenkinsChangeListener> iterator = CloudBeesUIPlugin.this.jenkinsChangeListeners.iterator();
           while (iterator.hasNext()) {
-            JenkinsChangeListener listener = (JenkinsChangeListener) iterator.next();
+            JenkinsChangeListener listener = iterator.next();
             listener.activeJobViewChanged(jobs);
           }
 
@@ -524,18 +522,18 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
   }
 
-  public void addJenkinsChangeListener(JenkinsChangeListener listener) {
+  public void addJenkinsChangeListener(final JenkinsChangeListener listener) {
     this.jenkinsChangeListeners.add(listener);
   }
 
-  public void removeJenkinsChangeListener(JenkinsChangeListener listener) {
-    jenkinsChangeListeners.remove(listener);
+  public void removeJenkinsChangeListener(final JenkinsChangeListener listener) {
+    this.jenkinsChangeListeners.remove(listener);
   }
 
-  public JenkinsService getJenkinsServiceForUrl(String serviceOrViewOrJobUrl) {
-    Iterator<JenkinsService> iter = jenkinsRegistry.iterator();
+  public JenkinsService getJenkinsServiceForUrl(final String serviceOrViewOrJobUrl) {
+    Iterator<JenkinsService> iter = this.jenkinsRegistry.iterator();
     while (iter.hasNext()) {
-      JenkinsService service = (JenkinsService) iter.next();
+      JenkinsService service = iter.next();
       if (serviceOrViewOrJobUrl.startsWith(service.getUrl())) {
         return service;
       }
@@ -567,14 +565,14 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return props;
   }
 
-  public void showBuildForJob(Job el) {
+  public void showBuildForJob(final Job el) {
     if (el == null) {
       return;
     }
     // Look up the service
-    Iterator<JenkinsService> it = jenkinsRegistry.iterator();
+    Iterator<JenkinsService> it = this.jenkinsRegistry.iterator();
     while (it.hasNext()) {
-      JenkinsService service = (JenkinsService) it.next();
+      JenkinsService service = it.next();
       if (el.url.startsWith(service.getUrl())) {
 
         try {
@@ -614,7 +612,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     loadAccountCredentials();
   }
 
-  public void openWithBrowser(String url) {
+  public void openWithBrowser(final String url) {
     IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
     try {
 
@@ -628,15 +626,15 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
   }
 
-  public static Image getImage(String imgKey) {
+  public static Image getImage(final String imgKey) {
     return CloudBeesUIPlugin.getDefault().getImageRegistry().get(imgKey);
   }
 
-  public static ImageDescriptor getImageDescription(String imgKey) {
+  public static ImageDescriptor getImageDescription(final String imgKey) {
     return CloudBeesUIPlugin.getDefault().getImageRegistry().getDescriptor(imgKey);
   }
 
-  public void storeP(String text) throws StorageException, CloudBeesException {
+  public void storeP(final String text) throws StorageException, CloudBeesException {
     if (USE_SECURE_STORAGE) {
       SecurePreferencesFactory.getDefault().put(PreferenceConstants.P_PASSWORD, text, true);
     } else {

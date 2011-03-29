@@ -22,12 +22,12 @@ public class JenkinsInstance implements Comparable<JenkinsInstance> {
   public JenkinsInstance() {
   }
   
-  public JenkinsInstance(String label, String url) {
+  public JenkinsInstance(final String label, final String url) {
     this(label, url, null, null, false, false);
   }
 
-  public JenkinsInstance(String label, String url, String username, String password, boolean authenticate,
-      boolean atCloud) {
+  public JenkinsInstance(final String label, final String url, final String username, final String password, final boolean authenticate,
+      final boolean atCloud) {
     this.label = label;
     this.url = url;
     this.username = username;
@@ -41,29 +41,34 @@ public class JenkinsInstance implements Comparable<JenkinsInstance> {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    result = prime * result + ((this.id == null) ? 0 : this.id.hashCode());
     return result;
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
+  public boolean equals(final Object obj) {
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null) {
       return false;
-    if (getClass() != obj.getClass())
+    }
+    if (getClass() != obj.getClass()) {
       return false;
+    }
     JenkinsInstance other = (JenkinsInstance) obj;
-    if (id == null) {
-      if (other.id != null)
+    if (this.id == null) {
+      if (other.id != null) {
         return false;
-    } else if (!id.equals(other.id))
+      }
+    } else if (!this.id.equals(other.id)) {
       return false;
+    }
     return true;
   }
 
   /** i.e. order by id for collections */
-  public int compareTo(JenkinsInstance other) {
+  public int compareTo(final JenkinsInstance other) {
     if (other == null) {
       return +1;
     }
@@ -82,7 +87,7 @@ public class JenkinsInstance implements Comparable<JenkinsInstance> {
    * @param instances
    * @return
    */
-  public final static String encode(List<JenkinsInstance> instances) {
+  public final static String encode(final List<JenkinsInstance> instances) {
     Type type = new TypeToken<List<JenkinsInstance>>(){}.getType();
     return Utils.toB64(Utils.createGson().toJson(instances,type));
   }
@@ -98,8 +103,7 @@ public class JenkinsInstance implements Comparable<JenkinsInstance> {
    * @param encodedInstances
    * @return
    */
-  @SuppressWarnings("unchecked")
-  public final static List<JenkinsInstance> decode(String encodedInstances) {
+  public final static List<JenkinsInstance> decode(final String encodedInstances) {
     Type type = new TypeToken<List<JenkinsInstance>>(){}.getType();
     List<JenkinsInstance> ret = Utils.createGson().fromJson(Utils.fromB64(encodedInstances), type);
     if (ret == null) {
@@ -112,10 +116,10 @@ public class JenkinsInstance implements Comparable<JenkinsInstance> {
   public String toString() {
     StringBuffer ret = new StringBuffer();
     ret.append("JenkinsInstance[");
-    ret.append("label=" + label + ";");
-    ret.append("url=" + url + ";");
-    ret.append("username=" + username + ";");
-    ret.append("password=" + ((password != null && password.length() > 0) ? "******" : ""));
+    ret.append("label=" + this.label + ";");
+    ret.append("url=" + this.url + ";");
+    ret.append("username=" + this.username + ";");
+    ret.append("password=" + ((this.password != null && this.password.length() > 0) ? "******" : ""));
     ret.append("]");
     return ret.toString();
   }

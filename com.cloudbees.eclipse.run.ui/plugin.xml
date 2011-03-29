@@ -80,27 +80,27 @@
  <extension
        point="org.eclipse.debug.ui.launchConfigurationTypeImages">
     <launchConfigurationTypeImage
-          configTypeID="com.cloudbees.eclipse.run.core.launchConfigurationType"
+          configTypeID="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType"
           icon="icons/16x16/cb_plain.png"
-          id="com.cloudbees.eclipse.run.ui.launchConfigurationTypeImage">
+          id="com.cloudbees.eclipse.run.ui.launchconfiguration.launchConfigurationTypeImage">
     </launchConfigurationTypeImage>
  </extension>
  <extension
        point="org.eclipse.debug.ui.launchConfigurationTabGroups">
     <launchConfigurationTabGroup
-          class="com.cloudbees.eclipse.run.ui.CBLaunchConfigurationTabGroup"
-          id="com.cloudbees.eclipse.run.ui.launchConfigurationTabGroup"
-          type="com.cloudbees.eclipse.run.core.launchConfigurationType">
+          class="com.cloudbees.eclipse.run.ui.launchconfiguration.CBLaunchConfigurationTabGroup"
+          id="com.cloudbees.eclipse.run.ui.launchconfiguration.launchConfigurationTabGroup"
+          type="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType">
     </launchConfigurationTabGroup>
  </extension>
  <extension
        point="org.eclipse.debug.ui.launchShortcuts">
     <shortcut
-          class="com.cloudbees.eclipse.run.ui.CBLaunchShortcut"
+          class="com.cloudbees.eclipse.run.ui.launchconfiguration.CBLaunchShortcut"
           icon="icons/16x16/cb_plain.png"
-          id="com.cloudbees.eclipse.run.ui.shortcut"
+          id="com.cloudbees.eclipse.run.ui.launchconfiguration.shortcut"
           label="CloudBees Application"
-          modes="run, debug">
+          modes="run">
        <contextualLaunch>
           <contextLabel
                 label="label"

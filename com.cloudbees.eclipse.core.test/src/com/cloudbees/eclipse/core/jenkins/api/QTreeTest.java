@@ -1,11 +1,11 @@
-package com.cloudbees.eclipse.core;
+package com.cloudbees.eclipse.core.jenkins.api;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
+import com.cloudbees.eclipse.core.CloudBeesException;
 
 public class QTreeTest {
 

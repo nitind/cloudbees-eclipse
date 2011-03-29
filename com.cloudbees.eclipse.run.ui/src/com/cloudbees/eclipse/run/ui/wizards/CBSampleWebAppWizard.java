@@ -37,7 +37,7 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
     setNeedsProgressMonitor(true);
     setWindowTitle(WINDOW_TITLE);
     setDefaultPageImageDescriptor(CBRunUiActivator.imageDescriptorFromPlugin(CBRunUiActivator.PLUGIN_ID,
-        Images.CLOUDBEES_WIZ_ICON));
+        Images.CLOUDBEES_WIZ_ICON_PATH));
   }
 
   public void addPages() {
