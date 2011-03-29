@@ -4,7 +4,10 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 public class CBRunCoreActivator implements BundleActivator {
-
+  
+  //The plug-in ID
+  public static final String PLUGIN_ID = "com.cloudbees.eclipse.run.core"; //$NON-NLS-1$
+  
   private static BundleContext context;
 
   static BundleContext getContext() {

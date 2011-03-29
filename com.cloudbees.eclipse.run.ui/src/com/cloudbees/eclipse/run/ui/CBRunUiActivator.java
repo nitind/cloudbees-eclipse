@@ -2,6 +2,7 @@ package com.cloudbees.eclipse.run.ui;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -52,5 +53,11 @@ public class CBRunUiActivator extends AbstractUIPlugin {
 	public static void logError(Exception e) {
 	  IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage());
 	  plugin.getLog().log(status);
+	}
+	
+	@Override
+	protected void initializeImageRegistry(ImageRegistry reg) {
+	  super.initializeImageRegistry(reg);
+	  reg.put(Images.CLOUDBEES_ICON_16x16, imageDescriptorFromPlugin(PLUGIN_ID, Images.CLOUDBEES_ICON_16x16_PATH));
 	}
 }
