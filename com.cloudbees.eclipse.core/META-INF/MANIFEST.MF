@@ -12,8 +12,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.net,
  org.eclipse.equinox.security,
  org.eclipse.jface,
- org.tigris.subversion.subclipse.core;resolution:=optional,
- org.eclipse.team.svn.core;resolution:=optional,
  org.eclipse.team.core;resolution:=optional,
  org.eclipse.core.expressions
 Bundle-ClassPath: .,

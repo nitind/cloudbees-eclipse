@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.core.internal.forge;
+package com.cloudbees.eclipse.dev.scm.subclipse;
 
 import java.util.Properties;
 
