@@ -10,5 +10,44 @@
             name="CloudBees Application">
       </launchConfigurationType>
    </extension>
-
+ <extension
+          point="org.eclipse.wst.server.core.runtimeTypes">
+       <runtimeType
+             class="com.cloudbees.eclipse.core.RunCloudRuntimeDeleage"
+             description="run at cloud server"
+             id="com.cloudbees.eclipse.core.runcloud"
+             name="Run@Cloud"
+             vendor="Cloudbees"
+             vendorId="com.cloudbees"
+             version="1">
+          <moduleType
+                types="com.cloudbees.eclipse.core.runcloud"
+                versions="*">
+          </moduleType>
+       </runtimeType>
+    </extension>
+    <extension
+          point="org.eclipse.wst.server.core.serverTypes">
+       <serverType
+             behaviourClass="com.cloudbees.eclipse.core.RunCloudBehaviourDelegate"
+             class="com.cloudbees.eclipse.core.RunCloudServerDelegate"
+             description="Run@Cloud Server test implementation"
+             hasConfiguration="true"
+             id="com.cloudbees.eclipse.core.runcloud.server"
+             initialState="started"
+             launchConfigId="com.cloudbees.eclipse.run.core.launchConfigurationType"
+             launchModes="publish"
+             name="Run@Cloud Server"
+             runtime="true"
+             runtimeTypeId="com.cloudbees.eclipse.core.runcloud"
+             supportsRemoteHosts="true">
+       </serverType>
+    </extension>
+    <extension
+          point="org.eclipse.wst.server.core.moduleTypes">
+       <moduleType
+             id="com.cloudbees.eclipse.core.runcloud"
+             name="Run@Cloud">
+       </moduleType>
+    </extension>
 </plugin>
