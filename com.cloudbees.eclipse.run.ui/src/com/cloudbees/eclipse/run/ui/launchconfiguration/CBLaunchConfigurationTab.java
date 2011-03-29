@@ -1,6 +1,4 @@
-package com.cloudbees.eclipse.run.ui;
-
-import static com.cloudbees.eclipse.run.core.CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME;
+package com.cloudbees.eclipse.run.ui.launchconfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +26,9 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import com.cloudbees.eclipse.core.CloudBeesNature;
-import com.cloudbees.eclipse.run.core.CBLaunchConfigurationConstants;
+import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
+import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
+import com.cloudbees.eclipse.run.ui.Images;
 
 public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
@@ -86,14 +86,14 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
   public void initializeFrom(ILaunchConfiguration configuration) {
     try {
-      projectName.setText(configuration.getAttribute(ATTR_CB_PROJECT_NAME, new String()));
+      projectName.setText(configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, new String()));
     } catch (CoreException e) {
       CBRunUiActivator.logError(e);
     }
   }
 
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    configuration.setAttribute(ATTR_CB_PROJECT_NAME, projectName.getText());
+    configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, projectName.getText());
   }
 
   public String getName() {

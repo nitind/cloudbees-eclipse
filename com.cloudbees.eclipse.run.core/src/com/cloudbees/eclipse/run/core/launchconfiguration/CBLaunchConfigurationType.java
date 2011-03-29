@@ -1,6 +1,6 @@
-package com.cloudbees.eclipse.run.core;
+package com.cloudbees.eclipse.run.core.launchconfiguration;
 
-import static com.cloudbees.eclipse.run.core.CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME;
+import static com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME;
 
 import java.text.MessageFormat;
 
@@ -15,8 +15,11 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
 
-public class CBLaunchConfigurationType implements ILaunchConfigurationDelegate {
+import com.cloudbees.eclipse.run.core.BeesSDK;
+import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
 
+public class CBLaunchConfigurationType implements ILaunchConfigurationDelegate {
+  
   private static final String ERROR_MSG_PATTERN = "Failed to run ''{0}''.";
 
   public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)

@@ -4,9 +4,9 @@
    <extension
          point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
-            delegate="com.cloudbees.eclipse.run.core.CBLaunchConfigurationType"
-            id="com.cloudbees.eclipse.run.core.launchConfigurationType"
-            modes="run, debug"
+            delegate="com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationType"
+            id="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType"
+            modes="run"
             name="CloudBees Application">
       </launchConfigurationType>
    </extension>

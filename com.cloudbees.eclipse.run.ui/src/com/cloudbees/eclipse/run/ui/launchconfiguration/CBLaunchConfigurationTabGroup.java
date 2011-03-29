@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.run.ui;
+package com.cloudbees.eclipse.run.ui.launchconfiguration;
 
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
