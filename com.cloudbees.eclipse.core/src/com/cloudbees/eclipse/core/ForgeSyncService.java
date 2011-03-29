@@ -10,8 +10,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.osgi.framework.Bundle;
 
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
-import com.cloudbees.eclipse.core.internal.forge.ForgeSubclipseSync;
-import com.cloudbees.eclipse.core.internal.forge.ForgeSubversiveSync;
 
 /**
  * Main service for syncing Forge repositories and Eclipse repository entries. Currently supported providers are EGit,
@@ -24,19 +22,13 @@ public class ForgeSyncService {
   private List<ForgeSync> providers = new ArrayList<ForgeSync>();
 
   public ForgeSyncService() {
-    if (bundleActive("org.tigris.subversion.subclipse.core")) {
-      providers.add(new ForgeSubclipseSync());
-    }
-    if (bundleActive("org.eclipse.team.svn.core")) {
-      providers.add(new ForgeSubversiveSync());
-    }
   }
 
-  public void addProvider(ForgeSync provider) {
-    providers.add(provider);
+  public void addProvider(final ForgeSync provider) {
+    this.providers.add(provider);
   }
 
-  public static boolean bundleActive(String bundleName) {
+  public static boolean bundleActive(final String bundleName) {
     Bundle bundle = Platform.getBundle(bundleName);
     if (bundle != null && (bundle.getState() == Bundle.ACTIVE || bundle.getState() == Bundle.STARTING)) {
       return true;
@@ -44,13 +36,13 @@ public class ForgeSyncService {
     return false;
   }
 
-  public String[] sync(ForgeSync.TYPE type, Properties props, IProgressMonitor monitor) throws CloudBeesException {
-    int ticksPerProcess = 100 / providers.size();
+  public String[] sync(final ForgeSync.TYPE type, final Properties props, final IProgressMonitor monitor) throws CloudBeesException {
+    int ticksPerProcess = 100 / Math.max(this.providers.size(), 1);
     if (ticksPerProcess <= 0) {
       ticksPerProcess = 1;
     }
     List<String> status = new ArrayList<String>();
-    for (ForgeSync provider : providers) {
+    for (ForgeSync provider : this.providers) {
       try {
         ForgeSync.ACTION act = provider.sync(type, props, new SubProgressMonitor(monitor, ticksPerProcess));
         if (!ForgeSync.ACTION.SKIPPED.equals(act)) {
