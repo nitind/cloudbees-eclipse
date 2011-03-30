@@ -129,5 +129,13 @@
        </contextualLaunch>
     </shortcut>
  </extension>
+ <extension
+       point="org.eclipse.wst.server.ui.wizardFragments">
+    <fragment
+          class="com.cloudbees.eclipse.run.ui.wizards.RunCloudServer"
+          id="com.cloudbees.eclipse.run.ui.runcloud"
+          typeIds="com.cloudbees.eclipse.core.runcloud.server">
+    </fragment>
+ </extension>
 
 </plugin>
