@@ -27,6 +27,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import com.cloudbees.eclipse.core.CloudBeesNature;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
+import com.cloudbees.eclipse.run.core.util.CBResourceUtil;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
 
@@ -112,12 +113,7 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     selectionDialog.setTitle(SELECTION_DIALOG_TITLE);
     selectionDialog.setMessage(SELECTION_DIALOG_MESSAGE);
 
-    List<IProject> projects = new ArrayList<IProject>();
-    for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-      if (CloudBeesNature.isEnabledFor(project)) {
-        projects.add(project);
-      }
-    }
+    List<IProject> projects = CBResourceUtil.getWorkbenchCloudBeesProjects();
 
     IProject[] projectsArray = new IProject[projects.size()];
     projects.toArray(projectsArray);

@@ -100,11 +100,11 @@
           icon="icons/16x16/cb_plain.png"
           id="com.cloudbees.eclipse.run.ui.launchconfiguration.shortcut"
           label="CloudBees Application"
-          modes="run">
+          modes="run, debug">
        <contextualLaunch>
           <contextLabel
-                label="label"
-                mode="run, debug">
+                label="CloudBees Application"
+                mode="run">
           </contextLabel>
           <enablement>
              <with
@@ -112,15 +112,17 @@
                 <count
                       value="1">
                 </count>
-                <iterate
-                      ifEmpty="false"
-                      operator="and">
-                   <instanceof
-                         value="org.eclipse.core.resources.IProject">
-                   </instanceof>
-                   <test
-                         property="com.cloudbees.eclipse.core.isCloudBeesNature">
-                   </test>
+                <iterate>
+                   <and>
+                      <adapt
+                            type="org.eclipse.core.resources.IProject">
+                         <test
+                               forcePluginActivation="false"
+                               property="org.eclipse.core.resources.projectNature"
+                               value="com.cloudbees.eclipse.core.cloudbeesNature">
+                         </test>
+                      </adapt>
+                   </and>
                 </iterate>
              </with>
           </enablement>

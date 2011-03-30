@@ -17,4 +17,5 @@ Require-Bundle: org.eclipse.core.runtime,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: com.cloudbees.eclipse.run.core,
- com.cloudbees.eclipse.run.core.launchconfiguration
+ com.cloudbees.eclipse.run.core.launchconfiguration,
+ com.cloudbees.eclipse.run.core.util
