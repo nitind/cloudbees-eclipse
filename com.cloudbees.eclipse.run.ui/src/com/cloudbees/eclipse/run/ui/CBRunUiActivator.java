@@ -1,5 +1,8 @@
 package com.cloudbees.eclipse.run.ui;
 
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -16,11 +19,13 @@ public class CBRunUiActivator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static CBRunUiActivator plugin;
+	private ProjectDeleteListener projectDeleteListener;
 	
 	/**
 	 * The constructor
 	 */
 	public CBRunUiActivator() {
+	  projectDeleteListener = new ProjectDeleteListener();
 	}
 
 	/*
@@ -30,6 +35,8 @@ public class CBRunUiActivator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+    // ResourcesPlugin.getWorkspace().addResourceChangeListener(projectDeleteListener);
+    ResourcesPlugin.getWorkspace().addResourceChangeListener(projectDeleteListener, IResourceChangeEvent.PRE_DELETE);
 	}
 
 	/*
@@ -37,6 +44,7 @@ public class CBRunUiActivator extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
+	  ResourcesPlugin.getWorkspace().removeResourceChangeListener(projectDeleteListener);
 		plugin = null;
 		super.stop(context);
 	}
@@ -60,4 +68,5 @@ public class CBRunUiActivator extends AbstractUIPlugin {
 	  super.initializeImageRegistry(reg);
 	  reg.put(Images.CLOUDBEES_ICON_16x16, imageDescriptorFromPlugin(PLUGIN_ID, Images.CLOUDBEES_ICON_16x16_PATH));
 	}
+	
 }

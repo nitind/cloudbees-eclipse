@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
-import com.cloudbees.eclipse.run.core.util.CBResourceUtil;
+import com.cloudbees.eclipse.run.core.util.CBRunUtil;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
 
@@ -114,7 +114,7 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     selectionDialog.setTitle(SELECTION_DIALOG_TITLE);
     selectionDialog.setMessage(SELECTION_DIALOG_MESSAGE);
 
-    List<IProject> projects = CBResourceUtil.getWorkbenchCloudBeesProjects();
+    List<IProject> projects = CBRunUtil.getWorkbenchCloudBeesProjects();
 
     IProject[] projectsArray = new IProject[projects.size()];
     projects.toArray(projectsArray);
@@ -140,7 +140,7 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     }
     
     boolean foundProjectWithSameName = false;
-    for(IProject project : CBResourceUtil.getWorkbenchCloudBeesProjects()) {
+    for(IProject project : CBRunUtil.getWorkbenchCloudBeesProjects()) {
       if(project.getName().equals(name)) {
         foundProjectWithSameName = true;
         break;
