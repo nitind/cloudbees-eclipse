@@ -9,6 +9,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.ILaunchShortcut;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
@@ -22,10 +23,18 @@ public class CBLaunchShortcut implements ILaunchShortcut {
     if (selection instanceof IStructuredSelection) {
       
       IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-      IProject project = (IProject) structuredSelection.getFirstElement();
+      
+      String name = null;
+      Object element = structuredSelection.getFirstElement();
+      
+      if(element instanceof IProject) {
+        name = ((IProject) element).getName();
+      } else if (element instanceof IJavaProject) {
+        name = ((IJavaProject) element).getProject().getName();
+      }
       
       try {
-        ILaunchConfiguration launchConfiguration = getOrCreateLaunchConfiguration(project);
+        ILaunchConfiguration launchConfiguration = getOrCreateLaunchConfiguration(name);
         DebugUITools.launch(launchConfiguration, mode);
       } catch (CoreException e) {
         CBRunUiActivator.logError(e);
@@ -38,33 +47,33 @@ public class CBLaunchShortcut implements ILaunchShortcut {
     // not currently supported
   }
 
-  private ILaunchConfiguration getOrCreateLaunchConfiguration(IProject project) throws CoreException {
+  private ILaunchConfiguration getOrCreateLaunchConfiguration(String name) throws CoreException {
     ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
     ILaunchConfiguration launchConfiguration = null;
 
     for (ILaunchConfiguration configuration : launchManager.getLaunchConfigurations()) {
       String projectName = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, new String());
-      if(projectName.equals(project.getName())) {
+      if(projectName.equals(name)) {
         launchConfiguration = configuration;
         break;
       }
     }
     
     if(launchConfiguration == null) {
-      launchConfiguration = createConfiguration(project, launchManager);
+      launchConfiguration = createConfiguration(name, launchManager);
     }
     
     return launchConfiguration;
   }
 
-  private ILaunchConfiguration createConfiguration(IProject project, ILaunchManager launchManager) throws CoreException {
+  private ILaunchConfiguration createConfiguration(String projectName, ILaunchManager launchManager) throws CoreException {
 
     ILaunchConfigurationType configType = launchManager
         .getLaunchConfigurationType(CBLaunchConfigurationConstants.ID_CB_LAUNCH);
-    String name = launchManager.generateLaunchConfigurationName(project.getName());
+    String name = launchManager.generateLaunchConfigurationName(projectName);
 
     ILaunchConfigurationWorkingCopy copy = configType.newInstance(null, name);
-    copy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, project.getName());
+    copy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, projectName);
     ILaunchConfiguration config = copy.doSave();
 
     return config;

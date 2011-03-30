@@ -1,11 +1,12 @@
 package com.cloudbees.eclipse.run.ui.launchconfiguration;
 
-import java.util.ArrayList;
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
@@ -25,7 +26,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-import com.cloudbees.eclipse.core.CloudBeesNature;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.core.util.CBResourceUtil;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
@@ -61,6 +61,7 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     projectName.addModifyListener(new ModifyListener() {
 
       public void modifyText(ModifyEvent e) {
+        updateErrorMessage();
         updateLaunchConfigurationDialog();
       }
 
@@ -128,6 +129,45 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
         projectName.setText(project.getName());
       }
     }
+    
+    updateErrorMessage();
+  }
+  
+  private IStatus validate() {
+    String name = projectName.getText();
+    if(name == null || name.length() == 0) {
+      return new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, "Project name is empty.");
+    }
+    
+    boolean foundProjectWithSameName = false;
+    for(IProject project : CBResourceUtil.getWorkbenchCloudBeesProjects()) {
+      if(project.getName().equals(name)) {
+        foundProjectWithSameName = true;
+        break;
+      }
+    }
+    
+    if(!foundProjectWithSameName) {
+      String error = MessageFormat.format("Can''t find CloudBees application with name ''{0}'' from workspace.", name);
+      return new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, error);
+    }
+    
+    return new Status(IStatus.OK, CBRunUiActivator.PLUGIN_ID, null);
+  }
+  
+  private void updateErrorMessage() {
+    IStatus status = validate();
+    if(status.getSeverity() == IStatus.OK) {
+      setErrorMessage(null);
+      setMessage("Run CloudBees application");
+    } else {
+      setErrorMessage(status.getMessage());
+    }
+  }
+  
+  @Override
+  public boolean isValid(ILaunchConfiguration launchConfig) {
+    return validate().getSeverity() == IStatus.OK;
   }
   
 }
