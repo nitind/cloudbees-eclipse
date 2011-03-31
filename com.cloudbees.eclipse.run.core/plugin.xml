@@ -33,7 +33,7 @@
              class="com.cloudbees.eclipse.core.RunCloudServerDelegate"
              description="Run@Cloud Server test implementation"
              hasConfiguration="true"
-             id="com.cloudbees.eclipse.core.runcloud.server"
+             id="com.cloudbees.eclipse.core.runcloud"
              initialState="started"
              launchConfigId="com.cloudbees.eclipse.run.core.launchConfigurationType"
              launchModes="publish"
