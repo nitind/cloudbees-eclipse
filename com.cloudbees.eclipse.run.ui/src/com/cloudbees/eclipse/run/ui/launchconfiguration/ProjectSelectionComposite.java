@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-import com.cloudbees.eclipse.run.core.util.CBResourceUtil;
+import com.cloudbees.eclipse.run.core.util.CBRunUtil;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
 public abstract class ProjectSelectionComposite extends Composite {
@@ -84,7 +84,7 @@ public abstract class ProjectSelectionComposite extends Composite {
     selectionDialog.setTitle(SELECTION_DIALOG_TITLE);
     selectionDialog.setMessage(SELECTION_DIALOG_MESSAGE);
 
-    List<IProject> projects = CBResourceUtil.getWorkbenchCloudBeesProjects();
+    List<IProject> projects = CBRunUtil.getWorkbenchCloudBeesProjects();
 
     IProject[] projectsArray = new IProject[projects.size()];
     projects.toArray(projectsArray);
@@ -110,7 +110,7 @@ public abstract class ProjectSelectionComposite extends Composite {
     }
 
     boolean foundProjectWithSameName = false;
-    for (IProject project : CBResourceUtil.getWorkbenchCloudBeesProjects()) {
+    for (IProject project : CBRunUtil.getWorkbenchCloudBeesProjects()) {
       if (project.getName().equals(name)) {
         foundProjectWithSameName = true;
         break;
