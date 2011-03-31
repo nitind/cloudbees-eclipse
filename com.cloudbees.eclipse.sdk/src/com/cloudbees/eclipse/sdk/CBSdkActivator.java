@@ -1,11 +1,17 @@
 package com.cloudbees.eclipse.sdk;
 
+import java.io.IOException;
+
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
 public class CBSdkActivator extends Plugin {
   // The plug-in ID
   public static final String PLUGIN_ID = "com.cloudbees.eclipse.sdk"; //$NON-NLS-1$
+
+  private String sdkLocation = null;
 
   // The shared instance
   private static CBSdkActivator plugin;
@@ -43,5 +49,18 @@ public class CBSdkActivator extends Plugin {
    */
   public static CBSdkActivator getDefault() {
     return plugin;
+  }
+
+  public String getBeesHome() {
+    if (this.sdkLocation == null) {
+      Path path = new Path("cloudbees-sdk");
+
+      try {
+        this.sdkLocation = FileLocator.toFileURL(FileLocator.find(plugin.getBundle(), path, null)).getFile();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+    return this.sdkLocation;
   }
 }

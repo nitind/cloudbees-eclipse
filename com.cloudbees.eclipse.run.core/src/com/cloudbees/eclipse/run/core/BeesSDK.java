@@ -10,6 +10,7 @@ import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.core.GrandCentralService.AuthInfo;
+import com.cloudbees.eclipse.sdk.CBSdkActivator;
 
 public class BeesSDK {
 
@@ -33,10 +34,12 @@ public class BeesSDK {
     String secretKey = "-Dbees.apiSecret=" + cachedAuthInfo.getAuth().secret_key;//$NON-NLS-1$
     String authKey = " -Dbees.apiKey=" + cachedAuthInfo.getAuth().api_key;//$NON-NLS-1$
     String appId = " -Dbees.appid=" + grandCentralService.getCachedPrimaryUser(false) + "/" + project.getName();//$NON-NLS-1$
-    runner.setArguments(secretKey + authKey + appId);
+    String beesHome = " -Dbees.home=" + CBSdkActivator.getDefault().getBeesHome();
+    runner.setArguments(secretKey + authKey + appId + beesHome);
 
     runner.addBuildLogger(TimestampedLogger.class.getName());
     runner.run();
+
   }
 
   /**
