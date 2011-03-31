@@ -100,7 +100,7 @@
           icon="icons/16x16/cb_plain.png"
           id="com.cloudbees.eclipse.run.ui.launchconfiguration.shortcut"
           label="CloudBees Application"
-          modes="run, debug">
+          modes="run">
        <contextualLaunch>
           <contextLabel
                 label="CloudBees Application"
@@ -128,6 +128,14 @@
           </enablement>
        </contextualLaunch>
     </shortcut>
+ </extension>
+ <extension
+       point="org.eclipse.wst.server.ui.wizardFragments">
+    <fragment
+          class="com.cloudbees.eclipse.run.ui.wizards.RunCloudServer"
+          id="com.cloudbees.eclipse.run.ui.runcloud"
+          typeIds="com.cloudbees.eclipse.core.runcloud.server">
+    </fragment>
  </extension>
 
 </plugin>
