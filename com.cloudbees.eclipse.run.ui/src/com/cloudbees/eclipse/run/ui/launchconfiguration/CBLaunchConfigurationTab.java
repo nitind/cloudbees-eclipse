@@ -9,7 +9,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
@@ -24,7 +23,7 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     }
 
     @Override
-    public void updateErrorMessage() {
+    public void handleUpdate() {
       IStatus status = validate();
       if (status.getSeverity() == IStatus.OK) {
         setErrorMessage(null);
@@ -41,13 +40,12 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
   public void createControl(Composite parent) {
     this.content = new ProjectSelectionCompositeForLauncher(parent, SWT.None);
-    this.content.setLayout(new FillLayout());
 
     setControl(this.content);
     this.content.addModifyListener(new ModifyListener() {
 
       public void modifyText(ModifyEvent e) {
-        CBLaunchConfigurationTab.this.content.updateErrorMessage();
+        CBLaunchConfigurationTab.this.content.handleUpdate();
         updateLaunchConfigurationDialog();
       }
 

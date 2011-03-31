@@ -10,9 +10,11 @@ import org.eclipse.debug.internal.ui.SWTFactory;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -42,6 +44,7 @@ public abstract class ProjectSelectionComposite extends Composite {
    */
   public ProjectSelectionComposite(Composite parent, int style) {
     super(parent, style);
+    setLayout(new FillLayout());
     Composite composite = new Composite(this, style);
     composite.setLayout(new GridLayout());
 
@@ -52,6 +55,13 @@ public abstract class ProjectSelectionComposite extends Composite {
     group.setLayoutData(data);
 
     this.projectName = new Text(group, SWT.SINGLE | SWT.BORDER);
+    this.projectName.addModifyListener(new ModifyListener() {
+
+      public void modifyText(ModifyEvent e) {
+        handleUpdate();
+      }
+    });
+
     data = new GridData(SWT.FILL, SWT.CENTER, true, false);
     this.projectName.setLayoutData(data);
     this.projectName.setFont(parent.getFont());
@@ -61,12 +71,12 @@ public abstract class ProjectSelectionComposite extends Composite {
 
       @Override
       public void widgetSelected(SelectionEvent e) {
-        handleProjectButtonPressed();
+        handleProjectNameChange();
       }
 
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        handleProjectButtonPressed();
+        handleProjectNameChange();
       }
 
     });
@@ -77,7 +87,7 @@ public abstract class ProjectSelectionComposite extends Composite {
     // Disable the check that prevents subclassing of SWT components
   }
 
-  private void handleProjectButtonPressed() {
+  private void handleProjectNameChange() {
     JavaElementLabelProvider labelProvider = new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 
     ElementListSelectionDialog selectionDialog = new ElementListSelectionDialog(getShell(), labelProvider);
@@ -100,10 +110,10 @@ public abstract class ProjectSelectionComposite extends Composite {
       }
     }
 
-    updateErrorMessage();
+    handleUpdate();
   }
 
-  IStatus validate() {
+  public IStatus validate() {
     String name = this.projectName.getText();
     if (name == null || name.length() == 0) {
       return new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, "Project name is empty.");
@@ -125,7 +135,7 @@ public abstract class ProjectSelectionComposite extends Composite {
     return new Status(IStatus.OK, CBRunUiActivator.PLUGIN_ID, null);
   }
 
-  public abstract void updateErrorMessage();
+  public abstract void handleUpdate();
 
   public void addModifyListener(ModifyListener modifyListener) {
     this.projectName.addModifyListener(modifyListener);
