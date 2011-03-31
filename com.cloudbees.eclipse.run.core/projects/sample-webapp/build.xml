@@ -72,8 +72,10 @@
 
     <target name="bees-classpath">
         <property environment="env" />
-        <fail message="BEES_HOME environment is not set" unless="env.BEES_HOME" />
-        <property name="bees.home" value="${env.BEES_HOME}"/>
+        <condition property="bees.home" value="${env.BEES_HOME}">
+			<isset property="bees.home" />
+		</condition>
+		<fail message="BEES_HOME environment is not set" unless="bees.home" />
         <echo message="bees home: ${bees.home}" />
 
         <path id="staxtasks.class.path">

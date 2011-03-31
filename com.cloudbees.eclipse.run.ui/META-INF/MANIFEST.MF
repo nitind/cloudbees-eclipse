@@ -14,6 +14,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.debug.ui,
  org.eclipse.jdt.ui,
  org.eclipse.wst.server.ui,
-org.eclipse.jdt.core;bundle-version="3.6.2"
+ org.eclipse.jdt.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
