@@ -4,6 +4,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.internal.ServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
@@ -11,12 +12,12 @@ import org.eclipse.wst.server.ui.wizard.WizardFragment;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.ui.launchconfiguration.ProjectSelectionComposite;
 
-public class RunCloudServer extends WizardFragment {
+public class RunCloudLocal extends WizardFragment {
 
   private ProjectSelectionComposite composite;
   private IWizardHandle wizard;
 
-  public RunCloudServer() {
+  public RunCloudLocal() {
     setComplete(false);
   }
 
@@ -34,18 +35,19 @@ public class RunCloudServer extends WizardFragment {
         updateServerName();
 
         if (!complete) {
-          RunCloudServer.this.wizard.setMessage("Select a Cloudbees project!", IStatus.ERROR);
+          RunCloudLocal.this.wizard.setMessage("Select a Cloudbees project!", IStatus.ERROR);
         } else {
-          RunCloudServer.this.wizard.setMessage(null, IStatus.OK);
+          RunCloudLocal.this.wizard.setMessage(null, IStatus.OK);
         }
         setComplete(complete);
-        RunCloudServer.this.wizard.update();
+        RunCloudLocal.this.wizard.update();
       }
 
       @SuppressWarnings("restriction")
       private void updateServerName() {
         ServerWorkingCopy server = (ServerWorkingCopy) getTaskModel().getObject("server");
-        server.setName(getText() + " running at RUN@Cloud");
+        IRuntime runtime = (IRuntime) getTaskModel().getObject("runtime");
+        server.setName(getText() + " running at localhost");
         server.setAttribute(CBLaunchConfigurationConstants.PROJECT, getText());
       }
     };
