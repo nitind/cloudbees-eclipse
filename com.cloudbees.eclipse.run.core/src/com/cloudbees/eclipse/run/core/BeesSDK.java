@@ -39,9 +39,27 @@ public class BeesSDK {
 
     runner.addBuildLogger(TimestampedLogger.class.getName());
     runner.run();
-
   }
 
+  public AntRunner getRunLocallyTask(IProject project) throws Exception {
+    AntRunner runner = new AntRunner();
+
+    runner.setBuildFileLocation(getBuildXmlPath(project));
+    runner.setExecutionTargets( new String[] { "run" });
+
+    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    AuthInfo cachedAuthInfo = grandCentralService.getCachedAuthInfo(false);
+
+    String secretKey = "-Dbees.apiSecret=" + cachedAuthInfo.getAuth().secret_key;//$NON-NLS-1$
+    String authKey = " -Dbees.apiKey=" + cachedAuthInfo.getAuth().api_key;//$NON-NLS-1$
+    String appId = " -Dbees.appid=" + grandCentralService.getCachedPrimaryUser(false) + "/" + project.getName();//$NON-NLS-1$
+    String beesHome = " -Dbees.home=" + CBSdkActivator.getDefault().getBeesHome();
+    runner.setArguments(secretKey + authKey + appId + beesHome);
+
+    runner.addBuildLogger(TimestampedLogger.class.getName());
+    return runner;
+  }
+  
   /**
    * Construct full path for the build.xml
    * 

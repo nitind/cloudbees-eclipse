@@ -28,6 +28,7 @@ import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
 public abstract class ProjectSelectionComposite extends Composite {
 
+  private static final String PROJECT_MSG = "Choose project...";
   private static final String GROUP_TITLE = "Project:";
   private static final String BROWSE_PROJECT_LABEL = "Browse...";
   private static final String SELECTION_DIALOG_MESSAGE = "Select a CloudBees project to constrain your search.";
@@ -65,6 +66,7 @@ public abstract class ProjectSelectionComposite extends Composite {
     data = new GridData(SWT.FILL, SWT.CENTER, true, false);
     this.projectName.setLayoutData(data);
     this.projectName.setFont(parent.getFont());
+    this.projectName.setMessage(PROJECT_MSG);
 
     this.projectBtn = SWTFactory.createPushButton(group, BROWSE_PROJECT_LABEL, null);
     this.projectBtn.addSelectionListener(new SelectionAdapter() {

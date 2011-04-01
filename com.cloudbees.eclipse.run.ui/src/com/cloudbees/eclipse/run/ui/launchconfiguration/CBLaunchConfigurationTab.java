@@ -82,5 +82,6 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
   public boolean isValid(ILaunchConfiguration launchConfig) {
     return this.content.validate().getSeverity() == IStatus.OK;
   }
-
+  
+  
 }

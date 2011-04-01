@@ -69,7 +69,7 @@ public class CBRunUtil {
 
     if (launchConfiguration.isEmpty()) {
       ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
-
+      
       ILaunchConfigurationType configType = launchManager
           .getLaunchConfigurationType(CBLaunchConfigurationConstants.ID_CB_LAUNCH);
       String name = launchManager.generateLaunchConfigurationName(projectName);

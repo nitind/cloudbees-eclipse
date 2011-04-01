@@ -28,22 +28,24 @@ public class CBLaunchConfigurationType implements ILaunchConfigurationDelegate {
     BeesSDK sdk = new BeesSDK();
 
     if (mode.equals(ILaunchManager.RUN_MODE)) {
-      run(configuration, sdk);
+      run(configuration, sdk, monitor);
     } else if (mode.equals(ILaunchManager.DEBUG_MODE)) {
       debug();
     }
-
+    
   }
 
-  private void run(ILaunchConfiguration configuration, BeesSDK sdk) throws CoreException {
+  private void run(ILaunchConfiguration configuration, BeesSDK sdk, IProgressMonitor monitor) throws CoreException {
     String projectName = null;
     try {
       projectName = (String) configuration.getAttributes().get(ATTR_CB_PROJECT_NAME);
       IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-      sdk.deploy(project);
+      CBLaunchedProjects.getInstance().start(project);
     } catch (Exception e) {
       String errorMsg = MessageFormat.format(ERROR_MSG_PATTERN, projectName);
       throw new CoreException(new Status(IStatus.ERROR, CBRunCoreActivator.PLUGIN_ID, errorMsg, e));
+    } finally {
+      monitor.done();
     }
   }
   
