@@ -2,6 +2,8 @@ package com.cloudbees.eclipse.core;
 
 import static com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -11,6 +13,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
+import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchedProjects;
 
 public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
 
@@ -19,6 +22,9 @@ public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
 
   @Override
   public void stop(boolean force) {
+    String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+    CBLaunchedProjects.getInstance().stop(project);
     setServerState(IServer.STATE_STOPPED);
   }
 
@@ -37,8 +43,9 @@ public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
   public void setupLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IProgressMonitor monitor)
       throws CoreException {
 
-    String projName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
-    workingCopy.setAttribute(ATTR_CB_PROJECT_NAME, projName);
+    String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+    workingCopy.setAttribute(ATTR_CB_PROJECT_NAME, projectName);
+    setServerState(IServer.STATE_STARTED);
 
   }
 }
