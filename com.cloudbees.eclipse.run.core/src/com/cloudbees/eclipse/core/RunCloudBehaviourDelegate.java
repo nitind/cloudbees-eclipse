@@ -32,6 +32,9 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
 
   @Override
   public IStatus publish(int kind, IProgressMonitor monitor) {
+    if (kind == IServer.PUBLISH_CLEAN || kind == IServer.PUBLISH_AUTO) {
+      return null;
+    }
     String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
