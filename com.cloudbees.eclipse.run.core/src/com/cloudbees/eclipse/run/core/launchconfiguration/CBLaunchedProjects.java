@@ -40,6 +40,8 @@ public class CBLaunchedProjects {
       throw new IllegalStateException(msg);
     }
 
+    LaunchHooksManager.invokePreStartHooks(project.getName());
+    
     CBProjectRunner runner = strategy.createRunner(project);
     runners.add(runner);
     runner.start();
@@ -49,7 +51,9 @@ public class CBLaunchedProjects {
     if (project == null || !containsRunningProject(project)) {
       return false;
     }
-
+    
+    LaunchHooksManager.invokePreStopHooks();
+    
     CBProjectRunner runner = getProjectRunner(project);
     runner.stop();
     return runners.remove(runner);

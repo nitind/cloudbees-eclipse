@@ -38,9 +38,7 @@ public class ConsoleUtil {
     PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
       public void run() {
         IWorkbenchWindow activeWindow = CBRunUiActivator.getDefault().getWorkbench().getActiveWorkbenchWindow();
-        System.out.println("active window " + activeWindow);
         IWorkbenchPage activePage = activeWindow.getActivePage();
-        System.out.println(activePage);
         String id = IConsoleConstants.ID_CONSOLE_VIEW;
         try {
           IConsoleView view = (IConsoleView) activePage.showView(id);

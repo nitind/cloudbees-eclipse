@@ -2,9 +2,6 @@ package com.cloudbees.eclipse.run.ui.launchconfiguration;
 
 import java.io.PrintStream;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.console.MessageConsole;
 
@@ -15,11 +12,15 @@ public class LaunchHook implements com.cloudbees.eclipse.run.core.launchconfigur
   public LaunchHook() {
   }
 
-  public void handle(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) {
-    MessageConsole console = ConsoleUtil.getOrCreateConsole(configuration.getName());
+  public void preStartHook(String projectName) {
+    MessageConsole console = ConsoleUtil.getOrCreateConsole(projectName);
     IOConsoleOutputStream out = console.newOutputStream();
     System.setOut(new PrintStream(out));
     ConsoleUtil.revealConsole(console);
+  }
+
+  public void preStopHook() {
+    System.setOut(System.out);
   }
 
 }
