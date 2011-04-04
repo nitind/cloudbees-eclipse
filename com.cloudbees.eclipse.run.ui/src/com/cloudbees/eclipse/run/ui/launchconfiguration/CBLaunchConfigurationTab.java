@@ -54,6 +54,7 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
   }
 
   public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
+    //configuration.setAttribute(IDebugUIConstants.ATTR_LAUNCH_IN_BACKGROUND, false);
   }
 
   public void initializeFrom(ILaunchConfiguration configuration) {

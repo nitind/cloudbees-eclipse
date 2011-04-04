@@ -29,6 +29,7 @@ public class CBLaunchConfigurationType implements ILaunchConfigurationDelegate {
 
     if (mode.equals(ILaunchManager.RUN_MODE)) {
       run(configuration, sdk, monitor);
+      LaunchHooksManager.hook(configuration, mode, launch, monitor);
     } else if (mode.equals(ILaunchManager.DEBUG_MODE)) {
       debug();
     }
@@ -52,5 +53,5 @@ public class CBLaunchConfigurationType implements ILaunchConfigurationDelegate {
   private void debug() {
     // TODO
   }
-  
+
 }

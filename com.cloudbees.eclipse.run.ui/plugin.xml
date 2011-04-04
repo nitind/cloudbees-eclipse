@@ -17,6 +17,11 @@
         id="com.cloudbees.eclipse.run.ui.commands.referenceToMenu"
         name="Reference To CloudBess Menus">
   </command>
+  <command
+        defaultHandler="com.cloudbees.eclipse.run.ui.console.TerminateHandler"
+        id="com.cloudbees.eclipse.run.ui.console.terminate"
+        name="Terminate">
+  </command>
 	</extension>
  <extension
        point="org.eclipse.ui.menus">
@@ -39,7 +44,7 @@
           locationURI="menu:com.cloudbees.eclipse.run.ui.commands.referenceToMenu">
        <command
              commandId="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp"
-             icon="icons/16x16/cb_plain.png"
+             icon="icons/16x16/cb_new_proj_wiz_ico_15x15.png"
              label="New Sample Web Application"
              mnemonic="N"
              style="push"
@@ -73,7 +78,7 @@
 		</category>
 		<wizard category="com.cloudbees.eclipse.run.ui"
 			class="com.cloudbees.eclipse.run.ui.wizards.CBSampleWebAppWizard"
-			icon="icons/16x16/cb_plain.png" id="com.cloudbees.eclipse.run.ui.wizards.CBSampleWebAppWizard"
+			icon="icons/16x16/cb_new_proj_wiz_ico_15x15.png" id="com.cloudbees.eclipse.run.ui.wizards.CBSampleWebAppWizard"
 			name="Sample Web App" project="true">
 		</wizard>
 	</extension>
@@ -154,6 +159,13 @@
           id="com.cloudbees.eclipse.run.ui.server.image"
           typeIds="com.cloudbees.eclipse.core.runcloud.local">
     </image>
+ </extension>
+ <extension
+       point="com.cloudbees.eclipse.run.core.launchHook">
+    <hook
+          defaultHandler="com.cloudbees.eclipse.run.ui.launchconfiguration.LaunchHook"
+          id="com.cloudbees.eclipse.run.ui.launchconfiguration.hook">
+    </hook>
  </extension>
 
 </plugin>
