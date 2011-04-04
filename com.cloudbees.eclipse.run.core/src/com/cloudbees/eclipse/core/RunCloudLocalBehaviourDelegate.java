@@ -45,7 +45,6 @@ public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
 
     String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
     workingCopy.setAttribute(ATTR_CB_PROJECT_NAME, projectName);
-    setServerState(IServer.STATE_STARTED);
 
   }
 }

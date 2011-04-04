@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.ServerCore;
+import org.eclipse.wst.server.core.internal.Server;
 
 public class CBLaunchedProjects {
 
@@ -45,6 +48,8 @@ public class CBLaunchedProjects {
     CBProjectRunner runner = strategy.createRunner(project);
     runners.add(runner);
     runner.start();
+   
+    getServer().setServerState(IServer.STATE_STARTED);
   }
 
   public boolean stop(IProject project) {
@@ -53,6 +58,7 @@ public class CBLaunchedProjects {
     }
     
     LaunchHooksManager.invokePreStopHooks();
+    getServer().setServerState(IServer.STATE_STOPPED);
     
     CBProjectRunner runner = getProjectRunner(project);
     runner.stop();
@@ -70,5 +76,15 @@ public class CBLaunchedProjects {
     }
 
     return foundRunner;
+  }
+  
+  private Server getServer() {
+    IServer[] servers = ServerCore.getServers();
+    for (IServer iServer : servers) {
+      if ("com.cloudbees.eclipse.core.runcloud.local".equals(iServer.getServerType().getId())) {
+        return (Server) iServer;
+      }
+    }
+    return null;
   }
 }
