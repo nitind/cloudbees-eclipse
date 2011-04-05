@@ -59,10 +59,10 @@ public class CBProjectRunnerService {
       throw new IllegalStateException(msg);
     }
 
-    if (!isStartAllowed()) {
-      String msg = "Cannot launch another project. Please stop the currently running project at localhost to launch this project.";
-      throw new IllegalStateException(msg);
-    }
+//    if (!isStartAllowed()) {
+//      String msg = "Cannot launch another project. Please stop the currently running project at localhost to launch this project.";
+//      throw new IllegalStateException(msg);
+//    }
 
     LaunchHooksManager.invokePreStartHooks(project.getName());
 

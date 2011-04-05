@@ -5,7 +5,7 @@
    <extension
          point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
-            delegate="com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationType"
+            delegate="org.eclipse.ant.internal.launching.launchConfigurations.AntLaunchDelegate"
             id="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType"
             modes="run"
             name="CloudBees Application">

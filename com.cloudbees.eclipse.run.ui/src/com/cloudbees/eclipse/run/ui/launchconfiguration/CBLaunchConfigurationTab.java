@@ -12,6 +12,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
+import com.cloudbees.eclipse.run.core.util.CBRunUtil;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
 
@@ -54,7 +55,6 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
   }
 
   public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-    //configuration.setAttribute(IDebugUIConstants.ATTR_LAUNCH_IN_BACKGROUND, false);
   }
 
   public void initializeFrom(ILaunchConfiguration configuration) {
@@ -67,7 +67,13 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
   }
 
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, this.content.getText());
+    String projectName = this.content.getText();
+
+    try {
+      CBRunUtil.addDefaultAttributes(configuration, projectName);
+    } catch (CoreException e) {
+      CBRunUiActivator.logError(e);
+    }
   }
 
   public String getName() {
@@ -83,6 +89,5 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
   public boolean isValid(ILaunchConfiguration launchConfig) {
     return this.content.validate().getSeverity() == IStatus.OK;
   }
-  
-  
+
 }

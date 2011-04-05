@@ -24,13 +24,15 @@ public class CBLaunchConfigurationType implements ILaunchConfigurationDelegate {
 
   public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
       throws CoreException {
-
+    
+    System.out.println("LAUNCH CONF TYPE");
+    
     BeesSDK sdk = new BeesSDK();
 
     if (mode.equals(ILaunchManager.RUN_MODE)) {
-      run(configuration, sdk, monitor);
+      //run(configuration, sdk, monitor);
     } else if (mode.equals(ILaunchManager.DEBUG_MODE)) {
-      debug();
+      //debug();
     }
     
   }
