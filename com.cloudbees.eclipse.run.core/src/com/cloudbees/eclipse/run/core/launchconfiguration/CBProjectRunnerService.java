@@ -9,21 +9,21 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.internal.Server;
 
-public class CBLaunchedProjects {
+public class CBProjectRunnerService {
 
   private final List<CBProjectRunner> runners;
   private final CBProjectRunnerCreationStrategy defaultCreationStrategy;
 
-  private static CBLaunchedProjects instance;
+  private static CBProjectRunnerService instance;
 
-  public static CBLaunchedProjects getInstance() {
+  public static CBProjectRunnerService getInstance() {
     if (instance == null) {
-      instance = new CBLaunchedProjects();
+      instance = new CBProjectRunnerService();
     }
     return instance;
   }
 
-  private CBLaunchedProjects() {
+  private CBProjectRunnerService() {
     runners = new ArrayList<CBProjectRunner>();
     defaultCreationStrategy = new CBProjectAntRunnerCreationStrategy();
   }
@@ -31,6 +31,22 @@ public class CBLaunchedProjects {
   public boolean containsRunningProject(IProject project) {
     CBProjectRunner runner = getProjectRunner(project);
     return runner != null && runner.isRunning();
+  }
+
+  /**
+   * Currently launching projects via ant. Ant needs separate JRE instances to separate projects in parallel. At the
+   * moment this support is not implemented. This method will be erased when multiple JRE launching is supported. 
+   * 
+   * @return false if any project is already running, true if no projects is running
+   */
+  @Deprecated
+  private boolean isStartAllowed() {
+    for (CBProjectRunner runner : runners) {
+      if (runner.isRunning()) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public void start(IProject project) throws Exception {
@@ -43,23 +59,28 @@ public class CBLaunchedProjects {
       throw new IllegalStateException(msg);
     }
 
+    if (!isStartAllowed()) {
+      String msg = "Cannot launch another project. Please stop the currently running project at localhost to launch this project.";
+      throw new IllegalStateException(msg);
+    }
+
     LaunchHooksManager.invokePreStartHooks(project.getName());
-    
+
     CBProjectRunner runner = strategy.createRunner(project);
     runners.add(runner);
     runner.start();
-   
-    getServer().setServerState(IServer.STATE_STARTED);
+
+    getServer(project.getName()).setServerState(IServer.STATE_STARTED);
   }
 
   public boolean stop(IProject project) {
     if (project == null || !containsRunningProject(project)) {
       return false;
     }
-    
+
     LaunchHooksManager.invokePreStopHooks();
-    getServer().setServerState(IServer.STATE_STOPPED);
-    
+    getServer(project.getName()).setServerState(IServer.STATE_STOPPED);
+
     CBProjectRunner runner = getProjectRunner(project);
     runner.stop();
     return runners.remove(runner);
@@ -77,14 +98,29 @@ public class CBLaunchedProjects {
 
     return foundRunner;
   }
-  
-  private Server getServer() {
+
+  private Server getServer(String projectName) {
+    Server foundServer = null;
     IServer[] servers = ServerCore.getServers();
-    for (IServer iServer : servers) {
-      if ("com.cloudbees.eclipse.core.runcloud.local".equals(iServer.getServerType().getId())) {
-        return (Server) iServer;
+
+    for (IServer server : servers) {
+
+      if (!(server instanceof Server)) {
+        continue;
+      }
+
+      boolean isLocalServer = "com.cloudbees.eclipse.core.runcloud.local".equals(server.getServerType().getId());
+      if (!isLocalServer) {
+        continue;
+      }
+
+      String nameAttribute = server.getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+      if (projectName.equals(nameAttribute)) {
+        foundServer = (Server) server;
+        break;
       }
     }
-    return null;
+
+    return foundServer;
   }
 }

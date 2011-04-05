@@ -40,7 +40,7 @@ public class CBLaunchConfigurationType implements ILaunchConfigurationDelegate {
     try {
       projectName = (String) configuration.getAttributes().get(ATTR_CB_PROJECT_NAME);
       IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-      CBLaunchedProjects.getInstance().start(project);
+      CBProjectRunnerService.getInstance().start(project);
     } catch (Exception e) {
       String errorMsg = MessageFormat.format(ERROR_MSG_PATTERN, projectName);
       throw new CoreException(new Status(IStatus.ERROR, CBRunCoreActivator.PLUGIN_ID, errorMsg, e));

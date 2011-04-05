@@ -22,7 +22,7 @@ import org.eclipse.ui.wizards.datatransfer.ImportOperation;
 
 import com.cloudbees.eclipse.core.CloudBeesNature;
 import com.cloudbees.eclipse.core.NatureUtil;
-import com.cloudbees.eclipse.run.core.CBRunCoreScrips;
+import com.cloudbees.eclipse.run.core.CBRunCoreScripts;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
 
@@ -57,7 +57,7 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
     String worksapceLocation = workspaceRoot.getLocation().toPortableString();
 
     try {
-      CBRunCoreScrips.executeCopySampleWebAppScript(worksapceLocation, projectName);
+      CBRunCoreScripts.executeCopySampleWebAppScript(worksapceLocation, projectName);
     } catch (Exception e) {
       CBRunUiActivator.logError(e);
       MessageDialog.openError(getShell(), "Error", e.getMessage());

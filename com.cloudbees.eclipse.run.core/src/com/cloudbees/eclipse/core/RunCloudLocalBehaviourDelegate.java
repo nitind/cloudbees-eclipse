@@ -13,7 +13,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
-import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchedProjects;
+import com.cloudbees.eclipse.run.core.launchconfiguration.CBProjectRunnerService;
 
 public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
 
@@ -24,7 +24,7 @@ public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
   public void stop(boolean force) {
     String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-    CBLaunchedProjects.getInstance().stop(project);
+    CBProjectRunnerService.getInstance().stop(project);
     setServerState(IServer.STATE_STOPPED);
   }
 

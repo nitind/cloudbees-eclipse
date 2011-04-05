@@ -10,7 +10,7 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.osgi.framework.Bundle;
 
-public class CBRunCoreScrips {
+public class CBRunCoreScripts {
   
   /**
    * Copies the sample-webapp project to user workspace directory 
