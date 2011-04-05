@@ -15,7 +15,7 @@
         categoryId="com.cloudbees.eclipse.run.ui.commands.category"
         defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.ReferenceHandler"
         id="com.cloudbees.eclipse.run.ui.commands.referenceToMenu"
-        name="Reference To CloudBess Menus">
+        name="Reference To CloudBees Menus">
   </command>
 	</extension>
  <extension

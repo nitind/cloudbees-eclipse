@@ -36,11 +36,30 @@ public class CBProjectProcessService {
     invokeStartHooks(name);
   }
   
+  /**
+   * Terminate ant process related to the given project name
+   * 
+   * @param projectName
+   * @throws DebugException
+   */
   public void terminateProcess(String projectName) throws DebugException {
     IProcess process = processMap.get(projectName);
     if(process != null && process.canTerminate()) {
       invokeStopHooks(projectName);
       process.terminate();
+    }
+    processMap.remove(projectName);
+  }
+  
+  /**
+   * If the process was terminated by system, then remove this process from the map.
+   * 
+   * @param projectName
+   */
+  public void removeProcess(String projectName) {
+    if(processMap.containsKey(projectName)) {
+      processMap.remove(projectName);
+      invokeStopHooks(projectName);
     }
   }
   
@@ -83,4 +102,5 @@ public class CBProjectProcessService {
     
     return hooks;
   }
+
 }
