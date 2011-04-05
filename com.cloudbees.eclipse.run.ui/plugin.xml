@@ -17,11 +17,6 @@
         id="com.cloudbees.eclipse.run.ui.commands.referenceToMenu"
         name="Reference To CloudBess Menus">
   </command>
-  <command
-        defaultHandler="com.cloudbees.eclipse.run.ui.console.TerminateHandler"
-        id="com.cloudbees.eclipse.run.ui.console.terminate"
-        name="Terminate">
-  </command>
 	</extension>
  <extension
        point="org.eclipse.ui.menus">
