@@ -66,7 +66,7 @@ public class CBProjectProcessService {
     List<CBProjectProcessLifecycleHook> hooks = new ArrayList<CBProjectProcessLifecycleHook>();
     
     IExtension[] extensions = Platform.getExtensionRegistry()
-        .getExtensionPoint(CBRunCoreActivator.PLUGIN_ID, "launchHook").getExtensions();
+        .getExtensionPoint(CBRunCoreActivator.PLUGIN_ID, "processLifecycleHook").getExtensions();
 
     for (IExtension extension : extensions) {
       for (IConfigurationElement element : extension.getConfigurationElements()) {
