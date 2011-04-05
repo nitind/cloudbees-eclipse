@@ -3,10 +3,10 @@
 <schema targetNamespace="com.cloudbees.eclipse.run.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="com.cloudbees.eclipse.run.core" id="com.cloudbees.eclipse.run.core.launchHook" name="launchHook"/>
+         <meta.schema plugin="com.cloudbees.eclipse.run.core" id="com.cloudbees.eclipse.run.core.processLifecycleHook" name="processLifecycleHook"/>
       </appinfo>
       <documentation>
-         Provides hook point right after the CloudBees project is launched.
+         Provides hook points for CloudBees project process lifecycle (onStart and onStop).
       </documentation>
    </annotation>
 
@@ -62,7 +62,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":com.cloudbees.eclipse.run.core.launchconfiguration.LaunchHook"/>
+                  <meta.attribute kind="java" basedOn=":com.cloudbees.eclipse.run.core.launchconfiguration.CBProjectProcessLifecycleHook"/>
                </appinfo>
             </annotation>
          </attribute>

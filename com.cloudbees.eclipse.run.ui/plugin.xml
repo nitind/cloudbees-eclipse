@@ -160,12 +160,5 @@
           typeIds="com.cloudbees.eclipse.core.runcloud.local">
     </image>
  </extension>
- <extension
-       point="com.cloudbees.eclipse.run.core.launchHook">
-    <hook
-          defaultHandler="com.cloudbees.eclipse.run.ui.launchconfiguration.LaunchHook"
-          id="com.cloudbees.eclipse.run.ui.launchconfiguration.hook">
-    </hook>
- </extension>
 
 </plugin>

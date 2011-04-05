@@ -19,7 +19,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 import com.cloudbees.eclipse.core.CloudBeesNature;
 import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
@@ -126,8 +125,7 @@ public class CBRunUtil {
     String directory = variableManager.generateVariableExpression(workspaceVarName, "/" + projectName);
     copy.setAttribute("org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY", directory);
 
-    copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME,
-        "org.eclipse.ant.internal.ui.antsupport.InternalAntRunner");
+    copy.setAttribute("org.eclipse.jdt.launching.MAIN_TYPE", "org.eclipse.ant.internal.ui.antsupport.InternalAntRunner");
 
     copy.setAttribute("org.eclipse.ui.externaltools.ATTR_ANT_TARGETS", "run");
 

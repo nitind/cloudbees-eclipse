@@ -13,9 +13,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.debug.core,
  org.eclipse.wst.server.core,
  org.apache.commons.codec,
- org.eclipse.ant.launching;bundle-version="1.0.1",
- org.eclipse.core.variables;bundle-version="3.2.400",
- org.eclipse.jdt.launching;bundle-version="3.5.200"
+ org.eclipse.core.variables,
+ org.eclipse.ant.launching
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: com.cloudbees.eclipse.run.core,
