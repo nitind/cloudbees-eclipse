@@ -7,7 +7,7 @@ Bundle-Activator: com.cloudbees.eclipse.run.ui.CBRunUiActivator
 Bundle-Vendor: Cloud Bees, Inc
 Require-Bundle: com.cloudbees.eclipse.run.core,
  org.eclipse.ui.ide,
- com.cloudbees.eclipse.core,
+ com.cloudbees.eclipse.run.core.wst,
  org.eclipse.wst.server.core,
  org.eclipse.debug.ui,
  org.eclipse.jdt.ui,

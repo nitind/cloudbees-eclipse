@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.core;
+package com.cloudbees.eclipse.run.core.wst;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -10,6 +10,7 @@ import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
+import com.cloudbees.api.ApplicationStatusResponse;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
@@ -22,6 +23,13 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
 
   @Override
   public void stop(boolean force) {
+    IProject project = getProject();
+
+    try {
+      ApplicationStatusResponse stop = new BeesSDK().stop(project);
+    } catch (Exception e) {
+      CBRunCoreActivator.logError(e);
+    }
     setServerState(IServer.STATE_STOPPED);
   }
 
@@ -35,8 +43,7 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
     if (kind == IServer.PUBLISH_CLEAN || kind == IServer.PUBLISH_AUTO) {
       return null;
     }
-    String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
-    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+    IProject project = getProject();
 
     try {
       new BeesSDK().deploy(project);
@@ -44,7 +51,14 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
       setServerState(IServer.STATE_STARTED);
       return null;
     } catch (Exception e) {
+      CBRunCoreActivator.logError(e);
       return new Status(IStatus.ERROR, CBRunCoreActivator.PLUGIN_ID, e.getMessage(), e);
     }
+  }
+
+  private IProject getProject() {
+    String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+    return project;
   }
 }

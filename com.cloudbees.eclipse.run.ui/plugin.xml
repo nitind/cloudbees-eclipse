@@ -60,7 +60,7 @@
          </objectClass>
          <objectState
                name="projectNature"
-               value="com.cloudbees.eclipse.core.cloudbeesNature">
+               value="com.cloudbees.eclipse.run.core.wstcore.wst.cloudbeesNature">
          </objectState>
       </and>
    </visibility>
@@ -119,7 +119,7 @@
                          <test
                                forcePluginActivation="false"
                                property="org.eclipse.core.resources.projectNature"
-                               value="com.cloudbees.eclipse.core.cloudbeesNature">
+                              com.cloudbees.eclipse.run.core.wstpse.run.core.wst.cloudbeesNature">
                          </test>
                       </adapt>
                    </and>
@@ -132,27 +132,23 @@
  <extension
        point="org.eclipse.wst.server.ui.wizardFragments">
     <fragment
-          class="com.cloudbees.eclipse.run.ui.wizards.RunCloudServer"
-          id="com.cloudbees.eclipse.core.runcloud"
-          typeIds="com.cloudbees.eclipse.core.runcloud">
+          class="com.cloudbees.eclipse.run.ui.wizards.RunCloudServercom.cloudbees.eclipse.run.core.wstees.eclipse.run.core.wst.runclcom.cloudbees.eclipse.run.core.wstm.cloudbees.eclipse.run.core.wst.runcloud">
     </fragment>
     <fragment
-          class="com.cloudbees.eclipse.run.ui.wizards.RunCloudLocal"
-          id="com.cloudbees.eclipse.core.runcloud.local"
-          typeIds="com.cloudbees.eclipse.core.runcloud.local">
+          class="com.cloudbees.eclipse.run.ui.wizarcom.cloudbees.eclipse.run.core.wst  id="com.cloudbees.eclipse.run.corecom.cloudbees.eclipse.run.core.wst     typeIds="com.cloudbees.eclipse.run.core.wst.runcloud.local">
     </fragment>
  </extension>
  <extension
        point="org.eclipse.wst.server.ui.serverImages">
     <image
           icon="icons/16x16/cb_plain.png"
-          id="com.cloudbees.eclipse.run.ui.server.image"
-          typeIds="com.cloudbees.eclipse.core.runcloud">
+          id="com.cloudbees.com.cloudbees.eclipse.run.core.wste"
+          typeIds="com.cloudbees.eclipse.run.core.wst.runcloud">
     </image>
     <image
           icon="icons/16x16/cb_plain.png"
-          id="com.cloudbees.eclipse.run.ui.server.image"
-          typeIds="com.cloudbees.eclipse.core.runcloud.local">
+          id="com.clcom.cloudbees.eclipse.run.core.wstver.image"
+          typeIds="com.cloudbees.eclipse.run.core.wst.runcloud.local">
     </image>
  </extension>
 
