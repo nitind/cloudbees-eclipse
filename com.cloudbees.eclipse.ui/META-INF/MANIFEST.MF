@@ -8,7 +8,6 @@ Bundle-Vendor: Cloud Bees, Inc
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Eclipse-LazyStart: true
 Require-Bundle: com.cloudbees.eclipse.core,
  org.eclipse.ui,
  org.eclipse.swt,
@@ -20,4 +19,5 @@ Require-Bundle: com.cloudbees.eclipse.core,
  org.eclipse.ui.forms,
  org.eclipse.ui.ide,
  org.eclipse.team.core;resolution:=optional,
- org.eclipse.team.ui
+ org.eclipse.team.ui;resolution:=optional
+Export-Package: com.cloudbees.eclipse.ui

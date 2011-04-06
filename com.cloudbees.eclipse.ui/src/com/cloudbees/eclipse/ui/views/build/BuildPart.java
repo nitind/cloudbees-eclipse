@@ -53,6 +53,7 @@ public class BuildPart extends EditorPart {
   private final FormToolkit formToolkit = new FormToolkit(Display.getDefault());
 
   private JenkinsBuildDetailsResponse dataBuildDetail;
+  protected JenkinsJobAndBuildsResponse dataJobDetails;
 
   private Form form;
   private Label textTopSummary;
@@ -60,7 +61,6 @@ public class BuildPart extends EditorPart {
   private Label contentBuildSummary;
   private Composite contentBuildHistory;
   private Label contentJUnitTests;
-  protected JenkinsJobAndBuildsResponse dataJobDetails;
   private Action invokeBuild;
   private Label statusIcon;
   private Composite compMain;
@@ -85,23 +85,23 @@ public class BuildPart extends EditorPart {
    * @param parent
    */
   @Override
-  public void createPartControl(Composite parent) {
+  public void createPartControl(final Composite parent) {
 
-    form = formToolkit.createForm(parent);
+    this.form = this.formToolkit.createForm(parent);
     //form.setDelayedReflow(true);
-    formToolkit.decorateFormHeading(form/*.getForm()*/);
-    formToolkit.paintBordersFor(form);
-    form.setText("n/a");
-    form.getBody().setLayout(new GridLayout(1, true));
+    this.formToolkit.decorateFormHeading(this.form/*.getForm()*/);
+    this.formToolkit.paintBordersFor(this.form);
+    this.form.setText("n/a");
+    this.form.getBody().setLayout(new GridLayout(1, true));
 
-    compMain = new Composite(form.getBody(), SWT.NONE);
+    this.compMain = new Composite(this.form.getBody(), SWT.NONE);
     GridLayout gl_compMain = new GridLayout(2, true);
-    compMain.setLayout(gl_compMain);
-    compMain.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-    formToolkit.adapt(compMain);
-    formToolkit.paintBordersFor(compMain);
+    this.compMain.setLayout(gl_compMain);
+    this.compMain.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    this.formToolkit.adapt(this.compMain);
+    this.formToolkit.paintBordersFor(this.compMain);
 
-    Composite compStatusHead = new Composite(compMain, SWT.NONE);
+    Composite compStatusHead = new Composite(this.compMain, SWT.NONE);
     compStatusHead.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
     GridLayout rl_compStatusHead = new GridLayout();
     rl_compStatusHead.marginHeight = 0;
@@ -109,124 +109,125 @@ public class BuildPart extends EditorPart {
     rl_compStatusHead.numColumns = 2;
 
     compStatusHead.setLayout(rl_compStatusHead);
-    formToolkit.adapt(compStatusHead);
-    formToolkit.paintBordersFor(compStatusHead);
+    this.formToolkit.adapt(compStatusHead);
+    this.formToolkit.paintBordersFor(compStatusHead);
 
-    statusIcon = formToolkit.createLabel(compStatusHead, "", SWT.NONE);
+    this.statusIcon = this.formToolkit.createLabel(compStatusHead, "", SWT.NONE);
 
-    textTopSummary = formToolkit.createLabel(compStatusHead, "n/a", SWT.BOLD);
-    textTopSummary.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false, 1, 1));
-    textTopSummary.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT));
-    textTopSummary.setForeground(formToolkit.getColors().getColor(IFormColors.TITLE));
+    this.textTopSummary = this.formToolkit.createLabel(compStatusHead, "n/a", SWT.BOLD);
+    this.textTopSummary.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false, 1, 1));
+    this.textTopSummary.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT));
+    this.textTopSummary.setForeground(this.formToolkit.getColors().getColor(IFormColors.TITLE));
 
-    Section sectSummary = formToolkit.createSection(compMain, Section.TITLE_BAR);
+    Section sectSummary = this.formToolkit.createSection(this.compMain, Section.TITLE_BAR);
     GridData gd_sectSummary = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
     gd_sectSummary.verticalIndent = 10;
     sectSummary.setLayoutData(gd_sectSummary);
     sectSummary.setSize(107, 45);
-    formToolkit.paintBordersFor(sectSummary);
+    this.formToolkit.paintBordersFor(sectSummary);
     sectSummary.setText("Build Summary");
 
-    compBuildSummary = new Composite(sectSummary, SWT.NONE);
-    formToolkit.adapt(compBuildSummary);
-    formToolkit.paintBordersFor(compBuildSummary);
-    sectSummary.setClient(compBuildSummary);
-    compBuildSummary.setLayout(new GridLayout(1, false));
+    this.compBuildSummary = new Composite(sectSummary, SWT.NONE);
+    this.formToolkit.adapt(this.compBuildSummary);
+    this.formToolkit.paintBordersFor(this.compBuildSummary);
+    sectSummary.setClient(this.compBuildSummary);
+    this.compBuildSummary.setLayout(new GridLayout(1, false));
 
-    contentBuildSummary = formToolkit.createLabel(compBuildSummary, "n/a", SWT.NONE);
-    contentBuildSummary.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
+    this.contentBuildSummary = this.formToolkit.createLabel(this.compBuildSummary, "n/a", SWT.NONE);
+    this.contentBuildSummary.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 
-    Section sectTests = formToolkit.createSection(compMain, Section.TITLE_BAR);
+    Section sectTests = this.formToolkit.createSection(this.compMain, Section.TITLE_BAR);
     GridData gd_sectTests = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
     gd_sectTests.verticalIndent = 10;
     sectTests.setLayoutData(gd_sectTests);
     sectTests.setSize(80, 45);
-    formToolkit.paintBordersFor(sectTests);
+    this.formToolkit.paintBordersFor(sectTests);
     sectTests.setText("JUnit Tests");
 
     Composite compTests = new Composite(sectTests, SWT.NONE);
-    formToolkit.adapt(compTests);
-    formToolkit.paintBordersFor(compTests);
+    this.formToolkit.adapt(compTests);
+    this.formToolkit.paintBordersFor(compTests);
     sectTests.setClient(compTests);
     compTests.setLayout(new GridLayout(1, false));
 
-    contentJUnitTests = formToolkit.createLabel(compTests, "n/a", SWT.NONE);
-    contentJUnitTests.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+    this.contentJUnitTests = this.formToolkit.createLabel(compTests, "n/a", SWT.NONE);
+    this.contentJUnitTests.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
-    sectBuildHistory = formToolkit.createSection(compMain, Section.TITLE_BAR);
+    this.sectBuildHistory = this.formToolkit.createSection(this.compMain, Section.TITLE_BAR);
     GridData gd_sectBuildHistory = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
     gd_sectBuildHistory.verticalIndent = 20;
-    sectBuildHistory.setLayoutData(gd_sectBuildHistory);
-    sectBuildHistory.setSize(94, 55);
-    formToolkit.paintBordersFor(sectBuildHistory);
-    sectBuildHistory.setText("Build History");
+    this.sectBuildHistory.setLayoutData(gd_sectBuildHistory);
+    this.sectBuildHistory.setSize(94, 55);
+    this.formToolkit.paintBordersFor(this.sectBuildHistory);
+    this.sectBuildHistory.setText("Build History");
 
-    ScrolledComposite scrolledHistory = new ScrolledComposite(sectBuildHistory, SWT.H_SCROLL | SWT.V_SCROLL);
-    contentBuildHistoryHolder = new Composite(scrolledHistory, SWT.NONE);
+    ScrolledComposite scrolledHistory = new ScrolledComposite(this.sectBuildHistory, SWT.H_SCROLL | SWT.V_SCROLL);
+    this.contentBuildHistoryHolder = new Composite(scrolledHistory, SWT.NONE);
 
     scrolledHistory.setExpandHorizontal(true);
     scrolledHistory.setExpandVertical(true);
 
-    scrolledHistory.setContent(contentBuildHistoryHolder);
+    scrolledHistory.setContent(this.contentBuildHistoryHolder);
 
-    sectBuildHistory.setClient(scrolledHistory);
+    this.sectBuildHistory.setClient(scrolledHistory);
 
-    formToolkit.adapt(contentBuildHistoryHolder);
-    formToolkit.paintBordersFor(contentBuildHistoryHolder);
-    contentBuildHistoryHolder.setLayout(new GridLayout(1, false));
+    this.formToolkit.adapt(this.contentBuildHistoryHolder);
+    this.formToolkit.paintBordersFor(this.contentBuildHistoryHolder);
+    this.contentBuildHistoryHolder.setLayout(new GridLayout(1, false));
 
-    formToolkit.adapt(scrolledHistory);
-    formToolkit.paintBordersFor(scrolledHistory);
+    this.formToolkit.adapt(scrolledHistory);
+    this.formToolkit.paintBordersFor(scrolledHistory);
     scrolledHistory.setLayout(new GridLayout(1, false));
 
     //contentBuildHistory = formToolkit.createHyperlink(composite_2, "n/a", SWT.NONE);
 
-    contentBuildHistory = formToolkit.createComposite(contentBuildHistoryHolder, SWT.NONE);
-    contentBuildHistory.setLayout(new GridLayout(1, false));
+    this.contentBuildHistory = this.formToolkit.createComposite(this.contentBuildHistoryHolder, SWT.NONE);
+    this.contentBuildHistory.setLayout(new GridLayout(1, false));
 
-    sectRecentChanges = formToolkit.createSection(compMain, Section.TITLE_BAR);
+    this.sectRecentChanges = this.formToolkit.createSection(this.compMain, Section.TITLE_BAR);
     GridData gd_sectRecentChanges = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
     gd_sectRecentChanges.verticalIndent = 20;
-    sectRecentChanges.setLayoutData(gd_sectRecentChanges);
+    this.sectRecentChanges.setLayoutData(gd_sectRecentChanges);
 
-    formToolkit.paintBordersFor(sectRecentChanges);
-    sectRecentChanges.setText("Changes");
+    this.formToolkit.paintBordersFor(this.sectRecentChanges);
+    this.sectRecentChanges.setText("Changes");
 
 
-    compInterm = formToolkit.createComposite(sectRecentChanges, SWT.NONE);
+    this.compInterm = this.formToolkit.createComposite(this.sectRecentChanges, SWT.NONE);
 
     GridLayout gl_compInterm = new GridLayout(1, false);
     gl_compInterm.verticalSpacing = 0;
     gl_compInterm.marginWidth = 0;
     gl_compInterm.marginHeight = 0;
-    compInterm.setLayout(gl_compInterm);
-    compInterm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+    this.compInterm.setLayout(gl_compInterm);
+    this.compInterm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
-    sectRecentChanges.setClient(compInterm);
+    this.sectRecentChanges.setClient(this.compInterm);
 
-    changesetLabel = formToolkit.createLabel(compInterm, "");
+    this.changesetLabel = this.formToolkit.createLabel(this.compInterm, "");
 
-    scrolledComposite = new ScrolledComposite(compInterm, SWT.H_SCROLL | SWT.V_SCROLL);
-    scrolledComposite.setExpandHorizontal(true);
-    scrolledComposite.setExpandVertical(true);
-    scrolledComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-    formToolkit.adapt(scrolledComposite);
-    formToolkit.paintBordersFor(scrolledComposite);
+    this.scrolledComposite = new ScrolledComposite(this.compInterm, SWT.H_SCROLL | SWT.V_SCROLL);
+    this.scrolledComposite.setExpandHorizontal(true);
+    this.scrolledComposite.setExpandVertical(true);
+    this.scrolledComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    this.formToolkit.adapt(this.scrolledComposite);
+    this.formToolkit.paintBordersFor(this.scrolledComposite);
 
 
-    treeViewerRecentChanges = new TreeViewer(scrolledComposite, SWT.BORDER);
-    Tree treeRecentChanges = treeViewerRecentChanges.getTree();
+    this.treeViewerRecentChanges = new TreeViewer(this.scrolledComposite, SWT.BORDER);
+    Tree treeRecentChanges = this.treeViewerRecentChanges.getTree();
 
-    changesContentProvider = new RecentChangesContentProvider();
-    treeViewerRecentChanges.setContentProvider(changesContentProvider);
-    treeViewerRecentChanges.setLabelProvider(new RecentChangesLabelProvider());
+    this.changesContentProvider = new RecentChangesContentProvider();
+    this.treeViewerRecentChanges.setContentProvider(this.changesContentProvider);
+    this.treeViewerRecentChanges.setLabelProvider(new RecentChangesLabelProvider());
+    this.treeViewerRecentChanges.addDoubleClickListener(new RecentChangesClickListener());
 
-    treeViewerRecentChanges.setInput("n/a");
+    this.treeViewerRecentChanges.setInput("n/a");
 
-    formToolkit.adapt(treeRecentChanges);
-    formToolkit.paintBordersFor(treeRecentChanges);
-    scrolledComposite.setContent(treeRecentChanges);
-    scrolledComposite.setMinSize(treeRecentChanges.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    this.formToolkit.adapt(treeRecentChanges);
+    this.formToolkit.paintBordersFor(treeRecentChanges);
+    this.scrolledComposite.setContent(treeRecentChanges);
+    this.scrolledComposite.setMinSize(treeRecentChanges.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
     //new Label(recentChangesComp, SWT.NONE);
 
@@ -243,6 +244,7 @@ public class BuildPart extends EditorPart {
   private void createActions() {
 
     Action reload = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+      @Override
       public void run() {
         BuildPart.this.reloadData();
       }
@@ -251,6 +253,7 @@ public class BuildPart extends EditorPart {
     reload.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_REFRESH));
 
     Action openInWeb = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+      @Override
       public void run() {
         BuildPart.this.openBuildWithBrowser();
       }
@@ -259,9 +262,10 @@ public class BuildPart extends EditorPart {
     openInWeb.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_BROWSER));
 
     Action openLogs = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+      @Override
       public void run() {
-        if (dataBuildDetail != null && dataBuildDetail.url != null) {
-          CloudBeesUIPlugin.getDefault().openWithBrowser(dataBuildDetail.url + "/consoleText");
+        if (BuildPart.this.dataBuildDetail != null && BuildPart.this.dataBuildDetail.url != null) {
+          CloudBeesUIPlugin.getDefault().openWithBrowser(BuildPart.this.dataBuildDetail.url + "/consoleText");
           return;
         }
 
@@ -270,7 +274,8 @@ public class BuildPart extends EditorPart {
     openLogs.setToolTipText("Open build log"); //TODO i18n
     openLogs.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_CONSOLE));
 
-    invokeBuild = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+    this.invokeBuild = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+      @Override
       public void run() {
         try {
           final String jobUrl = BuildPart.this.getBuildEditorInput().getJobUrl();
@@ -278,7 +283,8 @@ public class BuildPart extends EditorPart {
           final Map<String, String> props = CloudBeesUIPlugin.getDefault().getJobPropValues(
               BuildPart.this.dataJobDetails.property);
           org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Building job...") {
-            protected IStatus run(IProgressMonitor monitor) {
+            @Override
+            protected IStatus run(final IProgressMonitor monitor) {
               try {
                 ns.invokeBuild(jobUrl, props, monitor);
                 return org.eclipse.core.runtime.Status.OK_STATUS;
@@ -296,17 +302,17 @@ public class BuildPart extends EditorPart {
         }
       }
     };
-    invokeBuild.setToolTipText("Run a new build for this job"); //TODO i18n
-    invokeBuild.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_RUN));
+    this.invokeBuild.setToolTipText("Run a new build for this job"); //TODO i18n
+    this.invokeBuild.setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.IMG_RUN));
 
-    form.getToolBarManager().add(reload);
-    form.getToolBarManager().add(new Separator());
-    form.getToolBarManager().add(invokeBuild);
-    form.getToolBarManager().add(new Separator());
-    form.getToolBarManager().add(openLogs);
-    form.getToolBarManager().add(openInWeb);
+    this.form.getToolBarManager().add(reload);
+    this.form.getToolBarManager().add(new Separator());
+    this.form.getToolBarManager().add(this.invokeBuild);
+    this.form.getToolBarManager().add(new Separator());
+    this.form.getToolBarManager().add(openLogs);
+    this.form.getToolBarManager().add(openInWeb);
 
-    form.getToolBarManager().update(false);
+    this.form.getToolBarManager().update(false);
   }
 
   protected BuildEditorInput getBuildEditorInput() {
@@ -315,14 +321,14 @@ public class BuildPart extends EditorPart {
 
   protected void reloadData() {
     IRunnableWithProgress op = new IRunnableWithProgress() {
-      public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+      public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 
         try {
           BuildEditorInput details = (BuildEditorInput) getEditorInput();
           JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(
               getBuildEditorInput().getJobUrl());
-          dataBuildDetail = service.getJobDetails(details.getBuildUrl(), monitor);
-          dataJobDetails = service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor);
+          BuildPart.this.dataBuildDetail = service.getJobDetails(details.getBuildUrl(), monitor);
+          BuildPart.this.dataJobDetails = service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor);
         } catch (CloudBeesException e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
         }
@@ -342,8 +348,8 @@ public class BuildPart extends EditorPart {
   }
 
   protected void openBuildWithBrowser() {
-    if (dataBuildDetail != null && dataBuildDetail.url != null) {
-      CloudBeesUIPlugin.getDefault().openWithBrowser(dataBuildDetail.url);
+    if (this.dataBuildDetail != null && this.dataBuildDetail.url != null) {
+      CloudBeesUIPlugin.getDefault().openWithBrowser(this.dataBuildDetail.url);
       return;
     }
 
@@ -354,7 +360,7 @@ public class BuildPart extends EditorPart {
 
   protected void switchToBuild(final long buildNo) {
     IRunnableWithProgress op = new IRunnableWithProgress() {
-      public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+      public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 
         BuildEditorInput details = (BuildEditorInput) getEditorInput();
         String newJobUrl = getBuildEditorInput().getJobUrl() + "/" + buildNo + "/";
@@ -363,9 +369,9 @@ public class BuildPart extends EditorPart {
             getBuildEditorInput().getJobUrl());
 
         try {
-          dataBuildDetail = service.getJobDetails(newJobUrl, monitor);
-          details.setBuildUrl(dataBuildDetail.url);
-          dataJobDetails = service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor);
+          BuildPart.this.dataBuildDetail = service.getJobDetails(newJobUrl, monitor);
+          details.setBuildUrl(BuildPart.this.dataBuildDetail.url);
+          BuildPart.this.dataJobDetails = service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor);
 
         } catch (CloudBeesException e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
@@ -386,6 +392,7 @@ public class BuildPart extends EditorPart {
     }
   }
 
+  @Override
   public IEditorSite getEditorSite() {
     return (IEditorSite) getSite();
   }
@@ -400,28 +407,28 @@ public class BuildPart extends EditorPart {
     if (details == null || details.getBuildUrl() == null || !getBuildEditorInput().isLastBuildAvailable()) {
 
       // No last build available
-      if (contentBuildHistory != null && !contentBuildHistory.isDisposed()) {
-        contentBuildHistory.dispose();
+      if (this.contentBuildHistory != null && !this.contentBuildHistory.isDisposed()) {
+        this.contentBuildHistory.dispose();
       }
 
-      contentJUnitTests.setText("No data available.");
-      textTopSummary.setText("Latest build not available.");
-      form.setText(getBuildEditorInput().getDisplayName());
+      this.contentJUnitTests.setText("No data available.");
+      this.textTopSummary.setText("Latest build not available.");
+      this.form.setText(getBuildEditorInput().getDisplayName());
       setPartName(getBuildEditorInput().getDisplayName());
 
     } else {
 
       IRunnableWithProgress op = new IRunnableWithProgress() {
-        public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+        public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 
           JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(
               getBuildEditorInput().getBuildUrl());
 
           try {
 
-            dataBuildDetail = service.getJobDetails(getBuildEditorInput().getBuildUrl(), monitor);
+            BuildPart.this.dataBuildDetail = service.getJobDetails(getBuildEditorInput().getBuildUrl(), monitor);
 
-            dataJobDetails = service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor);
+            BuildPart.this.dataJobDetails = service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor);
 
           } catch (CloudBeesException e) {
             CloudBeesUIPlugin.getDefault().getLogger().error(e);
@@ -451,38 +458,38 @@ public class BuildPart extends EditorPart {
         BuildEditorInput details = (BuildEditorInput) getEditorInput();
 
         //setPartName();
-        if (dataBuildDetail != null) {
-          setPartName(details.getDisplayName() + " #" + dataBuildDetail.number);
+        if (BuildPart.this.dataBuildDetail != null) {
+          setPartName(details.getDisplayName() + " #" + BuildPart.this.dataBuildDetail.number);
         } else {
           setPartName(details.getDisplayName());
         }
 
         //setContentDescription(detail.fullDisplayName);
 
-        if (form != null) {
+        if (BuildPart.this.form != null) {
 
-          if (dataBuildDetail != null) {
-            form.setText("Build #" + dataBuildDetail.number + " [" + details.getDisplayName() + "]");
+          if (BuildPart.this.dataBuildDetail != null) {
+            BuildPart.this.form.setText("Build #" + BuildPart.this.dataBuildDetail.number + " [" + details.getDisplayName() + "]");
           } else {
-            form.setText(details.getDisplayName());
+            BuildPart.this.form.setText(details.getDisplayName());
           }
 
         }
 
-        String topStr = dataBuildDetail.result != null ? dataBuildDetail.result /*+ " ("
+        String topStr = BuildPart.this.dataBuildDetail.result != null ? BuildPart.this.dataBuildDetail.result /*+ " ("
                                                                                 + new Date(dataBuildDetail.timestamp) + ")"*/
-        : "";
+            : "";
 
-        if (dataBuildDetail.building) {
+        if (BuildPart.this.dataBuildDetail.building) {
           topStr = "BUILDING";
-        } else if (dataJobDetails.inQueue) {
+        } else if (BuildPart.this.dataJobDetails.inQueue) {
           topStr = "IN QUEUE";
         } /*else {
           topStr = topStr + " " + Utils.humanReadableTime((System.currentTimeMillis() - dataBuildDetail.timestamp))
               + " ago";
           }
-          */
-        textTopSummary.setText(topStr);
+         */
+        BuildPart.this.textTopSummary.setText(topStr);
 
 
         loadBuildSummary();
@@ -492,17 +499,17 @@ public class BuildPart extends EditorPart {
 
         loadBuildHistory();
 
-        // Recent Changes      
+        // Recent Changes
         loadRecentChanges();
 
-        invokeBuild.setEnabled(dataJobDetails.buildable);
+        BuildPart.this.invokeBuild.setEnabled(BuildPart.this.dataJobDetails.buildable);
 
-        if ("SUCCESS".equalsIgnoreCase(dataBuildDetail.result)) {
-          statusIcon.setImage(CloudBeesUIPlugin.getImage(CBImages.IMG_COLOR_16_BLUE));
-        } else if ("FAILURE".equalsIgnoreCase(dataBuildDetail.result)) {
-          statusIcon.setImage(CloudBeesUIPlugin.getImage(CBImages.IMG_COLOR_16_RED));
+        if ("SUCCESS".equalsIgnoreCase(BuildPart.this.dataBuildDetail.result)) {
+          BuildPart.this.statusIcon.setImage(CloudBeesUIPlugin.getImage(CBImages.IMG_COLOR_16_BLUE));
+        } else if ("FAILURE".equalsIgnoreCase(BuildPart.this.dataBuildDetail.result)) {
+          BuildPart.this.statusIcon.setImage(CloudBeesUIPlugin.getImage(CBImages.IMG_COLOR_16_RED));
         } else {
-          statusIcon.setImage(null);
+          BuildPart.this.statusIcon.setImage(null);
         }
 
         //form.layout();
@@ -512,8 +519,8 @@ public class BuildPart extends EditorPart {
         BuildPart.this.compMain.layout(true);
 
         //form.reflow(true);
-        form.layout(true);
-        form.getBody().layout(true);
+        BuildPart.this.form.layout(true);
+        BuildPart.this.form.getBody().layout(true);
         //details..form.layout();
 
       }
@@ -522,30 +529,30 @@ public class BuildPart extends EditorPart {
 
   private void loadBuildHistory() {
 
-    if (contentBuildHistory != null && !contentBuildHistory.isDisposed()) {
-      contentBuildHistory.dispose();
+    if (this.contentBuildHistory != null && !this.contentBuildHistory.isDisposed()) {
+      this.contentBuildHistory.dispose();
     }
 
     //contentBuildHistoryHolder.layout(true);
 
-    contentBuildHistory = formToolkit.createComposite(contentBuildHistoryHolder, SWT.NONE);
+    this.contentBuildHistory = this.formToolkit.createComposite(this.contentBuildHistoryHolder, SWT.NONE);
     GridLayout gl = new GridLayout(1, false);
     gl.marginHeight = 0;
     gl.marginWidth = 0;
     gl.verticalSpacing = 0;
-    contentBuildHistory.setLayout(gl);
-    
+    this.contentBuildHistory.setLayout(gl);
 
-    if (dataJobDetails.builds == null || dataJobDetails.builds.length == 0) {
-      formToolkit.createLabel(contentBuildHistory, "No recent builds.");//TODO i18n
-      contentBuildHistoryHolder.layout(true);
+
+    if (this.dataJobDetails.builds == null || this.dataJobDetails.builds.length == 0) {
+      this.formToolkit.createLabel(this.contentBuildHistory, "No recent builds.");//TODO i18n
+      this.contentBuildHistoryHolder.layout(true);
       return;
     }
 
     //contentBuildHistory.setBackground(composite.getBackground());
 
     StringBuffer val = new StringBuffer();
-    for (JenkinsJobAndBuildsResponse.Build b : dataJobDetails.builds) {
+    for (JenkinsJobAndBuildsResponse.Build b : this.dataJobDetails.builds) {
 
       //String result = b.result != null && b.result.length() > 0 ? " - " + b.result : "";
 
@@ -561,9 +568,10 @@ public class BuildPart extends EditorPart {
       }
 
       Composite comp;
-      if (b.number != dataBuildDetail.number) {
-        comp = createImageLink(contentBuildHistory, "<a>#" + b.number + "</a>  " + timeComp, image, new SelectionAdapter() {
-          public void widgetSelected(SelectionEvent e) {
+      if (b.number != this.dataBuildDetail.number) {
+        comp = createImageLink(this.contentBuildHistory, "<a>#" + b.number + "</a>  " + timeComp, image, new SelectionAdapter() {
+          @Override
+          public void widgetSelected(final SelectionEvent e) {
             if (e.text != null && e.text.startsWith("#")) {
               long buildNo = new Long(e.text.substring(1)).longValue();
               BuildPart.this.switchToBuild(buildNo);
@@ -571,7 +579,7 @@ public class BuildPart extends EditorPart {
           }
         });
       } else {
-        comp = createImageLabel(contentBuildHistory, "#" + b.number + "  " + timeComp, image);        
+        comp = createImageLabel(this.contentBuildHistory, "#" + b.number + "  " + timeComp, image);
       }
 
       GridData gd = new GridData();
@@ -581,7 +589,7 @@ public class BuildPart extends EditorPart {
     }
 
     //BuildPart.this.compMain.layout();
-    contentBuildHistoryHolder.layout(true);
+    this.contentBuildHistoryHolder.layout(true);
     //contentBuildHistory.setText(val.toString());
 
   }
@@ -592,14 +600,14 @@ public class BuildPart extends EditorPart {
     //details.getJob().healthReport;
 
     StringBuffer summary = new StringBuffer();
-    if (dataBuildDetail.description != null) {
-      summary.append(dataBuildDetail.description + "\n");
+    if (this.dataBuildDetail.description != null) {
+      summary.append(this.dataBuildDetail.description + "\n");
     }
 
     StringBuffer causeBuffer = new StringBuffer();
-    if (dataBuildDetail.actions != null && dataBuildDetail.actions.length > 0) {
-      for (int i = 0; i < dataBuildDetail.actions.length; i++) {
-        com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Action action = dataBuildDetail.actions[i];
+    if (this.dataBuildDetail.actions != null && this.dataBuildDetail.actions.length > 0) {
+      for (int i = 0; i < this.dataBuildDetail.actions.length; i++) {
+        com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Action action = this.dataBuildDetail.actions[i];
         if (action.causes != null) {
           for (int c = 0; c < action.causes.length; c++) {
             Cause cause = action.causes[c];
@@ -613,31 +621,31 @@ public class BuildPart extends EditorPart {
       summary.append(causeBuffer.toString() + "\n");
     }
 
-    if (dataBuildDetail.builtOn != null && dataBuildDetail.timestamp != null) {
-      if (dataBuildDetail.builtOn != null && dataBuildDetail.builtOn.length() > 0) {
-        summary.append("Built on: " + dataBuildDetail.builtOn + " at " + (new Date(dataBuildDetail.timestamp)) + "\n");
+    if (this.dataBuildDetail.builtOn != null && this.dataBuildDetail.timestamp != null) {
+      if (this.dataBuildDetail.builtOn != null && this.dataBuildDetail.builtOn.length() > 0) {
+        summary.append("Built on: " + this.dataBuildDetail.builtOn + " at " + (new Date(this.dataBuildDetail.timestamp)) + "\n");
       } else {
-        summary.append("Built at " + (new Date(dataBuildDetail.timestamp)) + "\n");
+        summary.append("Built at " + (new Date(this.dataBuildDetail.timestamp)) + "\n");
       }
     }
 
     //summary.append("Buildable: " + details.getJob().buildable + "\n");
     //summary.append("Build number: " + dataBuildDetail.number + "\n");
 
-    contentBuildSummary.setText(summary.toString());
+    this.contentBuildSummary.setText(summary.toString());
 
-    if (healthTest != null && !healthTest.isDisposed()) {
-      healthTest.dispose();
+    if (this.healthTest != null && !this.healthTest.isDisposed()) {
+      this.healthTest.dispose();
     }
 
-    if (healthBuild != null && !healthBuild.isDisposed()) {
-      healthBuild.dispose();
+    if (this.healthBuild != null && !this.healthBuild.isDisposed()) {
+      this.healthBuild.dispose();
     }
 
     //compBuildSummary.redraw();
     //compBuildSummary.layout(true);
 
-    HealthReport[] hr = dataJobDetails.healthReport;
+    HealthReport[] hr = this.dataJobDetails.healthReport;
     if (hr != null && hr.length > 0) {
       //summary.append("\nProject Health\n");
       for (HealthReport rep : hr) {
@@ -645,12 +653,12 @@ public class BuildPart extends EditorPart {
         //System.out.println("ICON URL: " + rep.iconUrl);
         String testMatch = "Test Result: ";
         if (rep.description.startsWith(testMatch)) {
-          healthTest = createImageLabel(compBuildSummary, rep.description.substring(testMatch.length()),
+          this.healthTest = createImageLabel(this.compBuildSummary, rep.description.substring(testMatch.length()),
               CloudBeesUIPlugin.getDefault().getImage(CBImages.IMG_HEALTH_PREFIX + CBImages.IMG_24 + rep.iconUrl));
         } else {
           String buildMatch = "Build stability: ";
           if (rep.description.startsWith(buildMatch)) {
-            healthBuild = createImageLabel(compBuildSummary, rep.description.substring(buildMatch.length()),
+            this.healthBuild = createImageLabel(this.compBuildSummary, rep.description.substring(buildMatch.length()),
                 CloudBeesUIPlugin.getDefault().getImage(CBImages.IMG_HEALTH_PREFIX + CBImages.IMG_24 + rep.iconUrl));
           }
         }
@@ -658,56 +666,56 @@ public class BuildPart extends EditorPart {
 
     }
 
-    compBuildSummary.layout(true);
+    this.compBuildSummary.layout(true);
 
   }
 
-  private Composite createImageLabel(Composite parent, String text, Image image) {
-    Composite comp = formToolkit.createComposite(parent);
+  private Composite createImageLabel(final Composite parent, final String text, final Image image) {
+    Composite comp = this.formToolkit.createComposite(parent);
     GridLayout gl = new GridLayout(2, false);
     comp.setLayout(gl);
     gl.marginHeight = 0;
     gl.marginWidth = 0;
     gl.verticalSpacing = 0;
-    Label imgLabel = formToolkit.createLabel(comp, "", SWT.NONE);
+    Label imgLabel = this.formToolkit.createLabel(comp, "", SWT.NONE);
     imgLabel.setImage(image);
-    Label label = formToolkit.createLabel(comp, text, SWT.NONE);
+    Label label = this.formToolkit.createLabel(comp, text, SWT.NONE);
     return comp;
   }
 
-  private Composite createImageLink(Composite parent, String text, Image image, SelectionListener selectionListener) {
-    Composite comp = formToolkit.createComposite(parent);
+  private Composite createImageLink(final Composite parent, final String text, final Image image, final SelectionListener selectionListener) {
+    Composite comp = this.formToolkit.createComposite(parent);
     GridLayout gl = new GridLayout(2, false);
     comp.setLayout(gl);
     gl.marginHeight = 0;
     gl.marginWidth = 0;
     gl.verticalSpacing = 0;
 
-    Label imgLabel = formToolkit.createLabel(comp, "", SWT.NONE);
+    Label imgLabel = this.formToolkit.createLabel(comp, "", SWT.NONE);
     imgLabel.setImage(image);
     Link link = new Link(comp, SWT.NONE);
     link.setText(text);
     link.addSelectionListener(selectionListener);
-    link.setBackground(formToolkit.getColors().getBackground());
+    link.setBackground(this.formToolkit.getColors().getBackground());
     return comp;
   }
 
   private void loadUnitTests() {
 
-    if (dataBuildDetail.actions == null) {
-      contentJUnitTests.setText("No Tests");
+    if (this.dataBuildDetail.actions == null) {
+      this.contentJUnitTests.setText("No Tests");
       return;
     }
 
-    for (com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Action action : dataBuildDetail.actions) {
+    for (com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Action action : this.dataBuildDetail.actions) {
       if ("testReport".equalsIgnoreCase(action.urlName)) {
         String val = "Total: " + action.totalCount + " Failed: " + action.failCount + " Skipped: " + action.skipCount;
-        contentJUnitTests.setText(val);
+        this.contentJUnitTests.setText(val);
         return;
       }
     }
 
-    contentJUnitTests.setText("No Tests");
+    this.contentJUnitTests.setText("No Tests");
 
   }
 
@@ -715,20 +723,20 @@ public class BuildPart extends EditorPart {
 
     //StringBuffer changes = new StringBuffer();
     //Point origSize = treeViewerRecentChanges.getTree().getSize();
-    if (dataBuildDetail.changeSet != null && dataBuildDetail.changeSet.items != null
-        && dataBuildDetail.changeSet.items.length > 0) {
+    if (this.dataBuildDetail.changeSet != null && this.dataBuildDetail.changeSet.items != null
+        && this.dataBuildDetail.changeSet.items.length > 0) {
       //changesContentProvider.setModel(dataBuildDetail.changeSet.items);
-      treeViewerRecentChanges.setInput(dataBuildDetail.changeSet.items);
-      changesetLabel.setVisible(false);
-      treeViewerRecentChanges.getTree().setVisible(true);
-      treeViewerRecentChanges.refresh();
+      this.treeViewerRecentChanges.setInput(this.dataBuildDetail);
+      this.changesetLabel.setVisible(false);
+      this.treeViewerRecentChanges.getTree().setVisible(true);
+      this.treeViewerRecentChanges.refresh();
       //createChangeTreeViewer(dataBuildDetail.changeSet.items);
     } else {
       //changesContentProvider.setModel(new ChangeSetItem[0]);
-      treeViewerRecentChanges.setInput(new ChangeSetItem[0]);
-      changesetLabel.setVisible(true);
-      changesetLabel.setText("No changes");
-      treeViewerRecentChanges.getTree().setVisible(false);
+      this.treeViewerRecentChanges.setInput(new ChangeSetItem[0]);
+      this.changesetLabel.setVisible(true);
+      this.changesetLabel.setText("No changes");
+      this.treeViewerRecentChanges.getTree().setVisible(false);
       //createChangeTreeViewer(new ChangeSetItem[0]);
     }
 
@@ -741,14 +749,14 @@ public class BuildPart extends EditorPart {
     /*    if (changes.length() == 0) {
           changes.append("none");
         }
-    */   
+     */
 
     //recentChangesComp.layout(true);
     //recentChangesScroll.setMinSize(recentChangesComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
     //recentChangesComp.setSize(recentChangesComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
     //recentChangesScroll.setMinSize(sectRecentChanges.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-    
+
 
     //contentRecentChanges.setText(changes.toString());
 
@@ -757,11 +765,11 @@ public class BuildPart extends EditorPart {
   @Override
   public void setFocus() {
     // Set the focus
-    form.setFocus();
+    this.form.setFocus();
   }
 
   @Override
-  public void doSave(IProgressMonitor monitor) {
+  public void doSave(final IProgressMonitor monitor) {
     // Do the Save operation
   }
 
@@ -771,7 +779,7 @@ public class BuildPart extends EditorPart {
   }
 
   @Override
-  public void init(IEditorSite site, IEditorInput input) throws PartInitException {
+  public void init(final IEditorSite site, final IEditorInput input) throws PartInitException {
 
     // Initialize the editor part
     setSite(site);
@@ -791,8 +799,8 @@ public class BuildPart extends EditorPart {
 
   @Override
   public void dispose() {
-    form.dispose();
-    form = null;
+    this.form.dispose();
+    this.form = null;
     super.dispose();
   }
 }

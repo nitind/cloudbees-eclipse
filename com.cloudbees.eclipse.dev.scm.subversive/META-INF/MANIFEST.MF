@@ -14,5 +14,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.equinox.security,
  org.eclipse.jface,
  com.cloudbees.eclipse.core,
+ org.eclipse.team.core,
  org.eclipse.team.svn.core,
- org.eclipse.team.core
+ org.eclipse.team.svn.ui
+ 

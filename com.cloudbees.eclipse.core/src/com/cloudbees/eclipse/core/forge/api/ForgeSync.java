@@ -5,19 +5,21 @@ import java.util.Properties;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet.ChangeSetItem;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 
 public interface ForgeSync {
 
   enum TYPE {
-    SVN, GIT
+    SVN, GIT, CVS
   };
-  
+
   enum ACTION {
     CHECKED("Checked"), ADDED("Added"), CLONED("Cloned"), SKIPPED("Skipped"), CANCELLED("Cancelled");
-    
+
     private String label;
-    
-    private ACTION(String label) {
+
+    private ACTION(final String label) {
       this.label = label;
     }
 
@@ -26,6 +28,23 @@ public interface ForgeSync {
     }
   };
 
+  static class ChangeSetPathItem {
+    public enum TYPE {
+      ADDED, DELETED, MODIFIED
+    };
+
+    public TYPE type;
+    public String path;
+    public ChangeSetItem parent;
+
+    public ChangeSetPathItem(final ChangeSetItem parent, final TYPE type, final String string) {
+      this.type = type;
+      this.path = string;
+      this.parent = parent;
+    }
+  }
+
   ACTION sync(TYPE type, Properties props, IProgressMonitor monitor) throws CloudBeesException;
 
+  boolean openRemoteFile(JenkinsScmConfig scmConfig, ChangeSetPathItem item, IProgressMonitor monitor);
 }
