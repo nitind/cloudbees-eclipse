@@ -8,21 +8,27 @@ import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationC
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBProjectProcessLifecycleHook;
 
 /**
- * Move this to WST plugin when created 
+ * Move this to WST plugin when created
  */
 public class WSTProjectLifecycleHook implements CBProjectProcessLifecycleHook {
-  
+
   public WSTProjectLifecycleHook() {
   }
 
   public void onStart(String projectName) {
-    getServer(projectName).setServerState(IServer.STATE_STARTED);
+    Server server = getServer(projectName);
+    if (server != null) {
+      server.setServerState(IServer.STATE_STARTED);
+    }
   }
 
   public void onStop(String projectName) {
-    getServer(projectName).setServerState(IServer.STATE_STOPPED);
+    Server server = getServer(projectName);
+    if (server != null) {
+      server.setServerState(IServer.STATE_STOPPED);
+    }
   }
-  
+
   private Server getServer(String projectName) {
     Server foundServer = null;
     IServer[] servers = ServerCore.getServers();
@@ -47,5 +53,5 @@ public class WSTProjectLifecycleHook implements CBProjectProcessLifecycleHook {
 
     return foundServer;
   }
-  
+
 }

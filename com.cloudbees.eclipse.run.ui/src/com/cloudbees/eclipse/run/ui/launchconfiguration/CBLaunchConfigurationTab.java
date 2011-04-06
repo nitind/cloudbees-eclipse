@@ -17,7 +17,7 @@ import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
 
 public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
-
+  
   private final class ProjectSelectionCompositeForLauncher extends ProjectSelectionComposite {
     private ProjectSelectionCompositeForLauncher(Composite parent, int style) {
       super(parent, style);
@@ -38,7 +38,7 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
   private static final String TAB_NAME = "CloudBees Application";
 
   private ProjectSelectionComposite content;
-
+  
   public void createControl(Composite parent) {
     this.content = new ProjectSelectionCompositeForLauncher(parent, SWT.None);
 
@@ -68,7 +68,6 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
     String projectName = this.content.getText();
-
     try {
       CBRunUtil.addDefaultAttributes(configuration, projectName);
     } catch (CoreException e) {

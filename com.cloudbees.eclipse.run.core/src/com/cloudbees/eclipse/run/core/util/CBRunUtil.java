@@ -19,6 +19,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 import com.cloudbees.eclipse.core.CloudBeesNature;
 import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
@@ -130,6 +131,35 @@ public class CBRunUtil {
     copy.setAttribute("org.eclipse.ui.externaltools.ATTR_ANT_TARGETS", "run");
 
     copy.setAttribute("process_factory_id", "org.eclipse.ant.ui.remoteAntProcessFactory");
+
+    return copy;
+  }
+
+  public static ILaunchConfiguration createTemporaryRemoteLaunchConfiguration(String projectName) throws CoreException {
+    ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
+    ILaunchConfigurationType configType = launchManager
+        .getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION);
+    String name = launchManager.generateLaunchConfigurationName(projectName + " remote debugger");
+    ILaunchConfigurationWorkingCopy copy = configType.newInstance(null, name);
+
+    List<String> resourcePaths = new ArrayList<String>();
+    resourcePaths.add("/" + projectName);
+    copy.setAttribute("org.eclipse.debug.core.MAPPED_RESOURCE_PATHS", resourcePaths);
+
+    List<String> resourceTypes = new ArrayList<String>();
+    resourceTypes.add("4");
+    copy.setAttribute("org.eclipse.debug.core.MAPPED_RESOURCE_TYPES", resourceTypes);
+
+    String connectMapAttr = IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP;
+    Map<String, String> connectMap = new HashMap<String, String>();
+    connectMap.put("hostname", "localhost");
+    connectMap.put("port", "8002");
+    copy.setAttribute(connectMapAttr, connectMap);
+
+    copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_ALLOW_TERMINATE, true);
+    copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, projectName);
+    copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_CONNECTOR,
+        IJavaLaunchConfigurationConstants.ID_SOCKET_ATTACH_VM_CONNECTOR);
 
     return copy;
   }

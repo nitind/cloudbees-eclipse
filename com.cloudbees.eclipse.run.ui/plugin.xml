@@ -100,11 +100,11 @@
           icon="icons/16x16/cb_plain.png"
           id="com.cloudbees.eclipse.run.ui.launchconfiguration.shortcut"
           label="CloudBees Application"
-          modes="run">
+          modes="run, debug">
        <contextualLaunch>
           <contextLabel
                 label="CloudBees Application"
-                mode="run">
+                mode="run, debug">
           </contextLabel>
           <enablement>
              <with

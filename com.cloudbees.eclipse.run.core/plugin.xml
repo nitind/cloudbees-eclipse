@@ -7,7 +7,7 @@
       <launchConfigurationType
             delegate="com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchDelegate"
             id="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType"
-            modes="run"
+            modes="run, debug"
             name="CloudBees Application">
       </launchConfigurationType>
    </extension>
