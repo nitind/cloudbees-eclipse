@@ -19,18 +19,18 @@ public class CBLaunchShortcut implements ILaunchShortcut {
 
   public void launch(ISelection selection, String mode) {
     if (selection instanceof IStructuredSelection) {
-      
+
       IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-      
+
       String name = null;
       Object element = structuredSelection.getFirstElement();
-      
-      if(element instanceof IProject) {
+
+      if (element instanceof IProject) {
         name = ((IProject) element).getName();
       } else if (element instanceof IJavaProject) {
         name = ((IJavaProject) element).getProject().getName();
       }
-      
+
       try {
         List<ILaunchConfiguration> launchConfigurations = CBRunUtil.getOrCreateCloudBeesLaunchConfigurations(name);
         ILaunchConfiguration configuration = launchConfigurations.get(launchConfigurations.size() - 1);
@@ -38,7 +38,7 @@ public class CBLaunchShortcut implements ILaunchShortcut {
       } catch (CoreException e) {
         CBRunUiActivator.logError(e);
       }
-      
+
     }
   }
 

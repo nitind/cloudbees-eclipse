@@ -23,7 +23,7 @@ public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
       String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
       CBProjectProcessService.getInstance().terminateProcess(projectName);
     } catch (DebugException e) {
-      e.printStackTrace(); // FIXME
+      e.printStackTrace(); //TODO better way to log
     }
   }
 
