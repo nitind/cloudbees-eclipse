@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.run.core.wst;
+package com.cloudbees.eclipse.core;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,12 +35,15 @@ public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
   @Override
   public IStatus publish(int kind, IProgressMonitor monitor) {
     return null;
+    //    return super.publish(kind, monitor);
   }
 
   @Override
   public void setupLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IProgressMonitor monitor)
       throws CoreException {
+
     String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
     CBRunUtil.addDefaultAttributes(workingCopy, projectName);
+
   }
 }

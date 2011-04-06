@@ -11,11 +11,40 @@
             name="CloudBees Application">
       </launchConfigurationType>
    </extension>
+ <extension
+          point="org.eclipse.wst.server.core.runtimeTypes">
+       <runtimeType
+             class="com.cloudbees.eclipse.core.RunCloudRuntimeDeleage"
+             description="Deploy to Run@Cloud"
+             id="com.cloudbees.eclipse.core.runcloud"
+             name="Run@Cloud"
+             vendor="Cloudbees"
+             vendorId="com.cloudbees"
+             version="1">
+          <moduleType
+                types="com.cloudbees.eclipse.core.runcloud"
+                versions="*">
+          </moduleType>
+       </runtimeType>
+       <runtimeType
+             class="com.cloudbees.eclipse.core.RunCloudRuntimeDeleage"
+             description="Launch local instance of application"
+             id="com.cloudbees.eclipse.core.runcloud.local"
+             name="Run@local"
+             vendor="Cloudbees"
+             vendorId="com.cloudbees"
+             version="1">
+          <moduleType
+                types="com.cloudbees.eclipse.core.runcloud.local"
+                versions="*">
+          </moduleType>
+       </runtimeType>
+    </extension>
     <extension
           point="org.eclipse.wst.server.core.serverTypes">
        <serverType
-             behaviourClass="com.cloudbees.eclipse.run.core.wst.RunCloudBehaviourDelegate"
-             class="com.cloudbees.eclipse.run.core.wst.RunCloudServerDelegate"
+             behaviourClass="com.cloudbees.eclipse.core.RunCloudBehaviourDelegate"
+             class="com.cloudbees.eclipse.core.RunCloudServerDelegate"
              description="Run@Cloud cloud instance"
              hasConfiguration="false"
              id="com.cloudbees.eclipse.core.runcloud"
@@ -28,8 +57,8 @@
              supportsRemoteHosts="true">
        </serverType>
        <serverType
-             behaviourClass="com.cloudbees.eclipse.run.core.wst.RunCloudLocalBehaviourDelegate"
-             class="com.cloudbees.eclipse.run.core.wst.RunCloudServerDelegate"
+             behaviourClass="com.cloudbees.eclipse.core.RunCloudLocalBehaviourDelegate"
+             class="com.cloudbees.eclipse.core.RunCloudServerDelegate"
              description="Run@Cloud Local instance"
              hasConfiguration="false"
              id="com.cloudbees.eclipse.core.runcloud.local"
@@ -56,7 +85,7 @@
     <extension
           point="com.cloudbees.eclipse.run.core.processLifecycleHook">
        <hook
-             defaultHandler="com.cloudbees.eclipse.run.core.wst.WSTProjectLifecycleHook"
+             defaultHandler="com.cloudbees.eclipse.core.WSTProjectLifecycleHook"
              id="com.cloudbees.eclipse.run.core.wstHook">
        </hook>
     </extension>

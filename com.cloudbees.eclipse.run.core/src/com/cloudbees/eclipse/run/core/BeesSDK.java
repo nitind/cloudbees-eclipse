@@ -11,7 +11,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import com.cloudbees.api.ApplicationDeployArchiveResponse;
-import com.cloudbees.api.ApplicationStatusResponse;
 import com.cloudbees.api.BeesClient;
 import com.cloudbees.api.BeesClientConfiguration;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
@@ -24,32 +23,6 @@ public class BeesSDK {
 
   public static final String API_URL = "https://api.cloudbees.com/api";
 
-  public ApplicationStatusResponse stop(IProject project) throws Exception {
-    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    BeesClient client = getBeesClient(grandCentralService);
-
-    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + project.getName();//$NON-NLS-1$
-
-    return client.applicationStop(appId);
-  }
-
-  public ApplicationStatusResponse start(IProject project) throws Exception {
-    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    BeesClient client = getBeesClient(grandCentralService);
-
-    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + project.getName();//$NON-NLS-1$
-
-    return client.applicationStart(appId);
-  }
-
-  /**
-   * Deploys project to the cloud if it has standard Bees project layout. NB! If the war file or build directory isn't
-   * found, it runs "ant dist".
-   * 
-   * @param project
-   * @return
-   * @throws Exception
-   */
   public ApplicationDeployArchiveResponse deploy(IProject project) throws Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
@@ -68,7 +41,6 @@ public class BeesSDK {
 
     if (!file.exists()) {
       runTargets(project, new String[] { "dist" });
-      file.refreshLocal(IFile.DEPTH_INFINITE, null);
 
       if (!file.exists()) {
         throw new FileNotFoundException("Could not find webapp.war file in build folder .");
@@ -83,7 +55,6 @@ public class BeesSDK {
     IFolder folder = project.getFolder("build");
     if (!folder.exists()) {
       runTargets(project, new String[] { "dist" });
-      folder.refreshLocal(IFolder.DEPTH_INFINITE, null);
 
       if (!folder.exists()) {
         throw new FileNotFoundException(
@@ -122,6 +93,25 @@ public class BeesSDK {
 
     runner.addBuildLogger(TimestampedLogger.class.getName());
     runner.run();
+  }
+
+  public AntRunner getRunLocallyTask(IProject project) throws Exception {
+    AntRunner runner = new AntRunner();
+
+    runner.setBuildFileLocation(getBuildXmlPath(project));
+    runner.setExecutionTargets(new String[] { "run" });
+
+    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    AuthInfo cachedAuthInfo = grandCentralService.getCachedAuthInfo(false);
+
+    String secretKey = "-Dbees.apiSecret=" + cachedAuthInfo.getAuth().secret_key;//$NON-NLS-1$
+    String authKey = " -Dbees.apiKey=" + cachedAuthInfo.getAuth().api_key;//$NON-NLS-1$
+    String appId = " -Dbees.appid=" + grandCentralService.getCachedPrimaryUser(false) + "/" + project.getName();//$NON-NLS-1$
+    String beesHome = " -Dbees.home=" + CBSdkActivator.getDefault().getBeesHome();
+    runner.setArguments(secretKey + authKey + appId + beesHome);
+
+    runner.addBuildLogger(TimestampedLogger.class.getName());
+    return runner;
   }
 
   /**
