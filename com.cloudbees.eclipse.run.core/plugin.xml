@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="com.cloudbees.eclipse.run.core.launchHook" name="launchHook" schema="schema/com.cloudbees.eclipse.run.core.launchhook.exsd"/>
+   <extension-point id="com.cloudbees.eclipse.run.core.processLifecycleHook" name="launchHook" schema="schema/com.cloudbees.eclipse.run.core.processLifecycleHook.exsd"/>
    <extension
          point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
-            delegate="com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationType"
+            delegate="com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchDelegate"
             id="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType"
             modes="run"
             name="CloudBees Application">
@@ -81,5 +81,12 @@
              id="com.cloudbees.eclipse.core.runcloud.local"
              name="Run@Cloud local">
        </moduleType>
+    </extension>
+    <extension
+          point="com.cloudbees.eclipse.run.core.processLifecycleHook">
+       <hook
+             defaultHandler="com.cloudbees.eclipse.core.WSTProjectLifecycleHook"
+             id="com.cloudbees.eclipse.run.core.wstHook">
+       </hook>
     </extension>
 </plugin>

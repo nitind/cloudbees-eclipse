@@ -1,19 +1,16 @@
 package com.cloudbees.eclipse.core;
 
-import static com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.wst.server.core.IModule;
-import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
-import com.cloudbees.eclipse.run.core.launchconfiguration.CBProjectRunnerService;
+import com.cloudbees.eclipse.run.core.launchconfiguration.CBProjectProcessService;
+import com.cloudbees.eclipse.run.core.util.CBRunUtil;
 
 public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
 
@@ -22,10 +19,12 @@ public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
 
   @Override
   public void stop(boolean force) {
-    String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
-    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-    CBProjectRunnerService.getInstance().stop(project);
-    setServerState(IServer.STATE_STOPPED);
+    try {
+      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+      CBProjectProcessService.getInstance().terminateProcess(projectName);
+    } catch (DebugException e) {
+      e.printStackTrace(); // FIXME
+    }
   }
 
   @Override
@@ -44,7 +43,7 @@ public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
       throws CoreException {
 
     String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
-    workingCopy.setAttribute(ATTR_CB_PROJECT_NAME, projectName);
+    CBRunUtil.addDefaultAttributes(workingCopy, projectName);
 
   }
 }

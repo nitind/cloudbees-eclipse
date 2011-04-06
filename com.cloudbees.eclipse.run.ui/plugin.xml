@@ -15,12 +15,7 @@
         categoryId="com.cloudbees.eclipse.run.ui.commands.category"
         defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.ReferenceHandler"
         id="com.cloudbees.eclipse.run.ui.commands.referenceToMenu"
-        name="Reference To CloudBess Menus">
-  </command>
-  <command
-        defaultHandler="com.cloudbees.eclipse.run.ui.console.TerminateHandler"
-        id="com.cloudbees.eclipse.run.ui.console.terminate"
-        name="Terminate">
+        name="Reference To CloudBees Menus">
   </command>
 	</extension>
  <extension
@@ -159,13 +154,6 @@
           id="com.cloudbees.eclipse.run.ui.server.image"
           typeIds="com.cloudbees.eclipse.core.runcloud.local">
     </image>
- </extension>
- <extension
-       point="com.cloudbees.eclipse.run.core.launchHook">
-    <hook
-          defaultHandler="com.cloudbees.eclipse.run.ui.launchconfiguration.LaunchHook"
-          id="com.cloudbees.eclipse.run.ui.launchconfiguration.hook">
-    </hook>
  </extension>
 
 </plugin>

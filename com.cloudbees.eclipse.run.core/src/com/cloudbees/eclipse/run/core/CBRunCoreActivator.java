@@ -3,6 +3,8 @@ package com.cloudbees.eclipse.run.core;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import com.cloudbees.eclipse.run.core.launchconfiguration.CBProjectProcessService;
+
 public class CBRunCoreActivator implements BundleActivator {
   
   //The plug-in ID
@@ -27,6 +29,7 @@ public class CBRunCoreActivator implements BundleActivator {
    * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
    */
   public void stop(BundleContext bundleContext) throws Exception {
+    CBProjectProcessService.getInstance().terminateAllProcesses();
     CBRunCoreActivator.context = null;
   }
 
