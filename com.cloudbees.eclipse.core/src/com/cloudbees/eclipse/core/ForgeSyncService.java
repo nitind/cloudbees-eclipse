@@ -5,11 +5,14 @@ import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.osgi.framework.Bundle;
 
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
+import com.cloudbees.eclipse.core.forge.api.ForgeSync.ChangeSetPathItem;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 
 /**
  * Main service for syncing Forge repositories and Eclipse repository entries. Currently supported providers are EGit,
@@ -43,6 +46,10 @@ public class ForgeSyncService {
     }
     List<String> status = new ArrayList<String>();
     for (ForgeSync provider : this.providers) {
+      if (monitor.isCanceled()) {
+        throw new OperationCanceledException();
+      }
+
       try {
         ForgeSync.ACTION act = provider.sync(type, props, new SubProgressMonitor(monitor, ticksPerProcess));
         if (!ForgeSync.ACTION.SKIPPED.equals(act)) {
@@ -54,6 +61,29 @@ public class ForgeSyncService {
     }
 
     return status.toArray(new String[status.size()]);
+  }
+
+  public boolean openRemoteFile(final JenkinsScmConfig scmConfig, final ChangeSetPathItem item,
+      final IProgressMonitor monitor) throws CloudBeesException {
+    int ticksPerProcess = 100 / Math.max(this.providers.size(), 1);
+    if (ticksPerProcess <= 0) {
+      ticksPerProcess = 1;
+    }
+    for (ForgeSync provider : this.providers) {
+      if (monitor.isCanceled()) {
+        throw new OperationCanceledException();
+      }
+      try {
+        boolean opened = provider.openRemoteFile(scmConfig, item, new SubProgressMonitor(monitor, ticksPerProcess));
+        if (opened) {
+          return true;
+        }
+      } catch (Exception e) {
+        CloudBeesCorePlugin.getDefault().getLogger().error(e);
+      }
+    }
+
+    return false;
   }
 
 }

@@ -27,7 +27,9 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
@@ -41,10 +43,12 @@ import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
+import com.cloudbees.eclipse.core.forge.api.ForgeSync.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobProperty;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 import com.cloudbees.eclipse.ui.views.build.BuildEditorInput;
 import com.cloudbees.eclipse.ui.views.build.BuildPart;
 import com.cloudbees.eclipse.ui.views.jobs.JobsView;
@@ -317,7 +321,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   public List<JenkinsInstance> loadDevAtCloudInstances(final IProgressMonitor monitor) throws CloudBeesException {
 
     List<JenkinsInstance> instances = CloudBeesCorePlugin.getDefault().getGrandCentralService()
-        .loadDevAtCloudInstances(monitor);
+    .loadDevAtCloudInstances(monitor);
 
     for (JenkinsInstance ni : instances) {
       if (getJenkinsServiceForUrl(ni.url) == null) {
@@ -340,7 +344,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
     Collections.sort(list);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
-        .setValue(PreferenceConstants.P_JENKINS_INSTANCES, JenkinsInstance.encode(list));
+    .setValue(PreferenceConstants.P_JENKINS_INSTANCES, JenkinsInstance.encode(list));
   }
 
   public void removeJenkinsInstance(final JenkinsInstance ni) {
@@ -350,12 +354,12 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     List<JenkinsInstance> list = loadManualJenkinsInstances();
     list.remove(ni);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
-        .setValue(PreferenceConstants.P_JENKINS_INSTANCES, JenkinsInstance.encode(list));
+    .setValue(PreferenceConstants.P_JENKINS_INSTANCES, JenkinsInstance.encode(list));
   }
 
   public void reloadAllJenkins(final boolean userAction) {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job(
-        "Loading DEV@Cloud & Jenkins instances") {
+    "Loading DEV@Cloud & Jenkins instances") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
         if (!getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
@@ -464,7 +468,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   public void showJobs(final String viewUrl, final boolean userAction)
-      throws CloudBeesException {
+  throws CloudBeesException {
     // CloudBeesUIPlugin.getDefault().getLogger().info("Show jobs: " + viewUrl);
     System.out.println("Show jobs: " + viewUrl);
 
@@ -484,8 +488,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
             public void run() {
               try {
                 PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-                    .showView(JobsView.ID, Long.toString(getJenkinsServiceForUrl(viewUrl).getUrl().hashCode()),
-                        userAction ? IWorkbenchPage.VIEW_ACTIVATE : IWorkbenchPage.VIEW_CREATE);
+                .showView(JobsView.ID, Long.toString(getJenkinsServiceForUrl(viewUrl).getUrl().hashCode()),
+                    userAction ? IWorkbenchPage.VIEW_ACTIVATE : IWorkbenchPage.VIEW_CREATE);
               } catch (PartInitException e) {
                 showError("Failed to show Jobs view", e);
               }
@@ -579,8 +583,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           //JobDetailsForm.ID, Utils.toB64(jobUrl), IWorkbenchPage.VIEW_ACTIVATE
           // IEditorDescriptor descr = PlatformUI.getWorkbench().getEditorRegistry().findEditor(JobDetailsForm.ID);
 
-          PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-              .openEditor(new BuildEditorInput(el), BuildPart.ID);
+          getActiveWindow().getActivePage().openEditor(new BuildEditorInput(el), BuildPart.ID);
 
         } catch (PartInitException e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
@@ -589,6 +592,18 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       }
     }
 
+  }
+
+  public static IWorkbenchWindow getActiveWindow() {
+    IWorkbench workbench = PlatformUI.getWorkbench();
+    IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
+    if (window == null) {
+      IWorkbenchWindow[] windows = workbench.getWorkbenchWindows();
+      if (windows.length > 0) {
+        window = windows[0];
+      }
+    }
+    return window;
   }
 
   public void loadAccountCredentials() throws CloudBeesException {
@@ -640,7 +655,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     } else {
       getPreferenceStore().putValue(PreferenceConstants.P_PASSWORD, text);
     }
-    // Call programmatically as SecurePreferences does not provide change listeners          
+    // Call programmatically as SecurePreferences does not provide change listeners
     CloudBeesUIPlugin.getDefault().fireSecureStorageChanged();
 
   }
@@ -650,6 +665,39 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       return SecurePreferencesFactory.getDefault().get(PreferenceConstants.P_PASSWORD, "");
     }
     return getPreferenceStore().getString(PreferenceConstants.P_PASSWORD);
+  }
+
+  public void openRemoteFile(final String jobUrl, final ChangeSetPathItem item) {
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Jenkins jobs") {
+      @Override
+      protected IStatus run(final IProgressMonitor monitor) {
+        try {
+          JenkinsService jenkins = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(jobUrl);
+
+          if (monitor.isCanceled()) {
+            throw new OperationCanceledException();
+          }
+
+          JenkinsScmConfig scmConfig = jenkins.getJenkinsScmConfig(jobUrl, monitor);
+
+          if (monitor.isCanceled()) {
+            throw new OperationCanceledException();
+          }
+
+          boolean opened = CloudBeesCorePlugin.getDefault().getGrandCentralService()
+          .openRemoteFile(scmConfig, item, monitor);
+
+          return opened ? Status.OK_STATUS : new Status(IStatus.INFO, CloudBeesUIPlugin.PLUGIN_ID, "Can't open "
+              + item.path);
+        } catch (CloudBeesException e) {
+          CloudBeesUIPlugin.getDefault().getLogger().error(e);
+          return new Status(Status.ERROR, CloudBeesUIPlugin.PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
+        }
+      }
+    };
+
+    job.setUser(true);
+    job.schedule();
   }
 
 }

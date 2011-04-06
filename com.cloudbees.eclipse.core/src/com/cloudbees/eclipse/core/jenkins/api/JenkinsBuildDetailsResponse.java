@@ -11,27 +11,10 @@ import com.google.gson.annotations.Expose;
  */
 public class JenkinsBuildDetailsResponse extends BaseJenkinsResponse {
 
-  public Action[] actions;
-
-
   @Expose(deserialize = false, serialize = false)
   public final static String QTREE = QTreeFactory.create(JenkinsBuildDetailsResponse.class);
 
-  public static class Action {
-
-    // Can be null
-    public Cause[] causes;
-
-    // Can be null. junit
-    public Long failCount;
-    public Long skipCount;
-    public Long totalCount;
-    public String urlName;
-
-    public static class Cause {
-      public String shortDescription;
-    }
-  }
+  public Action[] actions;
 
   public Artifact[] artifacts;
 
@@ -50,14 +33,31 @@ public class JenkinsBuildDetailsResponse extends BaseJenkinsResponse {
 
   public ChangeSet changeSet;
 
+  public Author[] culprits;
+
+  public static class Action {
+
+    // Can be null
+    public Cause[] causes;
+
+    // Can be null. junit
+    public Long failCount;
+    public Long skipCount;
+    public Long totalCount;
+    public String urlName;
+
+    public static class Cause {
+      public String shortDescription;
+    }
+  }
+
   public static class ChangeSet {
 
     public ChangeSetItem[] items;
     public String kind; // hg
 
-    public Author[] culprits;
-
     public static class ChangeSetItem {
+      public String id;
       public String[] addedPaths;
       public Author author;
       public String date;
@@ -65,6 +65,7 @@ public class JenkinsBuildDetailsResponse extends BaseJenkinsResponse {
       public String[] modifiedPaths;
       public Boolean merge;
       public String msg;
+      public String comment;
       //public String node;
       public ChangePath[] paths;
       public long rev;
@@ -74,12 +75,11 @@ public class JenkinsBuildDetailsResponse extends BaseJenkinsResponse {
         public String file;
       }
     }
+  }
 
-    public static class Author {
-      public String absoluteUrl;
-      public String fullName;
-    }
-
+  public static class Author {
+    public String absoluteUrl;
+    public String fullName;
   }
 
   public static class Artifact {

@@ -7,11 +7,12 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.team.ui.TeamImages;
 
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet.Author;
+import com.cloudbees.eclipse.core.forge.api.ForgeSync.ChangeSetPathItem;
+import com.cloudbees.eclipse.core.forge.api.ForgeSync.ChangeSetPathItem.TYPE;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Author;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet.ChangeSetItem;
 import com.cloudbees.eclipse.ui.CBImages;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
-import com.cloudbees.eclipse.ui.views.build.RecentChangesContentProvider.PathItem.TYPE;
 
 public class RecentChangesLabelProvider extends LabelProvider {
 
@@ -24,24 +25,28 @@ public class RecentChangesLabelProvider extends LabelProvider {
 
   public RecentChangesLabelProvider() {
     super();
-    imgAdded = new DecorationOverlayIcon(CloudBeesUIPlugin.getImage(CBImages.IMG_FILE),
+    this.imgAdded = new DecorationOverlayIcon(CloudBeesUIPlugin.getImage(CBImages.IMG_FILE),
         CloudBeesUIPlugin.getImageDescription(CBImages.IMG_FILE_ADDED), IDecoration.BOTTOM_RIGHT).createImage();
-    imgDeleted = new DecorationOverlayIcon(CloudBeesUIPlugin.getImage(CBImages.IMG_FILE),
+    this.imgDeleted = new DecorationOverlayIcon(CloudBeesUIPlugin.getImage(CBImages.IMG_FILE),
         CloudBeesUIPlugin.getImageDescription(CBImages.IMG_FILE_DELETED), IDecoration.BOTTOM_RIGHT).createImage();
-    imgModified = new DecorationOverlayIcon(CloudBeesUIPlugin.getImage(CBImages.IMG_FILE),
+    this.imgModified = new DecorationOverlayIcon(CloudBeesUIPlugin.getImage(CBImages.IMG_FILE),
         CloudBeesUIPlugin.getImageDescription(CBImages.IMG_FILE_MODIFIED), IDecoration.BOTTOM_RIGHT).createImage();
-    imgChangeSet = IMG_DESC_CHANGESET.createImage();
+    this.imgChangeSet = this.IMG_DESC_CHANGESET.createImage();
 
   }
 
   @Override
-  public String getText(Object element) {
+  public String getText(final Object element) {
     if (element instanceof ChangeSetItem) {
       Author author = ((ChangeSetItem) element).author;
       String msg = ((ChangeSetItem) element).msg;// + " rev" + ((ChangeSetItem) element).rev;
       if (msg == null || msg.length() == 0) {
+        msg = ((ChangeSetItem) element).comment;
+      }
+      if (msg == null || msg.length() == 0) {
         msg = "no message";
       }
+      msg = msg.trim();
       String authorPart = "";
       if (author != null && author.fullName != null && author.fullName.length() > 0) {
         authorPart = "[" + author.fullName + "] ";
@@ -49,28 +54,28 @@ public class RecentChangesLabelProvider extends LabelProvider {
       return authorPart + msg;
     }
 
-    if (element instanceof RecentChangesContentProvider.PathItem) {
-      String path = ((RecentChangesContentProvider.PathItem) element).path;
+    if (element instanceof ChangeSetPathItem) {
+      String path = ((ChangeSetPathItem) element).path;
       return path;
     }
     return super.getText(element);
   }
 
   @Override
-  public Image getImage(Object element) {
+  public Image getImage(final Object element) {
     if (element instanceof ChangeSetItem) {
-      return imgChangeSet;
+      return this.imgChangeSet;
     }
-    if (element instanceof RecentChangesContentProvider.PathItem) {
-      TYPE type = ((RecentChangesContentProvider.PathItem) element).type;
+    if (element instanceof ChangeSetPathItem) {
+      TYPE type = ((ChangeSetPathItem) element).type;
       if (type == TYPE.ADDED) {
-        return imgAdded;
+        return this.imgAdded;
       }
       if (type == TYPE.MODIFIED) {
-        return imgModified;
+        return this.imgModified;
       }
       if (type == TYPE.DELETED) {
-        return imgDeleted;
+        return this.imgDeleted;
       }
       return CloudBeesUIPlugin.getImage(CBImages.IMG_FILE);
     }
@@ -80,14 +85,14 @@ public class RecentChangesLabelProvider extends LabelProvider {
 
   @Override
   public void dispose() {
-    imgChangeSet.dispose();
-    imgAdded.dispose();
-    imgDeleted.dispose();
-    imgModified.dispose();
-    imgChangeSet = null;
-    imgAdded = null;
-    imgDeleted = null;
-    imgModified = null;
+    this.imgChangeSet.dispose();
+    this.imgAdded.dispose();
+    this.imgDeleted.dispose();
+    this.imgModified.dispose();
+    this.imgChangeSet = null;
+    this.imgAdded = null;
+    this.imgDeleted = null;
+    this.imgModified = null;
     super.dispose();
   }
 

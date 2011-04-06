@@ -4,11 +4,18 @@ import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.egit.core.Activator;
+import org.eclipse.egit.core.RepositoryCache;
+import org.eclipse.egit.ui.internal.CompareUtils;
 import org.eclipse.egit.ui.internal.clone.GitCloneWizard;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepository;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
@@ -16,11 +23,17 @@ import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.team.core.history.IFileRevision;
+import org.eclipse.team.internal.ui.Utils;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
+import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 /**
  * Forge repo sync provider for EGIT
@@ -29,7 +42,7 @@ import com.cloudbees.eclipse.core.forge.api.ForgeSync;
  */
 public class ForgeEGitSync implements ForgeSync {
 
-  public ACTION sync(TYPE type, Properties props, final IProgressMonitor monitor) throws CloudBeesException {
+  public ACTION sync(final TYPE type, final Properties props, final IProgressMonitor monitor) throws CloudBeesException {
 
     if (!ForgeSync.TYPE.GIT.equals(type)) {
       return ACTION.SKIPPED;
@@ -149,4 +162,78 @@ public class ForgeEGitSync implements ForgeSync {
     return false;
   }
 
+  public boolean openRemoteFile(final JenkinsScmConfig scmConfig, final ChangeSetPathItem item,
+      final IProgressMonitor monitor) {
+    for (JenkinsScmConfig.Repository repo : scmConfig.repos) {
+      if (!ForgeSync.TYPE.GIT.equals(repo.type)) {
+        continue;
+      }
+
+      boolean opened = openRemoteFile_(repo.url, item, monitor);
+      if (opened) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private boolean openRemoteFile_(final String repo, final ChangeSetPathItem item, final IProgressMonitor monitor) {
+    try {
+      // TODO extract repo search into separate method
+      RepositoryCache repositoryCache = org.eclipse.egit.core.Activator.getDefault().getRepositoryCache();
+      Repository repository = null;
+      URIish proposal = new URIish(repo);
+      List<String> reps = Activator.getDefault().getRepositoryUtil().getConfiguredRepositories();
+      all: for (String rep : reps) {
+        try {
+
+          Repository fr = repositoryCache.lookupRepository(new File(rep));
+          List<RemoteConfig> allRemotes = RemoteConfig.getAllRemoteConfigs(fr.getConfig());
+          for (RemoteConfig remo : allRemotes) {
+            List<URIish> uris = remo.getURIs();
+            for (URIish uri : uris) {
+              System.out.println("Checking URI: " + uri + " - " + proposal.equals(uri));
+              if (proposal.equals(uri)) {
+                repository = fr;
+                break all;
+              }
+            }
+          }
+        } catch (Exception e) {
+          System.out.println(e); // TODO
+          //          CloudBeesCorePlugin.getDefault().getLogger().error(e);
+        }
+      }
+
+      System.out.println("Repo: " + repository);
+
+      if (repository == null) {
+        throw new CloudBeesException("Failed to find mapped repository for " + repo);
+      }
+
+      ObjectId commitId = ObjectId.fromString(item.parent.id);
+      RevWalk rw = new RevWalk(repository);
+      RevCommit rc = rw.parseCommit(commitId);
+      final IFileRevision rev = CompareUtils.getFileRevision(item.path, rc, repository, null);
+
+      final IEditorPart[] editor = new IEditorPart[1];
+
+      PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+        public void run() {
+          IWorkbenchPage activePage = CloudBeesUIPlugin.getActiveWindow().getActivePage();
+          try {
+            editor[0] = Utils.openEditor(activePage, rev, monitor);
+          } catch (CoreException e) {
+            e.printStackTrace(); // TODO
+          }
+        }
+      });
+
+      return editor[0] != null;
+    } catch (Exception e) {
+      e.printStackTrace(); // TODO: handle exception
+      return false;
+    }
+  }
 }
