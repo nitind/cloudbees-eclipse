@@ -6,20 +6,31 @@ import java.util.List;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
+import com.cloudbees.eclipse.core.forge.api.ForgeSync.ChangeSetPathItem;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet.ChangeSetItem;
 
 public class RecentChangesContentProvider implements ITreeContentProvider {
 
+  private JenkinsBuildDetailsResponse buildDetails;
   private ChangeSetItem[] model;
 
   public void dispose() {
     this.model = null;
+    this.buildDetails = null;
+  }
+
+  public JenkinsBuildDetailsResponse getBuildDetails() {
+    return this.buildDetails;
   }
 
   public void inputChanged(final Viewer viewer, final Object oldInput, final Object newInput) {
 
     if (newInput instanceof ChangeSetItem[]) {
       this.model = (ChangeSetItem[]) newInput;
+    } else if (newInput instanceof JenkinsBuildDetailsResponse) {
+      this.buildDetails = (JenkinsBuildDetailsResponse) newInput;
+      this.model = ((JenkinsBuildDetailsResponse) newInput).changeSet.items;
     }
 
   }
@@ -41,9 +52,12 @@ public class RecentChangesContentProvider implements ITreeContentProvider {
       return (ChangeSetItem[]) parentElement;
     }
 
-    if (parentElement instanceof ChangeSetItem) {
+    if (parentElement instanceof JenkinsBuildDetailsResponse) {
+      return ((JenkinsBuildDetailsResponse) parentElement).changeSet.items;
+    }
 
-      List<PathItem> ret = new ArrayList<RecentChangesContentProvider.PathItem>();
+    if (parentElement instanceof ChangeSetItem) {
+      List<ChangeSetPathItem> ret = new ArrayList<ChangeSetPathItem>();
       ChangeSetItem el = (ChangeSetItem) parentElement;
       String[] added = el.addedPaths;
       String[] removed = el.deletedPaths;
@@ -52,41 +66,44 @@ public class RecentChangesContentProvider implements ITreeContentProvider {
 
       if (added != null) {
         for (int i = 0; i < added.length; i++) {
-          ret.add(new PathItem(el, PathItem.TYPE.ADDED, added[i]));
+          ret.add(new ChangeSetPathItem(el, ChangeSetPathItem.TYPE.ADDED, added[i]));
         }
       }
       if (removed != null) {
         for (int i = 0; i < removed.length; i++) {
-          ret.add(new PathItem(el, PathItem.TYPE.DELETED, removed[i]));
+          ret.add(new ChangeSetPathItem(el, ChangeSetPathItem.TYPE.DELETED, removed[i]));
         }
       }
       if (modified != null) {
         for (int i = 0; i < modified.length; i++) {
-          ret.add(new PathItem(el, PathItem.TYPE.MODIFIED, modified[i]));
+          ret.add(new ChangeSetPathItem(el, ChangeSetPathItem.TYPE.MODIFIED, modified[i]));
         }
       }
       if (changes != null) {
         for (int i = 0; i < changes.length; i++) {
           ChangeSetItem.ChangePath change = changes[i];
 
-          PathItem.TYPE type = PathItem.TYPE.MODIFIED;
+          ChangeSetPathItem.TYPE type = ChangeSetPathItem.TYPE.MODIFIED;
           if ("add".equalsIgnoreCase(change.editType)) {
-            type = PathItem.TYPE.ADDED;
+            type = ChangeSetPathItem.TYPE.ADDED;
           } else if ("delete".equalsIgnoreCase(change.editType)) {
-            type = PathItem.TYPE.DELETED;
+            type = ChangeSetPathItem.TYPE.DELETED;
           }
 
-          ret.add(new PathItem(el, type, change.file));
+          ret.add(new ChangeSetPathItem(el, type, change.file));
         }
       }
-      return ret.toArray(new PathItem[0]);
+      return ret.toArray(new ChangeSetPathItem[ret.size()]);
     }
+
+    System.out.println("Unknown parent: " + parentElement);
+
     return null;
   }
 
   public Object getParent(final Object element) {
-    if (element instanceof PathItem) {
-      return ((PathItem) element).parent;
+    if (element instanceof ChangeSetPathItem) {
+      return ((ChangeSetPathItem) element).parent;
     }
     return null;
   }
@@ -111,25 +128,12 @@ public class RecentChangesContentProvider implements ITreeContentProvider {
     if (element instanceof ChangeSetItem[]) {
       return ((ChangeSetItem[]) element).length > 0;
     }
-    return false;
-  }
-
-  static class PathItem {
-    enum TYPE {
-      ADDED, DELETED, MODIFIED
-    };
-
-    TYPE type;
-    String path;
-    ChangeSetItem parent;
-
-    public PathItem(final ChangeSetItem parent,
-        final com.cloudbees.eclipse.ui.views.build.RecentChangesContentProvider.PathItem.TYPE added, final String string) {
-      this.type = added;
-      this.path = string;
-      this.parent = parent;
+    if (element instanceof JenkinsBuildDetailsResponse) {
+      return ((JenkinsBuildDetailsResponse) element).changeSet != null
+      && ((JenkinsBuildDetailsResponse) element).changeSet.items != null
+      && ((JenkinsBuildDetailsResponse) element).changeSet.items.length > 0;
     }
-
+    return false;
   }
 
   public ChangeSetItem[] getModel() {

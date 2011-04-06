@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
+import com.cloudbees.eclipse.core.forge.api.ForgeSync.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.gc.api.AccountNameRequest;
 import com.cloudbees.eclipse.core.gc.api.AccountNameResponse;
 import com.cloudbees.eclipse.core.gc.api.AccountNamesRequest;
@@ -20,6 +21,7 @@ import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusRequest;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse;
 import com.cloudbees.eclipse.core.gc.api.KeysUsingAuthRequest;
 import com.cloudbees.eclipse.core.gc.api.KeysUsingAuthResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.google.gson.Gson;
 
@@ -302,6 +304,11 @@ public class GrandCentralService {
    @Deprecated
    public void addForgeSyncProvider(final ForgeSync provider) {
      this.forgeSyncService.addProvider(provider);
+   }
+
+   public boolean openRemoteFile(final JenkinsScmConfig scmConfig, final ChangeSetPathItem item,
+       final IProgressMonitor monitor) throws CloudBeesException {
+     return this.forgeSyncService.openRemoteFile(scmConfig, item, monitor);
    }
 
    public List<JenkinsInstance> loadDevAtCloudInstances(final IProgressMonitor monitor) throws CloudBeesException {
