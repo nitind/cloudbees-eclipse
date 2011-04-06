@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/cloudbees-api-client-1.0.0-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/annotations-api-6.0.26.jar"/>
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/ant-1.7.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/ant-launcher-1.7.0.jar"/>
