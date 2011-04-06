@@ -11,31 +11,34 @@ import org.eclipse.core.runtime.Path;
 import org.osgi.framework.Bundle;
 
 public class CBRunCoreScripts {
-  
+
   /**
-   * Copies the sample-webapp project to user workspace directory 
+   * Copies the sample-webapp project to user workspace directory
    * 
-   * @param workspacePath user workspace path
-   * @param projectName name of the project
+   * @param workspacePath
+   *          user workspace path
+   * @param projectName
+   *          name of the project
    * @throws IOException
    * @throws CoreException
    */
-  public static void executeCopySampleWebAppScript(String workspacePath, String projectName) throws IOException, CoreException {
+  public static void executeCopySampleWebAppScript(String workspacePath, String projectName) throws IOException,
+      CoreException {
 
     Map<String, String> properties = new HashMap<String, String>();
     properties.put("workspacePath", workspacePath);
     properties.put("projectName", projectName);
-    
+
     Bundle bundle = CBRunCoreActivator.getContext().getBundle();
     Path path = new Path("scripts/copy-project.xml");
     String scriptLocation = FileLocator.toFileURL(FileLocator.find(bundle, path, null)).getFile();
-    
+
     AntRunner antRunner = new AntRunner();
     antRunner.setBuildFileLocation(scriptLocation);
-    antRunner.setExecutionTargets(new String [] { "copy-sample-webapp" });
+    antRunner.setExecutionTargets(new String[] { "copy-sample-webapp" });
     antRunner.addUserProperties(properties);
-    
+
     antRunner.run();
   }
-  
+
 }

@@ -41,6 +41,7 @@ public class BeesSDK {
 
     if (!file.exists()) {
       runTargets(project, new String[] { "dist" });
+      file.refreshLocal(IFile.DEPTH_INFINITE, null);
 
       if (!file.exists()) {
         throw new FileNotFoundException("Could not find webapp.war file in build folder .");
@@ -55,6 +56,7 @@ public class BeesSDK {
     IFolder folder = project.getFolder("build");
     if (!folder.exists()) {
       runTargets(project, new String[] { "dist" });
+      folder.refreshLocal(IFile.DEPTH_INFINITE, null);
 
       if (!folder.exists()) {
         throw new FileNotFoundException(

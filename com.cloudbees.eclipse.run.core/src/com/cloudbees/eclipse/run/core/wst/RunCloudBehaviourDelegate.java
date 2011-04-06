@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.core;
+package com.cloudbees.eclipse.run.core.wst;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
