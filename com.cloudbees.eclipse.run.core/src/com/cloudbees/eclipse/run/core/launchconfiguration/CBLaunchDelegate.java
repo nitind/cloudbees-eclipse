@@ -36,7 +36,7 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
   }
 
   private ILaunchConfiguration addDebugAttributes(ILaunchConfiguration configuration) throws CoreException {
-    ILaunchConfigurationWorkingCopy copy = configuration.copy(configuration.getName());
+    ILaunchConfigurationWorkingCopy copy = configuration.copy(configuration.getName() + " debug");
     String vmargs = "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8002";
     copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, vmargs);
     return copy;
