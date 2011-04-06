@@ -43,8 +43,8 @@
     <extension
           point="org.eclipse.wst.server.core.serverTypes">
        <serverType
-             behaviourClass="com.cloudbees.eclipse.core.RunCloudBehaviourDelegate"
-             class="com.cloudbees.eclipse.core.RunCloudServerDelegate"
+             behaviourClass="com.cloudbees.eclipse.run.core.wst.RunCloudBehaviourDelegate"
+             class="com.cloudbees.eclipse.run.core.wst.RunCloudServerDelegate"
              description="Run@Cloud cloud instance"
              hasConfiguration="false"
              id="com.cloudbees.eclipse.core.runcloud"
@@ -57,8 +57,8 @@
              supportsRemoteHosts="true">
        </serverType>
        <serverType
-             behaviourClass="com.cloudbees.eclipse.core.RunCloudLocalBehaviourDelegate"
-             class="com.cloudbees.eclipse.core.RunCloudServerDelegate"
+             behaviourClass="com.cloudbees.eclipse.run.core.wst.RunCloudLocalBehaviourDelegate"
+             class="com.cloudbees.eclipse.run.core.wst.RunCloudServerDelegate"
              description="Run@Cloud Local instance"
              hasConfiguration="false"
              id="com.cloudbees.eclipse.core.runcloud.local"
@@ -85,7 +85,7 @@
     <extension
           point="com.cloudbees.eclipse.run.core.processLifecycleHook">
        <hook
-             defaultHandler="com.cloudbees.eclipse.core.WSTProjectLifecycleHook"
+             defaultHandler="com.cloudbees.eclipse.run.core.wst.WSTProjectLifecycleHook"
              id="com.cloudbees.eclipse.run.core.wstHook">
        </hook>
     </extension>

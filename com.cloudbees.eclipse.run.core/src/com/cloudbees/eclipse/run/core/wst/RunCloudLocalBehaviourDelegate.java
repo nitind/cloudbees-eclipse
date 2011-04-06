@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.core;
+package com.cloudbees.eclipse.run.core.wst;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;

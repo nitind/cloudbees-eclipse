@@ -19,15 +19,15 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
     CBProjectProcessService.getInstance().addProcess(projectName, launch.getProcesses()[0]);
     DebugPlugin.getDefault().getLaunchManager().addLaunchListener(new TerminateListener(projectName));
   }
-    
+
   private class TerminateListener implements ILaunchesListener2 {
-    
+
     private final String projectName;
-    
+
     public TerminateListener(String projectName) {
       this.projectName = projectName;
     }
-    
+
     public void launchesRemoved(ILaunch[] launches) {
     }
 

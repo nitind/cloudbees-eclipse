@@ -15,27 +15,27 @@ import org.eclipse.debug.core.model.IProcess;
 import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
 
 public class CBProjectProcessService {
-  
+
   private static CBProjectProcessService service;
-  
+
   private final Map<String, IProcess> processMap;
-  
+
   public CBProjectProcessService() {
     this.processMap = new HashMap<String, IProcess>();
   }
-  
+
   public static CBProjectProcessService getInstance() {
-    if(service == null) {
+    if (service == null) {
       service = new CBProjectProcessService();
     }
     return service;
   }
-  
+
   public void addProcess(String name, IProcess process) {
-    processMap.put(name, process);
+    this.processMap.put(name, process);
     invokeStartHooks(name);
   }
-  
+
   /**
    * Terminate ant process related to the given project name
    * 
@@ -43,47 +43,47 @@ public class CBProjectProcessService {
    * @throws DebugException
    */
   public void terminateProcess(String projectName) throws DebugException {
-    IProcess process = processMap.get(projectName);
-    if(process != null && process.canTerminate()) {
+    IProcess process = this.processMap.get(projectName);
+    if (process != null && process.canTerminate()) {
       invokeStopHooks(projectName);
       process.terminate();
     }
-    processMap.remove(projectName);
+    this.processMap.remove(projectName);
   }
-  
+
   /**
    * If the process was terminated by system, then remove this process from the map.
    * 
    * @param projectName
    */
   public void removeProcess(String projectName) {
-    if(processMap.containsKey(projectName)) {
-      processMap.remove(projectName);
+    if (this.processMap.containsKey(projectName)) {
+      this.processMap.remove(projectName);
       invokeStopHooks(projectName);
     }
   }
-  
+
   public void terminateAllProcesses() throws DebugException {
-    for(IProcess process : processMap.values()) {
+    for (IProcess process : this.processMap.values()) {
       process.terminate();
     }
   }
-  
+
   public void invokeStartHooks(String projectName) {
-    for(CBProjectProcessLifecycleHook hook : getLaunchHooks()) {
+    for (CBProjectProcessLifecycleHook hook : getLaunchHooks()) {
       hook.onStart(projectName);
     }
   }
-  
+
   public void invokeStopHooks(String projectName) {
-    for(CBProjectProcessLifecycleHook hook : getLaunchHooks()) {
+    for (CBProjectProcessLifecycleHook hook : getLaunchHooks()) {
       hook.onStop(projectName);
     }
   }
-  
+
   private List<CBProjectProcessLifecycleHook> getLaunchHooks() {
     List<CBProjectProcessLifecycleHook> hooks = new ArrayList<CBProjectProcessLifecycleHook>();
-    
+
     IExtension[] extensions = Platform.getExtensionRegistry()
         .getExtensionPoint(CBRunCoreActivator.PLUGIN_ID, "processLifecycleHook").getExtensions();
 
@@ -99,7 +99,7 @@ public class CBProjectProcessService {
         }
       }
     }
-    
+
     return hooks;
   }
 
