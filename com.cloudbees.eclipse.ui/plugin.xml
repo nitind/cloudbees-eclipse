@@ -42,80 +42,9 @@
             <action
                 id="com.cloudbees.eclipse.actions.openPrefs"
                 label="Configure CloudBees Account"
-                class="com.cloudbees.eclipse.ui.internal.actions.ConfigureCloudBeesAction">
+                class="com.cloudbees.eclipse.ui.internal.action.ConfigureCloudBeesAction">
             </action>
         </actionSet>
-    </extension>
-    
-    <extension
-        point="org.eclipse.ui.views">
-        <category
-            name="CloudBees"
-            id="com.cloudbees.eclipse">
-        </category>
-        <view
-            name="CloudBees"
-            icon="icons/16x16/cb_plain.png"
-            category="com.cloudbees.eclipse"
-            class="com.cloudbees.eclipse.ui.views.instances.JenkinsTreeView"
-            id="com.cloudbees.eclipse.ui.views.instances.JenkinsTreeView">
-        </view>
-        <view
-            name="Build Jobs"
-            icon="icons/jobs_view6.png"
-            category="com.cloudbees.eclipse"
-            class="com.cloudbees.eclipse.ui.views.jobs.JobsView"
-            id="com.cloudbees.eclipse.ui.views.JobsView"
-            allowMultiple="true">
-        </view>
-    </extension>
-    
-    <extension
-        point="org.eclipse.ui.perspectiveExtensions">
-        <perspectiveExtension
-            targetID="org.eclipse.jdt.ui.JavaPerspective">
-            <view
-                ratio="0.7"
-                relative="org.eclipse.jdt.ui.PackageExplorer"
-                relationship="bottom"
-                id="com.cloudbees.eclipse.ui.views.instances.JenkinsTreeView">
-            </view>
-        </perspectiveExtension>
-        <perspectiveExtension
-            targetID="org.eclipse.ui.resourcePerspective">
-            <view
-                ratio="0.7"
-                relative="org.eclipse.ui.views.ContentOutline"
-                relationship="stack"
-                id="com.cloudbees.eclipse.ui.views.instances.JenkinsTreeView">
-            </view>
-        </perspectiveExtension>
-        <perspectiveExtension
-            targetID="org.eclipse.jdt.ui.JavaPerspective">
-            <view
-                relative="org.eclipse.ui.views.ProblemView"
-                relationship="stack"
-                id="com.cloudbees.eclipse.ui.views.JobsView">
-            </view>
-        </perspectiveExtension>
-        <perspectiveExtension
-            targetID="org.eclipse.ui.resourcePerspective">
-            <view
-                relative="org.eclipse.ui.views.TaskList"
-                relationship="stack"
-                id="com.cloudbees.eclipse.ui.views.JobsView">
-            </view>
-        </perspectiveExtension>
-    </extension>
-    
-    <extension
-        point="org.eclipse.ui.editors">
-        <editor
-            class="com.cloudbees.eclipse.ui.views.build.BuildPart"
-            id="com.cloudbees.eclipse.ui.views.build.BuildPart"
-            icon="icons/epl/debugt_obj.png"
-            name="Build details">
-        </editor>
     </extension>
     
     <extension
@@ -178,7 +107,7 @@
                 </and>
             </visibility>
             <action
-                class="com.cloudbees.eclipse.ui.action.ToggleCloudBeesSupportAction"
+                class="com.cloudbees.eclipse.ui.internal.action.ToggleCloudBeesSupportAction"
                 enablesFor="1"
                 id="com.cloudbees.eclipse.ui.popup.addNatureAction"
                 label="%add.cloudbees.support.action.label"
@@ -204,7 +133,7 @@
                 </and>
             </visibility>
             <action
-                class="com.cloudbees.eclipse.ui.action.ToggleCloudBeesSupportAction"
+                class="com.cloudbees.eclipse.ui.internal.action.ToggleCloudBeesSupportAction"
                 enablesFor="1"
                 id="com.cloudbees.eclipse.ui.popup.removeNatureAction"
                 label="%remove.cloudbees.support.action.label"

@@ -3,7 +3,7 @@
 
   	<extensionContent id="comcloudbeeseclipseui-introExtension" style="css/intro.css" name="CloudBees Eclipse Toolkit" path="overview/@">
 		<group style-id="content-group" id="comcloudbeeseclipseui-introLink-group">
-			<link label="CloudBees Eclipse Toolkit" url="http://org.eclipse.ui.intro/runAction?pluginId=com.cloudbees.eclipse.ui&amp;class=com.cloudbees.eclipse.ui.internal.actions.ConfigureCloudBeesAction&amp;id=com.cloudbees.eclipse.introconf" id="comcloudbeeseclipseui-introLink" style-id="content-link">
+			<link label="CloudBees Eclipse Toolkit" url="http://org.eclipse.ui.intro/runAction?pluginId=com.cloudbees.eclipse.ui&amp;class=com.cloudbees.eclipse.ui.internal.action.ConfigureCloudBeesAction&amp;id=com.cloudbees.eclipse.introconf" id="comcloudbeeseclipseui-introLink" style-id="content-link">
 			<text>CloudBees DEV@cloud provides a fully integrated development infrastructure featuring a Jenkins-based continuous integration available as a SaaS, Git and SVN repositories and much more!
 			Click here to configure CloudBees Toolkit for Eclipse.<br/>
 			</text>
