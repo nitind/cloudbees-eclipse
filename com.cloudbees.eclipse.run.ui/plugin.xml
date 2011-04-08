@@ -5,66 +5,96 @@
 		<category id="com.cloudbees.eclipse.run.ui.commands.category"
 			name="CloudBees Run@Cloud">
 		</category>
-  <command
-        categoryId="com.cloudbees.eclipse.run.ui.commands.category"
-        defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.CBSampleWebAppHandler"
-        id="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp"
-        name="New Sample Web Application">
-  </command>
-  <command
-        categoryId="com.cloudbees.eclipse.run.ui.commands.category"
-        defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.ReferenceHandler"
-        id="com.cloudbees.eclipse.run.ui.commands.referenceToMenu"
-        name="Reference To CloudBees Menus">
-  </command>
+		<command categoryId="com.cloudbees.eclipse.run.ui.commands.category"
+			defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.CBSampleWebAppHandler"
+			id="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp" name="New Sample Web Application">
+		</command>
+		<command categoryId="com.cloudbees.eclipse.run.ui.commands.category"
+			defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.ReferenceHandler"
+			id="com.cloudbees.eclipse.run.ui.commands.referenceToMenu" name="Reference To CloudBees Menus">
+		</command>
 	</extension>
- <extension
-       point="org.eclipse.ui.menus">
-    <menuContribution
-          allPopups="false"
-          locationURI="toolbar:org.eclipse.ui.main.toolbar">
-       <toolbar
-             id="com.cloudbees.eclipse.run.ui.toolbar"
-             label="CloudBees">
-          <command
-                commandId="com.cloudbees.eclipse.run.ui.commands.referenceToMenu"
-                icon="icons/16x16/cb_plain.png"
-                label="CloudBees"
-                style="pulldown">
-          </command>
-       </toolbar>
-    </menuContribution>
-    <menuContribution
-          allPopups="false"
-          locationURI="menu:com.cloudbees.eclipse.run.ui.commands.referenceToMenu">
-       <command
-             commandId="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp"
-             icon="icons/16x16/cb_new_proj_wiz_ico_15x15.png"
-             label="New Sample Web Application"
-             mnemonic="N"
-             style="push"
-             tooltip="Create a sample web application">
-       </command>
-    </menuContribution>
- </extension>
+	<extension point="org.eclipse.ui.menus">
+		<menuContribution allPopups="false"
+			locationURI="toolbar:org.eclipse.ui.main.toolbar">
+			<toolbar id="com.cloudbees.eclipse.run.ui.toolbar" label="CloudBees">
+				<command commandId="com.cloudbees.eclipse.run.ui.commands.referenceToMenu"
+					icon="icons/16x16/cb_plain.png" label="CloudBees" style="pulldown">
+				</command>
+			</toolbar>
+		</menuContribution>
+		<menuContribution allPopups="false"
+			locationURI="menu:com.cloudbees.eclipse.run.ui.commands.referenceToMenu">
+			<command commandId="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp"
+				icon="icons/16x16/cb_new_proj_wiz_ico_15x15.png" label="New Sample Web Application"
+				mnemonic="N" style="push" tooltip="Create a sample web application">
+			</command>
+		</menuContribution>
+	</extension>
 	<extension point="org.eclipse.ui.popupMenus">
-		<objectContribution id="com.cloudbees.eclipse.run.ui.contribution"
+		<objectContribution adaptable="true"
+			id="com.cloudbees.eclipse.run.ui.deploy" nameFilter="*"
 			objectClass="org.eclipse.core.resources.IProject">
 			<action class="com.cloudbees.eclipse.run.ui.popup.actions.DeployAction"
-				enablesFor="1" id="com.cloudbees.eclipse.run.ui.deploy.cloud" label="Deploy"
+				enablesFor="1" id="com.cloudbees.eclipse.run.ui.deploy.cloud" label="Deploy to RunCloud"
 				menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup"></action>
-   <visibility>
-      <and>
-         <objectClass
-               name="org.eclipse.core.resources.IProject">
-         </objectClass>
-         <objectState
-               name="projectNature"
-               value="com.cloudbees.eclipse.core.cloudbeesNature">
-         </objectState>
-      </and>
-   </visibility>
+			<visibility>
+				<and>
+					<objectClass name="org.eclipse.core.resources.IProject">
+					</objectClass>
+					<objectState name="projectNature"
+						value="com.cloudbees.eclipse.core.cloudbeesNature"></objectState>
+				</and>
+			</visibility>
 		</objectContribution>
+  <objectContribution
+        adaptable="true"
+        id="com.cloudbees.eclipse.run.ui.stop"
+        nameFilter="*"
+        objectClass="org.eclipse.core.resources.IProject">
+     <action
+           class="com.cloudbees.eclipse.run.ui.popup.actions.StartAction"
+           enablesFor="1"
+           id="com.cloudbees.eclipse.run.ui.deploy.cloud"
+           label="Start RunCloud"
+           menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup">
+     </action>
+     <visibility>
+        <and>
+           <objectClass
+                 name="org.eclipse.core.resources.IProject">
+           </objectClass>
+           <objectState
+                 name="projectNature"
+                 value="com.cloudbees.eclipse.core.cloudbeesNature">
+           </objectState>
+        </and>
+     </visibility>
+  </objectContribution>
+  <objectContribution
+        adaptable="true"
+        id="com.cloudbees.eclipse.run.ui.start"
+        nameFilter="*"
+        objectClass="org.eclipse.core.resources.IProject">
+     <action
+           class="com.cloudbees.eclipse.run.ui.popup.actions.StopAction"
+           enablesFor="1"
+           id="com.cloudbees.eclipse.run.ui.deploy.cloud"
+           label="Stop RunCloud"
+           menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup">
+     </action>
+     <visibility>
+        <and>
+           <objectClass
+                 name="org.eclipse.core.resources.IProject">
+           </objectClass>
+           <objectState
+                 name="projectNature"
+                 value="com.cloudbees.eclipse.core.cloudbeesNature">
+           </objectState>
+        </and>
+     </visibility>
+  </objectContribution>
 	</extension>
 
 
@@ -77,83 +107,61 @@
 			name="Sample Web App" project="true">
 		</wizard>
 	</extension>
- <extension
-       point="org.eclipse.debug.ui.launchConfigurationTypeImages">
-    <launchConfigurationTypeImage
-          configTypeID="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType"
-          icon="icons/16x16/cb_plain.png"
-          id="com.cloudbees.eclipse.run.ui.launchconfiguration.launchConfigurationTypeImage">
-    </launchConfigurationTypeImage>
- </extension>
- <extension
-       point="org.eclipse.debug.ui.launchConfigurationTabGroups">
-    <launchConfigurationTabGroup
-          class="com.cloudbees.eclipse.run.ui.launchconfiguration.CBLaunchConfigurationTabGroup"
-          id="com.cloudbees.eclipse.run.ui.launchconfiguration.launchConfigurationTabGroup"
-          type="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType">
-    </launchConfigurationTabGroup>
- </extension>
- <extension
-       point="org.eclipse.debug.ui.launchShortcuts">
-    <shortcut
-          class="com.cloudbees.eclipse.run.ui.launchconfiguration.CBLaunchShortcut"
-          icon="icons/16x16/cb_plain.png"
-          id="com.cloudbees.eclipse.run.ui.launchconfiguration.shortcut"
-          label="CloudBees Application"
-          modes="run, debug">
-       <contextualLaunch>
-          <contextLabel
-                label="CloudBees Application"
-                mode="run, debug">
-          </contextLabel>
-          <enablement>
-             <with
-                   variable="selection">
-                <count
-                      value="1">
-                </count>
-                <iterate>
-                   <and>
-                      <adapt
-                            type="org.eclipse.core.resources.IProject">
-                         <test
-                               forcePluginActivation="false"
-                               property="org.eclipse.core.resources.projectNature"
-                               value="com.cloudbees.eclipse.core.cloudbeesNature">
-                         </test>
-                      </adapt>
-                   </and>
-                </iterate>
-             </with>
-          </enablement>
-       </contextualLaunch>
-    </shortcut>
- </extension>
- <extension
-       point="org.eclipse.wst.server.ui.wizardFragments">
-    <fragment
-          class="com.cloudbees.eclipse.run.ui.wizards.RunCloudServer"
-          id="com.cloudbees.eclipse.core.runcloud"
-          typeIds="com.cloudbees.eclipse.core.runcloud">
-    </fragment>
-    <fragment
-          class="com.cloudbees.eclipse.run.ui.wizards.RunCloudLocal"
-          id="com.cloudbees.eclipse.core.runcloud.local"
-          typeIds="com.cloudbees.eclipse.core.runcloud.local">
-    </fragment>
- </extension>
- <extension
-       point="org.eclipse.wst.server.ui.serverImages">
-    <image
-          icon="icons/16x16/cb_plain.png"
-          id="com.cloudbees.eclipse.run.ui.server.image"
-          typeIds="com.cloudbees.eclipse.core.runcloud">
-    </image>
-    <image
-          icon="icons/16x16/cb_plain.png"
-          id="com.cloudbees.eclipse.run.ui.server.image"
-          typeIds="com.cloudbees.eclipse.core.runcloud.local">
-    </image>
- </extension>
+	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+		<launchConfigurationTypeImage
+			configTypeID="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType"
+			icon="icons/16x16/cb_plain.png"
+			id="com.cloudbees.eclipse.run.ui.launchconfiguration.launchConfigurationTypeImage">
+		</launchConfigurationTypeImage>
+	</extension>
+	<extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+		<launchConfigurationTabGroup
+			class="com.cloudbees.eclipse.run.ui.launchconfiguration.CBLaunchConfigurationTabGroup"
+			id="com.cloudbees.eclipse.run.ui.launchconfiguration.launchConfigurationTabGroup"
+			type="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType">
+		</launchConfigurationTabGroup>
+	</extension>
+	<extension point="org.eclipse.debug.ui.launchShortcuts">
+		<shortcut
+			class="com.cloudbees.eclipse.run.ui.launchconfiguration.CBLaunchShortcut"
+			icon="icons/16x16/cb_plain.png" id="com.cloudbees.eclipse.run.ui.launchconfiguration.shortcut"
+			label="CloudBees Application" modes="run, debug">
+			<contextualLaunch>
+				<contextLabel label="CloudBees Application" mode="run, debug">
+				</contextLabel>
+				<enablement>
+					<with variable="selection">
+						<count value="1">
+						</count>
+						<iterate>
+							<and>
+								<adapt type="org.eclipse.core.resources.IProject">
+									<test forcePluginActivation="false"
+										property="org.eclipse.core.resources.projectNature" value="com.cloudbees.eclipse.core.cloudbeesNature">
+									</test>
+								</adapt>
+							</and>
+						</iterate>
+					</with>
+				</enablement>
+			</contextualLaunch>
+		</shortcut>
+	</extension>
+	<extension point="org.eclipse.wst.server.ui.wizardFragments">
+		<fragment class="com.cloudbees.eclipse.run.ui.wizards.RunCloudServer"
+			id="com.cloudbees.eclipse.core.runcloud" typeIds="com.cloudbees.eclipse.core.runcloud">
+		</fragment>
+		<fragment class="com.cloudbees.eclipse.run.ui.wizards.RunCloudLocal"
+			id="com.cloudbees.eclipse.core.runcloud.local" typeIds="com.cloudbees.eclipse.core.runcloud.local">
+		</fragment>
+	</extension>
+	<extension point="org.eclipse.wst.server.ui.serverImages">
+		<image icon="icons/16x16/cb_plain.png" id="com.cloudbees.eclipse.run.ui.server.image"
+			typeIds="com.cloudbees.eclipse.core.runcloud">
+		</image>
+		<image icon="icons/16x16/cb_plain.png" id="com.cloudbees.eclipse.run.ui.server.image"
+			typeIds="com.cloudbees.eclipse.core.runcloud.local">
+		</image>
+	</extension>
 
 </plugin>

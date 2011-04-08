@@ -11,6 +11,7 @@ import org.eclipse.wst.server.ui.wizard.WizardFragment;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.ui.launchconfiguration.ProjectSelectionComposite;
 
+@SuppressWarnings("restriction")
 public class RunCloudServer extends WizardFragment {
 
   private ProjectSelectionComposite composite;
@@ -42,7 +43,6 @@ public class RunCloudServer extends WizardFragment {
         RunCloudServer.this.wizard.update();
       }
 
-      @SuppressWarnings("restriction")
       private void updateServerName() {
         ServerWorkingCopy server = (ServerWorkingCopy) getTaskModel().getObject("server");
         server.setName(getText() + " running at RUN@Cloud");

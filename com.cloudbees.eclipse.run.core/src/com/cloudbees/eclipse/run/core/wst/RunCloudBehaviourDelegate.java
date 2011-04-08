@@ -6,10 +6,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
+import com.cloudbees.api.ApplicationDeployArchiveResponse;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
@@ -17,11 +19,17 @@ import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationC
 public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
 
   public RunCloudBehaviourDelegate() {
-    // TODO Auto-generated constructor stub
   }
 
   @Override
   public void stop(boolean force) {
+    try {
+      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+      IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+      BeesSDK.stop(project);
+    } catch (Exception e) {
+      CBRunCoreActivator.logError(e);
+    }
     setServerState(IServer.STATE_STOPPED);
   }
 
@@ -31,20 +39,57 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
   }
 
   @Override
-  public IStatus publish(int kind, IProgressMonitor monitor) {
-    if (kind == IServer.PUBLISH_CLEAN || kind == IServer.PUBLISH_AUTO) {
-      return null;
-    }
-    String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
-    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-
+  protected void initialize(IProgressMonitor monitor) {
     try {
-      new BeesSDK().deploy(project);
+      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+      IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+
+      String status = BeesSDK.getServerState(project).getStatus();
+
+      if ("stopped".equals(status)) {
+        setServerState(IServer.STATE_STOPPED);
+      } else if ("active".equals(status) || "hibernate".equals(status)) {
+        setServerState(IServer.STATE_STARTED);
+      } else {
+        setServerState(IServer.STATE_UNKNOWN);
+      }
+    } catch (Exception e) {
+      CBRunCoreActivator.logError(e);
+      setServerState(IServer.STATE_UNKNOWN);
+    }
+  }
+
+  @Override
+  public IStatus publish(int kind, IProgressMonitor monitor) {
+    try {
+      if (getServer().getServerState() != IServer.STATE_STARTED || kind == IServer.PUBLISH_CLEAN
+          || kind == IServer.PUBLISH_AUTO) {
+        return null;
+      }
+
+      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+      IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+
+      ApplicationDeployArchiveResponse deploy = BeesSDK.deploy(project);
       setServerPublishState(IServer.PUBLISH_STATE_NONE);
       setServerState(IServer.STATE_STARTED);
       return null;
     } catch (Exception e) {
       return new Status(IStatus.ERROR, CBRunCoreActivator.PLUGIN_ID, e.getMessage(), e);
     }
+  }
+
+  @Override
+  public void setupLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IProgressMonitor monitor)
+      throws CoreException {
+    try {
+      workingCopy.setAttribute(CBLaunchConfigurationConstants.DO_NOTHING, true);
+      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+      IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+      BeesSDK.start(project);
+    } catch (Exception e) {
+      CBRunCoreActivator.logError(e);
+    }
+    setServerState(IServer.STATE_STARTED);
   }
 }

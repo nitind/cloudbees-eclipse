@@ -26,6 +26,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import com.cloudbees.eclipse.run.core.util.CBRunUtil;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
+@SuppressWarnings("restriction")
 public abstract class ProjectSelectionComposite extends Composite {
 
   private static final String PROJECT_MSG = "Choose project...";
@@ -58,6 +59,7 @@ public abstract class ProjectSelectionComposite extends Composite {
     this.projectName = new Text(group, SWT.SINGLE | SWT.BORDER);
     this.projectName.addModifyListener(new ModifyListener() {
 
+      @Override
       public void modifyText(ModifyEvent e) {
         handleUpdate();
       }

@@ -4,7 +4,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.internal.ServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
@@ -12,6 +11,7 @@ import org.eclipse.wst.server.ui.wizard.WizardFragment;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.ui.launchconfiguration.ProjectSelectionComposite;
 
+@SuppressWarnings("restriction")
 public class RunCloudLocal extends WizardFragment {
 
   private ProjectSelectionComposite composite;
@@ -43,10 +43,8 @@ public class RunCloudLocal extends WizardFragment {
         RunCloudLocal.this.wizard.update();
       }
 
-      @SuppressWarnings("restriction")
       private void updateServerName() {
         ServerWorkingCopy server = (ServerWorkingCopy) getTaskModel().getObject("server");
-        IRuntime runtime = (IRuntime) getTaskModel().getObject("runtime");
         server.setName(getText() + " running at localhost");
         server.setAttribute(CBLaunchConfigurationConstants.PROJECT, getText());
       }
