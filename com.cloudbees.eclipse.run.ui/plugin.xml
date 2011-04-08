@@ -113,6 +113,11 @@
 			icon="icons/16x16/cb_plain.png"
 			id="com.cloudbees.eclipse.run.ui.launchconfiguration.launchConfigurationTypeImage">
 		</launchConfigurationTypeImage>
+  <launchConfigurationTypeImage
+        configTypeID="com.cloudbees.eclipse.run.core.launchcloudconfiguration.launchConfigurationType"
+        icon="icons/16x16/cb_plain.png"
+        id="com.cloudbees.eclipse.run.ui.launchconfiguration.launchConfigurationTypeImage">
+  </launchConfigurationTypeImage>
 	</extension>
 	<extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
 		<launchConfigurationTabGroup
@@ -120,6 +125,11 @@
 			id="com.cloudbees.eclipse.run.ui.launchconfiguration.launchConfigurationTabGroup"
 			type="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType">
 		</launchConfigurationTabGroup>
+  <launchConfigurationTabGroup
+        class="com.cloudbees.eclipse.run.ui.launchconfiguration.CBCloudLaunchConfigurationTabGroup"
+        id="com.cloudbees.eclipse.run.ui.launchcloudconfiguration.launchConfigurationTabGroup"
+        type="com.cloudbees.eclipse.run.core.launchcloudconfiguration.launchConfigurationType">
+  </launchConfigurationTabGroup>
 	</extension>
 	<extension point="org.eclipse.debug.ui.launchShortcuts">
 		<shortcut
@@ -163,5 +173,14 @@
 			typeIds="com.cloudbees.eclipse.core.runcloud.local">
 		</image>
 	</extension>
+ <extension
+       point="org.eclipse.debug.core.launchConfigurationTypes">
+    <launchConfigurationType
+          delegate="com.cloudbees.eclipse.run.ui.launchconfiguration.CBCloudLaunchDelegate"
+          id="com.cloudbees.eclipse.run.core.launchcloudconfiguration.launchConfigurationType"
+          modes="run"
+          name="CloudBees Application at Run@Cloud">
+    </launchConfigurationType>
+ </extension>
 
 </plugin>

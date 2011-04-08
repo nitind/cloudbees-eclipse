@@ -43,9 +43,9 @@
 		<serverType
 			behaviourClass="com.cloudbees.eclipse.run.core.wst.RunCloudLocalBehaviourDelegate"
 			class="com.cloudbees.eclipse.run.core.wst.RunCloudServerDelegate"
-			description="Run@Cloud Local instance" hasConfiguration="false"
+			description="Run@Cloud Local instance" hasConfiguration="true"
 			id="com.cloudbees.eclipse.core.runcloud.local" initialState="stopped"
-			launchConfigId="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType"
+			launchConfigId="com.cloudbees.eclipse.run.core.launchcloudconfiguration.launchConfigurationType"
 			launchModes="run,stop" name="Run@Cloud Local instance" runtime="false"
 			runtimeTypeId="com.cloudbees.eclipse.core.runcloud.local"
 			supportsRemoteHosts="true">

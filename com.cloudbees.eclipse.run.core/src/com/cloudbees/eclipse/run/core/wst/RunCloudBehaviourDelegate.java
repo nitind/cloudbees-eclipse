@@ -83,7 +83,6 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
   public void setupLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IProgressMonitor monitor)
       throws CoreException {
     try {
-      workingCopy.setAttribute(CBLaunchConfigurationConstants.DO_NOTHING, true);
       String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
       IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
       BeesSDK.start(project);

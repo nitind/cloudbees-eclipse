@@ -9,6 +9,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
@@ -17,7 +19,7 @@ import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
 
 public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
-  
+
   private final class ProjectSelectionCompositeForLauncher extends ProjectSelectionComposite {
     private ProjectSelectionCompositeForLauncher(Composite parent, int style) {
       super(parent, style);
@@ -38,13 +40,19 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
   private static final String TAB_NAME = "CloudBees Application";
 
   private ProjectSelectionComposite content;
-  
-  public void createControl(Composite parent) {
-    this.content = new ProjectSelectionCompositeForLauncher(parent, SWT.None);
 
-    setControl(this.content);
+  protected Composite main;
+
+  @Override
+  public void createControl(Composite parent) {
+    this.main = new Composite(parent, SWT.NONE);
+    this.main.setLayout(new GridLayout(2, false));
+    this.content = new ProjectSelectionCompositeForLauncher(this.main, SWT.None);
+    this.content.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    setControl(this.main);
     this.content.addModifyListener(new ModifyListener() {
 
+      @Override
       public void modifyText(ModifyEvent e) {
         CBLaunchConfigurationTab.this.content.handleUpdate();
         updateLaunchConfigurationDialog();
@@ -54,9 +62,11 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
   }
 
+  @Override
   public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
   }
 
+  @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
     try {
       this.content.setText(configuration
@@ -66,6 +76,7 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     }
   }
 
+  @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
     String projectName = this.content.getText();
     try {
@@ -75,6 +86,7 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     }
   }
 
+  @Override
   public String getName() {
     return TAB_NAME;
   }
