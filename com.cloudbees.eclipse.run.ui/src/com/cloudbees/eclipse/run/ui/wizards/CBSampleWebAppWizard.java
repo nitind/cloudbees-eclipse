@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -30,7 +31,8 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
 
   private static final String WINDOW_TITLE = "Sample Web Application";
 
-  private CBSampleWebAppWizardPage page;
+  private CBSampleWebAppWizardPage newProjectPage;
+  private JenkinsWizardPage jenkinsPage;
 
   public CBSampleWebAppWizard() {
     super();
@@ -40,12 +42,30 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
         Images.CLOUDBEES_WIZ_ICON_PATH));
   }
 
+  @Override
   public void addPages() {
-    page = new CBSampleWebAppWizardPage();
-    addPage(page);
+    this.newProjectPage = new CBSampleWebAppWizardPage();
+    addPage(this.newProjectPage);
+    this.jenkinsPage = new JenkinsWizardPage();
+    addPage(this.jenkinsPage);
   }
 
   public void init(IWorkbench workbench, IStructuredSelection selection) {
+  }
+
+  @Override
+  public IWizardPage getNextPage(IWizardPage page) {
+    if (page instanceof JenkinsWizardPage) {
+      JenkinsWizardPage jenkinsPage = (JenkinsWizardPage) page;
+      String jobName = jenkinsPage.getJobNameText().getText();
+
+      if (jobName == null || jobName.length() == 0) {
+        jobName = "Build " + this.newProjectPage.getProjectName();
+        jenkinsPage.getJobNameText().setText(jobName);
+      }
+    }
+
+    return super.getNextPage(page);
   }
 
   @Override
@@ -53,7 +73,7 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
 
     IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 
-    String projectName = page.getProjectName();
+    String projectName = this.newProjectPage.getProjectName();
     String worksapceLocation = workspaceRoot.getLocation().toPortableString();
 
     try {
@@ -108,8 +128,16 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
       MessageDialog.openError(getShell(), "Error", targetEx.getMessage());
       return false;
     }
-    
+
+    makeJenkinsJob();
     return true;
   }
 
+  private void makeJenkinsJob() {
+    if (this.jenkinsPage.getMakeJobCheck().getSelection() == false) {
+      return;
+    }
+
+    // TODO
+  }
 }
