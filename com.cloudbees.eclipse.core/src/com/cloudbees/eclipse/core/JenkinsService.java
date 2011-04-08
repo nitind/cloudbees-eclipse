@@ -1,7 +1,9 @@
 package com.cloudbees.eclipse.core;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +19,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.cookie.Cookie;
+import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
@@ -44,9 +47,9 @@ public class JenkinsService {
 
   /*private String url;
   private String label;*/
-  private JenkinsInstance jenkins;
+  private final JenkinsInstance jenkins;
 
-  private Map<String, JenkinsScmConfig> scms = new HashMap<String, JenkinsScmConfig>();
+  private final Map<String, JenkinsScmConfig> scms = new HashMap<String, JenkinsScmConfig>();
 
   private static String lastJossoSessionId = null;
 
@@ -157,12 +160,9 @@ public class JenkinsService {
     }
   }
 
-  synchronized
-  private String retrieveWithLogin(final DefaultHttpClient httpclient, final HttpRequestBase post,
-      final List<NameValuePair> params,
-      final boolean expectRedirect, final SubProgressMonitor monitor)
-  throws UnsupportedEncodingException,
-  IOException, ClientProtocolException, CloudBeesException, Exception {
+  synchronized private String retrieveWithLogin(final DefaultHttpClient httpclient, final HttpRequestBase post,
+      final List<NameValuePair> params, final boolean expectRedirect, final SubProgressMonitor monitor)
+      throws UnsupportedEncodingException, IOException, ClientProtocolException, CloudBeesException, Exception {
     String bodyResponse = null;
 
     //        if (lastJossoCookie != null) {
@@ -172,8 +172,9 @@ public class JenkinsService {
     boolean tryToLogin = true; // false for BasicAuth, true for redirect login
     do {
 
-      if ((this.jenkins.atCloud || this.jenkins.authenticate) && this.jenkins.username != null && this.jenkins.username.trim().length() > 0
-          && this.jenkins.password != null && this.jenkins.password.trim().length() > 0) {
+      if ((this.jenkins.atCloud || this.jenkins.authenticate) && this.jenkins.username != null
+          && this.jenkins.username.trim().length() > 0 && this.jenkins.password != null
+          && this.jenkins.password.trim().length() > 0) {
         //        post.addHeader("Authorization", "Basic " + Utils.toB64(jenkins.username + ":" + jenkins.password));
       }
 
@@ -283,7 +284,7 @@ public class JenkinsService {
   }
 
   private HttpResponse visitSite(final DefaultHttpClient httpClient, final String url, final String refererUrl)
-  throws IOException, ClientProtocolException, CloudBeesException {
+      throws IOException, ClientProtocolException, CloudBeesException {
 
     CloudBeesCorePlugin.getDefault().getLogger().info("Visiting: " + url);
 
@@ -306,7 +307,7 @@ public class JenkinsService {
     Header redir = resp.getFirstHeader("Location");
 
     CloudBeesCorePlugin.getDefault().getLogger()
-    .info("\t" + resp.getStatusLine() + (redir != null ? (" -> " + redir.getValue()) : ""));
+        .info("\t" + resp.getStatusLine() + (redir != null ? " -> " + redir.getValue() : ""));
 
     return resp;
   }
@@ -328,11 +329,12 @@ public class JenkinsService {
   }
 
   public JenkinsBuildDetailsResponse getJobDetails(final String jobUrl, final IProgressMonitor monitor)
-  throws CloudBeesException {
+      throws CloudBeesException {
     monitor.setTaskName("Fetching Job details...");
 
     if (jobUrl != null && !jobUrl.startsWith(this.jenkins.url)) {
-      throw new CloudBeesException("Unexpected view url provided! Service url: " + this.jenkins.url + "; job url: " + jobUrl);
+      throw new CloudBeesException("Unexpected view url provided! Service url: " + this.jenkins.url + "; job url: "
+          + jobUrl);
     }
 
     StringBuffer errMsg = new StringBuffer();
@@ -349,7 +351,6 @@ public class JenkinsService {
       DefaultHttpClient httpclient = Utils.getAPIClient();
 
       Gson g = Utils.createGson();
-
 
       HttpPost post = new HttpPost(reqStr);
       post.setHeader("Accept", "application/json");
@@ -376,7 +377,7 @@ public class JenkinsService {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((this.jenkins == null) ? 0 : this.jenkins.hashCode());
+    result = prime * result + (this.jenkins == null ? 0 : this.jenkins.hashCode());
     return result;
   }
 
@@ -402,11 +403,13 @@ public class JenkinsService {
     return true;
   }
 
-  public JenkinsJobAndBuildsResponse getJobBuilds(final String jobUrl, final IProgressMonitor monitor) throws CloudBeesException {
+  public JenkinsJobAndBuildsResponse getJobBuilds(final String jobUrl, final IProgressMonitor monitor)
+      throws CloudBeesException {
     monitor.setTaskName("Fetching Job builds...");
 
     if (jobUrl != null && !jobUrl.startsWith(this.jenkins.url)) {
-      throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; job url: " + jobUrl);
+      throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; job url: "
+          + jobUrl);
     }
 
     StringBuffer errMsg = new StringBuffer();
@@ -447,7 +450,7 @@ public class JenkinsService {
   }
 
   private JenkinsScmConfig getJobScmConfig(final String jobUrl, final IProgressMonitor monitor)
-  throws CloudBeesException {
+      throws CloudBeesException {
     monitor.setTaskName("Fetching Job SCM config...");
 
     if (jobUrl != null && !jobUrl.startsWith(this.jenkins.url)) {
@@ -471,7 +474,7 @@ public class JenkinsService {
       HttpGet post = new HttpGet(reqStr);
       post.setHeader("Accept", "text/html,application/xhtml+xml,application/xml");
       post.setHeader("User-Agent",
-      "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.16) Gecko/20110319 Firefox/3.6.16 (.NET CLR 3.5.30729)");
+          "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.16) Gecko/20110319 Firefox/3.6.16 (.NET CLR 3.5.30729)");
       //      post.setHeader("Accept-Language ru,en-us;q=0.7,en;q=0.3
       post.setHeader("Accept-Encoding", "gzip,deflate");
       post.setHeader("Accept-Charset", "UTF-8,*");
@@ -490,12 +493,13 @@ public class JenkinsService {
     }
   }
 
-
-  public void invokeBuild(final String jobUrl, final Map<String, String> props, final IProgressMonitor monitor) throws CloudBeesException {
+  public void invokeBuild(final String jobUrl, final Map<String, String> props, final IProgressMonitor monitor)
+      throws CloudBeesException {
     monitor.setTaskName("Invoking build request...");
 
     if (jobUrl != null && !jobUrl.startsWith(this.jenkins.url)) {
-      throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; job url: " + jobUrl);
+      throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; job url: "
+          + jobUrl);
     }
 
     StringBuffer errMsg = new StringBuffer();
@@ -536,7 +540,7 @@ public class JenkinsService {
   }
 
   public JenkinsScmConfig getJenkinsScmConfig(final String jobUrl, final IProgressMonitor monitor)
-  throws CloudBeesException {
+      throws CloudBeesException {
     // TODO invalidate old items
     JenkinsScmConfig scm = this.scms.get(jobUrl);
     if (scm == null) {
@@ -546,5 +550,27 @@ public class JenkinsService {
       }
     }
     return scm;
+  }
+
+  public void createJenkinsJob(final String jobName, final File configXML, final IProgressMonitor monitor)
+      throws CloudBeesException {
+    try {
+      monitor.setTaskName("Constructing post request");
+
+      String encodedJobName = URLEncoder.encode(jobName, "UTF-8");
+
+      HttpPost post = new HttpPost("http://localhost:8080/createItem?name=" + encodedJobName); // FIXME
+      FileEntity fileEntity = new FileEntity(configXML, "application/xml");
+      post.setEntity(fileEntity);
+
+      DefaultHttpClient httpClient = Utils.getAPIClient();
+      monitor.setTaskName("Creating new Jenkins job...");
+      HttpResponse response = httpClient.execute(post);
+      if (response.getStatusLine().getStatusCode() != 200) {
+        throw new Exception(response.getStatusLine().getReasonPhrase());
+      }
+    } catch (Exception e) {
+      throw new CloudBeesException("Failed to create new Jenkins job", e);
+    }
   }
 }
