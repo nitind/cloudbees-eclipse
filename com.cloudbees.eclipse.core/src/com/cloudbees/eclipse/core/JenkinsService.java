@@ -470,13 +470,6 @@ public class JenkinsService {
 
       HttpGet post = new HttpGet(reqStr);
       post.setHeader("Accept", "text/html,application/xhtml+xml,application/xml");
-      post.setHeader("User-Agent",
-      "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.16) Gecko/20110319 Firefox/3.6.16 (.NET CLR 3.5.30729)");
-      //      post.setHeader("Accept-Language ru,en-us;q=0.7,en;q=0.3
-      post.setHeader("Accept-Encoding", "gzip,deflate");
-      post.setHeader("Accept-Charset", "UTF-8,*");
-
-      //post.setHeader("Content-type", "application/xml");
 
       bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 10));
 
@@ -546,5 +539,40 @@ public class JenkinsService {
       }
     }
     return scm;
+  }
+
+  public String getTestReport(final String url, final IProgressMonitor monitor) throws CloudBeesException {
+    monitor.setTaskName("Fetching Jenkins build Test Report...");
+
+    if (url != null && !url.startsWith(this.jenkins.url)) {
+      throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; job url: "
+          + url);
+    }
+
+    StringBuffer errMsg = new StringBuffer();
+
+    String reqUrl = url;
+
+    if (!reqUrl.endsWith("/")) {
+      reqUrl = reqUrl + "/";
+    }
+
+    String reqStr = reqUrl + "testReport/api/xml";
+
+    String bodyResponse = null;
+    try {
+      DefaultHttpClient httpclient = Utils.getAPIClient();
+
+      HttpGet post = new HttpGet(reqStr);
+      post.setHeader("Accept", "text/html,application/xhtml+xml,application/xml");
+
+      bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 10));
+
+      return bodyResponse;
+    } catch (Exception e) {
+      throw new CloudBeesException("Failed to get Jenkins job test report for '" + url + "'. "
+          + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr + " - Response: "
+          + bodyResponse, e);
+    }
   }
 }

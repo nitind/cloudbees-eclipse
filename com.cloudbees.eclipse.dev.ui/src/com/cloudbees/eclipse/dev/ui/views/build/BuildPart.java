@@ -11,6 +11,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -46,6 +47,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
+import com.cloudbees.eclipse.dev.ui.internal.action.OpenJunitViewAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class BuildPart extends EditorPart {
@@ -62,6 +64,8 @@ public class BuildPart extends EditorPart {
   private Label contentBuildSummary;
   private Composite contentBuildHistory;
   private Label contentJUnitTests;
+  private OpenJunitViewAction openJunitAction;
+  private Composite testsLink;
   private Action invokeBuild;
   private Label statusIcon;
   private Composite compMain;
@@ -153,6 +157,23 @@ public class BuildPart extends EditorPart {
 
     this.contentJUnitTests = this.formToolkit.createLabel(compTests, "n/a", SWT.NONE);
     this.contentJUnitTests.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+
+    this.openJunitAction = new OpenJunitViewAction();
+    this.testsLink = new Composite(compTests, SWT.NONE);
+    this.formToolkit.adapt(this.testsLink);
+    this.testsLink.setLayout(new GridLayout(2, false));
+    Label label = this.formToolkit.createLabel(this.testsLink, "");
+    label.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_JUNIT));
+    Link link = new Link(this.testsLink, SWT.FLAT);
+    link.setText("Show tests results in <a>JUnit View</a>.");
+    link.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(final SelectionEvent e) {
+        BuildPart.this.openJunitAction.run();
+      }
+    });
+    this.formToolkit.adapt(link, false, false);
+    this.testsLink.setVisible(false);
 
     this.sectBuildHistory = this.formToolkit.createSection(this.compMain, Section.TITLE_BAR);
     GridData gd_sectBuildHistory = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
@@ -413,6 +434,8 @@ public class BuildPart extends EditorPart {
       }
 
       this.contentJUnitTests.setText("No data available.");
+      this.testsLink.setVisible(false);
+      this.testsLink.getParent().layout(true);
       this.textTopSummary.setText("Latest build not available.");
       this.form.setText(getBuildEditorInput().getDisplayName());
       setPartName(getBuildEditorInput().getDisplayName());
@@ -665,10 +688,8 @@ public class BuildPart extends EditorPart {
         }
       }
 
+      this.compBuildSummary.layout(true);
     }
-
-    this.compBuildSummary.layout(true);
-
   }
 
   private Composite createImageLabel(final Composite parent, final String text, final Image image) {
@@ -705,6 +726,8 @@ public class BuildPart extends EditorPart {
 
     if (this.dataBuildDetail.actions == null) {
       this.contentJUnitTests.setText("No Tests");
+      this.testsLink.setVisible(false);
+      this.testsLink.getParent().layout(true);
       return;
     }
 
@@ -712,12 +735,16 @@ public class BuildPart extends EditorPart {
       if ("testReport".equalsIgnoreCase(action.urlName)) {
         String val = "Total: " + action.totalCount + " Failed: " + action.failCount + " Skipped: " + action.skipCount;
         this.contentJUnitTests.setText(val);
+        this.openJunitAction.selectionChanged(new StructuredSelection(this.dataBuildDetail));
+        this.testsLink.setVisible(true);
+        this.testsLink.getParent().layout(true);
         return;
       }
     }
 
     this.contentJUnitTests.setText("No Tests");
-
+    this.testsLink.setVisible(false);
+    this.testsLink.getParent().layout(true);
   }
 
   private void loadRecentChanges() {
