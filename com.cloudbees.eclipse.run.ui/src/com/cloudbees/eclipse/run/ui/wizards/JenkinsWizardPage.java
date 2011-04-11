@@ -1,7 +1,11 @@
 package com.cloudbees.eclipse.run.ui.wizards;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -18,17 +22,24 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
+import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
+import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class JenkinsWizardPage extends CBWizardPage {
 
-  private static final String PAGE_NAME = JenkinsWizardPage.class.getSimpleName();
+  public static final String PAGE_NAME = JenkinsWizardPage.class.getSimpleName();
   private static final String PAGE_TITLE = "New Jenkins Job";
   private static final String PAGE_DESCRIPTION = "Optionally you can create a new Jenkins job for this project.";
+  private static final String JENKINS_JOB_CHECK_LABEL = "Make new Jenkins job for this project";
+  private static final String JENKINS_INSTANCE_LABEL = "Jenkins instance:";
   private static final String JOB_NAME_LABEL = "Job Name:";
+  private static final String ERR_JOB_NAME = "Please provide a job name";
+  private static final String ERR_JENKINS_INSTANCE = "Please provide a Jenkins instance";
 
   private Button makeJobCheck;
   private Text jobNameText;
@@ -42,6 +53,7 @@ public class JenkinsWizardPage extends CBWizardPage {
     setDescription(PAGE_DESCRIPTION);
   }
 
+  @Override
   public void createControl(Composite parent) {
     Composite container = new Composite(parent, SWT.NULL);
 
@@ -57,7 +69,7 @@ public class JenkinsWizardPage extends CBWizardPage {
     data.horizontalAlignment = SWT.LEFT;
 
     this.makeJobCheck = new Button(container, SWT.CHECK);
-    this.makeJobCheck.setText("Make new Jenkins job for this project");
+    this.makeJobCheck.setText(JENKINS_JOB_CHECK_LABEL);
     this.makeJobCheck.setSelection(false);
     this.makeJobCheck.setLayoutData(data);
     this.makeJobCheck.addSelectionListener(new MakeJenkinsJobSelectionListener());
@@ -67,7 +79,7 @@ public class JenkinsWizardPage extends CBWizardPage {
 
     Label jenkinsInstanceLabel = new Label(container, SWT.NULL);
     jenkinsInstanceLabel.setLayoutData(data);
-    jenkinsInstanceLabel.setText("Jenkins instance:");
+    jenkinsInstanceLabel.setText(JENKINS_INSTANCE_LABEL);
 
     data = new GridData();
     data.grabExcessHorizontalSpace = true;
@@ -78,8 +90,8 @@ public class JenkinsWizardPage extends CBWizardPage {
     this.jenkinsInstancesCombo.setEnabled(false);
     this.jenkinsComboViewer = new ComboViewer(this.jenkinsInstancesCombo);
     this.jenkinsComboViewer.setLabelProvider(new JenkinsInstanceLabelProvider());
-    this.jenkinsComboViewer.add(getJenkinsInstances());
     this.jenkinsComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+      @Override
       public void selectionChanged(SelectionChangedEvent event) {
         ISelection selection = JenkinsWizardPage.this.jenkinsComboViewer.getSelection();
         if (selection instanceof StructuredSelection) {
@@ -105,6 +117,7 @@ public class JenkinsWizardPage extends CBWizardPage {
     this.jobNameText.setLayoutData(data);
     this.jobNameText.setEnabled(false);
     this.jobNameText.addModifyListener(new ModifyListener() {
+      @Override
       public void modifyText(ModifyEvent e) {
         validate();
       }
@@ -131,10 +144,12 @@ public class JenkinsWizardPage extends CBWizardPage {
 
   private class MakeJenkinsJobSelectionListener implements SelectionListener {
 
+    @Override
     public void widgetSelected(SelectionEvent e) {
       handleEvent();
     }
 
+    @Override
     public void widgetDefaultSelected(SelectionEvent e) {
       handleEvent();
     }
@@ -166,10 +181,44 @@ public class JenkinsWizardPage extends CBWizardPage {
 
   }
 
-  private JenkinsInstance[] getJenkinsInstances() {
-    List<JenkinsInstance> instances = ((CBSampleWebAppWizard) getWizard()).getJenkinsInstances();
-    JenkinsInstance[] instancesArray = new JenkinsInstance[instances.size()];
-    return instances.toArray(instancesArray);
+  public void loadJenkinsInstances() {
+    if (this.jenkinsInstancesCombo.getItemCount() > 0) {
+      return;
+    }
+
+    final Display display = getShell().getDisplay();
+    IRunnableWithProgress operation = new IRunnableWithProgress() {
+
+      @Override
+      public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+        try {
+          CloudBeesUIPlugin plugin = CloudBeesUIPlugin.getDefault();
+          List<JenkinsInstance> manualInstances = plugin.loadManualJenkinsInstances();
+          List<JenkinsInstance> cloudInstances = plugin.loadDevAtCloudInstances(monitor);
+          List<JenkinsInstance> instances = new ArrayList<JenkinsInstance>();
+          instances.addAll(manualInstances);
+          instances.addAll(cloudInstances);
+          final Object[] items = instances.toArray();
+
+          display.syncExec(new Runnable() {
+            @Override
+            public void run() {
+              JenkinsWizardPage.this.jenkinsComboViewer.add(items);
+            }
+          });
+
+        } catch (Exception e) {
+          CBRunUiActivator.logError(e);
+        }
+      }
+    };
+
+    try {
+      getContainer().run(true, false, operation);
+    } catch (Exception e) {
+      CBRunUiActivator.logError(e);
+    }
+
   }
 
   private void updateErrorStatus(String message) {
@@ -185,12 +234,12 @@ public class JenkinsWizardPage extends CBWizardPage {
 
     String jobName = getJobNameText();
     if (jobName == null || jobName.length() == 0) {
-      updateErrorStatus("Please provide a job name");
+      updateErrorStatus(ERR_JOB_NAME);
       return;
     }
 
     if (getJenkinsInstance() == null) {
-      updateErrorStatus("Please provide a Jenkins instance");
+      updateErrorStatus(ERR_JENKINS_INSTANCE);
       return;
     }
 

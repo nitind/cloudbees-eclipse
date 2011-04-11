@@ -18,6 +18,8 @@ public class CBSampleWebAppWizardPage extends CBWizardPage {
   private static final String PAGE_DESCRIPTION = "This wizard creates a new sample web application.";
   private static final String PROJECT_NAME_LABEL = "Project Name:";
   private static final String PROJECT_NAME_HINT = "Please enter the project name";
+  private static final String ERR_PROJECT_EXISTS = "Project with same name already exists in workspace";
+  private static final String ERR_PROJECT_NAME = "Project name must be specified";
 
   private Text text;
 
@@ -27,6 +29,7 @@ public class CBSampleWebAppWizardPage extends CBWizardPage {
     setDescription(PAGE_DESCRIPTION);
   }
 
+  @Override
   public void createControl(Composite parent) {
     Composite container = new Composite(parent, SWT.NULL);
 
@@ -51,6 +54,7 @@ public class CBSampleWebAppWizardPage extends CBWizardPage {
     this.text.setMessage(PROJECT_NAME_HINT);
     this.text.setLayoutData(data);
     this.text.addModifyListener(new ModifyListener() {
+      @Override
       public void modifyText(ModifyEvent e) {
         projectNameInputChanged(CBSampleWebAppWizardPage.this.text.getText());
       }
@@ -63,10 +67,10 @@ public class CBSampleWebAppWizardPage extends CBWizardPage {
 
   private void projectNameInputChanged(String newName) {
     if (newName.isEmpty()) {
-      updateErrorStatus("Project name must be specified");
+      updateErrorStatus(ERR_PROJECT_NAME);
       return;
     } else if (isProjectNameExists(newName)) {
-      updateErrorStatus("Project with same name already exists in workspace");
+      updateErrorStatus(ERR_PROJECT_EXISTS);
       return;
     }
     updateErrorStatus(null);
