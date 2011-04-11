@@ -119,9 +119,9 @@
         <objectContribution
             adaptable="true"
             objectClass="org.eclipse.core.resources.IProject"
-            nameFilter="*"
+            nameFilter="*"            
             id="com.cloudbees.eclipse.ui.cloudbeessupport.remove">
-            <visibility>
+            <visibility>            
                 <and>
                     <objectClass
                         name="org.eclipse.core.resources.IProject">
@@ -132,7 +132,7 @@
                     </objectState>
                 </and>
             </visibility>
-            <action
+            <action            
                 class="com.cloudbees.eclipse.ui.internal.action.ToggleCloudBeesSupportAction"
                 enablesFor="1"
                 id="com.cloudbees.eclipse.ui.popup.removeNatureAction"

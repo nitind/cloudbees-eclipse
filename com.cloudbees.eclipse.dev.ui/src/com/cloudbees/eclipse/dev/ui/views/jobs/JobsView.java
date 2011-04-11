@@ -32,6 +32,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuDetectEvent;
+import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -93,7 +95,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       IViewSite site = getViewSite();
       String secId = site.getSecondaryId();
       String servUrl = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(newView.viewUrl).getUrl();
-      if (!secId.equals(Long.toString(servUrl.hashCode()))) {
+      if (secId != null && servUrl != null && !secId.equals(Long.toString(servUrl.hashCode()))) {
         return; // another view
       }
     }
@@ -388,6 +390,14 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     makeActions();
     contributeToActionBars();
 
+    table.getTable().addMenuDetectListener(new MenuDetectListener() {
+
+      public void menuDetected(MenuDetectEvent e) {
+        System.out.println("MENU DETECTED");
+      }
+
+    });
+    
     this.table.addPostSelectionChangedListener(new ISelectionChangedListener() {
 
       public void selectionChanged(final SelectionChangedEvent event) {

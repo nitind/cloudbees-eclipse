@@ -3,11 +3,11 @@
 <plugin>
 	<extension point="org.eclipse.ui.commands">
 		<category id="com.cloudbees.eclipse.run.ui.commands.category"
-			name="CloudBees Run@Cloud">
+			name="CloudBees RUN@Cloud">
 		</category>
 		<command categoryId="com.cloudbees.eclipse.run.ui.commands.category"
 			defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.CBSampleWebAppHandler"
-			id="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp" name="New Sample Web Application">
+			id="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp" name="New Web Application...">
 		</command>
 		<command categoryId="com.cloudbees.eclipse.run.ui.commands.category"
 			defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.ReferenceHandler"
@@ -26,7 +26,7 @@
 		<menuContribution allPopups="false"
 			locationURI="menu:com.cloudbees.eclipse.run.ui.commands.referenceToMenu">
 			<command commandId="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp"
-				icon="icons/16x16/cb_new_proj_wiz_ico_15x15.png" label="New Sample Web Application"
+				icon="icons/16x16/cb_new_proj_wiz_ico_16x16.png" label="New Web Application..."
 				mnemonic="N" style="push" tooltip="Create a sample web application">
 			</command>
 		</menuContribution>
@@ -36,7 +36,7 @@
 			id="com.cloudbees.eclipse.run.ui.deploy" nameFilter="*"
 			objectClass="org.eclipse.core.resources.IProject">
 			<action class="com.cloudbees.eclipse.run.ui.popup.actions.DeployAction"
-				enablesFor="1" id="com.cloudbees.eclipse.run.ui.deploy.cloud" label="Deploy to RunCloud"
+				enablesFor="1" id="com.cloudbees.eclipse.run.ui.deploy.cloud" label="Deploy to RUN@cloud@"
 				menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup"></action>
 			<visibility>
 				<and>
@@ -56,7 +56,7 @@
            class="com.cloudbees.eclipse.run.ui.popup.actions.StartAction"
            enablesFor="1"
            id="com.cloudbees.eclipse.run.ui.deploy.cloud"
-           label="Start RunCloud"
+           label="Start in RUN@cloud@"           
            menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup">
      </action>
      <visibility>
@@ -80,7 +80,7 @@
            class="com.cloudbees.eclipse.run.ui.popup.actions.StopAction"
            enablesFor="1"
            id="com.cloudbees.eclipse.run.ui.deploy.cloud"
-           label="Stop RunCloud"
+           label="Stop in RUN@cloud@"
            menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup">
      </action>
      <visibility>
@@ -103,8 +103,8 @@
 		</category>
 		<wizard category="com.cloudbees.eclipse.run.ui"
 			class="com.cloudbees.eclipse.run.ui.wizards.CBSampleWebAppWizard"
-			icon="icons/16x16/cb_new_proj_wiz_ico_15x15.png" id="com.cloudbees.eclipse.run.ui.wizards.CBSampleWebAppWizard"
-			name="Sample Web App" project="true">
+			icon="icons/16x16/cb_new_proj_wiz_ico_16x16.png" id="com.cloudbees.eclipse.run.ui.wizards.CBSampleWebAppWizard"
+			name="New Web App" project="true">
 		</wizard>
 	</extension>
 	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
@@ -163,5 +163,47 @@
 			typeIds="com.cloudbees.eclipse.core.runcloud.local">
 		</image>
 	</extension>
+
+
+
+
+
+	<extension
+        point="org.eclipse.ui.views">
+        <category
+            name="CloudBees"
+            id="com.cloudbees.eclipse">
+        </category>
+        <view
+            name="RUN@cloud apps"
+            icon="icons/16x16/cb_run_arr_topleft.png"
+            category="com.cloudbees.eclipse"
+            class="com.cloudbees.eclipse.run.ui.views.AppListView"
+            id="com.cloudbees.eclipse.run.ui.views.AppListView"
+            allowMultiple="false">
+        </view>
+    </extension>
+    
+
+    <extension
+        point="org.eclipse.ui.perspectiveExtensions">
+        <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+            <view
+                relative="org.eclipse.ui.views.ProblemView"
+                relationship="stack"
+                id="com.cloudbees.eclipse.run.ui.views.AppListView">
+            </view>
+        </perspectiveExtension>
+        <perspectiveExtension
+            targetID="org.eclipse.ui.resourcePerspective">
+            <view
+                relative="org.eclipse.ui.views.TaskList"
+                relationship="stack"
+                id="com.cloudbees.eclipse.run.ui.views.AppListView">
+            </view>
+        </perspectiveExtension>
+    </extension>
+
 
 </plugin>

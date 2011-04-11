@@ -100,6 +100,7 @@ public class OpenJunitViewAction extends BaseSelectionListenerAction {
 
   private void showInJUnitView(final String testReport, final IProgressMonitor monitor) throws Exception {
 
+    System.out.println("TESTREPORT!\n" + testReport);
     try {
       // TODO transform Jenkins test results into JUnit standard test results
       String result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><testsuite errors=\"0\" failures=\"1\" tests=\"5\" name=\"blah\"> </testsuite>";
