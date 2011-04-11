@@ -44,5 +44,5 @@ public interface CBImages {
   String IMG_HEALTH_24_60_to_79 = IMG_HEALTH_PREFIX + IMG_24 + "health-60to79.gif";
   String IMG_HEALTH_24_80PLUS = IMG_HEALTH_PREFIX + IMG_24 + "health-80plus.gif";
 
-
+  String IMG_JUNIT = "IMG_JUNIT";
 }

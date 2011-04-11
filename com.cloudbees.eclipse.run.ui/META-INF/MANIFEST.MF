@@ -14,6 +14,7 @@ Require-Bundle: com.cloudbees.eclipse.run.core,
  org.eclipse.wst.server.ui,
  org.eclipse.jdt.core,
  org.eclipse.wst.common.project.facet.ui,
- com.cloudbees.eclipse.sdk;bundle-version="0.6.0"
+ com.cloudbees.eclipse.sdk;bundle-version="0.6.0",
+ com.cloudbees.eclipse.ui;bundle-version="1.0.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

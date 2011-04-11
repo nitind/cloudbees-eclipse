@@ -2,7 +2,6 @@ package com.cloudbees.eclipse.run.ui.wizards;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -12,13 +11,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-public class CBSampleWebAppWizardPage extends WizardPage {
+public class CBSampleWebAppWizardPage extends CBWizardPage {
 
   public static final String PAGE_NAME = CBSampleWebAppWizardPage.class.getSimpleName();
   private static final String PAGE_TITLE = "Sample Web Application";
   private static final String PAGE_DESCRIPTION = "This wizard creates a new sample web application.";
   private static final String PROJECT_NAME_LABEL = "Project Name:";
   private static final String PROJECT_NAME_HINT = "Please enter the project name";
+  private static final String ERR_PROJECT_EXISTS = "Project with same name already exists in workspace";
+  private static final String ERR_PROJECT_NAME = "Project name must be specified";
 
   private Text text;
 
@@ -28,6 +29,7 @@ public class CBSampleWebAppWizardPage extends WizardPage {
     setDescription(PAGE_DESCRIPTION);
   }
 
+  @Override
   public void createControl(Composite parent) {
     Composite container = new Composite(parent, SWT.NULL);
 
@@ -52,6 +54,7 @@ public class CBSampleWebAppWizardPage extends WizardPage {
     this.text.setMessage(PROJECT_NAME_HINT);
     this.text.setLayoutData(data);
     this.text.addModifyListener(new ModifyListener() {
+      @Override
       public void modifyText(ModifyEvent e) {
         projectNameInputChanged(CBSampleWebAppWizardPage.this.text.getText());
       }
@@ -64,10 +67,10 @@ public class CBSampleWebAppWizardPage extends WizardPage {
 
   private void projectNameInputChanged(String newName) {
     if (newName.isEmpty()) {
-      updateErrorStatus("Project name must be specified");
+      updateErrorStatus(ERR_PROJECT_NAME);
       return;
     } else if (isProjectNameExists(newName)) {
-      updateErrorStatus("Project with same name already exists in workspace");
+      updateErrorStatus(ERR_PROJECT_EXISTS);
       return;
     }
     updateErrorStatus(null);
@@ -92,4 +95,10 @@ public class CBSampleWebAppWizardPage extends WizardPage {
     }
     return nameExists;
   }
+
+  @Override
+  boolean canFinish() {
+    return false;
+  }
+
 }

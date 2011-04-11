@@ -102,6 +102,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     reg.put(CBImages.IMG_FILE_DELETED,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/del_stat.gif")));
 
+    reg.put(CBImages.IMG_JUNIT, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/junit.gif")));
+
     reg.put(CBImages.IMG_COLOR_16_GREY,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/grey.gif")));
 
@@ -214,6 +216,18 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     if (CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
       job.schedule();
     }
+  }
+
+  public void showView(final String viewId) {
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      public void run() {
+        try {
+          CloudBeesUIPlugin.getActiveWindow().getActivePage().showView(viewId);
+        } catch (PartInitException e) {
+          CloudBeesUIPlugin.getDefault().showError("Failed to show view: " + viewId, e);
+        }
+      }
+    });
   }
 
   public void showBuildForJob(final Job el) {

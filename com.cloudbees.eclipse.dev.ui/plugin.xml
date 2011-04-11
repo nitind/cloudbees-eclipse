@@ -17,7 +17,7 @@
         </view>
         <view
             name="Build Jobs"
-            icon="icons/jobs_view6.png"
+            icon="icons/cb_run_wheel_topleft.png"
             category="com.cloudbees.eclipse"
             class="com.cloudbees.eclipse.dev.ui.views.jobs.JobsView"
             id="com.cloudbees.eclipse.ui.views.JobsView"
