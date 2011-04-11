@@ -2,7 +2,6 @@ package com.cloudbees.eclipse.run.ui.wizards;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -12,7 +11,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-public class CBSampleWebAppWizardPage extends WizardPage {
+public class CBSampleWebAppWizardPage extends CBWizardPage {
 
   public static final String PAGE_NAME = CBSampleWebAppWizardPage.class.getSimpleName();
   private static final String PAGE_TITLE = "Sample Web Application";
@@ -92,4 +91,10 @@ public class CBSampleWebAppWizardPage extends WizardPage {
     }
     return nameExists;
   }
+
+  @Override
+  boolean canFinish() {
+    return false;
+  }
+
 }

@@ -13,6 +13,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -558,16 +559,19 @@ public class JenkinsService {
       monitor.setTaskName("Constructing post request");
 
       String encodedJobName = URLEncoder.encode(jobName, "UTF-8");
+      String url = this.jenkins.url.endsWith("/") ? this.jenkins.url : this.jenkins.url + "/";
 
-      HttpPost post = new HttpPost("http://localhost:8080/createItem?name=" + encodedJobName); // FIXME
+      HttpPost post = new HttpPost(url + "createItem?name=" + encodedJobName);
       FileEntity fileEntity = new FileEntity(configXML, "application/xml");
       post.setEntity(fileEntity);
 
       DefaultHttpClient httpClient = Utils.getAPIClient();
       monitor.setTaskName("Creating new Jenkins job...");
       HttpResponse response = httpClient.execute(post);
-      if (response.getStatusLine().getStatusCode() != 200) {
-        throw new Exception(response.getStatusLine().getReasonPhrase());
+      StatusLine status = response.getStatusLine();
+      if (status.getStatusCode() != 200) {
+        throw new Exception("HTTP post to create new Jenkins job failed. HTTP " + status.getStatusCode() + " ("
+            + status.getReasonPhrase() + ").");
       }
     } catch (Exception e) {
       throw new CloudBeesException("Failed to create new Jenkins job", e);
