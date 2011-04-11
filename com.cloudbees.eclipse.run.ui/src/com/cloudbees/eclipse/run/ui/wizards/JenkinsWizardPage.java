@@ -27,14 +27,19 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
+import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class JenkinsWizardPage extends CBWizardPage {
 
-  private static final String PAGE_NAME = JenkinsWizardPage.class.getSimpleName();
+  public static final String PAGE_NAME = JenkinsWizardPage.class.getSimpleName();
   private static final String PAGE_TITLE = "New Jenkins Job";
   private static final String PAGE_DESCRIPTION = "Optionally you can create a new Jenkins job for this project.";
+  private static final String JENKINS_JOB_CHECK_LABEL = "Make new Jenkins job for this project";
+  private static final String JENKINS_INSTANCE_LABEL = "Jenkins instance:";
   private static final String JOB_NAME_LABEL = "Job Name:";
+  private static final String ERR_JOB_NAME = "Please provide a job name";
+  private static final String ERR_JENKINS_INSTANCE = "Please provide a Jenkins instance";
 
   private Button makeJobCheck;
   private Text jobNameText;
@@ -64,7 +69,7 @@ public class JenkinsWizardPage extends CBWizardPage {
     data.horizontalAlignment = SWT.LEFT;
 
     this.makeJobCheck = new Button(container, SWT.CHECK);
-    this.makeJobCheck.setText("Make new Jenkins job for this project");
+    this.makeJobCheck.setText(JENKINS_JOB_CHECK_LABEL);
     this.makeJobCheck.setSelection(false);
     this.makeJobCheck.setLayoutData(data);
     this.makeJobCheck.addSelectionListener(new MakeJenkinsJobSelectionListener());
@@ -74,7 +79,7 @@ public class JenkinsWizardPage extends CBWizardPage {
 
     Label jenkinsInstanceLabel = new Label(container, SWT.NULL);
     jenkinsInstanceLabel.setLayoutData(data);
-    jenkinsInstanceLabel.setText("Jenkins instance:");
+    jenkinsInstanceLabel.setText(JENKINS_INSTANCE_LABEL);
 
     data = new GridData();
     data.grabExcessHorizontalSpace = true;
@@ -203,17 +208,15 @@ public class JenkinsWizardPage extends CBWizardPage {
           });
 
         } catch (Exception e) {
-          e.printStackTrace(); // TODO
+          CBRunUiActivator.logError(e);
         }
       }
     };
 
     try {
       getContainer().run(true, false, operation);
-    } catch (InvocationTargetException e) {
-      e.printStackTrace(); // TODO
-    } catch (InterruptedException e) {
-      e.printStackTrace(); // TODO
+    } catch (Exception e) {
+      CBRunUiActivator.logError(e);
     }
 
   }
@@ -231,12 +234,12 @@ public class JenkinsWizardPage extends CBWizardPage {
 
     String jobName = getJobNameText();
     if (jobName == null || jobName.length() == 0) {
-      updateErrorStatus("Please provide a job name");
+      updateErrorStatus(ERR_JOB_NAME);
       return;
     }
 
     if (getJenkinsInstance() == null) {
-      updateErrorStatus("Please provide a Jenkins instance");
+      updateErrorStatus(ERR_JENKINS_INSTANCE);
       return;
     }
 

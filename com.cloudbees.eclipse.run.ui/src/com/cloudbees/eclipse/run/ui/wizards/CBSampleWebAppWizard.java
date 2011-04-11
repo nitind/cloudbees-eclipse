@@ -2,6 +2,7 @@ package com.cloudbees.eclipse.run.ui.wizards;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -34,6 +35,9 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 public class CBSampleWebAppWizard extends Wizard implements INewWizard {
 
   private static final String WINDOW_TITLE = "Sample Web Application";
+  private static final String ERROR_TITLE = "Error";
+  private static final String ERROR_MSG = "Received error while creating new project";
+  private static final String BUILD_LABEL = "Build {0}";
 
   private CBSampleWebAppWizardPage newProjectPage;
   private JenkinsWizardPage jenkinsPage;
@@ -65,7 +69,7 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
       String jobName = jenkinsPage.getJobNameText();
 
       if (jobName == null || jobName.length() == 0) {
-        jenkinsPage.setJobNameText("Build " + this.newProjectPage.getProjectName());
+        jenkinsPage.setJobNameText(MessageFormat.format(BUILD_LABEL, this.newProjectPage.getProjectName()));
       }
 
       jenkinsPage.loadJenkinsInstances();
@@ -101,7 +105,7 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
       CBRunCoreScripts.executeCopySampleWebAppScript(worksapceLocation, projectName);
     } catch (Exception e) {
       CBRunUiActivator.logError(e);
-      MessageDialog.openError(getShell(), "Error", e.getMessage());
+      MessageDialog.openError(getShell(), ERROR_TITLE, e.getMessage());
       return false;
     }
 
@@ -140,7 +144,7 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
             @Override
             public void run() {
               IStatus status = new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, e.getMessage(), e.getCause());
-              ErrorDialog.openError(getShell(), "Error", "Received error while creating new project", status);
+              ErrorDialog.openError(getShell(), ERROR_TITLE, ERROR_MSG, status);
             }
           });
         } finally {
@@ -157,7 +161,7 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
     } catch (InvocationTargetException e) {
       CBRunUiActivator.logError(e);
       Throwable targetEx = e.getTargetException();
-      MessageDialog.openError(getShell(), "Error", targetEx.getMessage());
+      MessageDialog.openError(getShell(), ERROR_TITLE, targetEx.getMessage());
       return false;
     }
 
