@@ -13,7 +13,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -190,7 +189,9 @@ public class JenkinsService {
         httpclient.getCookieStore().addCookie(new BasicClientCookie("JOSSO_SESSIONID", lastJossoSessionId)); // 3
       }
       if (post instanceof HttpEntityEnclosingRequest) {
-        ((HttpEntityEnclosingRequest) post).setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
+        if (((HttpEntityEnclosingRequest) post).getEntity() == null) {
+          ((HttpEntityEnclosingRequest) post).setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
+        }
       }
 
       CloudBeesCorePlugin.getDefault().getLogger().info("Retrieve: " + post.getURI());
@@ -595,12 +596,9 @@ public class JenkinsService {
 
       DefaultHttpClient httpClient = Utils.getAPIClient();
       monitor.setTaskName("Creating new Jenkins job...");
-      HttpResponse response = httpClient.execute(post);
-      StatusLine status = response.getStatusLine();
-      if (status.getStatusCode() != 200) {
-        throw new Exception("HTTP post to create new Jenkins job failed. HTTP " + status.getStatusCode() + " ("
-            + status.getReasonPhrase() + ").");
-      }
+
+      retrieveWithLogin(httpClient, post, null, true, new SubProgressMonitor(monitor, 10));
+
     } catch (Exception e) {
       throw new CloudBeesException("Failed to create new Jenkins job", e);
     }

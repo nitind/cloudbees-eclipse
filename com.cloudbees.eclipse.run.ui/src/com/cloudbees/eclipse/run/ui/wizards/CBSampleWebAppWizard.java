@@ -2,7 +2,6 @@ package com.cloudbees.eclipse.run.ui.wizards;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -27,7 +26,6 @@ import org.eclipse.ui.wizards.datatransfer.ImportOperation;
 import com.cloudbees.eclipse.core.CloudBeesNature;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.NatureUtil;
-import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.run.core.CBRunCoreScripts;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
@@ -56,6 +54,7 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
     addPage(this.jenkinsPage);
   }
 
+  @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
   }
 
@@ -68,6 +67,8 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
       if (jobName == null || jobName.length() == 0) {
         jenkinsPage.setJobNameText("Build " + this.newProjectPage.getProjectName());
       }
+
+      jenkinsPage.loadJenkinsInstances();
     }
 
     return super.getNextPage(page);
@@ -110,6 +111,7 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
     IImportStructureProvider structureProvider = FileSystemStructureProvider.INSTANCE;
     IOverwriteQuery overwriteQuery = new IOverwriteQuery() {
 
+      @Override
       public String queryOverwrite(String pathString) {
         return IOverwriteQuery.ALL;
       }
@@ -121,6 +123,7 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
 
     IRunnableWithProgress progress = new IRunnableWithProgress() {
 
+      @Override
       public void run(IProgressMonitor monitor) throws InvocationTargetException {
 
         try {
@@ -134,6 +137,7 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
         } catch (final Exception e) {
           CBRunUiActivator.logError(e);
           getShell().getDisplay().syncExec(new Runnable() {
+            @Override
             public void run() {
               IStatus status = new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, e.getMessage(), e.getCause());
               ErrorDialog.openError(getShell(), "Error", "Received error while creating new project", status);
@@ -165,10 +169,6 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
     CloudBeesUIPlugin plugin = CloudBeesUIPlugin.getDefault();
     JenkinsService jenkinsService = plugin.lookupJenkinsService(this.jenkinsPage.getJenkinsInstance());
     jenkinsService.createJenkinsJob(jobName, configXML, monitor);
-  }
-
-  public List<JenkinsInstance> getJenkinsInstances() {
-    return CloudBeesUIPlugin.getDefault().loadManualJenkinsInstances();
   }
 
 }

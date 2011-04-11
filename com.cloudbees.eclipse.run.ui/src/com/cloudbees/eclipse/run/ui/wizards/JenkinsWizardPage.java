@@ -1,7 +1,11 @@
 package com.cloudbees.eclipse.run.ui.wizards;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -18,10 +22,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
+import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class JenkinsWizardPage extends CBWizardPage {
 
@@ -42,6 +48,7 @@ public class JenkinsWizardPage extends CBWizardPage {
     setDescription(PAGE_DESCRIPTION);
   }
 
+  @Override
   public void createControl(Composite parent) {
     Composite container = new Composite(parent, SWT.NULL);
 
@@ -78,8 +85,8 @@ public class JenkinsWizardPage extends CBWizardPage {
     this.jenkinsInstancesCombo.setEnabled(false);
     this.jenkinsComboViewer = new ComboViewer(this.jenkinsInstancesCombo);
     this.jenkinsComboViewer.setLabelProvider(new JenkinsInstanceLabelProvider());
-    this.jenkinsComboViewer.add(getJenkinsInstances());
     this.jenkinsComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+      @Override
       public void selectionChanged(SelectionChangedEvent event) {
         ISelection selection = JenkinsWizardPage.this.jenkinsComboViewer.getSelection();
         if (selection instanceof StructuredSelection) {
@@ -105,6 +112,7 @@ public class JenkinsWizardPage extends CBWizardPage {
     this.jobNameText.setLayoutData(data);
     this.jobNameText.setEnabled(false);
     this.jobNameText.addModifyListener(new ModifyListener() {
+      @Override
       public void modifyText(ModifyEvent e) {
         validate();
       }
@@ -131,10 +139,12 @@ public class JenkinsWizardPage extends CBWizardPage {
 
   private class MakeJenkinsJobSelectionListener implements SelectionListener {
 
+    @Override
     public void widgetSelected(SelectionEvent e) {
       handleEvent();
     }
 
+    @Override
     public void widgetDefaultSelected(SelectionEvent e) {
       handleEvent();
     }
@@ -166,10 +176,46 @@ public class JenkinsWizardPage extends CBWizardPage {
 
   }
 
-  private JenkinsInstance[] getJenkinsInstances() {
-    List<JenkinsInstance> instances = ((CBSampleWebAppWizard) getWizard()).getJenkinsInstances();
-    JenkinsInstance[] instancesArray = new JenkinsInstance[instances.size()];
-    return instances.toArray(instancesArray);
+  public void loadJenkinsInstances() {
+    if (this.jenkinsInstancesCombo.getItemCount() > 0) {
+      return;
+    }
+
+    final Display display = getShell().getDisplay();
+    IRunnableWithProgress operation = new IRunnableWithProgress() {
+
+      @Override
+      public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+        try {
+          CloudBeesUIPlugin plugin = CloudBeesUIPlugin.getDefault();
+          List<JenkinsInstance> manualInstances = plugin.loadManualJenkinsInstances();
+          List<JenkinsInstance> cloudInstances = plugin.loadDevAtCloudInstances(monitor);
+          List<JenkinsInstance> instances = new ArrayList<JenkinsInstance>();
+          instances.addAll(manualInstances);
+          instances.addAll(cloudInstances);
+          final Object[] items = instances.toArray();
+
+          display.syncExec(new Runnable() {
+            @Override
+            public void run() {
+              JenkinsWizardPage.this.jenkinsComboViewer.add(items);
+            }
+          });
+
+        } catch (Exception e) {
+          e.printStackTrace(); // TODO
+        }
+      }
+    };
+
+    try {
+      getContainer().run(true, false, operation);
+    } catch (InvocationTargetException e) {
+      e.printStackTrace(); // TODO
+    } catch (InterruptedException e) {
+      e.printStackTrace(); // TODO
+    }
+
   }
 
   private void updateErrorStatus(String message) {
