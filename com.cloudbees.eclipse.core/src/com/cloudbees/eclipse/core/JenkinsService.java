@@ -20,6 +20,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.FileEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
@@ -610,8 +611,10 @@ public class JenkinsService {
 
       HttpPost post = new HttpPost(url + "doDelete");
 
+      post.setEntity(new StringEntity(""));
+
       DefaultHttpClient httpClient = Utils.getAPIClient();
-      monitor.setTaskName("Creating new Jenkins job...");
+      monitor.setTaskName("Deleting Jenkins job...");
 
       retrieveWithLogin(httpClient, post, null, false, new SubProgressMonitor(monitor, 10));
 
