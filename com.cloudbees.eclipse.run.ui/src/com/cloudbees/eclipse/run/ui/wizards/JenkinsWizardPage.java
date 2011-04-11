@@ -46,6 +46,8 @@ public class JenkinsWizardPage extends CBWizardPage {
   private Combo jenkinsInstancesCombo;
   private ComboViewer jenkinsComboViewer;
   private JenkinsInstance jenkinsInstance;
+  private Label jenkinsInstanceLabel;
+  private Label jobNameLabel;
 
   protected JenkinsWizardPage() {
     super(PAGE_NAME);
@@ -77,9 +79,10 @@ public class JenkinsWizardPage extends CBWizardPage {
     data = new GridData();
     data.verticalAlignment = SWT.CENTER;
 
-    Label jenkinsInstanceLabel = new Label(container, SWT.NULL);
-    jenkinsInstanceLabel.setLayoutData(data);
-    jenkinsInstanceLabel.setText(JENKINS_INSTANCE_LABEL);
+    this.jenkinsInstanceLabel = new Label(container, SWT.NULL);
+    this.jenkinsInstanceLabel.setLayoutData(data);
+    this.jenkinsInstanceLabel.setText(JENKINS_INSTANCE_LABEL);
+    this.jenkinsInstanceLabel.setEnabled(false);
 
     data = new GridData();
     data.grabExcessHorizontalSpace = true;
@@ -105,9 +108,10 @@ public class JenkinsWizardPage extends CBWizardPage {
     data = new GridData();
     data.verticalAlignment = SWT.CENTER;
 
-    Label label = new Label(container, SWT.NULL);
-    label.setLayoutData(data);
-    label.setText(JOB_NAME_LABEL);
+    this.jobNameLabel = new Label(container, SWT.NULL);
+    this.jobNameLabel.setLayoutData(data);
+    this.jobNameLabel.setText(JOB_NAME_LABEL);
+    this.jobNameLabel.setEnabled(false);
 
     data = new GridData();
     data.grabExcessHorizontalSpace = true;
@@ -158,6 +162,8 @@ public class JenkinsWizardPage extends CBWizardPage {
       boolean selected = isMakeNewJob();
       JenkinsWizardPage.this.jobNameText.setEnabled(selected);
       JenkinsWizardPage.this.jenkinsInstancesCombo.setEnabled(selected);
+      JenkinsWizardPage.this.jenkinsInstanceLabel.setEnabled(selected);
+      JenkinsWizardPage.this.jobNameLabel.setEnabled(selected);
       validate();
     }
   }
