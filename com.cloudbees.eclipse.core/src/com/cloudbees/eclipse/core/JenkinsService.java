@@ -165,13 +165,13 @@ public class JenkinsService {
   throws UnsupportedEncodingException, IOException, ClientProtocolException, CloudBeesException, Exception {
     String bodyResponse = null;
 
-    boolean tryToLogin = false; // false for BasicAuth, true for redirect login
+    boolean tryToLogin = true; // false for BasicAuth, true for redirect login
     do {
 
       if ((this.jenkins.atCloud || this.jenkins.authenticate) && this.jenkins.username != null
           && this.jenkins.username.trim().length() > 0 && this.jenkins.password != null
           && this.jenkins.password.trim().length() > 0) {
-        post.addHeader("Authorization", "Basic " + Utils.toB64(this.jenkins.username + ":" + this.jenkins.password));
+        //post.addHeader("Authorization", "Basic " + Utils.toB64(this.jenkins.username + ":" + this.jenkins.password));
       }
 
       List<NameValuePair> nvps = new ArrayList<NameValuePair>();
@@ -601,11 +601,11 @@ public class JenkinsService {
   }
 
   public void deleteJenkinsJob(final String joburl, final IProgressMonitor monitor)
-      throws CloudBeesException {
+  throws CloudBeesException {
     try {
       monitor.setTaskName("Preparing delete request");
 
-      
+
       String url = joburl.endsWith("/") ? joburl : joburl + "/";
 
       HttpPost post = new HttpPost(url + "doDelete");
