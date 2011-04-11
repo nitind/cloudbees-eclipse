@@ -585,7 +585,7 @@ public class JenkinsService {
   public void createJenkinsJob(final String jobName, final File configXML, final IProgressMonitor monitor)
       throws CloudBeesException {
     try {
-      monitor.setTaskName("Constructing post request");
+      monitor.setTaskName("Preparing new job request");
 
       String encodedJobName = URLEncoder.encode(jobName, "UTF-8");
       String url = this.jenkins.url.endsWith("/") ? this.jenkins.url : this.jenkins.url + "/";
@@ -603,4 +603,25 @@ public class JenkinsService {
       throw new CloudBeesException("Failed to create new Jenkins job", e);
     }
   }
+
+  public void deleteJenkinsJob(final String joburl, final IProgressMonitor monitor)
+      throws CloudBeesException {
+    try {
+      monitor.setTaskName("Preparing delete request");
+
+      
+      String url = joburl.endsWith("/") ? joburl : joburl + "/";
+
+      HttpPost post = new HttpPost(url + "doDelete");
+
+      DefaultHttpClient httpClient = Utils.getAPIClient();
+      monitor.setTaskName("Creating new Jenkins job...");
+
+      retrieveWithLogin(httpClient, post, null, false, new SubProgressMonitor(monitor, 10));
+
+    } catch (Exception e) {
+      throw new CloudBeesException("Failed to delete Jenkins job", e);
+    }
+  }
+
 }
