@@ -1,6 +1,7 @@
 package com.cloudbees.eclipse.run.core.launchconfiguration;
 
 import static com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME;
+import static com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants.DO_NOTHING;
 
 import org.eclipse.ant.internal.launching.launchConfigurations.AntLaunchDelegate;
 import org.eclipse.core.runtime.CoreException;
@@ -20,6 +21,11 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
   @Override
   public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
       throws CoreException {
+
+    if (configuration.getAttribute(DO_NOTHING, false)) {
+      monitor.setCanceled(true);
+      return;
+    }
 
     boolean debug = mode.equals("debug");
 
@@ -50,15 +56,19 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
       this.projectName = projectName;
     }
 
+    @Override
     public void launchesRemoved(ILaunch[] launches) {
     }
 
+    @Override
     public void launchesAdded(ILaunch[] launches) {
     }
 
+    @Override
     public void launchesChanged(ILaunch[] launches) {
     }
 
+    @Override
     public void launchesTerminated(ILaunch[] launches) {
       CBProjectProcessService service = CBProjectProcessService.getInstance();
       service.removeProcess(this.projectName);

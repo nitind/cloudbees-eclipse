@@ -10,11 +10,13 @@ import com.cloudbees.eclipse.run.core.launchconfiguration.CBProjectProcessLifecy
 /**
  * Move this to WST plugin when created
  */
+@SuppressWarnings("restriction")
 public class WSTProjectLifecycleHook implements CBProjectProcessLifecycleHook {
 
   public WSTProjectLifecycleHook() {
   }
 
+  @Override
   public void onStart(String projectName) {
     Server server = getServer(projectName);
     if (server != null) {
@@ -22,6 +24,7 @@ public class WSTProjectLifecycleHook implements CBProjectProcessLifecycleHook {
     }
   }
 
+  @Override
   public void onStop(String projectName) {
     Server server = getServer(projectName);
     if (server != null) {
