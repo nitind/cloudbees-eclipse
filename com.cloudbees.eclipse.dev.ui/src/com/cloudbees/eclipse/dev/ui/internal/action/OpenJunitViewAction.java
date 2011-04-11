@@ -1,5 +1,6 @@
 package com.cloudbees.eclipse.dev.ui.internal.action;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +31,7 @@ import org.eclipse.ui.statushandlers.StatusManager;
 import org.xml.sax.SAXException;
 
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
+import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -99,35 +101,110 @@ public class OpenJunitViewAction extends BaseSelectionListenerAction {
   }
 
   private void showInJUnitView(final String testReport, final IProgressMonitor monitor) throws Exception {
-
     System.out.println("TESTREPORT!\n" + testReport);
+    // TODO transform Jenkins test results into JUnit standard test results
+    String result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><testsuite errors=\"0\" failures=\"1\" tests=\"5\" name=\"blah\"> </testsuite>";
+
+    InputStream in = new ByteArrayInputStream(result.getBytes("UTF-8"));
+
+    final TestRunSession testRunSession = importTestRunSession(in);
+
+    //          JUnitResultGenerator generator = new JUnitResultGenerator(build.getTestResult());
+    //          TestRunHandler handler = new TestRunHandler(testRunSession);
+    //          try {
+    //            generator.write(handler);
+    //          } catch (SAXException e) {
+    //            throw new CoreException(new Status(IStatus.ERROR, CloudBeesDevUiPlugin.PLUGIN_ID,
+    //                "Unexpected parsing error while preparing test results", e));
+    //          }
+
+    CloudBeesDevUiPlugin.getDefault().showView(TestRunnerViewPart.NAME);
+    getJUnitModel().addTestRunSession(testRunSession);
+  }
+
+  public static void main(final String[] args) {
     try {
-      // TODO transform Jenkins test results into JUnit standard test results
-      String result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><testsuite errors=\"0\" failures=\"1\" tests=\"5\" name=\"blah\"> </testsuite>";
-
-      InputStream in = new ByteArrayInputStream(result.getBytes("UTF-8"));
-
-      final TestRunSession testRunSession = importTestRunSession(in);
-
-      //          JUnitResultGenerator generator = new JUnitResultGenerator(build.getTestResult());
-      //          TestRunHandler handler = new TestRunHandler(testRunSession);
-      //          try {
-      //            generator.write(handler);
-      //          } catch (SAXException e) {
-      //            throw new CoreException(new Status(IStatus.ERROR, CloudBeesDevUiPlugin.PLUGIN_ID,
-      //                "Unexpected parsing error while preparing test results", e));
-      //          }
-
-      CloudBeesDevUiPlugin.getDefault().showView(TestRunnerViewPart.NAME);
-      getJUnitModel().addTestRunSession(testRunSession);
-    } catch (CoreException e) {
-      StatusManager.getManager()
-      .handle(
-          new Status(IStatus.ERROR, CloudBeesDevUiPlugin.PLUGIN_ID,
-              "Unexpected error while processing test results", e), StatusManager.SHOW | StatusManager.LOG);
-      return;
+      String report = Utils.readString(new BufferedInputStream(OpenJunitViewAction.class
+          .getResourceAsStream("/resources/testReport4.xml")));
+      tr(report);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
+  }
 
+  private static void tr(final String testReport) throws Exception {
+    TestRunHandler handler = new TestRunHandler();
+
+    javax.xml.transform.Source xmlSource = new javax.xml.transform.stream.StreamSource(new ByteArrayInputStream(
+        testReport.getBytes("UTF-8")));
+    javax.xml.transform.Source xsltSource = new javax.xml.transform.stream.StreamSource(
+        OpenJunitViewAction.class.getResourceAsStream(
+"/resources/jenkins-to-junit.xsl"));
+    javax.xml.transform.Result result = new javax.xml.transform.stream.StreamResult(System.out);
+    //new SAXResult(handler);
+
+    javax.xml.transform.TransformerFactory transFact = javax.xml.transform.TransformerFactory.newInstance();
+    javax.xml.transform.Transformer trans = transFact.newTransformer(xsltSource);
+
+    trans.transform(xmlSource, result);
+
+    TestRunSession session = handler.getTestRunSession();
+
+    // // Instantiate a TransformerFactory.
+    //    javax.xml.transform.TransformerFactory tFactory =
+    //                        javax.xml.transform.TransformerFactory.newInstance();
+    //    // Verify that the TransformerFactory implementation you are using
+    //    // supports SAX input and output (Xalan-Java does!).
+    //    if (tFactory.getFeature(javax.xml.transform.sax.SAXSource.FEATURE) &&
+    //        tFactory.getFeature(javax.xml.transform.sax.SAXResult.FEATURE))
+    //      {
+    //        // Cast the TransformerFactory to SAXTransformerFactory.
+    //        javax.xml.transform.sax.SAXTransformerFactory saxTFactory =
+    //                       ((javax.xml.transform.sax.SAXTransformerFactory) tFactory);
+    //        // Create a Templates ContentHandler to handle parsing of the
+    //        // stylesheet.
+    //        javax.xml.transform.sax.TemplatesHandler templatesHandler =
+    //                                            saxTFactory.newTemplatesHandler();
+    //
+    //        org.xml.sax.XMLReader reader =
+    //                       org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
+    //        reader.setContentHandler(templatesHandler);
+    //
+    //        InputSource xslSrc = new InputSource(getClass().getResourceAsStream("resources/jenkins-to-junit.xsl"));
+    //
+    //        reader.parse(xslSrc);
+    //
+    //        // Get the Templates object (generated during the parsing of the stylesheet)
+    //        // from the TemplatesHandler.
+    //        javax.xml.transform.Templates templates =
+    //                                              templatesHandler.getTemplates();
+    //        // Create a Transformer ContentHandler to handle parsing of
+    //        // the XML Source.
+    //        javax.xml.transform.sax.TransformerHandler transformerHandler
+    //                               = saxTFactory.newTransformerHandler(templates);
+    //        // Reset the XMLReader's ContentHandler to the TransformerHandler.
+    //        reader.setContentHandler(transformerHandler);
+    //
+    //        // Set the ContentHandler to also function as a LexicalHandler, which
+    //        // can process "lexical" events (such as comments and CDATA).
+    //        reader.setProperty("http://xml.org/sax/properties/lexical-handler",
+    //                            transformerHandler);
+    //
+    ////        // Set up a Serializer to serialize the Result to a file.
+    ////        org.apache.xml.serializer.Serializer serializer =
+    ////        org.apache.xml.serializer.SerializerFactory.getSerializer
+    ////        (org.apache.xml.serializer.OutputPropertiesFactory.getDefaultMethodProperties
+    ////                                                                       ("xml"));
+    ////        serializer.setOutputStream(new java.io.FileOutputStream("foo.out"));
+    //
+    //        // The Serializer functions as a SAX ContentHandler.
+    //        javax.xml.transform.Result result =
+    //          new javax.xml.transform.sax.SAXResult(serializer.asContentHandler());
+    //        transformerHandler.setResult(result);
+    //
+    //        // Parse the XML input document.
+    //        reader.parse("foo.xml");
+    //      }
   }
 
   private static volatile JUnitModel junitModel;

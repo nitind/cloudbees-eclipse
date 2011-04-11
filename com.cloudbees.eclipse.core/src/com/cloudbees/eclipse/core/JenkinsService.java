@@ -162,20 +162,16 @@ public class JenkinsService {
 
   synchronized private String retrieveWithLogin(final DefaultHttpClient httpclient, final HttpRequestBase post,
       final List<NameValuePair> params, final boolean expectRedirect, final SubProgressMonitor monitor)
-      throws UnsupportedEncodingException, IOException, ClientProtocolException, CloudBeesException, Exception {
+  throws UnsupportedEncodingException, IOException, ClientProtocolException, CloudBeesException, Exception {
     String bodyResponse = null;
 
-    //        if (lastJossoCookie != null) {
-    //          reqUrl += "&JOSSO_SESSIONID=" + lastJossoCookie;
-    //        }
-
-    boolean tryToLogin = true; // false for BasicAuth, true for redirect login
+    boolean tryToLogin = false; // false for BasicAuth, true for redirect login
     do {
 
       if ((this.jenkins.atCloud || this.jenkins.authenticate) && this.jenkins.username != null
           && this.jenkins.username.trim().length() > 0 && this.jenkins.password != null
           && this.jenkins.password.trim().length() > 0) {
-        //        post.addHeader("Authorization", "Basic " + Utils.toB64(jenkins.username + ":" + jenkins.password));
+        post.addHeader("Authorization", "Basic " + Utils.toB64(this.jenkins.username + ":" + this.jenkins.password));
       }
 
       List<NameValuePair> nvps = new ArrayList<NameValuePair>();
@@ -286,7 +282,7 @@ public class JenkinsService {
   }
 
   private HttpResponse visitSite(final DefaultHttpClient httpClient, final String url, final String refererUrl)
-      throws IOException, ClientProtocolException, CloudBeesException {
+  throws IOException, ClientProtocolException, CloudBeesException {
 
     CloudBeesCorePlugin.getDefault().getLogger().info("Visiting: " + url);
 
@@ -309,7 +305,7 @@ public class JenkinsService {
     Header redir = resp.getFirstHeader("Location");
 
     CloudBeesCorePlugin.getDefault().getLogger()
-        .info("\t" + resp.getStatusLine() + (redir != null ? " -> " + redir.getValue() : ""));
+    .info("\t" + resp.getStatusLine() + (redir != null ? " -> " + redir.getValue() : ""));
 
     return resp;
   }
@@ -331,7 +327,7 @@ public class JenkinsService {
   }
 
   public JenkinsBuildDetailsResponse getJobDetails(final String jobUrl, final IProgressMonitor monitor)
-      throws CloudBeesException {
+  throws CloudBeesException {
     monitor.setTaskName("Fetching Job details...");
 
     if (jobUrl != null && !jobUrl.startsWith(this.jenkins.url)) {
@@ -406,7 +402,7 @@ public class JenkinsService {
   }
 
   public JenkinsJobAndBuildsResponse getJobBuilds(final String jobUrl, final IProgressMonitor monitor)
-      throws CloudBeesException {
+  throws CloudBeesException {
     monitor.setTaskName("Fetching Job builds...");
 
     if (jobUrl != null && !jobUrl.startsWith(this.jenkins.url)) {
@@ -452,7 +448,7 @@ public class JenkinsService {
   }
 
   private JenkinsScmConfig getJobScmConfig(final String jobUrl, final IProgressMonitor monitor)
-      throws CloudBeesException {
+  throws CloudBeesException {
     monitor.setTaskName("Fetching Job SCM config...");
 
     if (jobUrl != null && !jobUrl.startsWith(this.jenkins.url)) {
@@ -489,7 +485,7 @@ public class JenkinsService {
   }
 
   public void invokeBuild(final String jobUrl, final Map<String, String> props, final IProgressMonitor monitor)
-      throws CloudBeesException {
+  throws CloudBeesException {
     monitor.setTaskName("Invoking build request...");
 
     if (jobUrl != null && !jobUrl.startsWith(this.jenkins.url)) {
@@ -535,7 +531,7 @@ public class JenkinsService {
   }
 
   public JenkinsScmConfig getJenkinsScmConfig(final String jobUrl, final IProgressMonitor monitor)
-      throws CloudBeesException {
+  throws CloudBeesException {
     // TODO invalidate old items
     JenkinsScmConfig scm = this.scms.get(jobUrl);
     if (scm == null) {
@@ -583,7 +579,7 @@ public class JenkinsService {
   }
 
   public void createJenkinsJob(final String jobName, final File configXML, final IProgressMonitor monitor)
-      throws CloudBeesException {
+  throws CloudBeesException {
     try {
       monitor.setTaskName("Preparing new job request");
 
