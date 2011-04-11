@@ -17,7 +17,7 @@ import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
 
 public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
-  
+
   private final class ProjectSelectionCompositeForLauncher extends ProjectSelectionComposite {
     private ProjectSelectionCompositeForLauncher(Composite parent, int style) {
       super(parent, style);
@@ -38,13 +38,15 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
   private static final String TAB_NAME = "CloudBees Application";
 
   private ProjectSelectionComposite content;
-  
+
+  @Override
   public void createControl(Composite parent) {
     this.content = new ProjectSelectionCompositeForLauncher(parent, SWT.None);
 
     setControl(this.content);
     this.content.addModifyListener(new ModifyListener() {
 
+      @Override
       public void modifyText(ModifyEvent e) {
         CBLaunchConfigurationTab.this.content.handleUpdate();
         updateLaunchConfigurationDialog();
@@ -54,18 +56,25 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
   }
 
+  @Override
   public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
   }
 
+  @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
     try {
-      this.content.setText(configuration
-          .getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, new String()));
+      String projectName = configuration
+          .getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, new String());
+      if (projectName == null || projectName.length() == 0) {
+        projectName = this.content.getDefaultSelection();
+      }
+      this.content.setText(projectName);
     } catch (CoreException e) {
       CBRunUiActivator.logError(e);
     }
   }
 
+  @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
     String projectName = this.content.getText();
     try {
@@ -75,6 +84,7 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     }
   }
 
+  @Override
   public String getName() {
     return TAB_NAME;
   }
