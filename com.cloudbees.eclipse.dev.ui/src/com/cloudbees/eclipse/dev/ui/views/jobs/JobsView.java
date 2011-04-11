@@ -91,6 +91,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   }
 
   protected void setInput(final JenkinsJobsResponse newView) {
+
     if (newView != null && newView.viewUrl != null) {
       IViewSite site = getViewSite();
       String secId = site.getSecondaryId();
@@ -111,6 +112,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         viewInfo = newView.name + " [";
       }
       setContentDescription(viewInfo + label + (viewInfo.length() > 0 ? "]" : "") + " (" + new Date() + ")");
+      setPartName("Build Jobs [" + label + "]");
       this.contentProvider.inputChanged(this.table, null, Arrays.asList(newView.jobs));
     }
 
