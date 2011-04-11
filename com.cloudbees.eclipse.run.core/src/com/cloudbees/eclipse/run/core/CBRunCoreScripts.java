@@ -1,5 +1,6 @@
 package com.cloudbees.eclipse.run.core;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,4 +42,9 @@ public class CBRunCoreScripts {
     antRunner.run();
   }
 
+  public static File getMockConfigXML() throws IOException {
+    Bundle bundle = CBRunCoreActivator.getContext().getBundle();
+    Path path = new Path("scripts/config.xml");
+    return new File(FileLocator.toFileURL(FileLocator.find(bundle, path, null)).getFile());
+  }
 }

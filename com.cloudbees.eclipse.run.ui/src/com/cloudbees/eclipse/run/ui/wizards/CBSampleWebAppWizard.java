@@ -2,13 +2,16 @@ package com.cloudbees.eclipse.run.ui.wizards;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -22,10 +25,13 @@ import org.eclipse.ui.wizards.datatransfer.IImportStructureProvider;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
 
 import com.cloudbees.eclipse.core.CloudBeesNature;
+import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.NatureUtil;
+import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.run.core.CBRunCoreScripts;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
+import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class CBSampleWebAppWizard extends Wizard implements INewWizard {
 
@@ -57,15 +63,29 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
   public IWizardPage getNextPage(IWizardPage page) {
     if (page instanceof JenkinsWizardPage) {
       JenkinsWizardPage jenkinsPage = (JenkinsWizardPage) page;
-      String jobName = jenkinsPage.getJobNameText().getText();
+      String jobName = jenkinsPage.getJobNameText();
 
       if (jobName == null || jobName.length() == 0) {
-        jobName = "Build " + this.newProjectPage.getProjectName();
-        jenkinsPage.getJobNameText().setText(jobName);
+        jenkinsPage.setJobNameText("Build " + this.newProjectPage.getProjectName());
       }
     }
 
     return super.getNextPage(page);
+  }
+
+  @Override
+  public boolean canFinish() {
+    for (IWizardPage page : getPages()) {
+      if (!(page instanceof CBWizardPage)) {
+        continue;
+      }
+
+      CBWizardPage cbPage = (CBWizardPage) page;
+      if (cbPage.isActivePage()) {
+        return super.canFinish() && cbPage.canFinish();
+      }
+    }
+    return super.canFinish();
   }
 
   @Override
@@ -96,6 +116,8 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
     };
 
     final ImportOperation importOp = new ImportOperation(containerPath, source, structureProvider, overwriteQuery);
+    final boolean isMakeJenkinsJob = this.jenkinsPage.isMakeNewJob();
+    final String jobName = this.jenkinsPage.getJobNameText();
 
     IRunnableWithProgress progress = new IRunnableWithProgress() {
 
@@ -106,16 +128,22 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
           importOp.setCreateContainerStructure(false);
           importOp.run(monitor);
           NatureUtil.addNatures(project, new String[] { CloudBeesNature.NATURE_ID }, monitor);
-        } catch (InterruptedException e) {
+          if (isMakeJenkinsJob) {
+            makeJenkinsJob(jobName, monitor);
+          }
+        } catch (final Exception e) {
           CBRunUiActivator.logError(e);
-        } catch (CoreException e) {
-          CBRunUiActivator.logError(e);
+          getShell().getDisplay().syncExec(new Runnable() {
+            public void run() {
+              IStatus status = new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, e.getMessage(), e.getCause());
+              ErrorDialog.openError(getShell(), "Error", "Received error while creating new project", status);
+            }
+          });
         } finally {
           monitor.done();
         }
 
       }
-
     };
 
     try {
@@ -129,15 +157,18 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
       return false;
     }
 
-    makeJenkinsJob();
     return true;
   }
 
-  private void makeJenkinsJob() {
-    if (this.jenkinsPage.getMakeJobCheck().getSelection() == false) {
-      return;
-    }
-
-    // TODO
+  private void makeJenkinsJob(String jobName, IProgressMonitor monitor) throws Exception {
+    File configXML = CBRunCoreScripts.getMockConfigXML();
+    CloudBeesUIPlugin plugin = CloudBeesUIPlugin.getDefault();
+    JenkinsService jenkinsService = plugin.lookupJenkinsService(this.jenkinsPage.getJenkinsInstance());
+    jenkinsService.createJenkinsJob(jobName, configXML, monitor);
   }
+
+  public List<JenkinsInstance> getJenkinsInstances() {
+    return CloudBeesUIPlugin.getDefault().loadManualJenkinsInstances();
+  }
+
 }

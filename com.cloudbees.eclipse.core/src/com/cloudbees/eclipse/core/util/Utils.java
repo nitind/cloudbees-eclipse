@@ -133,8 +133,7 @@ public class Utils {
       };
 
       SSLSocketFactory socketFactory = new SSLSocketFactory(SSLSocketFactory.TLS, null, null, trustStore, null,
-          trustAllStrategy,
-          SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+          trustAllStrategy, SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
       // Override https handling to use provided truststore
       @SuppressWarnings("deprecation")
       Scheme sch = new Scheme("https", socketFactory, 443);
@@ -180,7 +179,8 @@ public class Utils {
     checkResponseCode(resp, false);
   }
 
-  public final static void checkResponseCode(final HttpResponse resp, final boolean expectCIRedirect) throws CloudBeesException {
+  public final static void checkResponseCode(final HttpResponse resp, final boolean expectCIRedirect)
+      throws CloudBeesException {
     int responseStatus = resp.getStatusLine().getStatusCode();
 
     Header firstHeader = resp.getFirstHeader("Location");
