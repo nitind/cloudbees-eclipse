@@ -208,7 +208,7 @@ public class JenkinsService {
         tryToLogin = false;
       } else {
         // check final outcome if we got what we asked for
-        //        Utils.checkResponseCode(resp, expectRedirect);
+        Utils.checkResponseCode(resp, expectRedirect);
         break;
       }
 
