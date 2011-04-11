@@ -597,7 +597,7 @@ public class JenkinsService {
       DefaultHttpClient httpClient = Utils.getAPIClient();
       monitor.setTaskName("Creating new Jenkins job...");
 
-      retrieveWithLogin(httpClient, post, null, true, new SubProgressMonitor(monitor, 10));
+      retrieveWithLogin(httpClient, post, null, false, new SubProgressMonitor(monitor, 10));
 
     } catch (Exception e) {
       throw new CloudBeesException("Failed to create new Jenkins job", e);
