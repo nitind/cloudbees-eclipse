@@ -1,6 +1,5 @@
 package com.cloudbees.eclipse.dev.ui.internal.action;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
@@ -15,6 +14,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.BaseSelectionListenerAction;
+import org.eclipse.ui.progress.IProgressService;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
@@ -55,10 +55,11 @@ public class OpenJunitViewAction extends BaseSelectionListenerAction {
       final JenkinsBuildDetailsResponse build = (JenkinsBuildDetailsResponse) selection;
 
       try {
-        PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
+        IRunnableWithProgress op = new IRunnableWithProgress() {
           public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
             try {
-              String testReport = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(build.url).getTestReport(build.url, monitor);
+              InputStream testReport = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(build.url)
+              .getTestReport(build.url, monitor);
               if (testReport == null) {
                 StatusManager.getManager().handle(
                     new Status(IStatus.ERROR, CloudBeesDevUiPlugin.PLUGIN_ID, "The build did not produce test results."),
@@ -69,12 +70,18 @@ public class OpenJunitViewAction extends BaseSelectionListenerAction {
                 throw new InterruptedException();
               }
 
-              showInJUnitView(testReport, monitor);
+              final TestRunSession testRunSession = JUnitReportSupport.importJenkinsTestRunSession(testReport);
+              CloudBeesDevUiPlugin.getDefault().showView(TestRunnerViewPart.NAME);
+              JUnitReportSupport.getJUnitModel().addTestRunSession(testRunSession);
             } catch (Exception e) {
               throw new InvocationTargetException(e);
             }
           }
-        });
+        };
+
+        //PlatformUI.getWorkbench().getProgressService().busyCursorWhile(op);
+        IProgressService service = PlatformUI.getWorkbench().getProgressService();
+        service.run(false, true, op);
       } catch (InterruptedException e) {
         // cancelled
       } catch (InvocationTargetException e) {
@@ -89,28 +96,5 @@ public class OpenJunitViewAction extends BaseSelectionListenerAction {
       }
     }
   }
-
-  private void showInJUnitView(final String testReport, final IProgressMonitor monitor) throws Exception {
-    //System.out.println("TESTREPORT!\n" + testReport);
-    // TODO transform Jenkins test results into JUnit standard test results
-    //    String result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><testsuite errors=\"0\" failures=\"1\" tests=\"5\" name=\"blah\"> </testsuite>";
-
-    InputStream in = new ByteArrayInputStream(testReport.getBytes("UTF-8"));
-
-    final TestRunSession testRunSession = JUnitReportSupport.importJenkinsTestRunSession(in);
-
-    //          JUnitResultGenerator generator = new JUnitResultGenerator(build.getTestResult());
-    //          TestRunHandler handler = new TestRunHandler(testRunSession);
-    //          try {
-    //            generator.write(handler);
-    //          } catch (SAXException e) {
-    //            throw new CoreException(new Status(IStatus.ERROR, CloudBeesDevUiPlugin.PLUGIN_ID,
-    //                "Unexpected parsing error while preparing test results", e));
-    //          }
-
-    CloudBeesDevUiPlugin.getDefault().showView(TestRunnerViewPart.NAME);
-    JUnitReportSupport.getJUnitModel().addTestRunSession(testRunSession);
-  }
-
 
 }
