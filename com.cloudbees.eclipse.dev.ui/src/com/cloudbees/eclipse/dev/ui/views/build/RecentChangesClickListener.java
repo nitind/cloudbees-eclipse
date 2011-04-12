@@ -15,7 +15,11 @@ public class RecentChangesClickListener implements IDoubleClickListener {
   public void doubleClick(final DoubleClickEvent event) {
     JenkinsBuildDetailsResponse buildDetails = ((RecentChangesContentProvider) ((TreeViewer) event.getSource())
         .getContentProvider()).getBuildDetails();
-    final ChangeSetPathItem item = (ChangeSetPathItem) ((TreeSelection) event.getSelection()).getFirstElement();
+    Object selection = ((TreeSelection) event.getSelection()).getFirstElement();
+    if (!(selection instanceof ChangeSetPathItem)) {
+      return;
+    }
+    final ChangeSetPathItem item = (ChangeSetPathItem) selection;
 
     String jobUrl = buildDetails.url;
 
