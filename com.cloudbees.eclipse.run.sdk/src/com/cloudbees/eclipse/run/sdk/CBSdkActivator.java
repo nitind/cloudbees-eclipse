@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.sdk;
+package com.cloudbees.eclipse.run.sdk;
 
 import java.io.IOException;
 
@@ -9,7 +9,7 @@ import org.osgi.framework.BundleContext;
 
 public class CBSdkActivator extends Plugin {
   // The plug-in ID
-  public static final String PLUGIN_ID = "com.cloudbees.eclipse.sdk"; //$NON-NLS-1$
+  public static final String PLUGIN_ID = "com.cloudbees.eclipse.run.sdk"; //$NON-NLS-1$
 
   private String sdkLocation = null;
 

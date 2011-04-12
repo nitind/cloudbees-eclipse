@@ -24,7 +24,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import com.cloudbees.eclipse.core.CloudBeesNature;
 import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
-import com.cloudbees.eclipse.sdk.CBSdkActivator;
+import com.cloudbees.eclipse.run.sdk.CBSdkActivator;
 
 public class CBRunUtil {
 

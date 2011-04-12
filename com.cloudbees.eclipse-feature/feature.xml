@@ -65,12 +65,6 @@ Notwithstanding anything to the contrary contained herein, except for the limite
          unpack="false"/>
 
    <plugin
-         id="com.cloudbees.eclipse.sdk"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="com.cloudbees.eclipse.dev.core"
          download-size="0"
          install-size="0"
@@ -93,6 +87,27 @@ Notwithstanding anything to the contrary contained herein, except for the limite
 
    <plugin
          id="com.cloudbees.eclipse.run.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.cloudbees.eclipse.dev.scm.egit"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.cloudbees.eclipse.dev.scm.subclipse"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.cloudbees.eclipse.run.sdk"
          download-size="0"
          install-size="0"
          version="0.0.0"

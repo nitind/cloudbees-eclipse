@@ -19,7 +19,7 @@ import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.core.GrandCentralService.AuthInfo;
-import com.cloudbees.eclipse.sdk.CBSdkActivator;
+import com.cloudbees.eclipse.run.sdk.CBSdkActivator;
 
 public class BeesSDK {
 
