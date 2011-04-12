@@ -72,7 +72,7 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
       String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
       IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
-      ApplicationDeployArchiveResponse deploy = BeesSDK.deploy(project);
+      ApplicationDeployArchiveResponse deploy = BeesSDK.deploy(project, true);
       setServerPublishState(IServer.PUBLISH_STATE_NONE);
       setServerState(IServer.STATE_STARTED);
       return null;

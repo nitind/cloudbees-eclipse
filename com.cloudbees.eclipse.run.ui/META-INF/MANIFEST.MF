@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Cloudbees Run Ui
+Bundle-Name: CloudBees Run Ui
 Bundle-SymbolicName: com.cloudbees.eclipse.run.ui;singleton:=true
 Bundle-Version: 1.0.2.qualifier
 Bundle-Activator: com.cloudbees.eclipse.run.ui.CBRunUiActivator

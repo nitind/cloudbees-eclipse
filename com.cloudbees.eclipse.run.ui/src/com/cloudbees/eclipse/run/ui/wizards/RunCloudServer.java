@@ -24,9 +24,9 @@ public class RunCloudServer extends WizardFragment {
   @Override
   public Composite createComposite(Composite parent, IWizardHandle wizard) {
     this.wizard = wizard;
-    wizard.setTitle("CloudBees Project");
+    wizard.setTitle("CloudBees Application");
     wizard
-        .setDescription("Cloudbees servers are project specific. Select a project for cerating a server configuration.");
+        .setDescription("CloudBees servers are application (project) specific. Select a project for cerating a server configuration.");
     this.composite = new ProjectSelectionComposite(parent, SWT.NONE) {
 
       @Override
@@ -35,7 +35,7 @@ public class RunCloudServer extends WizardFragment {
         updateServerName();
 
         if (!complete) {
-          RunCloudServer.this.wizard.setMessage("Select a Cloudbees project!", IStatus.ERROR);
+          RunCloudServer.this.wizard.setMessage("Select a CloudBees project!", IStatus.ERROR);
         } else {
           RunCloudServer.this.wizard.setMessage(null, IStatus.OK);
         }
@@ -45,7 +45,7 @@ public class RunCloudServer extends WizardFragment {
 
       private void updateServerName() {
         ServerWorkingCopy server = (ServerWorkingCopy) getTaskModel().getObject("server");
-        server.setName(getText() + " running at RUN@Cloud");
+        server.setName(getText() + " running at RUN@cloud");
         server.setAttribute(CBLaunchConfigurationConstants.PROJECT, getText());
       }
     };

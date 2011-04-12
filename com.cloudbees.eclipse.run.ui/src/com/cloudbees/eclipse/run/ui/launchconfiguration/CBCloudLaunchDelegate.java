@@ -35,7 +35,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
       for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
         if (project.getName().equals(projectName)) {
-          ApplicationDeployArchiveResponse deploy = BeesSDK.deploy(project);
+          ApplicationDeployArchiveResponse deploy = BeesSDK.deploy(project, true);
           monitor.done();
 
           if (needLaunch) {
