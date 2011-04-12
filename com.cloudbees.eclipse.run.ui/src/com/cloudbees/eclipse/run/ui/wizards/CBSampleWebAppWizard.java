@@ -34,7 +34,7 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class CBSampleWebAppWizard extends Wizard implements INewWizard {
 
-  private static final String WINDOW_TITLE = "Sample CloudBees Project";
+  private static final String WINDOW_TITLE = "CloudBees Project";
   private static final String ERROR_TITLE = "Error";
   private static final String ERROR_MSG = "Received error while creating new project";
   private static final String BUILD_LABEL = "Build {0}";

@@ -33,9 +33,9 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 public class JenkinsWizardPage extends CBWizardPage {
 
   public static final String PAGE_NAME = JenkinsWizardPage.class.getSimpleName();
-  private static final String PAGE_TITLE = "New Jenkins Job";
+  private static final String PAGE_TITLE = "Jenkins Job";
   private static final String PAGE_DESCRIPTION = "Optionally you can create a new Jenkins job for this project.";
-  private static final String JENKINS_JOB_CHECK_LABEL = "Make new Jenkins job for this project";
+  private static final String JENKINS_JOB_CHECK_LABEL = "New Jenkins job";
   private static final String JENKINS_INSTANCE_LABEL = "Jenkins instance:";
   private static final String JOB_NAME_LABEL = "Job Name:";
   private static final String ERR_JOB_NAME = "Please provide a job name";
