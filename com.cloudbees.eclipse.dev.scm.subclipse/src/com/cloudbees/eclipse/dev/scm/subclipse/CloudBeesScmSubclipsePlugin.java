@@ -21,6 +21,7 @@ public class CloudBeesScmSubclipsePlugin extends AbstractUIPlugin {
    */
   @Override
   public void start(final BundleContext bundleContext) throws Exception {
+    super.start(context);
     CloudBeesScmSubclipsePlugin.context = bundleContext;
 
     if (ForgeSyncService.bundleActive("org.tigris.subversion.subclipse.core")) {
@@ -36,6 +37,7 @@ public class CloudBeesScmSubclipsePlugin extends AbstractUIPlugin {
    */
   @Override
   public void stop(final BundleContext bundleContext) throws Exception {
+    super.stop(context);
     CloudBeesScmSubclipsePlugin.context = null;
     plugin = null;
   }
