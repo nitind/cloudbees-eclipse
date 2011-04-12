@@ -37,7 +37,7 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
 
     boolean debug = mode.equals("debug");
 
-    ILaunchConfiguration launchConf = debug ? addDebugAttributes(configuration) : configuration;
+    ILaunchConfiguration launchConf = modifyLaunch(configuration, mode);
     super.launch(launchConf, mode, launch, monitor);
 
     String projectName = configuration.getAttribute(ATTR_CB_PROJECT_NAME, "");
@@ -52,6 +52,17 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
       openBrowser("http://localhost:8080");
     }
 
+  }
+
+  private ILaunchConfiguration modifyLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
+    ILaunchConfigurationWorkingCopy copy = configuration.copy(configuration.getName());
+    if (mode.equals("run")) {
+      copy.removeAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS);
+    } else if (mode.equals("debug")) {
+      String vmargs = "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8002";
+      copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, vmargs);
+    }
+    return copy;
   }
 
   private void openBrowser(final String url) {
@@ -73,13 +84,6 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
         }
       });
     }
-  }
-
-  private ILaunchConfiguration addDebugAttributes(ILaunchConfiguration configuration) throws CoreException {
-    ILaunchConfigurationWorkingCopy copy = configuration.copy(configuration.getName() + " debug");
-    String vmargs = "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8002";
-    copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, vmargs);
-    return copy;
   }
 
   private class TerminateListener implements ILaunchesListener2 {

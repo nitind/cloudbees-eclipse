@@ -17,6 +17,7 @@ import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
 public class CBLaunchShortcut implements ILaunchShortcut {
 
+  @Override
   public void launch(ISelection selection, String mode) {
     if (selection instanceof IStructuredSelection) {
 
@@ -42,6 +43,7 @@ public class CBLaunchShortcut implements ILaunchShortcut {
     }
   }
 
+  @Override
   public void launch(IEditorPart editor, String mode) {
     // not currently supported
   }
