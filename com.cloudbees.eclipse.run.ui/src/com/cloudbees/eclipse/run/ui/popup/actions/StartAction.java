@@ -36,7 +36,7 @@ public class StartAction implements IObjectActionDelegate {
 
     @Override
     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-      monitor.beginTask("Starting Run@Cloud server", 1);
+      monitor.beginTask("Starting RUN@cloud server", 1);
       Object firstElement = ((StructuredSelection) this.selection).getFirstElement();
 
       if (firstElement instanceof IProject) {

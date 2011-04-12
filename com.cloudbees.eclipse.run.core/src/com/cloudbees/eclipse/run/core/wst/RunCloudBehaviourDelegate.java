@@ -44,17 +44,19 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
       String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
       IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
-      String status = BeesSDK.getServerState(project).getStatus();
-
-      if ("stopped".equals(status)) {
-        setServerState(IServer.STATE_STOPPED);
-      } else if ("active".equals(status) || "hibernate".equals(status)) {
-        setServerState(IServer.STATE_STARTED);
-      } else {
-        setServerState(IServer.STATE_UNKNOWN);
-      }
+      setState(BeesSDK.getServerState(project).getStatus());
     } catch (Exception e) {
       CBRunCoreActivator.logError(e);
+      setServerState(IServer.STATE_UNKNOWN);
+    }
+  }
+
+  private void setState(String status) {
+    if ("stopped".equals(status)) {
+      setServerState(IServer.STATE_STOPPED);
+    } else if ("active".equals(status) || "hibernate".equals(status)) {
+      setServerState(IServer.STATE_STARTED);
+    } else {
       setServerState(IServer.STATE_UNKNOWN);
     }
   }

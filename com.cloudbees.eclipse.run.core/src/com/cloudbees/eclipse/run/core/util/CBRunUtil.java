@@ -43,18 +43,27 @@ public class CBRunUtil {
 
   /**
    * @param projectName
+   * @param cloud
    * @return list of launch configurations associated with this project name
    * @throws CoreException
    */
-  public static List<ILaunchConfiguration> getLaunchConfigurations(String projectName) throws CoreException {
+  public static List<ILaunchConfiguration> getLaunchConfigurations(String projectName, boolean cloud)
+      throws CoreException {
     ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
     List<ILaunchConfiguration> launchConfigurations = new ArrayList<ILaunchConfiguration>();
 
     try {
       for (ILaunchConfiguration configuration : launchManager.getLaunchConfigurations()) {
-        String name = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, new String());
+
+        String name = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, "");
         if (name.equals(projectName)) {
-          launchConfigurations.add(configuration);
+          boolean cloudLaunch = "".equals(configuration.getAttribute("org.eclipse.jdt.launching.MAIN_TYPE", ""));
+
+          if (cloudLaunch && cloud) {
+            launchConfigurations.add(configuration);
+          } else if (!cloudLaunch && !cloud) {
+            launchConfigurations.add(configuration);
+          }
         }
       }
     } catch (Exception e) {
@@ -65,6 +74,28 @@ public class CBRunUtil {
     return launchConfigurations;
   }
 
+  public static List<ILaunchConfiguration> getOrCreateCloudBeesLaunchConfigurations(String projectName, boolean cloud)
+      throws CoreException {
+    if (!cloud) {
+      return getOrCreateCloudBeesLaunchConfigurations(projectName);
+    }
+
+    List<ILaunchConfiguration> launchConfiguration = getLaunchConfigurations(projectName, cloud);
+    if (launchConfiguration.isEmpty()) {
+      ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
+
+      ILaunchConfigurationType configType = launchManager
+          .getLaunchConfigurationType(CBLaunchConfigurationConstants.ID_CB_DEPLOY_LAUNCH);
+
+      ILaunchConfigurationWorkingCopy copy = configType.newInstance(null, projectName);
+      copy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, projectName);
+      copy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_BROWSER, true);
+      launchConfiguration.add(copy.doSave());
+    }
+
+    return launchConfiguration;
+  }
+
   /**
    * @param projectName
    * @return list of launch configurations associated with this project name, guaranteed to return at least 1
@@ -73,14 +104,14 @@ public class CBRunUtil {
    */
   public static List<ILaunchConfiguration> getOrCreateCloudBeesLaunchConfigurations(String projectName)
       throws CoreException {
-    List<ILaunchConfiguration> launchConfiguration = getLaunchConfigurations(projectName);
+    List<ILaunchConfiguration> launchConfiguration = getLaunchConfigurations(projectName, false);
 
     if (launchConfiguration.isEmpty()) {
       ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
 
       ILaunchConfigurationType configType = launchManager
           .getLaunchConfigurationType(CBLaunchConfigurationConstants.ID_CB_LAUNCH);
-      String name = launchManager.generateLaunchConfigurationName(projectName);
+      String name = projectName + " (local)";
 
       ILaunchConfigurationWorkingCopy copy = configType.newInstance(null, name);
       addDefaultAttributes(copy, projectName);

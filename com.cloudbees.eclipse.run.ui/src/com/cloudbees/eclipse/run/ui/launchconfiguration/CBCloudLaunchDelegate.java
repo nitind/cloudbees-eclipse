@@ -15,7 +15,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.browser.IWebBrowser;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 import com.cloudbees.api.ApplicationDeployArchiveResponse;
 import com.cloudbees.eclipse.run.core.BeesSDK;
@@ -29,13 +29,15 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
       throws CoreException {
     boolean needLaunch = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_BROWSER, true);
 
-    monitor.beginTask("Deploying to Run@Cloud", 1);
+    monitor.beginTask("Deploying to RUN@cloud", 1);
     try {
       String projectName = configuration.getAttribute(ATTR_CB_PROJECT_NAME, "");
+
       for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
         if (project.getName().equals(projectName)) {
           ApplicationDeployArchiveResponse deploy = BeesSDK.deploy(project);
           monitor.done();
+
           if (needLaunch) {
             openBrowser(deploy);
           }
@@ -55,12 +57,11 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
         @Override
         public void run() {
-          IWebBrowser browser;
           try {
-            browser = PlatformUI.getWorkbench().getBrowserSupport()
-                .createBrowser(CBLaunchConfigurationConstants.COM_CLOUDBEES_ECLIPSE_WST);
-            Thread.sleep(2000);
-            browser.openURL(new URL(url));
+
+            IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
+            browserSupport.getExternalBrowser().openURL(new URL(url));
+
           } catch (Exception e) {
             CBRunUiActivator.logError(e);
           }

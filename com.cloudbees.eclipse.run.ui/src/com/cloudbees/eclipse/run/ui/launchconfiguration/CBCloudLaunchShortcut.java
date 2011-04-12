@@ -15,8 +15,9 @@ import org.eclipse.ui.IEditorPart;
 import com.cloudbees.eclipse.run.core.util.CBRunUtil;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
-public class CBLaunchDeployShortcut implements ILaunchShortcut {
+public class CBCloudLaunchShortcut implements ILaunchShortcut {
 
+  @Override
   public void launch(ISelection selection, String mode) {
     if (selection instanceof IStructuredSelection) {
 
@@ -32,7 +33,8 @@ public class CBLaunchDeployShortcut implements ILaunchShortcut {
       }
 
       try {
-        List<ILaunchConfiguration> launchConfigurations = CBRunUtil.getOrCreateCloudBeesLaunchConfigurations(name);
+        List<ILaunchConfiguration> launchConfigurations = CBRunUtil
+            .getOrCreateCloudBeesLaunchConfigurations(name, true);
         ILaunchConfiguration configuration = launchConfigurations.get(launchConfigurations.size() - 1);
         DebugUITools.launch(configuration, mode);
       } catch (CoreException e) {
@@ -42,8 +44,10 @@ public class CBLaunchDeployShortcut implements ILaunchShortcut {
     }
   }
 
+  @Override
   public void launch(IEditorPart editor, String mode) {
-    // not currently supported
+    // TODO Auto-generated method stub
+
   }
 
 }

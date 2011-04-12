@@ -11,7 +11,9 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.core.util.CBRunUtil;
@@ -39,8 +41,8 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
   private static final String TAB_NAME = "CloudBees Application";
 
-  private ProjectSelectionComposite content;
-
+  protected ProjectSelectionComposite content;
+  protected Button launchButton;
   protected Composite main;
 
   @Override
@@ -59,6 +61,11 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
       }
 
     });
+    this.launchButton = new Button(this.main, SWT.CHECK);
+    this.launchButton.setLayoutData(new GridData());
+    this.launchButton.setSelection(true);
+    Label label = new Label(this.main, SWT.NONE);
+    label.setText("Open browser after launch.");
 
   }
 
@@ -81,6 +88,9 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     String projectName = this.content.getText();
     try {
       CBRunUtil.addDefaultAttributes(configuration, projectName);
+
+      configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_BROWSER,
+          this.launchButton.getSelection());
     } catch (CoreException e) {
       CBRunUiActivator.logError(e);
     }

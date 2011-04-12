@@ -38,12 +38,12 @@ public class DeployAction implements IObjectActionDelegate {
 
     @Override
     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-      monitor.beginTask("Deploying to Run@Cloud", 1);
+      monitor.beginTask("Deploying to RUN@cloud", 1);
       try {
-        ApplicationDeployArchiveResponse deploy = BeesSDK.deploy((IProject) firstElement);
+        ApplicationDeployArchiveResponse deploy = BeesSDK.deploy((IProject) this.firstElement);
         monitor.done();
-        boolean openConfirm = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(),
-            "Deploy to Run@Cloud", "Deployment finished to Run@Cloud. Open " + deploy.getUrl());
+        boolean openConfirm = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "Deploy to RUN@cloud",
+            "Deployment finished to RUN@cloud. Open " + deploy.getUrl());
 
         if (openConfirm) {
           openBrowser(deploy);
