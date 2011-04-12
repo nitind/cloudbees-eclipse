@@ -18,7 +18,7 @@ Require-Bundle: org.eclipse.core.runtime,
  com.cloudbees.eclipse.ui,
  org.eclipse.team.core,
  org.eclipse.team.ui,
- org.eclipse.jgit,
- org.eclipse.egit.core,
- org.eclipse.egit.ui
+ org.eclipse.jgit;resolution:=optional,
+ org.eclipse.egit.core;resolution:=optional,
+ org.eclipse.egit.ui;resolution:=optional
 Export-Package: com.cloudbees.eclipse.dev.scm.egit
