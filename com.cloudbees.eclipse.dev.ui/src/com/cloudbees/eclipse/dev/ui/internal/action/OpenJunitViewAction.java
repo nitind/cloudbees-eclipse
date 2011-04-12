@@ -28,7 +28,10 @@ public class OpenJunitViewAction extends BaseSelectionListenerAction {
   public OpenJunitViewAction() {
     super("Show Test Results");
     setToolTipText("Show Test Results in JUnit View");
-    setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_JUNIT));
+    if (CloudBeesDevUiPlugin.getDefault() != null && CloudBeesDevUiPlugin.getDefault().getImageRegistry() != null
+        && CBImages.IMG_JUNIT != null) {
+      setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_JUNIT));
+    }
   }
 
   public static boolean isJUnitAvailable() {
