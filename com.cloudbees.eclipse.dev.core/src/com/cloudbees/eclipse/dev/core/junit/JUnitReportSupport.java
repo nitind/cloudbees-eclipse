@@ -11,24 +11,40 @@ import javax.xml.transform.sax.SAXResult;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
 import org.eclipse.jdt.internal.junit.model.ModelMessages;
 import org.eclipse.jdt.internal.junit.model.TestRunHandler;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
+import org.osgi.framework.Bundle;
 import org.xml.sax.SAXException;
+
+import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
 
 public class JUnitReportSupport {
 
   private static volatile JUnitModel junitModel;
 
   public static TestRunSession importJenkinsTestRunSession(final InputStream testReport) throws Exception {
+    InputStream xsl;
+    if (CloudBeesDevCorePlugin.getDefault() != null) {
+      String path = "/" + JUnitReportSupport.class.getPackage().getName().replace('.', '/') + "/jenkins-to-junit.xsl";
+      Bundle bundle = Platform.getBundle(CloudBeesDevCorePlugin.PLUGIN_ID);
+      xsl = bundle.getResource(path).openStream();
+    } else {
+      xsl = JUnitReportSupport.class.getResourceAsStream("jenkins-to-junit.xsl");
+    }
+    return importJenkinsTestRunSession(testReport, xsl);
+  }
+
+  public static TestRunSession importJenkinsTestRunSession(final InputStream testReport, final InputStream transform)
+  throws Exception {
     TestRunHandler handler = new TestRunHandler();
 
     javax.xml.transform.Source xmlSource = new javax.xml.transform.stream.StreamSource(testReport);
-    javax.xml.transform.Source xsltSource = new javax.xml.transform.stream.StreamSource(
-        JUnitReportSupport.class.getResourceAsStream("jenkins-to-junit.xsl"));
+    javax.xml.transform.Source xsltSource = new javax.xml.transform.stream.StreamSource(transform);
     javax.xml.transform.Result result = //new javax.xml.transform.stream.StreamResult(System.out);
       new SAXResult(handler);
 

@@ -2,6 +2,7 @@ package com.cloudbees.eclipse.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -95,7 +96,11 @@ public class JenkinsService {
       try {
         views = g.fromJson(bodyResponse, JenkinsJobsResponse.class);
       } catch (Exception e) {
-        throw new CloudBeesException("Illegal JSON response for '" + uri + "': " + bodyResponse, e);
+        String body = bodyResponse;
+        if (body != null && body.length() > 1000) {
+          body = body.substring(0, 1000);
+        }
+        throw new CloudBeesException("Illegal JSON response for '" + uri + "': " + body, e);
       }
 
       if (views != null) {
@@ -164,7 +169,14 @@ public class JenkinsService {
   synchronized private String retrieveWithLogin(final DefaultHttpClient httpclient, final HttpRequestBase post,
       final List<NameValuePair> params, final boolean expectRedirect, final SubProgressMonitor monitor)
   throws UnsupportedEncodingException, IOException, ClientProtocolException, CloudBeesException, Exception {
-    String bodyResponse = null;
+    return (String) retrieveWithLogin(httpclient, post, params, expectRedirect, monitor, false);
+  }
+
+  synchronized private Object retrieveWithLogin(final DefaultHttpClient httpclient, final HttpRequestBase post,
+      final List<NameValuePair> params, final boolean expectRedirect, final SubProgressMonitor monitor,
+      final boolean asStream)
+  throws UnsupportedEncodingException, IOException, ClientProtocolException, CloudBeesException, Exception {
+    Object bodyResponse = null;
 
     boolean tryToLogin = true; // false for BasicAuth, true for redirect login
     do {
@@ -194,11 +206,16 @@ public class JenkinsService {
       CloudBeesCorePlugin.getDefault().getLogger().info("Retrieve: " + post.getURI());
 
       HttpResponse resp = httpclient.execute(post);
-      bodyResponse = Utils.getResponseBody(resp);
+      if (asStream) {
+        bodyResponse = resp.getEntity().getContent();
+      } else {
+        bodyResponse = Utils.getResponseBody(resp);
+      }
 
       if (this.jenkins.atCloud && this.jenkins.username != null && this.jenkins.username.trim().length() > 0
           && this.jenkins.password != null && this.jenkins.password.trim().length() > 0
           && (resp.getStatusLine().getStatusCode() == 302 || resp.getStatusLine().getStatusCode() == 301) && tryToLogin) { // redirect to login
+        bodyResponse = null;
         login(httpclient, post.getURI().toASCIIString(), resp.getFirstHeader("Location").getValue(),
             new SubProgressMonitor(monitor, 5));
         //httpclient.getCookieStore().clear();
@@ -367,7 +384,7 @@ public class JenkinsService {
 
     } catch (Exception e) {
       throw new CloudBeesException("Failed to get Jenkins jobs for '" + jobUrl + "'. "
-          + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr, e);
+          + (errMsg.length() > 0 && errMsg.length() < 1000 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr, e);
     }
 
   }
@@ -444,7 +461,7 @@ public class JenkinsService {
 
     } catch (Exception e) {
       throw new CloudBeesException("Failed to get Jenkins jobs for '" + jobUrl + "'. "
-          + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr, e);
+          + (errMsg.length() > 0 && errMsg.length() < 1000 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr, e);
     }
   }
 
@@ -544,7 +561,7 @@ public class JenkinsService {
     return scm;
   }
 
-  public String getTestReport(final String url, final IProgressMonitor monitor) throws CloudBeesException {
+  public InputStream getTestReport(final String url, final IProgressMonitor monitor) throws CloudBeesException {
     monitor.setTaskName("Fetching Jenkins build Test Report...");
 
     if (url != null && !url.startsWith(this.jenkins.url)) {
@@ -562,20 +579,22 @@ public class JenkinsService {
 
     String reqStr = reqUrl + "testReport/api/xml";
 
-    String bodyResponse = null;
+    InputStream bodyResponse = null;
     try {
       DefaultHttpClient httpclient = Utils.getAPIClient();
 
       HttpGet post = new HttpGet(reqStr);
       post.setHeader("Accept", "text/html,application/xhtml+xml,application/xml");
 
-      bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 10));
+      bodyResponse = (InputStream) retrieveWithLogin(httpclient, post, null, false,
+          new SubProgressMonitor(monitor, 10), true);
 
       return bodyResponse;
+
     } catch (Exception e) {
       throw new CloudBeesException("Failed to get Jenkins job test report for '" + url + "'. "
           + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr + " - Response: "
-          + bodyResponse, e);
+          + Utils.readString(bodyResponse), e);
     }
   }
 

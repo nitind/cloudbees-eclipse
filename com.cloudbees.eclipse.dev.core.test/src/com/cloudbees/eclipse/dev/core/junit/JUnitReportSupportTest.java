@@ -45,4 +45,13 @@ public class JUnitReportSupportTest {
     assertEquals(0, sess.getErrorCount());
   }
 
+  @Test
+  public void testImportJenkins5() throws Exception {
+    InputStream report = JUnitReportSupport.class.getResourceAsStream("testReport5.xml");
+    TestRunSession sess = JUnitReportSupport.importJenkinsTestRunSession(report);
+    assertEquals(4, sess.getTotalCount());
+    assertEquals(2, sess.getFailureCount());
+    assertEquals(0, sess.getErrorCount());
+  }
+
 }

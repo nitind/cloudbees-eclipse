@@ -82,6 +82,9 @@ public class Utils {
   }
 
   public final static String readString(final InputStream is) throws CloudBeesException {
+    if (is == null) {
+      return null;
+    }
     try {
       Writer writer = new StringWriter();
       char[] buffer = new char[1024];
