@@ -11,20 +11,21 @@ import com.cloudbees.eclipse.core.CloudBeesNature;
 import com.cloudbees.eclipse.run.core.util.CBRunUtil;
 
 public class ProjectDeleteListener implements IResourceChangeListener {
-  
+
+  @Override
   public void resourceChanged(IResourceChangeEvent event) {
-    if(event.getResource().getType() != IResource.PROJECT) {
+    if (event.getResource().getType() != IResource.PROJECT) {
       return;
     }
-    
+
     IProject project = (IProject) event.getResource();
-    
-    if(!CloudBeesNature.isEnabledFor(project)) {
+
+    if (!CloudBeesNature.isEnabledFor(project)) {
       return;
     }
-    
+
     try {
-      for(ILaunchConfiguration configuration : CBRunUtil.getLaunchConfigurations(project.getName())) {
+      for (ILaunchConfiguration configuration : CBRunUtil.getLaunchConfigurations(project.getName(), false)) {
         configuration.delete();
       }
     } catch (CoreException e) {

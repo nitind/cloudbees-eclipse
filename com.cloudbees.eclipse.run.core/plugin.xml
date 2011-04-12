@@ -3,17 +3,10 @@
 <plugin>
 	<extension-point id="com.cloudbees.eclipse.run.core.processLifecycleHook"
 		name="launchHook" schema="schema/com.cloudbees.eclipse.run.core.processLifecycleHook.exsd" />
-	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
-		<launchConfigurationType
-			delegate="com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchDelegate"
-			id="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType"
-			modes="run, debug" name="CloudBees Application">
-		</launchConfigurationType>
-	</extension>
 	<extension point="org.eclipse.wst.server.core.runtimeTypes">
 		<runtimeType
-			description="Deploy to Run@Cloud" id="com.cloudbees.eclipse.core.runcloud"
-			name="Run@Cloud" vendor="Cloudbees" vendorId="com.cloudbees" version="1">
+			description="Deploy to RUN@cloud" id="com.cloudbees.eclipse.core.runcloud"
+			name="RUN@cloud" vendor="Cloudbees" vendorId="com.cloudbees" version="1">
 			<moduleType types="com.cloudbees.eclipse.core.runcloud"
 				versions="*">
 			</moduleType>
@@ -30,12 +23,12 @@
 		<serverType
         behaviourClass="com.cloudbees.eclipse.run.core.wst.RunCloudBehaviourDelegate"
         class="com.cloudbees.eclipse.run.core.wst.RunCloudServerDelegate"
-        description="Run@Cloud cloud instance"
+        description="RUN@cloud cloud instance"
         hasConfiguration="false"
         id="com.cloudbees.eclipse.core.runcloud"
-        launchConfigId="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType"
+        launchConfigId="com.cloudbees.eclipse.run.core.launchcloudconfiguration.launchConfigurationType"
         launchModes="run, stop, publish"
-        name="Run@Cloud"
+        name="RUN@cloud"
         runtime="false"
         runtimeTypeId="com.cloudbees.eclipse.core.runcloud"
         supportsRemoteHosts="true">
@@ -43,19 +36,19 @@
 		<serverType
 			behaviourClass="com.cloudbees.eclipse.run.core.wst.RunCloudLocalBehaviourDelegate"
 			class="com.cloudbees.eclipse.run.core.wst.RunCloudServerDelegate"
-			description="Run@Cloud Local instance" hasConfiguration="false"
+			description="RUN@cloud Local instance" hasConfiguration="true"
 			id="com.cloudbees.eclipse.core.runcloud.local" initialState="stopped"
-			launchConfigId="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType"
-			launchModes="run,stop" name="Run@Cloud Local instance" runtime="false"
+			launchConfigId="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationTypecom.cloudbees.eclipse.run.core.launchcloudconfiguration.launchConfigurationType"
+			launchModes="run,stop" name="RUN@cloud Local instance" runtime="false"
 			runtimeTypeId="com.cloudbees.eclipse.core.runcloud.local"
 			supportsRemoteHosts="true">
 		</serverType>
 	</extension>
 	<extension point="org.eclipse.wst.server.core.moduleTypes">
-		<moduleType id="com.cloudbees.eclipse.core.runcloud" name="Run@Cloud">
+		<moduleType id="com.cloudbees.eclipse.core.runcloud" name="RUN@cloud">
 		</moduleType>
 		<moduleType id="com.cloudbees.eclipse.core.runcloud.local"
-			name="Run@Cloud local">
+			name="RUN@cloud local">
 		</moduleType>
 	</extension>
 	<extension point="com.cloudbees.eclipse.run.core.processLifecycleHook">

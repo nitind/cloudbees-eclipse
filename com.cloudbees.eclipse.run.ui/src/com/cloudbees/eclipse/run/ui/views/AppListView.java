@@ -25,14 +25,12 @@ public class AppListView extends ViewPart implements IPropertyChangeListener {
   @Override
   public void createPartControl(final Composite parent) {
 
-
     this.table = new TableViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION);
 
     this.table.getTable().setHeaderVisible(true);
 
     //this.table.setInput(getViewSite());
   }
-
 
   @Override
   public void setFocus() {

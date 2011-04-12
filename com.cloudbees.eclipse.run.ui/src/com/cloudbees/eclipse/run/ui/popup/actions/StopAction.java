@@ -36,7 +36,7 @@ public class StopAction implements IObjectActionDelegate {
 
     @Override
     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-      monitor.beginTask("Stopping Run@Cloud server", 1);
+      monitor.beginTask("Stopping RUN@cloud server", 1);
       Object firstElement = ((StructuredSelection) this.selection).getFirstElement();
 
       if (firstElement instanceof IProject) {

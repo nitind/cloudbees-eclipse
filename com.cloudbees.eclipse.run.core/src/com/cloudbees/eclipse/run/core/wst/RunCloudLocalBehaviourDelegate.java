@@ -8,6 +8,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
+import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBProjectProcessService;
 import com.cloudbees.eclipse.run.core.util.CBRunUtil;
@@ -23,7 +24,7 @@ public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
       String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
       CBProjectProcessService.getInstance().terminateProcess(projectName);
     } catch (DebugException e) {
-      e.printStackTrace(); //TODO better way to log
+      CBRunCoreActivator.logError(e);
     }
   }
 
@@ -35,7 +36,6 @@ public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
   @Override
   public IStatus publish(int kind, IProgressMonitor monitor) {
     return null;
-    //    return super.publish(kind, monitor);
   }
 
   @Override
