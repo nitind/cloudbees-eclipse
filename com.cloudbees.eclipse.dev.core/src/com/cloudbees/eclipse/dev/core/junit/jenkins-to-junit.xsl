@@ -2,7 +2,8 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:output method="xml" indent="yes"/>
     <xsl:template match="/">
-        <testsuite name="Tests">
+        <testrun name="TestRunAllTests">
+        <testsuite name="TestRunAllTests">
             <xsl:attribute name="time">
                 <xsl:value-of select="testResult//duration"/>
             </xsl:attribute>
@@ -48,5 +49,6 @@
                 </testsuite>
             </xsl:for-each>
         </testsuite>
+        </testrun>
     </xsl:template>
 </xsl:stylesheet>

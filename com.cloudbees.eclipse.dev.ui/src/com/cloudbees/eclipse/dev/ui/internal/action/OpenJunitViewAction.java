@@ -70,7 +70,10 @@ public class OpenJunitViewAction extends BaseSelectionListenerAction {
                 throw new InterruptedException();
               }
 
-              final TestRunSession testRunSession = JUnitReportSupport.importJenkinsTestRunSession(testReport);
+              String projectName = null; // TODO
+
+              final TestRunSession testRunSession = JUnitReportSupport.importJenkinsTestRunSession(
+                  build.fullDisplayName, projectName, testReport);
               CloudBeesDevUiPlugin.getDefault().showView(TestRunnerViewPart.NAME);
               JUnitReportSupport.getJUnitModel().addTestRunSession(testRunSession);
             } catch (Exception e) {

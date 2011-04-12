@@ -14,11 +14,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.Messages;
+import org.eclipse.jdt.internal.junit.model.IXMLTags;
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
 import org.eclipse.jdt.internal.junit.model.ModelMessages;
 import org.eclipse.jdt.internal.junit.model.TestRunHandler;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.osgi.framework.Bundle;
+import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
@@ -27,7 +29,7 @@ public class JUnitReportSupport {
 
   private static volatile JUnitModel junitModel;
 
-  public static TestRunSession importJenkinsTestRunSession(final InputStream testReport) throws Exception {
+  public static TestRunSession importJenkinsTestRunSession(final String jobName, final String projectName, final InputStream testReport) throws Exception {
     InputStream xsl;
     if (CloudBeesDevCorePlugin.getDefault() != null) {
       String path = "/" + JUnitReportSupport.class.getPackage().getName().replace('.', '/') + "/jenkins-to-junit.xsl";
@@ -36,12 +38,81 @@ public class JUnitReportSupport {
     } else {
       xsl = JUnitReportSupport.class.getResourceAsStream("jenkins-to-junit.xsl");
     }
-    return importJenkinsTestRunSession(testReport, xsl);
+    return importJenkinsTestRunSession(jobName, projectName, testReport, xsl);
   }
 
-  public static TestRunSession importJenkinsTestRunSession(final InputStream testReport, final InputStream transform)
+  public static TestRunSession importJenkinsTestRunSession(final String jobName, final String projectName, final InputStream testReport, final InputStream transform)
   throws Exception {
-    TestRunHandler handler = new TestRunHandler();
+    TestRunHandler handler = new TestRunHandler() {
+      @Override
+      public void startElement(final String uri, final String localName, final String qName, final Attributes attributes)
+      throws SAXException {
+        if (IXMLTags.NODE_TESTRUN.equals(qName)
+            || (IXMLTags.NODE_TESTSUITE.equals(qName) && "TestRunAllTests".equals(attributes
+                .getValue(IXMLTags.ATTR_NAME)))) {
+          Attributes newAttrs = new Attributes() {
+            public int getLength() {
+              return attributes.getLength();
+            }
+
+            public String getURI(final int index) {
+              return attributes.getURI(index);
+            }
+
+            public String getLocalName(final int index) {
+              return attributes.getLocalName(index);
+            }
+
+            public String getQName(final int index) {
+              return attributes.getQName(index);
+            }
+
+            public String getType(final int index) {
+              return attributes.getType(index);
+            }
+
+            public String getValue(final int index) {
+              return attributes.getValue(index);
+            }
+
+            public int getIndex(final String uri, final String localName) {
+              return attributes.getIndex(uri, localName);
+            }
+
+            public int getIndex(final String qName) {
+              return attributes.getIndex(qName);
+            }
+
+            public String getType(final String uri, final String localName) {
+              return attributes.getType(uri, localName);
+            }
+
+            public String getType(final String qName) {
+              return attributes.getType(qName);
+            }
+
+            public String getValue(final String uri, final String localName) {
+              return attributes.getValue(uri, localName);
+            }
+
+            public String getValue(final String qName) {
+              if (IXMLTags.ATTR_NAME.equals(qName) && jobName != null) {
+                return jobName;
+              }
+              if (IXMLTags.ATTR_PROJECT.equals(qName) && projectName != null) {
+                return projectName;
+              }
+
+              return attributes.getValue(qName);
+            }
+          };
+
+          super.startElement(uri, localName, qName, newAttrs);
+        } else {
+          super.startElement(uri, localName, qName, attributes);
+        }
+      }
+    };
 
     javax.xml.transform.Source xmlSource = new javax.xml.transform.stream.StreamSource(testReport);
     javax.xml.transform.Source xsltSource = new javax.xml.transform.stream.StreamSource(transform);
