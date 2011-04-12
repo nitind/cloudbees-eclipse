@@ -4,10 +4,15 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.internal.ui.SWTFactory;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -21,8 +26,14 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
+import com.cloudbees.eclipse.core.CloudBeesNature;
 import com.cloudbees.eclipse.run.core.util.CBRunUtil;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
@@ -84,6 +95,7 @@ public abstract class ProjectSelectionComposite extends Composite {
       }
 
     });
+
   }
 
   @Override
@@ -152,4 +164,66 @@ public abstract class ProjectSelectionComposite extends Composite {
   public String getText() {
     return this.projectName.getText();
   }
+
+  public String getDefaultSelection() {
+    IJavaElement element = getSelectedJavaElement();
+    if (element == null) {
+      return new String();
+    }
+
+    IProject project = element.getJavaProject().getProject();
+
+    if (CloudBeesNature.isEnabledFor(project) == false) {
+      return new String();
+    }
+
+    return project.getName();
+  }
+
+  private IJavaElement getSelectedJavaElement() {
+    IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+    if (activeWorkbenchWindow == null) {
+      return null;
+    }
+
+    IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
+    if (activePage == null) {
+      return null;
+    }
+
+    ISelection selection = activePage.getSelection();
+    if (selection instanceof IStructuredSelection) {
+      IStructuredSelection structuredSelection = (IStructuredSelection) selection;
+
+      if (!structuredSelection.isEmpty()) {
+        Object element = structuredSelection.getFirstElement();
+
+        if (element instanceof IJavaElement) {
+          return (IJavaElement) element;
+        }
+
+        if (element instanceof IResource) {
+          IJavaElement javaElement = JavaCore.create((IResource) element);
+
+          if (javaElement == null) {
+            IProject project = ((IResource) element).getProject();
+            javaElement = JavaCore.create(project);
+          }
+
+          if (javaElement != null) {
+            return javaElement;
+          }
+        }
+      }
+    }
+
+    IEditorPart part = activePage.getActiveEditor();
+    if (part != null) {
+      IEditorInput input = part.getEditorInput();
+      return (IJavaElement) input.getAdapter(IJavaElement.class);
+    }
+
+    return null;
+  }
+
 }

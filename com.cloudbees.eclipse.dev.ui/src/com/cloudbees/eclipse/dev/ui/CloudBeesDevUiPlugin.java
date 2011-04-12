@@ -4,11 +4,14 @@ import java.util.Iterator;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -65,7 +68,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
   /**
    * Returns the shared instance
-   *
+   * 
    * @return the shared instance
    */
   public static CloudBeesDevUiPlugin getDefault() {
@@ -103,6 +106,14 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/del_stat.gif")));
 
     reg.put(CBImages.IMG_JUNIT, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/junit.gif")));
+
+    reg.put(CBImages.IMG_BUILD_DETAILS,
+        ImageDescriptor.createFromURL(getBundle().getResource("icons/epl/debugt_obj.png")));
+
+    reg.put(CBImages.IMG_DELETE, ImageDescriptor.createFromURL(getBundle().getResource("icons/epl/delete.gif")));
+
+    reg.put(CBImages.IMG_DELETE_DISABLED,
+        ImageDescriptor.createFromURL(getBundle().getResource("icons/epl/d/delete.gif")));
 
     reg.put(CBImages.IMG_COLOR_16_GREY,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/grey.gif")));
@@ -173,13 +184,12 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             public void run() {
               try {
                 CloudBeesUIPlugin
-                .getActiveWindow()
-                .getActivePage()
-                .showView(
-                    JobsView.ID,
-                    Long.toString(CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getUrl()
-                        .hashCode()),
-                        userAction ? IWorkbenchPage.VIEW_ACTIVATE : IWorkbenchPage.VIEW_CREATE);
+                    .getActiveWindow()
+                    .getActivePage()
+                    .showView(
+                        JobsView.ID,
+                        Long.toString(CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getUrl()
+                            .hashCode()), userAction ? IWorkbenchPage.VIEW_ACTIVATE : IWorkbenchPage.VIEW_CREATE);
               } catch (PartInitException e) {
                 CloudBeesUIPlugin.getDefault().showError("Failed to show Jobs view", e);
               }
@@ -191,14 +201,14 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
           }
 
           JenkinsJobsResponse jobs = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl)
-          .getJobs(viewUrl, monitor);
+              .getJobs(viewUrl, monitor);
 
           if (monitor.isCanceled()) {
             throw new OperationCanceledException();
           }
 
           Iterator<JenkinsChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
-          .iterator();
+              .iterator();
           while (iterator.hasNext()) {
             JenkinsChangeListener listener = iterator.next();
             listener.activeJobViewChanged(jobs);
@@ -252,6 +262,23 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
         return;
       }
     }
+  }
+
+  /**
+   * @param job
+   * @param monitor
+   * @return <code>true</code> if succeeded
+   * @throws CloudBeesException
+   */
+  public void deleteJob(final Job job) throws CloudBeesException {
+    boolean openConfirm = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "DELETING A BUILD JOB!",
+        "Are you sure you want to delete this build job?\n" + "Name: " + job.displayName);
+
+    if (openConfirm) {
+      JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(job.url);
+      service.deleteJenkinsJob(job.url, new NullProgressMonitor());
+    }
+
   }
 
 }

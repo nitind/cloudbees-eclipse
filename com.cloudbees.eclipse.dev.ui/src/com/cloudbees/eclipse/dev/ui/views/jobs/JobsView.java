@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -32,12 +33,11 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MenuDetectEvent;
-import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewSite;
@@ -74,6 +74,9 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   //private Action actionOpenLogs; // Open Logs
   private Action actionOpenJobInBrowser; // Open Open Job in Browser
 
+  private Action actionOpenLastBuildDetails; // Open Open Job in Browser
+  private Action actionDeleteJob; // deletes the jenkins job
+
   private final Map<String, Image> stateIcons = new HashMap<String, Image>();
 
   private JenkinsChangeListener jenkinsChangeListener;
@@ -91,6 +94,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   }
 
   protected void setInput(final JenkinsJobsResponse newView) {
+
     if (newView != null && newView.viewUrl != null) {
       IViewSite site = getViewSite();
       String secId = site.getSecondaryId();
@@ -111,6 +115,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         viewInfo = newView.name + " [";
       }
       setContentDescription(viewInfo + label + (viewInfo.length() > 0 ? "]" : "") + " (" + new Date() + ")");
+      setPartName("Build Jobs [" + label + "]");
       this.contentProvider.inputChanged(this.table, null, Arrays.asList(newView.jobs));
     }
 
@@ -390,14 +395,25 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     makeActions();
     contributeToActionBars();
 
-    table.getTable().addMenuDetectListener(new MenuDetectListener() {
-
-      public void menuDetected(MenuDetectEvent e) {
-        System.out.println("MENU DETECTED");
-      }
-
-    });
     
+    MenuManager popupMenu = new MenuManager();
+
+    //popupMenu.add
+    //popupMenu.add(new Separator());
+    popupMenu.add(this.actionOpenLastBuildDetails);
+    popupMenu.add(new Separator());
+    popupMenu.add(this.actionOpenJobInBrowser);
+    popupMenu.add(this.actionInvokeBuild);
+    popupMenu.add(new Separator());
+    popupMenu.add(this.actionDeleteJob);
+    popupMenu.add(new Separator());
+    popupMenu.add(this.actionReloadJobs);
+
+    // delete job
+
+    Menu menu = popupMenu.createContextMenu(table.getTable());
+    table.getTable().setMenu(menu);
+
     this.table.addPostSelectionChangedListener(new ISelectionChangedListener() {
 
       public void selectionChanged(final SelectionChangedEvent event) {
@@ -405,6 +421,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         JobsView.this.selectedJob = sel.getFirstElement();
         boolean enable = sel.getFirstElement() != null;
         JobsView.this.actionInvokeBuild.setEnabled(enable);
+        JobsView.this.actionOpenLastBuildDetails.setEnabled(enable);
+        JobsView.this.actionDeleteJob.setEnabled(enable);
         JobsView.this.actionOpenJobInBrowser.setEnabled(enable);
       }
     });
@@ -507,17 +525,19 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   }
 
   private void fillLocalToolBar(final IToolBarManager manager) {
-    manager.add(this.actionReloadJobs);
-    manager.add(new Separator());
-    manager.add(this.actionInvokeBuild);
+    //manager.add(this.actionOpenLastBuildDetails);
     manager.add(this.actionOpenJobInBrowser);
+    manager.add(this.actionInvokeBuild);
+    manager.add(new Separator());
+    manager.add(this.actionReloadJobs);
   }
 
   private void fillLocalPullDown(final IMenuManager manager) {
-    manager.add(this.actionReloadJobs);
-    manager.add(new Separator());
-    manager.add(this.actionInvokeBuild);
+    //manager.add(this.actionOpenLastBuildDetails);
     manager.add(this.actionOpenJobInBrowser);
+    manager.add(this.actionInvokeBuild);
+    manager.add(new Separator());
+    manager.add(this.actionReloadJobs);
   }
 
   private void makeActions() {
@@ -526,6 +546,9 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     this.actionReloadJobs = new ReloadJobsAction();
     this.actionReloadJobs.setEnabled(false);
+
+    actionOpenLastBuildDetails = new OpenLastBuildAction(this);
+    actionDeleteJob = new DeleteJobAction(this);
 
     this.actionOpenJobInBrowser = new Action("Open with Browser...", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       @Override

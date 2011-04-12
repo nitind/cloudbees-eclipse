@@ -76,8 +76,12 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
   @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
     try {
-      this.content.setText(configuration
-          .getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, new String()));
+      String projectName = configuration
+          .getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, new String());
+      if (projectName == null || projectName.length() == 0) {
+        projectName = this.content.getDefaultSelection();
+      }
+      this.content.setText(projectName);
     } catch (CoreException e) {
       CBRunUiActivator.logError(e);
     }

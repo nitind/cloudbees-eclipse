@@ -1,0 +1,67 @@
+<testResult>
+    <duration>3.0</duration>
+    <failCount>0</failCount>
+    <passCount>3</passCount>
+    <skipCount>0</skipCount>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>hg.build.info</className>
+            <duration>1.0</duration>
+            <failedSince>0</failedSince>
+            <name>hg.build.info</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout> NetBeans dev build ------------------ Number: trunk-9629-on-20110407 Date: 7 Apr 2011 Branding:
+                Branch: trunk Tag: Hg ID: 0857144adb2a</stdout>
+        </case>
+        <duration>1.0</duration>
+        <name>hg.build.info</name>
+        <stderr />
+        <stdout> NetBeans dev build ------------------ Number: trunk-9629-on-20110407 Date: 7 Apr 2011 Branding: Branch:
+            trunk Tag: Hg ID: 0857144adb2a</stdout>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>hg.check.build.stable</className>
+            <duration>1.0</duration>
+            <failedSince>0</failedSince>
+            <name>hg.check.build.stable</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout> HTTP/1.1 302 Found Server: Winstone Servlet Engine v0.9.10 Location:
+                http://deadlock.netbeans.org/hudson/images/48x48/blue.png Content-Length: 0 Date: Thu, 07 Apr 2011
+                08:06:31 GMT X-Powered-By: Servlet/2.5 (Winstone/0.9.10) Set-Cookie:
+                JSESSIONID=9ba1e78ec7b945c676448c3f0f1f3406; Path=/hudson</stdout>
+        </case>
+        <duration>1.0</duration>
+        <name>hg.check.build.stable</name>
+        <stderr />
+        <stdout> HTTP/1.1 302 Found Server: Winstone Servlet Engine v0.9.10 Location:
+            http://deadlock.netbeans.org/hudson/images/48x48/blue.png Content-Length: 0 Date: Thu, 07 Apr 2011 08:06:31
+            GMT X-Powered-By: Servlet/2.5 (Winstone/0.9.10) Set-Cookie: JSESSIONID=9ba1e78ec7b945c676448c3f0f1f3406;
+            Path=/hudson</stdout>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>hg.outgoing.changes</className>
+            <duration>1.0</duration>
+            <failedSince>0</failedSince>
+            <name>hg.outgoing.changes</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout> comparing with https://ffjre:***@hg.netbeans.org/main-silver/ searching for changes no changes
+                found</stdout>
+        </case>
+        <duration>1.0</duration>
+        <name>hg.outgoing.changes</name>
+        <stderr />
+        <stdout> comparing with https://ffjre:***@hg.netbeans.org/main-silver/ searching for changes no changes found
+        </stdout>
+    </suite>
+</testResult>

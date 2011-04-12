@@ -1,25 +1,14 @@
 package com.cloudbees.eclipse.dev.ui.internal.action;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
-import org.eclipse.jdt.internal.junit.Messages;
-import org.eclipse.jdt.internal.junit.model.JUnitModel;
-import org.eclipse.jdt.internal.junit.model.ModelMessages;
-import org.eclipse.jdt.internal.junit.model.TestRunHandler;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -27,9 +16,9 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.BaseSelectionListenerAction;
 import org.eclipse.ui.statushandlers.StatusManager;
-import org.xml.sax.SAXException;
 
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
+import com.cloudbees.eclipse.dev.core.junit.JUnitReportSupport;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -99,82 +88,26 @@ public class OpenJunitViewAction extends BaseSelectionListenerAction {
   }
 
   private void showInJUnitView(final String testReport, final IProgressMonitor monitor) throws Exception {
+    //System.out.println("TESTREPORT!\n" + testReport);
+    // TODO transform Jenkins test results into JUnit standard test results
+    //    String result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><testsuite errors=\"0\" failures=\"1\" tests=\"5\" name=\"blah\"> </testsuite>";
 
-    System.out.println("TESTREPORT!\n" + testReport);
-    try {
-      // TODO transform Jenkins test results into JUnit standard test results
-      String result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><testsuite errors=\"0\" failures=\"1\" tests=\"5\" name=\"blah\"> </testsuite>";
+    InputStream in = new ByteArrayInputStream(testReport.getBytes("UTF-8"));
 
-      InputStream in = new ByteArrayInputStream(result.getBytes("UTF-8"));
+    final TestRunSession testRunSession = JUnitReportSupport.importJenkinsTestRunSession(in);
 
-      final TestRunSession testRunSession = importTestRunSession(in);
+    //          JUnitResultGenerator generator = new JUnitResultGenerator(build.getTestResult());
+    //          TestRunHandler handler = new TestRunHandler(testRunSession);
+    //          try {
+    //            generator.write(handler);
+    //          } catch (SAXException e) {
+    //            throw new CoreException(new Status(IStatus.ERROR, CloudBeesDevUiPlugin.PLUGIN_ID,
+    //                "Unexpected parsing error while preparing test results", e));
+    //          }
 
-      //          JUnitResultGenerator generator = new JUnitResultGenerator(build.getTestResult());
-      //          TestRunHandler handler = new TestRunHandler(testRunSession);
-      //          try {
-      //            generator.write(handler);
-      //          } catch (SAXException e) {
-      //            throw new CoreException(new Status(IStatus.ERROR, CloudBeesDevUiPlugin.PLUGIN_ID,
-      //                "Unexpected parsing error while preparing test results", e));
-      //          }
-
-      CloudBeesDevUiPlugin.getDefault().showView(TestRunnerViewPart.NAME);
-      getJUnitModel().addTestRunSession(testRunSession);
-    } catch (CoreException e) {
-      StatusManager.getManager()
-      .handle(
-          new Status(IStatus.ERROR, CloudBeesDevUiPlugin.PLUGIN_ID,
-              "Unexpected error while processing test results", e), StatusManager.SHOW | StatusManager.LOG);
-      return;
-    }
-
+    CloudBeesDevUiPlugin.getDefault().showView(TestRunnerViewPart.NAME);
+    JUnitReportSupport.getJUnitModel().addTestRunSession(testRunSession);
   }
 
-  private static volatile JUnitModel junitModel;
-
-  static JUnitModel getJUnitModel() {
-    if (junitModel == null) {
-      try {
-        // Eclipse 3.6 or later
-        Class<?> clazz;
-        try {
-          clazz = Class.forName("org.eclipse.jdt.internal.junit.JUnitCorePlugin");
-        } catch (ClassNotFoundException e) {
-          // Eclipse 3.5 and earlier
-          clazz = Class.forName("org.eclipse.jdt.internal.junit.ui.JUnitPlugin");
-        }
-
-        Method method = clazz.getDeclaredMethod("getModel");
-        junitModel = (JUnitModel) method.invoke(null);
-      } catch (Exception e) {
-        NoClassDefFoundError error = new NoClassDefFoundError("Unable to locate container for JUnitModel");
-        error.initCause(e);
-        throw error;
-      }
-    }
-    return junitModel;
-  }
-
-  public static TestRunSession importTestRunSession(final InputStream in) throws CoreException {
-    try {
-      SAXParserFactory parserFactory = SAXParserFactory.newInstance();
-      //      parserFactory.setValidating(true); // TODO: add DTD and debug flag
-      SAXParser parser = parserFactory.newSAXParser();
-      TestRunHandler handler = new TestRunHandler();
-      parser.parse(in, handler);
-      TestRunSession session = handler.getTestRunSession();
-      //      JUnitCorePlugin.getModel().addTestRunSession(session);
-      return session;
-    } catch (ParserConfigurationException e) {
-      throw new CoreException(new org.eclipse.core.runtime.Status(IStatus.ERROR, JUnitCorePlugin.getPluginId(),
-          Messages.format(ModelMessages.JUnitModel_could_not_read, "bla"), e)); // TODO
-    } catch (SAXException e) {
-      throw new CoreException(new org.eclipse.core.runtime.Status(IStatus.ERROR, JUnitCorePlugin.getPluginId(),
-          Messages.format(ModelMessages.JUnitModel_could_not_read, "bla"), e)); // TODO
-    } catch (IOException e) {
-      throw new CoreException(new org.eclipse.core.runtime.Status(IStatus.ERROR, JUnitCorePlugin.getPluginId(),
-          Messages.format(ModelMessages.JUnitModel_could_not_read, "bla"), e)); // TODO
-    }
-  }
 
 }

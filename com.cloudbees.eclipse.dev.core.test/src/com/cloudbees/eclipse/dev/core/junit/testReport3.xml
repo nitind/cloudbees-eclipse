@@ -1,0 +1,675 @@
+<testResult>
+    <duration>5.771</duration>
+    <failCount>0</failCount>
+    <passCount>43</passCount>
+    <skipCount>0</skipCount>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.core.sdk.DalvikPlatformManagerTest</className>
+            <duration>0.33</duration>
+            <failedSince>0</failedSince>
+            <name>emptyManager</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr>MasterFileObject[/space/android-sdk-linux_86/platforms/android-3@5bf99eea:6691177,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/add-ons/addon_google_apis_google_inc_3@27b4c1d7:613043d2,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/platforms/android-4@54083e1e:4c221e9e,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/add-ons/addon_google_apis_google_inc_4@51f6f27b:69264eab,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/platforms/android-7@a0430b6:2ba99347,v...[truncated 598
+                chars]...on_edk_sony_ericsson_mobile_communications_ab_9@582ab653:78e45b5e,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/platforms/android-10@527f58ef:5c28305d,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/add-ons/addon_google_apis_google_inc_10@56acdd02:26a7dd39,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/platforms/android-11@2de12f6d:6ee1dac2,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/add-ons/addon_google_apis_google_inc_11@30e34726:1af0b4a3,valid=true]
+            </stderr>
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.core.sdk.DalvikPlatformManagerTest</className>
+            <duration>0.501</duration>
+            <failedSince>0</failedSince>
+            <name>nonEmptyManager</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr>MasterFileObject[/space/android-sdk-linux_86/platforms/android-3@5bf99eea:6691177,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/add-ons/addon_google_apis_google_inc_3@27b4c1d7:613043d2,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/platforms/android-4@54083e1e:4c221e9e,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/add-ons/addon_google_apis_google_inc_4@51f6f27b:69264eab,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/platforms/android-7@a0430b6:2ba99347,v...[truncated 598
+                chars]...on_edk_sony_ericsson_mobile_communications_ab_9@582ab653:78e45b5e,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/platforms/android-10@527f58ef:5c28305d,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/add-ons/addon_google_apis_google_inc_10@56acdd02:26a7dd39,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/platforms/android-11@2de12f6d:6ee1dac2,valid=true]
+                MasterFileObject[/space/android-sdk-linux_86/add-ons/addon_google_apis_google_inc_11@30e34726:1af0b4a3,valid=true]
+            </stderr>
+            <stdout />
+        </case>
+        <duration>0.831</duration>
+        <name>org.netbeans.modules.android.core.sdk.DalvikPlatformManagerTest</name>
+        <stderr>MasterFileObject[/space/android-sdk-linux_86/platforms/android-3@5bf99eea:6691177,valid=true]
+            MasterFileObject[/space/android-sdk-linux_86/add-ons/addon_google_apis_google_inc_3@27b4c1d7:613043d2,valid=true]
+            MasterFileObject[/space/android-sdk-linux_86/platforms/android-4@54083e1e:4c221e9e,valid=true]
+            MasterFileObject[/space/android-sdk-linux_86/add-ons/addon_google_apis_google_inc_4@51f6f27b:69264eab,valid=true]
+            MasterFileObject[/space/android-sdk-linux_86/platforms/android-7@a0430b6:2ba99347,v...[truncated 598
+            chars]...on_edk_sony_ericsson_mobile_communications_ab_9@582ab653:78e45b5e,valid=true]
+            MasterFileObject[/space/android-sdk-linux_86/platforms/android-10@527f58ef:5c28305d,valid=true]
+            MasterFileObject[/space/android-sdk-linux_86/add-ons/addon_google_apis_google_inc_10@56acdd02:26a7dd39,valid=true]
+            MasterFileObject[/space/android-sdk-linux_86/platforms/android-11@2de12f6d:6ee1dac2,valid=true]
+            MasterFileObject[/space/android-sdk-linux_86/add-ons/addon_google_apis_google_inc_11@30e34726:1af0b4a3,valid=true]
+        </stderr>
+        <stdout />
+        <timestamp>2011-03-31T08:55:40</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.core.sdk.DalvikPlatformTest</className>
+            <duration>0.438</duration>
+            <failedSince>0</failedSince>
+            <name>cleanPlatforms</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.core.sdk.DalvikPlatformTest</className>
+            <duration>0.07</duration>
+            <failedSince>0</failedSince>
+            <name>googleApiPlatforms</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <duration>0.508</duration>
+        <name>org.netbeans.modules.android.core.sdk.DalvikPlatformTest</name>
+        <stderr />
+        <stdout />
+        <timestamp>2011-03-31T08:55:41</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.core.sdk.UtilTest</className>
+            <duration>0.175</duration>
+            <failedSince>0</failedSince>
+            <name>testFindToolIn</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <duration>0.175</duration>
+        <name>org.netbeans.modules.android.core.sdk.UtilTest</name>
+        <stderr />
+        <stdout />
+        <timestamp>2011-03-31T08:55:43</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.grammars.AndroidGrammarTest</className>
+            <duration>0.747</duration>
+            <failedSince>0</failedSince>
+            <name>testTags</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.grammars.AndroidGrammarTest</className>
+            <duration>0.05</duration>
+            <failedSince>0</failedSince>
+            <name>testFirstLevelTags</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.grammars.AndroidGrammarTest</className>
+            <duration>0.046</duration>
+            <failedSince>0</failedSince>
+            <name>testTagWithMoreParents</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.grammars.AndroidGrammarTest</className>
+            <duration>0.05</duration>
+            <failedSince>0</failedSince>
+            <name>testAttributes</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.grammars.AndroidGrammarTest</className>
+            <duration>0.043</duration>
+            <failedSince>0</failedSince>
+            <name>testAttributes2</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.grammars.AndroidGrammarTest</className>
+            <duration>0.041</duration>
+            <failedSince>0</failedSince>
+            <name>testAttributes3</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.grammars.AndroidGrammarTest</className>
+            <duration>0.042</duration>
+            <failedSince>0</failedSince>
+            <name>testAttrBooleanValues</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.grammars.AndroidGrammarTest</className>
+            <duration>0.031</duration>
+            <failedSince>0</failedSince>
+            <name>testAttrValues</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <duration>1.0500001</duration>
+        <name>org.netbeans.modules.android.grammars.AndroidGrammarTest</name>
+        <stderr />
+        <stdout />
+        <timestamp>2011-03-31T08:56:08</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.grammars.StyleableModelsTest</className>
+            <duration>0.307</duration>
+            <failedSince>0</failedSince>
+            <name>testAndroidManifestModel</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <duration>0.307</duration>
+        <name>org.netbeans.modules.android.grammars.StyleableModelsTest</name>
+        <stderr />
+        <stdout />
+        <timestamp>2011-03-31T08:56:10</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AndroidActionProviderTest</className>
+            <duration>0.0040</duration>
+            <failedSince>0</failedSince>
+            <name>run</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AndroidActionProviderTest</className>
+            <duration>0.0</duration>
+            <failedSince>0</failedSince>
+            <name>debug</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AndroidActionProviderTest</className>
+            <duration>0.0</duration>
+            <failedSince>0</failedSince>
+            <name>test</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AndroidActionProviderTest</className>
+            <duration>0.0010</duration>
+            <failedSince>0</failedSince>
+            <name>build</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <duration>0.0050000004</duration>
+        <name>org.netbeans.modules.android.project.AndroidActionProviderTest</name>
+        <stderr />
+        <stdout />
+        <timestamp>2011-03-31T08:55:46</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AndroidInfoImplTest</className>
+            <duration>0.068</duration>
+            <failedSince>0</failedSince>
+            <name>isTest</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr>Mar 31, 2011 10:55:49 AM org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform
+                WARNING: could not find platform for AndroidProject[/tmp/junit6668601095629780317/Spinner] Mar 31, 2011
+                10:55:49 AM org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform WARNING: could not
+                find platform for AndroidProject[/tmp/junit6668601095629780317/Spinner] Mar 31, 2011 10:55:49 AM
+                org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform WARNING: could not find platform
+                for AndroidProject[/tmp/junit6668601095629780317/SpinnerTest] Mar 31, 2011 10:55:49 AM
+                org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform WARNING: could not find platform
+                for AndroidProject[/tmp/junit6668601095629780317/SpinnerTest]</stderr>
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AndroidInfoImplTest</className>
+            <duration>0.092</duration>
+            <failedSince>0</failedSince>
+            <name>newTestProject</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr>Mar 31, 2011 10:55:49 AM org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform
+                WARNING: could not find platform for AndroidProject[/tmp/junit6668601095629780317/Spinner] Mar 31, 2011
+                10:55:49 AM org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform WARNING: could not
+                find platform for AndroidProject[/tmp/junit6668601095629780317/Spinner] Mar 31, 2011 10:55:49 AM
+                org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform WARNING: could not find platform
+                for AndroidProject[/tmp/junit6668601095629780317/SpinnerTest] Mar 31, 2011 10:55:49 AM
+                org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform WARNING: could not find platform
+                for AndroidProject[/tmp/junit6668601095629780317/SpinnerTest]</stderr>
+            <stdout />
+        </case>
+        <duration>0.16</duration>
+        <name>org.netbeans.modules.android.project.AndroidInfoImplTest</name>
+        <stderr>Mar 31, 2011 10:55:49 AM org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform
+            WARNING: could not find platform for AndroidProject[/tmp/junit6668601095629780317/Spinner] Mar 31, 2011
+            10:55:49 AM org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform WARNING: could not find
+            platform for AndroidProject[/tmp/junit6668601095629780317/Spinner] Mar 31, 2011 10:55:49 AM
+            org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform WARNING: could not find platform for
+            AndroidProject[/tmp/junit6668601095629780317/SpinnerTest] Mar 31, 2011 10:55:49 AM
+            org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform WARNING: could not find platform for
+            AndroidProject[/tmp/junit6668601095629780317/SpinnerTest]</stderr>
+        <stdout />
+        <timestamp>2011-03-31T08:55:49</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AndroidProjectImplTest</className>
+            <duration>0.255</duration>
+            <failedSince>0</failedSince>
+            <name>fileEncoding</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <duration>0.255</duration>
+        <name>org.netbeans.modules.android.project.AndroidProjectImplTest</name>
+        <stderr />
+        <stdout />
+        <timestamp>2011-03-31T08:55:51</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AndroidProjectUtilTest</className>
+            <duration>0.793</duration>
+            <failedSince>0</failedSince>
+            <name>testParseAndroidPlatform</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AndroidProjectUtilTest</className>
+            <duration>0.09</duration>
+            <failedSince>0</failedSince>
+            <name>testToPlatform</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <duration>0.883</duration>
+        <name>org.netbeans.modules.android.project.AndroidProjectUtilTest</name>
+        <stderr />
+        <stdout />
+        <timestamp>2011-03-31T08:55:53</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AvdSelectorTest</className>
+            <duration>0.137</duration>
+            <failedSince>0</failedSince>
+            <name>testAutoWithSelectedNameAvailable</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AvdSelectorTest</className>
+            <duration>0.0010</duration>
+            <failedSince>0</failedSince>
+            <name>testAutoWithoutSelectedAndOneExactTargetMatch</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AvdSelectorTest</className>
+            <duration>0.0010</duration>
+            <failedSince>0</failedSince>
+            <name>testAutoWithoutSelectedFindExactTargetMatch</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AvdSelectorTest</className>
+            <duration>0.0010</duration>
+            <failedSince>0</failedSince>
+            <name>testAutoWithoutSelectedFindCompatibleTargetMatch</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AvdSelectorTest</className>
+            <duration>0.0010</duration>
+            <failedSince>0</failedSince>
+            <name>testAutoWithoutSelectedNoAvds</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AvdSelectorTest</className>
+            <duration>0.022</duration>
+            <failedSince>0</failedSince>
+            <name>testAutoAvdTwoAdbDevices</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.AvdSelectorTest</className>
+            <duration>0.0020</duration>
+            <failedSince>0</failedSince>
+            <name>testAutoTwoAdbDevicesButNeedsAddOn</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <duration>0.165</duration>
+        <name>org.netbeans.modules.android.project.AvdSelectorTest</name>
+        <stderr />
+        <stdout />
+        <timestamp>2011-03-31T08:55:55</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.PropertiesHelperTest</className>
+            <duration>0.011</duration>
+            <failedSince>0</failedSince>
+            <name>fixLocalProperties</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <duration>0.011</duration>
+        <name>org.netbeans.modules.android.project.PropertiesHelperTest</name>
+        <stderr />
+        <stdout />
+        <timestamp>2011-03-31T08:55:56</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.launch.AndroidLauncherImplTest</className>
+            <duration>0.21</duration>
+            <failedSince>0</failedSince>
+            <name>testInstallPackage</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout>[Android development] Package foo-debug.apk deployed [Android development] Package foo-debug.apk
+                deployed</stdout>
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.launch.AndroidLauncherImplTest</className>
+            <duration>0.0020</duration>
+            <failedSince>0</failedSince>
+            <name>testInstallPackageWhenNotDeployed</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout>[Android development] Package foo-debug.apk deployed [Android development] Package foo-debug.apk
+                deployed</stdout>
+        </case>
+        <duration>0.212</duration>
+        <name>org.netbeans.modules.android.project.launch.AndroidLauncherImplTest</name>
+        <stderr />
+        <stdout>[Android development] Package foo-debug.apk deployed [Android development] Package foo-debug.apk
+            deployed</stdout>
+        <timestamp>2011-03-31T08:55:58</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.launch.LaunchConfigurationsTest</className>
+            <duration>0.148</duration>
+            <failedSince>0</failedSince>
+            <name>testForProject_Default</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.launch.LaunchConfigurationsTest</className>
+            <duration>0.0020</duration>
+            <failedSince>0</failedSince>
+            <name>testForProject_NoAction</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.launch.LaunchConfigurationsTest</className>
+            <duration>0.0020</duration>
+            <failedSince>0</failedSince>
+            <name>testForProject_Activity</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <duration>0.15200001</duration>
+        <name>org.netbeans.modules.android.project.launch.LaunchConfigurationsTest</name>
+        <stderr />
+        <stdout />
+        <timestamp>2011-03-31T08:55:59</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.queries.ClassPathProviderImpl2Test</className>
+            <duration>0.055</duration>
+            <failedSince>0</failedSince>
+            <name>isTest</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr>Mar 31, 2011 10:56:01 AM org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform
+                WARNING: could not find platform for AndroidProject[/tmp/junit6325615613422712304/Spinner] Mar 31, 2011
+                10:56:01 AM org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform WARNING: could not
+                find platform for AndroidProject[/tmp/junit6325615613422712304/Spinner] Mar 31, 2011 10:56:01 AM
+                org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform WARNING: could not find platform
+                for AndroidProject[/tmp/junit6325615613422712304/SpinnerTest] Mar 31, 2011 10:56:01 AM
+                org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform WARNING: could not find platform
+                for AndroidProject[/tmp/junit6325615613422712304/SpinnerTest] compile cp entry
+                file:/tmp/junit6325615613422712304/Spinner/bin/classes/</stderr>
+            <stdout />
+        </case>
+        <duration>0.055</duration>
+        <name>org.netbeans.modules.android.project.queries.ClassPathProviderImpl2Test</name>
+        <stderr>Mar 31, 2011 10:56:01 AM org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform
+            WARNING: could not find platform for AndroidProject[/tmp/junit6325615613422712304/Spinner] Mar 31, 2011
+            10:56:01 AM org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform WARNING: could not find
+            platform for AndroidProject[/tmp/junit6325615613422712304/Spinner] Mar 31, 2011 10:56:01 AM
+            org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform WARNING: could not find platform for
+            AndroidProject[/tmp/junit6325615613422712304/SpinnerTest] Mar 31, 2011 10:56:01 AM
+            org.netbeans.modules.android.project.AndroidProjectUtil projectPlatform WARNING: could not find platform for
+            AndroidProject[/tmp/junit6325615613422712304/SpinnerTest] compile cp entry
+            file:/tmp/junit6325615613422712304/Spinner/bin/classes/</stderr>
+        <stdout />
+        <timestamp>2011-03-31T08:56:00</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.queries.ClassPathProviderImplTest</className>
+            <duration>0.176</duration>
+            <failedSince>0</failedSince>
+            <name>testFindClassPath</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.queries.ClassPathProviderImplTest</className>
+            <duration>0.013</duration>
+            <failedSince>0</failedSince>
+            <name>testProjectSourceCp</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <duration>0.189</duration>
+        <name>org.netbeans.modules.android.project.queries.ClassPathProviderImplTest</name>
+        <stderr />
+        <stdout />
+        <timestamp>2011-03-31T08:56:02</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.queries.CompiledSourceForBinaryQueryTest</className>
+            <duration>0.346</duration>
+            <failedSince>0</failedSince>
+            <name>findSourceRoots</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.queries.CompiledSourceForBinaryQueryTest</className>
+            <duration>0.0020</duration>
+            <failedSince>0</failedSince>
+            <name>findSourceRoots2</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <duration>0.348</duration>
+        <name>org.netbeans.modules.android.project.queries.CompiledSourceForBinaryQueryTest</name>
+        <stderr />
+        <stdout />
+        <timestamp>2011-03-31T08:56:04</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.project.ui.customizer.AndroidTargetTableModelTest</className>
+            <duration>0.14</duration>
+            <failedSince>0</failedSince>
+            <name>testSomeMethod</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <duration>0.14</duration>
+        <name>org.netbeans.modules.android.project.ui.customizer.AndroidTargetTableModelTest</name>
+        <stderr />
+        <stdout />
+        <timestamp>2011-03-31T08:56:06</timestamp>
+    </suite>
+    <suite>
+        <case>
+            <age>0</age>
+            <className>org.netbeans.modules.android.xml.resources.ManifestDataObjectTest</className>
+            <duration>0.325</duration>
+            <failedSince>0</failedSince>
+            <name>testDataObject</name>
+            <skipped>false</skipped>
+            <status>PASSED</status>
+            <stderr />
+            <stdout />
+        </case>
+        <duration>0.325</duration>
+        <name>org.netbeans.modules.android.xml.resources.ManifestDataObjectTest</name>
+        <stderr />
+        <stdout />
+        <timestamp>2011-03-31T08:56:13</timestamp>
+    </suite>
+</testResult>

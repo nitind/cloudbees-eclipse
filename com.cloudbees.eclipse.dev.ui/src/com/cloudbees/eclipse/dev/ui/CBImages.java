@@ -45,4 +45,10 @@ public interface CBImages {
   String IMG_HEALTH_24_80PLUS = IMG_HEALTH_PREFIX + IMG_24 + "health-80plus.gif";
 
   String IMG_JUNIT = "IMG_JUNIT";
+
+  String IMG_BUILD_DETAILS = "IMG_BUILD_DETAILS";
+
+  String IMG_DELETE = "IMG_DELETE";
+  String IMG_DELETE_DISABLED = "IMG_DELETE_DISABLED";
+
 }
