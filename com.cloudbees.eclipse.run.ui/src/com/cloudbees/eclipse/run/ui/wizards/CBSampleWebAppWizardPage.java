@@ -15,7 +15,7 @@ public class CBSampleWebAppWizardPage extends CBWizardPage {
 
   public static final String PAGE_NAME = CBSampleWebAppWizardPage.class.getSimpleName();
   private static final String PAGE_TITLE = "CloudBees Project";
-  private static final String PAGE_DESCRIPTION = "This wizard creates a new CloudBees web application.";
+  private static final String PAGE_DESCRIPTION = "This wizard creates a new CloudBees project.";
   private static final String PROJECT_NAME_LABEL = "Project Name:";
   private static final String PROJECT_NAME_HINT = "Please enter the project name";
   private static final String ERR_PROJECT_EXISTS = "Project with same name already exists in workspace";

@@ -50,6 +50,43 @@ Notwithstanding anything to the contrary contained herein, except for the limite
 6.13 Headings.  The headings in this Agreement are for purposes of reference only and will not in any way limit or affect the meaning or interpretation of any of the terms hereof.
    </license>
 
+   <requires>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.core.net"/>
+      <import plugin="org.eclipse.equinox.security"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.core.expressions"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.swt"/>
+      <import plugin="org.eclipse.ui.intro"/>
+      <import plugin="org.eclipse.ui.forms"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="com.cloudbees.eclipse.run.sdk" version="0.6.0" match="greaterOrEqual"/>
+      <import plugin="org.apache.ant"/>
+      <import plugin="org.eclipse.ant.core"/>
+      <import plugin="com.cloudbees.eclipse.core" version="1.0.2" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.debug.core"/>
+      <import plugin="org.eclipse.wst.server.core"/>
+      <import plugin="org.apache.commons.codec"/>
+      <import plugin="org.eclipse.core.variables"/>
+      <import plugin="org.eclipse.jdt.launching"/>
+      <import plugin="org.eclipse.debug.ui"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.wst.server.ui"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.wst.common.project.facet.ui"/>
+      <import plugin="org.eclipse.ant.launching"/>
+      <import plugin="org.eclipse.ant.ui"/>
+      <import plugin="org.eclipse.team.core"/>
+      <import plugin="org.eclipse.team.ui"/>
+      <import plugin="org.eclipse.jgit"/>
+      <import plugin="org.eclipse.egit.core"/>
+      <import plugin="org.eclipse.egit.ui"/>
+      <import plugin="org.tigris.subversion.subclipse.core"/>
+      <import plugin="org.tigris.subversion.subclipse.ui"/>
+   </requires>
+
    <plugin
          id="com.cloudbees.eclipse.core"
          download-size="0"
@@ -65,10 +102,24 @@ Notwithstanding anything to the contrary contained herein, except for the limite
          unpack="false"/>
 
    <plugin
-         id="com.cloudbees.eclipse.sdk"
+         id="com.cloudbees.eclipse.run.core"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+
+   <plugin
+         id="com.cloudbees.eclipse.run.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.cloudbees.eclipse.run.sdk"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
    <plugin
          id="com.cloudbees.eclipse.dev.core"
@@ -79,20 +130,6 @@ Notwithstanding anything to the contrary contained herein, except for the limite
 
    <plugin
          id="com.cloudbees.eclipse.dev.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.cloudbees.eclipse.run.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.cloudbees.eclipse.run.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"

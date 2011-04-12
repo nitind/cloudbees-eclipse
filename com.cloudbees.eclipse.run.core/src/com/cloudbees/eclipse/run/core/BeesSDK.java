@@ -19,7 +19,7 @@ import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.core.GrandCentralService.AuthInfo;
-import com.cloudbees.eclipse.sdk.CBSdkActivator;
+import com.cloudbees.eclipse.run.sdk.CBSdkActivator;
 
 public class BeesSDK {
 
@@ -52,20 +52,24 @@ public class BeesSDK {
     return client.applicationStart(appId);
   }
 
-  public static ApplicationDeployArchiveResponse deploy(IProject project) throws Exception {
+  public static ApplicationDeployArchiveResponse deploy(IProject project, boolean build) throws Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
 
     String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + project.getName();//$NON-NLS-1$
 
     IPath workspacePath = project.getLocation().removeLastSegments(1);
-    IPath buildPath = getWarFile(project).getFullPath();
+    IPath buildPath = getWarFile(project, build).getFullPath();
 
     String warFile = workspacePath.toOSString() + buildPath.toOSString();
     return client.applicationDeployWar(appId, null, null, warFile, null, null);
   }
 
-  private static IFile getWarFile(IProject project) throws CloudBeesException, CoreException, FileNotFoundException {
+  private static IFile getWarFile(IProject project, boolean build) throws CloudBeesException, CoreException,
+      FileNotFoundException {
+    if (build) {
+      runTargets(project, new String[] { "dist" });
+    }
     IFile file = getBuildFolder(project).getFile("webapp.war");
 
     if (!file.exists()) {

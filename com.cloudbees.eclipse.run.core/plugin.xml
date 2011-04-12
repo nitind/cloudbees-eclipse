@@ -6,14 +6,14 @@
 	<extension point="org.eclipse.wst.server.core.runtimeTypes">
 		<runtimeType
 			description="Deploy to RUN@cloud" id="com.cloudbees.eclipse.core.runcloud"
-			name="RUN@cloud" vendor="Cloudbees" vendorId="com.cloudbees" version="1">
+			name="RUN@cloud" vendor="CloudBees" vendorId="com.cloudbees" version="1">
 			<moduleType types="com.cloudbees.eclipse.core.runcloud"
 				versions="*">
 			</moduleType>
 		</runtimeType>
 		<runtimeType
 			description="Launch local instance of application" id="com.cloudbees.eclipse.core.runcloud.local"
-			name="Run@local" vendor="Cloudbees" vendorId="com.cloudbees" version="1">
+			name="Run@local" vendor="CloudBees" vendorId="com.cloudbees" version="1">
 			<moduleType types="com.cloudbees.eclipse.core.runcloud.local"
 				versions="*">
 			</moduleType>

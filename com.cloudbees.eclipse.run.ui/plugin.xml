@@ -3,11 +3,11 @@
 <plugin>
 	<extension point="org.eclipse.ui.commands">
 		<category id="com.cloudbees.eclipse.run.ui.commands.category"
-			name="CloudBees RUN@Cloud">
+			name="CloudBees RUN@cloud">
 		</category>
 		<command categoryId="com.cloudbees.eclipse.run.ui.commands.category"
 			defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.CBSampleWebAppHandler"
-			id="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp" name="New CloudBees Project">
+			id="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp" name="New CloudBees Project...">
 		</command>
 		<command categoryId="com.cloudbees.eclipse.run.ui.commands.category"
 			defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.ReferenceHandler"
@@ -27,7 +27,7 @@
 			locationURI="menu:com.cloudbees.eclipse.run.ui.commands.referenceToMenu">
 			<command commandId="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp"
 				icon="icons/16x16/cb_new_proj_wiz_ico_16x16.png" label="New CloudBees Project..."
-				mnemonic="N" style="push" tooltip="Create a sample web application">
+				mnemonic="N" style="push" tooltip="Create a sample CloudBees project">
 			</command>
 		</menuContribution>
 	</extension>
@@ -121,9 +121,9 @@
 		<shortcut
 			class="com.cloudbees.eclipse.run.ui.launchconfiguration.CBLaunchShortcut"
 			icon="icons/16x16/cb_plain.png" id="com.cloudbees.eclipse.run.ui.launchconfiguration.shortcut"
-			label="CloudBees Application" modes="run, debug">
+			label="CloudBees Application (local)" modes="run, debug">
 			<contextualLaunch>
-				<contextLabel label="CloudBees Application" mode="run, debug">
+				<contextLabel label="CloudBees Application (local)" mode="run, debug">
 				</contextLabel>
 				<enablement>
 					<with variable="selection">
@@ -145,9 +145,9 @@
 		<shortcut
 			class="com.cloudbees.eclipse.run.ui.launchconfiguration.CBCloudLaunchShortcut"
 			icon="icons/16x16/cb_plain.png" id="com.cloudbees.eclipse.run.ui.launchcloudconfiguration.shortcut"
-			label="Deploy CloudBees Application" modes="run">
+			label="CloudBees Application (RUN@cloud)@" modes="run">
 			<contextualLaunch>
-				<contextLabel label="Deploy CloudBees Application"
+				<contextLabel label="CloudBees Application (RUN@cloud)@"
 					mode="run, debug">
 				</contextLabel>
 				<enablement>

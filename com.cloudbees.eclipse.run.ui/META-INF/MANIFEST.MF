@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Cloudbees Run Ui
+Bundle-Name: CloudBees Run Ui
 Bundle-SymbolicName: com.cloudbees.eclipse.run.ui;singleton:=true
 Bundle-Version: 1.0.2.qualifier
 Bundle-Activator: com.cloudbees.eclipse.run.ui.CBRunUiActivator
@@ -14,7 +14,7 @@ Require-Bundle: com.cloudbees.eclipse.run.core,
  org.eclipse.wst.server.ui,
  org.eclipse.jdt.core,
  org.eclipse.wst.common.project.facet.ui,
- com.cloudbees.eclipse.sdk,
+ com.cloudbees.eclipse.run.sdk,
  com.cloudbees.eclipse.ui,
  org.eclipse.ant.launching,
  org.eclipse.jdt.launching,

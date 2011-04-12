@@ -21,6 +21,7 @@ public class CloudBeesScmEgitPlugin extends AbstractUIPlugin {
    */
   @Override
   public void start(final BundleContext bundleContext) throws Exception {
+    super.start(context);
     CloudBeesScmEgitPlugin.context = bundleContext;
 
     if ((ForgeSyncService.bundleActive("org.eclipse.egit.core") || ForgeSyncService.bundleActive("org.eclipse.egit"))
@@ -37,6 +38,7 @@ public class CloudBeesScmEgitPlugin extends AbstractUIPlugin {
    */
   @Override
   public void stop(final BundleContext bundleContext) throws Exception {
+    super.stop(context);
     CloudBeesScmEgitPlugin.context = null;
     plugin = null;
   }
