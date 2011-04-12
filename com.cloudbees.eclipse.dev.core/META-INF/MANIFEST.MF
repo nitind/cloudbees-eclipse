@@ -17,4 +17,5 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.team.ui;resolution:=optional,
  org.eclipse.jdt.junit;resolution:=optional,
  org.eclipse.jdt.junit.core;resolution:=optional
-Export-Package: com.cloudbees.eclipse.dev.core.junit
+Export-Package: com.cloudbees.eclipse.dev.core;uses:="org.eclipse.core.runtime,org.osgi.framework",
+ com.cloudbees.eclipse.dev.core.junit;uses:="org.eclipse.jdt.internal.junit.model"

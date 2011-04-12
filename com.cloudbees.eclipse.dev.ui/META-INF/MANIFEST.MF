@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.cloudbees.eclipse.dev.ui;singleton:=true
 Bundle-Version: 1.0.2.qualifier
 Bundle-Activator: com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin
 Bundle-Vendor: Cloud Bees, Inc
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.cloudbees.eclipse.core,
  org.eclipse.ui,
@@ -24,3 +24,7 @@ Require-Bundle: com.cloudbees.eclipse.core,
  org.eclipse.team.ui;resolution:=optional,
  org.eclipse.jdt.junit;resolution:=optional,
  org.eclipse.jdt.junit.core;resolution:=optional
+Export-Package: com.cloudbees.eclipse.dev.ui,
+ com.cloudbees.eclipse.dev.ui.views.build,
+ com.cloudbees.eclipse.dev.ui.views.instances,
+ com.cloudbees.eclipse.dev.ui.views.jobs
