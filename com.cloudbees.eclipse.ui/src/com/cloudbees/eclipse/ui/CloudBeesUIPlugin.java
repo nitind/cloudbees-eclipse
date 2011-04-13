@@ -19,7 +19,6 @@ import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -39,10 +38,8 @@ import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
-import com.cloudbees.eclipse.core.forge.api.ForgeSync.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobProperty;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 
 /**
  * CloudBees Eclipse Toolkit UI Plugin
@@ -73,7 +70,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext
    * )
@@ -85,8 +82,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     this.logger = new Logger(getLog());
     loadAccountCredentials();
     hookPrefChangeListener();
-
-    reloadForgeRepos(false);
   }
 
   private void hookPrefChangeListener() {
@@ -109,7 +104,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext
    * )
@@ -132,60 +127,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
    */
   public static CloudBeesUIPlugin getDefault() {
     return plugin;
-  }
-
-  public void reloadForgeRepos(final boolean userAction) throws CloudBeesException {
-    //      PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new IRunnableWithProgress() {
-    //        public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Forge repositories") {
-      @Override
-      protected IStatus run(final IProgressMonitor monitor) {
-        if (!getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_FORGE)) {
-          // Forge sync disabled.
-          return Status.CANCEL_STATUS;
-        }
-
-        try {
-          monitor.beginTask("Loading Forge repositories", 1000);
-          String[] status = CloudBeesCorePlugin.getDefault().getGrandCentralService().reloadForgeRepos(monitor);
-
-          String mess = "";
-          if (status != null) {
-            for (String st : status) {
-              mess += st + "\n\n";
-            }
-          }
-
-          if (mess.length() == 0) {
-            mess = "Found no Forge repositories!";
-          }
-
-          monitor.worked(1000);
-
-          if (userAction) {
-            final String msg = mess;
-            PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-              public void run() {
-                MessageDialog.openInformation(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay()
-                    .getActiveShell(), "Synced Forge repositories", msg);
-              }
-            });
-          }
-
-          return Status.OK_STATUS; // new Status(Status.INFO, PLUGIN_ID, mess);
-        } catch (Exception e) {
-          CloudBeesUIPlugin.getDefault().getLogger().error(e);
-          return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage(), e);
-        } finally {
-          monitor.done();
-        }
-      }
-    };
-
-    job.setUser(userAction);
-    if (getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_FORGE)) {
-      job.schedule();
-    }
   }
 
   public static IStatus showError(final String msg, final Throwable e) {
@@ -241,7 +182,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   public List<JenkinsInstance> loadDevAtCloudInstances(final IProgressMonitor monitor) throws CloudBeesException {
 
     List<JenkinsInstance> instances = CloudBeesCorePlugin.getDefault().getGrandCentralService()
-    .loadDevAtCloudInstances(monitor);
+        .loadDevAtCloudInstances(monitor);
 
     for (JenkinsInstance ni : instances) {
       if (getJenkinsServiceForUrl(ni.url) == null) {
@@ -264,7 +205,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
     Collections.sort(list);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
-    .setValue(PreferenceConstants.P_JENKINS_INSTANCES, JenkinsInstance.encode(list));
+        .setValue(PreferenceConstants.P_JENKINS_INSTANCES, JenkinsInstance.encode(list));
   }
 
   public void removeJenkinsInstance(final JenkinsInstance ni) {
@@ -274,12 +215,12 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     List<JenkinsInstance> list = loadManualJenkinsInstances();
     list.remove(ni);
     CloudBeesUIPlugin.getDefault().getPreferenceStore()
-    .setValue(PreferenceConstants.P_JENKINS_INSTANCES, JenkinsInstance.encode(list));
+        .setValue(PreferenceConstants.P_JENKINS_INSTANCES, JenkinsInstance.encode(list));
   }
 
   public void reloadAllJenkins(final boolean userAction) {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job(
-    "Loading DEV@Cloud & Jenkins instances") {
+        "Loading DEV@Cloud & Jenkins instances") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
         if (!getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
@@ -342,7 +283,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
   }
 
-  private List<JenkinsInstanceResponse> pollInstances(final List<JenkinsInstance> instances, final IProgressMonitor monitor) {
+  private List<JenkinsInstanceResponse> pollInstances(final List<JenkinsInstance> instances,
+      final IProgressMonitor monitor) {
     try {
       int scale = 10;
       monitor.beginTask("Fetching instance details", instances.size() * scale);
@@ -423,8 +365,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           for (JenkinsJobProperty.ParameterDefinition def : prop.parameterDefinitions) {
             JenkinsJobProperty.ParameterValue val = def.defaultParameterValue;
             InputDialog propDialog = new InputDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-                "Job parameter is missing",
-                "Specify value for job parameter '" + def.name + "':", val != null ? val.value : "", null);
+                "Job parameter is missing", "Specify value for job parameter '" + def.name + "':",
+                val != null ? val.value : "", null);
             propDialog.setBlockOnOpen(true);
             if (propDialog.open() != InputDialog.OK) {
               throw new CancellationException();
@@ -502,38 +444,4 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
     return getPreferenceStore().getString(PreferenceConstants.P_PASSWORD);
   }
-
-  public void openRemoteFile(final String jobUrl, final ChangeSetPathItem item) {
-    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Jenkins jobs") {
-      @Override
-      protected IStatus run(final IProgressMonitor monitor) {
-        try {
-          JenkinsService jenkins = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(jobUrl);
-
-          if (monitor.isCanceled()) {
-            throw new OperationCanceledException();
-          }
-
-          JenkinsScmConfig scmConfig = jenkins.getJenkinsScmConfig(jobUrl, monitor);
-
-          if (monitor.isCanceled()) {
-            throw new OperationCanceledException();
-          }
-
-          boolean opened = CloudBeesCorePlugin.getDefault().getGrandCentralService()
-          .openRemoteFile(scmConfig, item, monitor);
-
-          return opened ? Status.OK_STATUS : new Status(IStatus.INFO, CloudBeesUIPlugin.PLUGIN_ID, "Can't open "
-              + item.path);
-        } catch (CloudBeesException e) {
-          CloudBeesUIPlugin.getDefault().getLogger().error(e);
-          return new Status(Status.ERROR, CloudBeesUIPlugin.PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
-        }
-      }
-    };
-
-    job.setUser(true);
-    job.schedule();
-  }
-
 }
