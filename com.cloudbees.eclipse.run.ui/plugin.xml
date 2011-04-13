@@ -88,7 +88,7 @@
 		<category id="com.cloudbees.eclipse.run.ui" name="CloudBees">
 		</category>
 		<wizard category="com.cloudbees.eclipse.run.ui"
-			class="com.cloudbees.eclipse.run.ui.wizards.CBSampleWebAppWizard"
+			class="com.cloudbees.eclipse.run.ui.wizards.CBWebAppWizard"
 			icon="icons/16x16/cb_new_proj_wiz_ico_16x16.png" id="com.cloudbees.eclipse.run.ui.wizards.CBSampleWebAppWizard"
 			name="CloudBees Project" project="true">
 		</wizard>

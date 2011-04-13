@@ -12,6 +12,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -30,9 +31,9 @@ import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
-public class JenkinsWizardPage extends CBWizardPage {
+public class CBJenkinsWizardPage extends WizardPage implements CBWizardPageSupport {
 
-  public static final String PAGE_NAME = JenkinsWizardPage.class.getSimpleName();
+  public static final String PAGE_NAME = CBJenkinsWizardPage.class.getSimpleName();
   private static final String PAGE_TITLE = "Jenkins Job";
   private static final String PAGE_DESCRIPTION = "Optionally you can create a new Jenkins job for this project.";
   private static final String JENKINS_JOB_CHECK_LABEL = "New Jenkins job";
@@ -49,7 +50,7 @@ public class JenkinsWizardPage extends CBWizardPage {
   private Label jenkinsInstanceLabel;
   private Label jobNameLabel;
 
-  protected JenkinsWizardPage() {
+  protected CBJenkinsWizardPage() {
     super(PAGE_NAME);
     setTitle(PAGE_TITLE);
     setDescription(PAGE_DESCRIPTION);
@@ -96,10 +97,10 @@ public class JenkinsWizardPage extends CBWizardPage {
     this.jenkinsComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
-        ISelection selection = JenkinsWizardPage.this.jenkinsComboViewer.getSelection();
+        ISelection selection = CBJenkinsWizardPage.this.jenkinsComboViewer.getSelection();
         if (selection instanceof StructuredSelection) {
           StructuredSelection structSelection = (StructuredSelection) selection;
-          JenkinsWizardPage.this.jenkinsInstance = (JenkinsInstance) structSelection.getFirstElement();
+          CBJenkinsWizardPage.this.jenkinsInstance = (JenkinsInstance) structSelection.getFirstElement();
         }
         validate();
       }
@@ -160,10 +161,10 @@ public class JenkinsWizardPage extends CBWizardPage {
 
     private void handleEvent() {
       boolean selected = isMakeNewJob();
-      JenkinsWizardPage.this.jobNameText.setEnabled(selected);
-      JenkinsWizardPage.this.jenkinsInstancesCombo.setEnabled(selected);
-      JenkinsWizardPage.this.jenkinsInstanceLabel.setEnabled(selected);
-      JenkinsWizardPage.this.jobNameLabel.setEnabled(selected);
+      CBJenkinsWizardPage.this.jobNameText.setEnabled(selected);
+      CBJenkinsWizardPage.this.jenkinsInstancesCombo.setEnabled(selected);
+      CBJenkinsWizardPage.this.jenkinsInstanceLabel.setEnabled(selected);
+      CBJenkinsWizardPage.this.jobNameLabel.setEnabled(selected);
       validate();
     }
   }
@@ -209,7 +210,7 @@ public class JenkinsWizardPage extends CBWizardPage {
           display.syncExec(new Runnable() {
             @Override
             public void run() {
-              JenkinsWizardPage.this.jenkinsComboViewer.add(items);
+              CBJenkinsWizardPage.this.jenkinsComboViewer.add(items);
             }
           });
 
@@ -253,8 +254,13 @@ public class JenkinsWizardPage extends CBWizardPage {
   }
 
   @Override
-  boolean canFinish() {
+  public boolean canFinish() {
     return true;
+  }
+
+  @Override
+  public boolean isActivePage() {
+    return isCurrentPage();
   }
 
 }

@@ -14,15 +14,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
-import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.wizards.datatransfer.FileSystemStructureProvider;
 import org.eclipse.ui.wizards.datatransfer.IImportStructureProvider;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
+import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 import com.cloudbees.eclipse.core.CloudBeesNature;
 import com.cloudbees.eclipse.core.JenkinsService;
@@ -32,17 +31,17 @@ import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
-public class CBSampleWebAppWizard extends Wizard implements INewWizard {
+public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard {
 
   private static final String WINDOW_TITLE = "CloudBees Project";
   private static final String ERROR_TITLE = "Error";
   private static final String ERROR_MSG = "Received error while creating new project";
   private static final String BUILD_LABEL = "Build {0}";
 
-  private CBSampleWebAppWizardPage newProjectPage;
-  private JenkinsWizardPage jenkinsPage;
+  private CBProjectNameAndLocationPage nameAndLocPage;
+  private CBJenkinsWizardPage jenkinsPage;
 
-  public CBSampleWebAppWizard() {
+  public CBWebAppWizard() {
     super();
     setNeedsProgressMonitor(true);
     setWindowTitle(WINDOW_TITLE);
@@ -52,24 +51,20 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
 
   @Override
   public void addPages() {
-    this.newProjectPage = new CBSampleWebAppWizardPage();
-    addPage(this.newProjectPage);
-    this.jenkinsPage = new JenkinsWizardPage();
+    this.nameAndLocPage = new CBProjectNameAndLocationPage();
+    addPage(this.nameAndLocPage);
+    this.jenkinsPage = new CBJenkinsWizardPage();
     addPage(this.jenkinsPage);
   }
 
   @Override
-  public void init(IWorkbench workbench, IStructuredSelection selection) {
-  }
-
-  @Override
   public IWizardPage getNextPage(IWizardPage page) {
-    if (page instanceof JenkinsWizardPage) {
-      JenkinsWizardPage jenkinsPage = (JenkinsWizardPage) page;
+    if (page instanceof CBJenkinsWizardPage) {
+      CBJenkinsWizardPage jenkinsPage = (CBJenkinsWizardPage) page;
       String jobName = jenkinsPage.getJobNameText();
 
       if (jobName == null || jobName.length() == 0) {
-        jenkinsPage.setJobNameText(MessageFormat.format(BUILD_LABEL, this.newProjectPage.getProjectName()));
+        jenkinsPage.setJobNameText(MessageFormat.format(BUILD_LABEL, this.nameAndLocPage.getProjectName()));
       }
 
       jenkinsPage.loadJenkinsInstances();
@@ -81,13 +76,13 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
   @Override
   public boolean canFinish() {
     for (IWizardPage page : getPages()) {
-      if (!(page instanceof CBWizardPage)) {
+      if (!(page instanceof CBWizardPageSupport)) {
         continue;
       }
 
-      CBWizardPage cbPage = (CBWizardPage) page;
-      if (cbPage.isActivePage()) {
-        return super.canFinish() && cbPage.canFinish();
+      CBWizardPageSupport p = (CBWizardPageSupport) page;
+      if (p.isActivePage()) {
+        return super.canFinish() && p.canFinish();
       }
     }
     return super.canFinish();
@@ -97,8 +92,7 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
   public boolean performFinish() {
 
     IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-
-    String projectName = this.newProjectPage.getProjectName();
+    String projectName = this.nameAndLocPage.getProjectName();
     String worksapceLocation = workspaceRoot.getLocation().toPortableString();
 
     try {
@@ -164,6 +158,9 @@ public class CBSampleWebAppWizard extends Wizard implements INewWizard {
       MessageDialog.openError(getShell(), ERROR_TITLE, targetEx.getMessage());
       return false;
     }
+
+    IWorkingSet[] workingSets = this.nameAndLocPage.getWorkingSets();
+    getWorkbench().getWorkingSetManager().addToWorkingSets(project, workingSets);
 
     return true;
   }
