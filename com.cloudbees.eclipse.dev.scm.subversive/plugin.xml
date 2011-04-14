@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="com.cloudbees.eclipse.dev.core.forgeSyncProvider">
+      <forgeSyncProvider
+            class="com.cloudbees.eclipse.dev.scm.subversive.ForgeSubversiveSync">
+      </forgeSyncProvider>
+   </extension>
+
+</plugin>

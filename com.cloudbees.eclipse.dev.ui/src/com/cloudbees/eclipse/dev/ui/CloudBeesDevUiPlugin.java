@@ -18,11 +18,16 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.JenkinsService;
+import com.cloudbees.eclipse.core.Logger;
+import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
+import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildEditorInput;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildPart;
 import com.cloudbees.eclipse.dev.ui.views.jobs.JobsView;
@@ -40,6 +45,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
   // The shared instance
   private static CloudBeesDevUiPlugin plugin;
 
+  private Logger logger;
+
   /**
    * The constructor
    */
@@ -53,7 +60,10 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
   @Override
   public void start(final BundleContext context) throws Exception {
     super.start(context);
-    plugin = this;
+    this.plugin = this;
+    this.logger = new Logger(getLog());
+
+    reloadForgeRepos(false);
   }
 
   /*
@@ -62,17 +72,22 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
    */
   @Override
   public void stop(final BundleContext context) throws Exception {
-    plugin = null;
+    this.plugin = null;
+    this.logger = null;
     super.stop(context);
   }
 
   /**
    * Returns the shared instance
-   * 
+   *
    * @return the shared instance
    */
   public static CloudBeesDevUiPlugin getDefault() {
     return plugin;
+  }
+
+  public Logger getLogger() {
+    return this.logger;
   }
 
   @Override
@@ -279,6 +294,95 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
       service.deleteJenkinsJob(job.url, new NullProgressMonitor());
     }
 
+  }
+
+  public void openRemoteFile(final String jobUrl, final ForgeSync.ChangeSetPathItem item) {
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Jenkins jobs") {
+      @Override
+      protected IStatus run(final IProgressMonitor monitor) {
+        try {
+          JenkinsService jenkins = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(jobUrl);
+
+          if (monitor.isCanceled()) {
+            throw new OperationCanceledException();
+          }
+
+          JenkinsScmConfig scmConfig = jenkins.getJenkinsScmConfig(jobUrl, monitor);
+
+          if (monitor.isCanceled()) {
+            throw new OperationCanceledException();
+          }
+
+          boolean opened = CloudBeesCorePlugin.getDefault().getGrandCentralService()
+              .openRemoteFile(scmConfig, item, monitor);
+
+          return opened ? Status.OK_STATUS : new Status(IStatus.INFO, PLUGIN_ID, "Can't open " + item.path);
+        } catch (CloudBeesException e) {
+          getLogger().error(e);
+          return new Status(Status.ERROR, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
+        }
+      }
+    };
+
+    job.setUser(true);
+    job.schedule();
+  }
+
+  public void reloadForgeRepos(final boolean userAction) throws CloudBeesException {
+    CloudBeesDevCorePlugin.getDefault();
+
+    //      PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new IRunnableWithProgress() {
+    //        public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Forge repositories") {
+      @Override
+      protected IStatus run(final IProgressMonitor monitor) {
+        if (!CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_FORGE)) {
+          // Forge sync disabled.
+          return Status.CANCEL_STATUS;
+        }
+
+        try {
+          monitor.beginTask("Loading Forge repositories", 1000);
+
+          String[] status = CloudBeesCorePlugin.getDefault().getGrandCentralService().reloadForgeRepos(monitor);
+
+          String mess = "";
+          if (status != null) {
+            for (String st : status) {
+              mess += st + "\n\n";
+            }
+          }
+
+          if (mess.length() == 0) {
+            mess = "Found no Forge repositories!";
+          }
+
+          monitor.worked(1000);
+
+          if (userAction) {
+            final String msg = mess;
+            PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+              public void run() {
+                MessageDialog.openInformation(CloudBeesDevUiPlugin.getDefault().getWorkbench().getDisplay()
+                    .getActiveShell(), "Synced Forge repositories", msg);
+              }
+            });
+          }
+
+          return Status.OK_STATUS; // new Status(Status.INFO, PLUGIN_ID, mess);
+        } catch (Exception e) {
+          CloudBeesUIPlugin.getDefault().getLogger().error(e);
+          return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage(), e);
+        } finally {
+          monitor.done();
+        }
+      }
+    };
+
+    job.setUser(userAction);
+    if (CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_FORGE)) {
+      job.schedule();
+    }
   }
 
 }
