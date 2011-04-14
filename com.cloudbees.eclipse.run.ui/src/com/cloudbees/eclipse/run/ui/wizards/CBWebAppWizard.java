@@ -2,6 +2,7 @@ package com.cloudbees.eclipse.run.ui.wizards;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.text.MessageFormat;
 
 import org.eclipse.core.resources.IProject;
@@ -10,12 +11,18 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.URIUtil;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.wizards.datatransfer.FileSystemStructureProvider;
@@ -53,8 +60,11 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
   public void addPages() {
     this.nameAndLocPage = new CBProjectNameAndLocationPage();
     addPage(this.nameAndLocPage);
+
     this.jenkinsPage = new CBJenkinsWizardPage();
     addPage(this.jenkinsPage);
+
+    this.nameAndLocPage.init(getSelection(), getActivePart());
   }
 
   @Override
@@ -92,11 +102,16 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
   public boolean performFinish() {
 
     IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+
     String projectName = this.nameAndLocPage.getProjectName();
-    String worksapceLocation = workspaceRoot.getLocation().toPortableString();
+    URI uri = this.nameAndLocPage.getProjectLocationURI();
+    final boolean useDefaultLocation = uri == null;
+    if (useDefaultLocation) {
+      uri = workspaceRoot.getLocationURI();
+    }
 
     try {
-      CBRunCoreScripts.executeCopySampleWebAppScript(worksapceLocation, projectName);
+      CBRunCoreScripts.executeCopySampleWebAppScript(uri.getPath(), projectName);
     } catch (Exception e) {
       CBRunUiActivator.logError(e);
       MessageDialog.openError(getShell(), ERROR_TITLE, e.getMessage());
@@ -104,35 +119,43 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
     }
 
     final IProject project = workspaceRoot.getProject(projectName);
+    IPath path = new Path(uri.getPath()).append(projectName);
     IPath containerPath = project.getFullPath();
-    File source = workspaceRoot.getLocation().append(projectName).toFile();
+    File source = path.toFile();
     IImportStructureProvider structureProvider = FileSystemStructureProvider.INSTANCE;
     IOverwriteQuery overwriteQuery = new IOverwriteQuery() {
 
       @Override
       public String queryOverwrite(String pathString) {
-        return IOverwriteQuery.ALL;
+        return IOverwriteQuery.NO_ALL;
       }
     };
 
     final ImportOperation importOp = new ImportOperation(containerPath, source, structureProvider, overwriteQuery);
     final boolean isMakeJenkinsJob = this.jenkinsPage.isMakeNewJob();
     final String jobName = this.jenkinsPage.getJobNameText();
+    final URI locationURI = URIUtil.append(uri, projectName);
 
     IRunnableWithProgress progress = new IRunnableWithProgress() {
 
+      @SuppressWarnings("restriction")
       @Override
       public void run(IProgressMonitor monitor) throws InvocationTargetException {
 
         try {
-          importOp.setContext(getShell());
-          importOp.setCreateContainerStructure(false);
-          importOp.run(monitor);
+          if (useDefaultLocation) {
+            importOp.setContext(getShell());
+            importOp.setCreateContainerStructure(false);
+            importOp.run(monitor);
+          } else {
+            BuildPathsBlock.createProject(project, locationURI, monitor);
+          }
           NatureUtil.addNatures(project, new String[] { CloudBeesNature.NATURE_ID }, monitor);
           if (isMakeJenkinsJob) {
             makeJenkinsJob(jobName, monitor);
           }
         } catch (final Exception e) {
+          e.printStackTrace();
           CBRunUiActivator.logError(e);
           getShell().getDisplay().syncExec(new Runnable() {
             @Override
@@ -151,8 +174,10 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
     try {
       getContainer().run(true, false, progress);
     } catch (InterruptedException e) {
+      e.printStackTrace();
       return false;
     } catch (InvocationTargetException e) {
+      e.printStackTrace();
       CBRunUiActivator.logError(e);
       Throwable targetEx = e.getTargetException();
       MessageDialog.openError(getShell(), ERROR_TITLE, targetEx.getMessage());
@@ -172,4 +197,14 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
     jenkinsService.createJenkinsJob(jobName, configXML, monitor);
   }
 
+  private IWorkbenchPart getActivePart() {
+    IWorkbenchWindow activeWindow = getWorkbench().getActiveWorkbenchWindow();
+    if (activeWindow != null) {
+      IWorkbenchPage activePage = activeWindow.getActivePage();
+      if (activePage != null) {
+        return activePage.getActivePart();
+      }
+    }
+    return null;
+  }
 }

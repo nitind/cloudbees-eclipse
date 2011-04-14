@@ -8,13 +8,12 @@ import org.eclipse.swt.widgets.Control;
 
 public class CBProjectNameAndLocationPage extends NewJavaProjectWizardPageOne implements CBWizardPageSupport {
 
-  public static final String PAGE_NAME = CBSampleWebAppWizardPage.class.getSimpleName();
+  public static final String PAGE_NAME = CBProjectNameAndLocationPage.class.getSimpleName();
   private static final String PAGE_TITLE = "CloudBees Project";
   private static final String PAGE_DESCRIPTION = "This wizard creates a new CloudBees project.";
 
   public CBProjectNameAndLocationPage() {
     super();
-    setTitle(PAGE_TITLE);
     setTitle(PAGE_TITLE);
     setDescription(PAGE_DESCRIPTION);
   }
@@ -43,8 +42,9 @@ public class CBProjectNameAndLocationPage extends NewJavaProjectWizardPageOne im
     Control workingSetControl = createWorkingSetControl(composite);
     workingSetControl.setLayoutData(new GridData(768));
 
-    //Control infoControl = createInfoControl(composite);
-    //infoControl.setLayoutData(new GridData(768));
+    Control infoControl = createInfoControl(composite);
+    infoControl.setLayoutData(new GridData(768));
+    infoControl.setVisible(false);
 
     setControl(composite);
   }
