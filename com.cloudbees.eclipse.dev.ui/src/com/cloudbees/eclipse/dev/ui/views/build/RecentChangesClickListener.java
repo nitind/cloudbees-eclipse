@@ -7,7 +7,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 
 import com.cloudbees.eclipse.core.forge.api.ForgeSync.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
-import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
+import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 
 
 public class RecentChangesClickListener implements IDoubleClickListener {
@@ -34,7 +34,7 @@ public class RecentChangesClickListener implements IDoubleClickListener {
 
     System.out.println("Clicked: " + event + " - " + jobUrl + " -> " + " - " + item.path);
 
-    CloudBeesUIPlugin.getDefault().openRemoteFile(jobUrl, item);
+    CloudBeesDevUiPlugin.getDefault().openRemoteFile(jobUrl, item);
   }
 
 

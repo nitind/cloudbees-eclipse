@@ -36,7 +36,7 @@ import com.cloudbees.eclipse.ui.internal.action.ConfigureCloudBeesAction;
 
 /**
  * View showing both Jenkins offline installations and JaaS Nectar instances
- * 
+ *
  * @author ahtik
  */
 public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener {
@@ -189,7 +189,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
       @Override
       public void run() {
         try {
-          CloudBeesUIPlugin.getDefault().reloadForgeRepos(true);
+          CloudBeesDevUiPlugin.getDefault().reloadForgeRepos(true);
         } catch (CloudBeesException e) {
           //TODO i18n
           CloudBeesUIPlugin.showError("Failed to reload Forge repositories!", e);

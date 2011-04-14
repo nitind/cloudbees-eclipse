@@ -2,4 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
 
+	<extension-point id="com.cloudbees.eclipse.dev.core.forgeSyncProvider"
+		name="forgeSyncProvider" schema="schema/com.cloudbees.eclipse.dev.core.forgeSyncProvider.exsd" />
+
 </plugin>
