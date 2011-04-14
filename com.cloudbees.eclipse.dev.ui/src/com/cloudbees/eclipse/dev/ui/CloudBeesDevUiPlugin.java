@@ -30,6 +30,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildEditorInput;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildPart;
+import com.cloudbees.eclipse.dev.ui.views.jobs.JobConsoleManager;
 import com.cloudbees.eclipse.dev.ui.views.jobs.JobsView;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
@@ -39,11 +40,10 @@ import com.cloudbees.eclipse.ui.PreferenceConstants;
  */
 public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
-  // The plug-in ID
   public static final String PLUGIN_ID = "com.cloudbees.eclipse.dev.ui"; //$NON-NLS-1$
-
-  // The shared instance
   private static CloudBeesDevUiPlugin plugin;
+
+  private JobConsoleManager jobConsoleManager;
 
   private Logger logger;
 
@@ -60,9 +60,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
   @Override
   public void start(final BundleContext context) throws Exception {
     super.start(context);
-    this.plugin = this;
+    CloudBeesDevUiPlugin.plugin = this;
     this.logger = new Logger(getLog());
-
     reloadForgeRepos(false);
   }
 
@@ -72,8 +71,12 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
    */
   @Override
   public void stop(final BundleContext context) throws Exception {
-    this.plugin = null;
+    CloudBeesDevUiPlugin.plugin = null;
     this.logger = null;
+    if (this.jobConsoleManager != null) {
+      this.jobConsoleManager.unregister();
+      this.jobConsoleManager = null;
+    }
     super.stop(context);
   }
 
@@ -88,6 +91,14 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
   public Logger getLogger() {
     return this.logger;
+  }
+
+  public JobConsoleManager getJobConsoleManager() {
+    if (this.jobConsoleManager == null) {
+      this.jobConsoleManager = new JobConsoleManager();
+    }
+
+    return this.jobConsoleManager;
   }
 
   @Override
@@ -124,6 +135,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
     reg.put(CBImages.IMG_BUILD_DETAILS,
         ImageDescriptor.createFromURL(getBundle().getResource("icons/epl/debugt_obj.png")));
+    reg.put(CBImages.IMG_BUILD_CONSOLE_LOG,
+        ImageDescriptor.createFromURL(getBundle().getResource("icons/epl/debugtt_obj.png"))); // TODO
 
     reg.put(CBImages.IMG_DELETE, ImageDescriptor.createFromURL(getBundle().getResource("icons/epl/delete.gif")));
 

@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.dev.ui.internal.action;
+package com.cloudbees.eclipse.dev.ui.actions;
 
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;

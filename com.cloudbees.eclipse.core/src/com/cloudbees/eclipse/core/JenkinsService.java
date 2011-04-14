@@ -42,7 +42,7 @@ import com.google.gson.Gson;
 
 /**
  * Service to access Jenkins instances
- * 
+ *
  * @author ahti
  */
 public class JenkinsService {
@@ -639,6 +639,42 @@ public class JenkinsService {
 
     } catch (Exception e) {
       throw new CloudBeesException("Failed to delete Jenkins job", e);
+    }
+  }
+
+  public String getBuildLog(final String url, final int start, final IProgressMonitor monitor)
+      throws CloudBeesException {
+    monitor.setTaskName("Fetching Job build log...");
+
+    if (url != null && !url.startsWith(this.jenkins.url)) {
+      throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; job url: "
+          + url);
+    }
+
+    StringBuffer errMsg = new StringBuffer();
+
+    String reqUrl = url;
+
+    if (!reqUrl.endsWith("/")) {
+      reqUrl = reqUrl + "/";
+    }
+
+    String reqStr = reqUrl + "logText/progressiveHtml";
+
+    try {
+      DefaultHttpClient httpclient = Utils.getAPIClient();
+
+      HttpPost post = new HttpPost(reqStr);
+      //      post.setHeader("Accept", "application/json");
+      //      post.setHeader("Content-type", "application/json");
+
+      String bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 10));
+
+      return bodyResponse;
+
+    } catch (Exception e) {
+      throw new CloudBeesException("Failed to get Jenkins build log for '" + url + "'. "
+          + (errMsg.length() > 0 && errMsg.length() < 1000 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr, e);
     }
   }
 

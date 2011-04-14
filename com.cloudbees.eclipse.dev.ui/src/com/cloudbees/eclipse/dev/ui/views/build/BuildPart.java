@@ -47,7 +47,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
-import com.cloudbees.eclipse.dev.ui.internal.action.OpenJunitViewAction;
+import com.cloudbees.eclipse.dev.ui.actions.OpenJunitViewAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class BuildPart extends EditorPart {
