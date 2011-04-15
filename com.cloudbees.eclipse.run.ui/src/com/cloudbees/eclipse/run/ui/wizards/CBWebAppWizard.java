@@ -46,7 +46,7 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
   private static final String BUILD_LABEL = "Build {0}";
 
   private CBProjectNameAndLocationPage nameAndLocPage;
-  private CBJenkinsWizardPage jenkinsPage;
+  private CBServicesWizardPage jenkinsPage;
 
   public CBWebAppWizard() {
     super();
@@ -61,7 +61,7 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
     this.nameAndLocPage = new CBProjectNameAndLocationPage();
     addPage(this.nameAndLocPage);
 
-    this.jenkinsPage = new CBJenkinsWizardPage();
+    this.jenkinsPage = new CBServicesWizardPage();
     addPage(this.jenkinsPage);
 
     this.nameAndLocPage.init(getSelection(), getActivePart());
@@ -69,15 +69,14 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
 
   @Override
   public IWizardPage getNextPage(IWizardPage page) {
-    if (page instanceof CBJenkinsWizardPage) {
-      CBJenkinsWizardPage jenkinsPage = (CBJenkinsWizardPage) page;
+    if (page instanceof CBServicesWizardPage) {
+      CBServicesWizardPage jenkinsPage = (CBServicesWizardPage) page;
       String jobName = jenkinsPage.getJobNameText();
 
       if (jobName == null || jobName.length() == 0) {
         jenkinsPage.setJobNameText(MessageFormat.format(BUILD_LABEL, this.nameAndLocPage.getProjectName()));
       }
 
-      jenkinsPage.loadJenkinsInstances();
     }
 
     return super.getNextPage(page);

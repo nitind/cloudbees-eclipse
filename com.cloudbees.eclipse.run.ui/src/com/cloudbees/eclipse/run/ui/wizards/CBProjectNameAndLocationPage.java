@@ -33,12 +33,6 @@ public class CBProjectNameAndLocationPage extends NewJavaProjectWizardPageOne im
     Control locationControl = createLocationControl(composite);
     locationControl.setLayoutData(new GridData(768));
 
-    //Control jreControl = createJRESelectionControl(composite);
-    //jreControl.setLayoutData(new GridData(768));
-
-    //Control layoutControl = createProjectLayoutControl(composite);
-    //layoutControl.setLayoutData(new GridData(768));
-
     Control workingSetControl = createWorkingSetControl(composite);
     workingSetControl.setLayoutData(new GridData(768));
 
