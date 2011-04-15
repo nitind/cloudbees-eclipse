@@ -28,7 +28,7 @@ public class CloudBeesDevCorePlugin extends Plugin {
   @Override
   public void start(final BundleContext bundleContext) throws Exception {
     super.start(bundleContext);
-    this.plugin = this;
+    CloudBeesDevCorePlugin.plugin = this;
     this.logger = new Logger(getLog());
     registerForgeSyncProviders();
   }
@@ -39,7 +39,7 @@ public class CloudBeesDevCorePlugin extends Plugin {
    */
   @Override
   public void stop(final BundleContext bundleContext) throws Exception {
-    this.plugin = null;
+    CloudBeesDevCorePlugin.plugin = null;
     this.logger = null;
     super.stop(bundleContext);
   }

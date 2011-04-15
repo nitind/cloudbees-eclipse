@@ -20,7 +20,7 @@ public class CloudBeesScmEgitPlugin extends AbstractUIPlugin {
     //      CloudBeesCorePlugin.getDefault().getGrandCentralService().addForgeSyncProvider(new ForgeEGitSync());
     //    }
 
-    this.plugin = this;
+    CloudBeesScmEgitPlugin.plugin = this;
   }
 
   /*
@@ -29,7 +29,7 @@ public class CloudBeesScmEgitPlugin extends AbstractUIPlugin {
    */
   @Override
   public void stop(final BundleContext bundleContext) throws Exception {
-    this.plugin = null;
+    CloudBeesScmEgitPlugin.plugin = null;
     super.stop(bundleContext);
   }
 

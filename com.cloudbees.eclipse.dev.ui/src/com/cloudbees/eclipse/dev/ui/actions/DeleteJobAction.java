@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.dev.ui.views.jobs;
+package com.cloudbees.eclipse.dev.ui.actions;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.SWT;
@@ -8,13 +8,14 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
+import com.cloudbees.eclipse.dev.ui.views.jobs.JobsView;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class DeleteJobAction extends Action {
 
   private JobsView view;
 
-  public DeleteJobAction(JobsView jobsView) {
+  public DeleteJobAction(final JobsView jobsView) {
     super("Delete Job...", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS);
     setToolTipText("Deletes the build job"); //TODO i18n
     setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_DELETE));
@@ -23,12 +24,12 @@ public class DeleteJobAction extends Action {
   }
 
   @Override
-  public void runWithEvent(Event event) {
+  public void runWithEvent(final Event event) {
 
-    if (view.selectedJob instanceof JenkinsJobsResponse.Job) {
+    if (this.view.getSelectedJob() instanceof JenkinsJobsResponse.Job) {
       try {
-        CloudBeesDevUiPlugin.getDefault().deleteJob(((JenkinsJobsResponse.Job) view.selectedJob));
-        CloudBeesDevUiPlugin.getDefault().showJobs(view.actionReloadJobs.viewUrl, false);
+        CloudBeesDevUiPlugin.getDefault().deleteJob(((JenkinsJobsResponse.Job) this.view.getSelectedJob()));
+        CloudBeesDevUiPlugin.getDefault().showJobs(this.view.getReloadJobsAction().viewUrl, false);
       } catch (CloudBeesException e) {
         CloudBeesUIPlugin.getDefault().showError("Failed to refresh the jobs list", e);
       }

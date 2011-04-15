@@ -54,13 +54,16 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job.Build;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
-import com.cloudbees.eclipse.dev.ui.internal.action.ReloadJobsAction;
+import com.cloudbees.eclipse.dev.ui.actions.DeleteJobAction;
+import com.cloudbees.eclipse.dev.ui.actions.OpenLastBuildAction;
+import com.cloudbees.eclipse.dev.ui.actions.OpenLogAction;
+import com.cloudbees.eclipse.dev.ui.actions.ReloadJobsAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 
 /**
  * View showing jobs for both Jenkins offline installations and JaaS Nectar instances
- * 
+ *
  * @author ahtik
  */
 public class JobsView extends ViewPart implements IPropertyChangeListener {
@@ -69,13 +72,13 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
   private TableViewer table;
 
-  protected ReloadJobsAction actionReloadJobs; // Reload JaaS instances
-  private Action actionInvokeBuild; // Invoke Build
-  //private Action actionOpenLogs; // Open Logs
-  private Action actionOpenJobInBrowser; // Open Open Job in Browser
+  protected ReloadJobsAction actionReloadJobs;
+  private Action actionInvokeBuild;
+  private Action actionOpenJobInBrowser;
 
-  private Action actionOpenLastBuildDetails; // Open Open Job in Browser
-  private Action actionDeleteJob; // deletes the jenkins job
+  private Action actionOpenLastBuildDetails;
+  private Action actionOpenLog;
+  private Action actionDeleteJob;
 
   private final Map<String, Image> stateIcons = new HashMap<String, Image>();
 
@@ -91,6 +94,14 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
   public JobsView() {
     super();
+  }
+
+  public Object getSelectedJob() {
+    return this.selectedJob;
+  }
+
+  public ReloadJobsAction getReloadJobsAction() {
+    return this.actionReloadJobs;
   }
 
   protected void setInput(final JenkinsJobsResponse newView) {
@@ -395,12 +406,11 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     makeActions();
     contributeToActionBars();
 
-    
+
     MenuManager popupMenu = new MenuManager();
 
-    //popupMenu.add
-    //popupMenu.add(new Separator());
     popupMenu.add(this.actionOpenLastBuildDetails);
+    popupMenu.add(this.actionOpenLog);
     popupMenu.add(new Separator());
     popupMenu.add(this.actionOpenJobInBrowser);
     popupMenu.add(this.actionInvokeBuild);
@@ -409,10 +419,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     popupMenu.add(new Separator());
     popupMenu.add(this.actionReloadJobs);
 
-    // delete job
-
-    Menu menu = popupMenu.createContextMenu(table.getTable());
-    table.getTable().setMenu(menu);
+    Menu menu = popupMenu.createContextMenu(this.table.getTable());
+    this.table.getTable().setMenu(menu);
 
     this.table.addPostSelectionChangedListener(new ISelectionChangedListener() {
 
@@ -422,6 +430,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         boolean enable = sel.getFirstElement() != null;
         JobsView.this.actionInvokeBuild.setEnabled(enable);
         JobsView.this.actionOpenLastBuildDetails.setEnabled(enable);
+        JobsView.this.actionOpenLog.setEnabled(enable);
         JobsView.this.actionDeleteJob.setEnabled(enable);
         JobsView.this.actionOpenJobInBrowser.setEnabled(enable);
       }
@@ -547,8 +556,9 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     this.actionReloadJobs = new ReloadJobsAction();
     this.actionReloadJobs.setEnabled(false);
 
-    actionOpenLastBuildDetails = new OpenLastBuildAction(this);
-    actionDeleteJob = new DeleteJobAction(this);
+    this.actionOpenLastBuildDetails = new OpenLastBuildAction(this);
+    this.actionOpenLog = new OpenLogAction(this);
+    this.actionDeleteJob = new DeleteJobAction(this);
 
     this.actionOpenJobInBrowser = new Action("Open with Browser...", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       @Override

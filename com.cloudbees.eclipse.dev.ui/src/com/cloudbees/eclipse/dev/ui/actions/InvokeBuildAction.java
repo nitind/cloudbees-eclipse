@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.dev.ui.internal.action;
+package com.cloudbees.eclipse.dev.ui.actions;
 
 import org.eclipse.jface.action.Action;
 
