@@ -6,7 +6,7 @@ import com.google.gson.annotations.Expose;
 
 /**
  * Main response data
- * 
+ *
  * @author ahti
  */
 public class JenkinsJobsResponse extends BaseJenkinsResponse {
@@ -55,6 +55,7 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
   public static class Job {
     public HealthReport[] healthReport;
 
+    public String name;
     public String displayName;
     public Boolean inQueue;
     public String color;
@@ -72,6 +73,14 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
     public Build lastUnsuccessfulBuild;
 
     public JenkinsJobProperty[] property;
+
+    public String getDisplayName() {
+      if (this.displayName != null) {
+        return this.displayName;
+      } else {
+        return this.name;
+      }
+    }
 
     @Override
     public int hashCode() {

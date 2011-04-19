@@ -208,8 +208,10 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         JenkinsJobsResponse.Job j1 = (JenkinsJobsResponse.Job) e1;
         JenkinsJobsResponse.Job j2 = (JenkinsJobsResponse.Job) e2;
 
-        if (j1.displayName != null && j2.displayName != null) {
-          return j1.displayName.toLowerCase().compareTo(j2.displayName.toLowerCase());
+        String displayName1 = j1.displayName;
+        String displayName2 = j2.displayName;
+        if (displayName1 != null && displayName2 != null) {
+          return displayName1.toLowerCase().compareTo(displayName2.toLowerCase());
         }
 
       }
@@ -268,8 +270,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       @Override
       public void update(final ViewerCell cell) {
         JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
-        String val = job.displayName;
-        if (job.inQueue) {
+        String val = job.getDisplayName();
+        if (job.inQueue != null && job.inQueue) {
           val = val + " (in queue)";
         } else if (job.color != null && job.color.indexOf('_') > 0) {
           val = val + " (running)";

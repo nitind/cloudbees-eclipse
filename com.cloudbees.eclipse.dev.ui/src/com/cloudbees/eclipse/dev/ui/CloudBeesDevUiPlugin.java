@@ -318,7 +318,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
    */
   public void deleteJob(final Job job) throws CloudBeesException {
     boolean openConfirm = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "DELETING A BUILD JOB!",
-        "Are you sure you want to delete this build job?\n" + "Name: " + job.displayName);
+        "Are you sure you want to delete this build job?\n" + "Name: " + job.getDisplayName());
 
     if (openConfirm) {
       JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(job.url);
