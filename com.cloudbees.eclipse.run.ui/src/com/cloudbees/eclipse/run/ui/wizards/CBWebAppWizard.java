@@ -31,12 +31,14 @@ import org.eclipse.ui.wizards.datatransfer.ImportOperation;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 import com.cloudbees.eclipse.core.CloudBeesNature;
-import com.cloudbees.eclipse.core.JenkinsService;
+import com.cloudbees.eclipse.core.CoreScripts;
 import com.cloudbees.eclipse.core.NatureUtil;
+import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.run.core.CBRunCoreScripts;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
-import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
+import com.cloudbees.eclipse.ui.wizard.CBWizardPage;
+import com.cloudbees.eclipse.ui.wizard.CBWizardSupport;
 
 public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard {
 
@@ -85,11 +87,11 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
   @Override
   public boolean canFinish() {
     for (IWizardPage page : getPages()) {
-      if (!(page instanceof CBWizardPageSupport)) {
+      if (!(page instanceof CBWizardPage)) {
         continue;
       }
 
-      CBWizardPageSupport p = (CBWizardPageSupport) page;
+      CBWizardPage p = (CBWizardPage) page;
       if (p.isActivePage()) {
         return super.canFinish() && p.canFinish();
       }
@@ -149,9 +151,13 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
           } else {
             BuildPathsBlock.createProject(project, locationURI, monitor);
           }
+
           NatureUtil.addNatures(project, new String[] { CloudBeesNature.NATURE_ID }, monitor);
+
           if (isMakeJenkinsJob) {
-            makeJenkinsJob(jobName, monitor);
+            File configXML = CoreScripts.getMockConfigXML();
+            JenkinsInstance instance = CBWebAppWizard.this.jenkinsPage.getJenkinsInstance();
+            CBWizardSupport.makeJenkinsJob(configXML, instance, jobName, getContainer());
           }
         } catch (final Exception e) {
           e.printStackTrace();
@@ -187,13 +193,6 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
     getWorkbench().getWorkingSetManager().addToWorkingSets(project, workingSets);
 
     return true;
-  }
-
-  private void makeJenkinsJob(String jobName, IProgressMonitor monitor) throws Exception {
-    File configXML = CBRunCoreScripts.getMockConfigXML();
-    CloudBeesUIPlugin plugin = CloudBeesUIPlugin.getDefault();
-    JenkinsService jenkinsService = plugin.lookupJenkinsService(this.jenkinsPage.getJenkinsInstance());
-    jenkinsService.createJenkinsJob(jobName, configXML, monitor);
   }
 
   private IWorkbenchPart getActivePart() {

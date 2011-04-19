@@ -6,7 +6,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-public class CBProjectNameAndLocationPage extends NewJavaProjectWizardPageOne implements CBWizardPageSupport {
+import com.cloudbees.eclipse.ui.wizard.CBWizardPage;
+
+public class CBProjectNameAndLocationPage extends NewJavaProjectWizardPageOne implements CBWizardPage {
 
   public static final String PAGE_NAME = CBProjectNameAndLocationPage.class.getSimpleName();
   private static final String PAGE_TITLE = "CloudBees Project";
