@@ -26,6 +26,17 @@ public class OpenLogAction extends Action {
   }
 
   @Override
+  public boolean isEnabled() {
+    if (this.view.getSelectedJob() instanceof JenkinsJobsResponse.Job) {
+      Job job = ((JenkinsJobsResponse.Job) this.view.getSelectedJob());
+      if (job.lastBuild != null) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
   public void runWithEvent(final Event event) {
     if (this.view.getSelectedJob() instanceof JenkinsJobsResponse.Job) {
       Job job = ((JenkinsJobsResponse.Job) this.view.getSelectedJob());
