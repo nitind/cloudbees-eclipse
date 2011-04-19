@@ -21,19 +21,19 @@ public class JobSorter extends ViewerSorter {
   private int sortCol;
   private int direction;
 
-  public JobSorter(int sortCol) {
+  public JobSorter(final int sortCol) {
     super();
     this.sortCol = sortCol;
     this.direction = SWT.DOWN;
   }
 
   @Override
-  public int compare(Viewer viewer, Object e1, Object e2) {
+  public int compare(final Viewer viewer, final Object e1, final Object e2) {
 
     JenkinsJobsResponse.Job j1 = (JenkinsJobsResponse.Job) e1;
     JenkinsJobsResponse.Job j2 = (JenkinsJobsResponse.Job) e2;
 
-    switch (sortCol) {
+    switch (this.sortCol) {
     case STATE:
       return rev() * compState(j1, j2);
 
@@ -57,7 +57,7 @@ public class JobSorter extends ViewerSorter {
     return rev() * super.compare(viewer, e1, e2);
   }
 
-  private int compareBuildStability(HealthReport[] b1, HealthReport[] b2) {
+  private int compareBuildStability(final HealthReport[] b1, final HealthReport[] b2) {
     if (b1 == null || b2 == null) {
       if (b1 != null) {
         return -1;
@@ -104,14 +104,14 @@ public class JobSorter extends ViewerSorter {
   }
 
   private int rev() {
-    return direction == SWT.UP ? -1 : 1;
+    return this.direction == SWT.UP ? -1 : 1;
   }
 
-  public void setDirection(int newDirection) {
-    direction = newDirection;
+  public void setDirection(final int newDirection) {
+    this.direction = newDirection;
   }
 
-  private int compareBuildTimestamps(Build b1, Build b2) {
+  private int compareBuildTimestamps(final Build b1, final Build b2) {
     if (b1 == null || b2 == null) {
       if (b1 != null) {
         return -1;
@@ -133,11 +133,16 @@ public class JobSorter extends ViewerSorter {
     return -1 * b1.timestamp.compareTo(b2.timestamp);
   }
 
-  private int compJob(Job j1, Job j2) {
-    return j1.displayName.compareToIgnoreCase(j2.displayName);
+  private int compJob(final Job j1, final Job j2) {
+    try {
+      return j1.getDisplayName().compareToIgnoreCase(j2.getDisplayName());
+    } catch (Exception e) {
+      e.printStackTrace(); // TODO handle better
+      return 0;
+    }
   }
 
-  private int compState(Job j1, Job j2) {
+  private int compState(final Job j1, final Job j2) {
     int res = j1.color.compareTo(j2.color);
     if (res == 0) {
       return compJob(j1, j2);
@@ -146,11 +151,11 @@ public class JobSorter extends ViewerSorter {
   }
 
   public int getSortCol() {
-    return sortCol;
+    return this.sortCol;
   }
 
-  public void setSortCol(int col) {
-    sortCol = col;
+  public void setSortCol(final int col) {
+    this.sortCol = col;
   }
 
 }
