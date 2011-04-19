@@ -5,16 +5,23 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
+import com.cloudbees.eclipse.core.util.Utils;
+import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class FavouritesUtils {
 
+  private static final String FAVOURITES_LIST = "FAVOURITES_LIST";
+
   public static final String FAVOURITES = "favourites://";//$NON-NLS-1$
+
+  private static final IPreferenceStore prefs = CloudBeesDevUiPlugin.getDefault().getPreferenceStore();
 
   public static JenkinsJobsResponse getFavouritesResponse(final IProgressMonitor monitor) throws CloudBeesException {
     List<String> favourites = getFavourites();
@@ -69,12 +76,31 @@ public class FavouritesUtils {
   private static List<String> getFavourites() {
     ArrayList<String> favourites = new ArrayList<String>();
 
-    favourites.add("https://imeikas.ci.cloudbees.com/job/Build%20Akka/");
-    favourites.add("https://imeikas.ci.cloudbees.com/job/Build%20Scala/");
-    favourites.add("http://localhost:8080/job/test/");
-    favourites.add("http://localhost:8080/job/test/");
+    String pref = prefs.getString(FAVOURITES_LIST);
+
+    if (!"".equals(pref)) { // we don't want an empty URL
+      for (String string : pref.split(",")) {
+        favourites.add(Utils.fromB64(string));
+      }
+    } else {// FIXME: remove test code
+      favourites.add("https://imeikas.ci.cloudbees.com/job/Build%20Akka/");
+      favourites.add("https://imeikas.ci.cloudbees.com/job/Build%20Scala/");
+      favourites.add("http://localhost:8080/job/test/");
+      favourites.add("http://localhost:8080/job/test/");
+      storeFavourites(favourites);
+    }
 
     return favourites;
+  }
+
+  private static void storeFavourites(ArrayList<String> favourites) {
+    String pref = "";
+    for (String string : favourites) {
+      pref += Utils.toB64(string) + ",";
+    }
+
+    pref = pref.substring(0, pref.length() - 1);
+    prefs.setValue(FAVOURITES_LIST, pref);
   }
 
 }
