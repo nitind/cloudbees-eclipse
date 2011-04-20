@@ -38,7 +38,6 @@ public class FavouritesUtils {
         }
       }
     }
-    System.out.println(filtered);
 
     JenkinsJobsResponse jobs = new JenkinsJobsResponse();
     jobs.name = "Favourite jobs";
@@ -73,7 +72,7 @@ public class FavouritesUtils {
     return null;
   }
 
-  private static List<String> getFavourites() {
+  private static ArrayList<String> getFavourites() {
     ArrayList<String> favourites = new ArrayList<String>();
 
     String pref = prefs.getString(FAVOURITES_LIST);
@@ -82,12 +81,6 @@ public class FavouritesUtils {
       for (String string : pref.split(",")) {
         favourites.add(Utils.fromB64(string));
       }
-    } else {// FIXME: remove test code
-      favourites.add("https://imeikas.ci.cloudbees.com/job/Build%20Akka/");
-      favourites.add("https://imeikas.ci.cloudbees.com/job/Build%20Scala/");
-      favourites.add("http://localhost:8080/job/test/");
-      favourites.add("http://localhost:8080/job/test/");
-      storeFavourites(favourites);
     }
 
     return favourites;
@@ -101,6 +94,26 @@ public class FavouritesUtils {
 
     pref = pref.substring(0, pref.length() - 1);
     prefs.setValue(FAVOURITES_LIST, pref);
+  }
+
+  public static void removeFavourite(String favourite) {
+    ArrayList<String> fav = getFavourites();
+    if (fav.contains(favourite)) {
+      fav.remove(favourite);
+      storeFavourites(fav);
+    }
+  }
+
+  public static void addFavourite(String favourite) {
+    ArrayList<String> fav = getFavourites();
+    if (!fav.contains(favourite)) {
+      fav.add(favourite);
+      storeFavourites(fav);
+    }
+  }
+
+  public static boolean isFavourite(String favourite) {
+    return getFavourites().contains(favourite);
   }
 
 }
