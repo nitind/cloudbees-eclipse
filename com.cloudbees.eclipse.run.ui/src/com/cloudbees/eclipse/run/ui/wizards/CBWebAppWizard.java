@@ -68,7 +68,7 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
   }
 
   @Override
-  public IWizardPage getNextPage(IWizardPage page) {
+  public IWizardPage getNextPage(final IWizardPage page) {
     if (page instanceof CBJenkinsWizardPage) {
       CBJenkinsWizardPage jenkinsPage = (CBJenkinsWizardPage) page;
       String jobName = jenkinsPage.getJobNameText();
@@ -126,7 +126,7 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
     IOverwriteQuery overwriteQuery = new IOverwriteQuery() {
 
       @Override
-      public String queryOverwrite(String pathString) {
+      public String queryOverwrite(final String pathString) {
         return IOverwriteQuery.NO_ALL;
       }
     };
@@ -140,7 +140,7 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
 
       @SuppressWarnings("restriction")
       @Override
-      public void run(IProgressMonitor monitor) throws InvocationTargetException {
+      public void run(final IProgressMonitor monitor) throws InvocationTargetException {
 
         try {
           if (useDefaultLocation) {
@@ -190,7 +190,7 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
     return true;
   }
 
-  private void makeJenkinsJob(String jobName, IProgressMonitor monitor) throws Exception {
+  private void makeJenkinsJob(final String jobName, final IProgressMonitor monitor) throws Exception {
     File configXML = CBRunCoreScripts.getMockConfigXML();
     CloudBeesUIPlugin plugin = CloudBeesUIPlugin.getDefault();
     JenkinsService jenkinsService = plugin.lookupJenkinsService(this.jenkinsPage.getJenkinsInstance());

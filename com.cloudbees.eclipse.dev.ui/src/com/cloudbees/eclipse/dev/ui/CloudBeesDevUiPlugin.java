@@ -24,11 +24,14 @@ import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildEditorInput;
+import com.cloudbees.eclipse.dev.ui.views.build.BuildHistoryView;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildPart;
 import com.cloudbees.eclipse.dev.ui.views.jobs.JobConsoleManager;
 import com.cloudbees.eclipse.dev.ui.views.jobs.JobsView;
@@ -112,6 +115,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/internal_browser.gif")));
 
     reg.put(CBImages.IMG_RUN, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/lrun_obj.png")));
+    reg.put(CBImages.IMG_BUILD_HISTORY,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/history_view.gif")));
 
     reg.put(CBImages.IMG_FOLDER_HOSTED,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_run.png")));
@@ -135,8 +140,6 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
     reg.put(CBImages.IMG_BUILD_DETAILS,
         ImageDescriptor.createFromURL(getBundle().getResource("icons/epl/debugt_obj.png")));
-    reg.put(CBImages.IMG_BUILD_CONSOLE_LOG,
-        ImageDescriptor.createFromURL(getBundle().getResource("icons/epl/debugtt_obj.png"))); // TODO
 
     reg.put(CBImages.IMG_DELETE, ImageDescriptor.createFromURL(getBundle().getResource("icons/epl/delete.gif")));
 
@@ -268,27 +271,37 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     });
   }
 
-  public void showBuildForJob(final Job el) {
-    if (el == null) {
+  public void showBuildForJob(final Job job) {
+    if (job == null) {
       return;
     }
-    // Look up the service
-    Iterator<JenkinsService> it = CloudBeesUIPlugin.getDefault().getAllJenkinsServices().iterator();
-    while (it.hasNext()) {
-      JenkinsService service = it.next();
-      if (el.url.startsWith(service.getUrl())) {
 
-        try {
-          //JobDetailsForm.ID, Utils.toB64(jobUrl), IWorkbenchPage.VIEW_ACTIVATE
-          // IEditorDescriptor descr = PlatformUI.getWorkbench().getEditorRegistry().findEditor(JobDetailsForm.ID);
+    String name;
+    String url;
+    if (job.lastBuild != null && job.lastBuild.url != null) {
+      name = job.lastBuild.fullDisplayName;
+      url = job.lastBuild.url;
+    } else {
+      name = job.getDisplayName();
+      url = job.url;
+    }
 
-          CloudBeesUIPlugin.getActiveWindow().getActivePage().openEditor(new BuildEditorInput(el), BuildPart.ID);
+    try {
+      CloudBeesUIPlugin.getActiveWindow().getActivePage().openEditor(new BuildEditorInput(name, url), BuildPart.ID);
+    } catch (PartInitException e) {
+      CloudBeesUIPlugin.getDefault().getLogger().error(e);
+    }
+  }
 
-        } catch (PartInitException e) {
-          CloudBeesUIPlugin.getDefault().getLogger().error(e);
-        }
-        return;
-      }
+  public void showBuild(final JenkinsBuild build) {
+    if (build == null) {
+      return;
+    }
+    try {
+      CloudBeesUIPlugin.getActiveWindow().getActivePage()
+          .openEditor(new BuildEditorInput(build.fullDisplayName, build.url), BuildPart.ID);
+    } catch (PartInitException e) {
+      CloudBeesUIPlugin.getDefault().getLogger().error(e);
     }
   }
 
@@ -299,7 +312,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
    * @throws CloudBeesException
    */
   public void deleteJob(final Job job) throws CloudBeesException {
-    boolean openConfirm = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "DELETING A BUILD JOB!",
+    boolean openConfirm = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "DELETING A BUILD BUILD!",
         "Are you sure you want to delete this build job?\n" + "Name: " + job.getDisplayName());
 
     if (openConfirm) {
@@ -394,6 +407,70 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
     job.setUser(userAction);
     if (CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_FORGE)) {
+      job.schedule();
+    }
+  }
+
+  public void showBuildHistory(final String jobUrl, final boolean userAction) throws CloudBeesException {
+    // CloudBeesUIPlugin.getDefault().getLogger().info("Show build history: " + jobUrl);
+    System.out.println("Show build history: " + jobUrl);
+
+    if (jobUrl == null) {
+      return; // no info
+    }
+
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Jenkins jobs") {
+      @Override
+      protected IStatus run(final IProgressMonitor monitor) {
+        if (!CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
+          return Status.CANCEL_STATUS;
+        }
+
+        try {
+          PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+            public void run() {
+              try {
+                CloudBeesUIPlugin
+                    .getActiveWindow()
+                    .getActivePage()
+                    .showView(
+                        BuildHistoryView.ID,
+                        Long.toString(CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(jobUrl).getUrl()
+                            .hashCode()), userAction ? IWorkbenchPage.VIEW_ACTIVATE : IWorkbenchPage.VIEW_CREATE);
+              } catch (PartInitException e) {
+                CloudBeesUIPlugin.getDefault().showError("Failed to show build history view", e);
+              }
+            }
+          });
+
+          if (monitor.isCanceled()) {
+            throw new OperationCanceledException();
+          }
+
+          JenkinsJobAndBuildsResponse builds = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(jobUrl)
+              .getJobBuilds(jobUrl, monitor);
+
+          if (monitor.isCanceled()) {
+            throw new OperationCanceledException();
+          }
+
+          Iterator<JenkinsChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
+              .iterator();
+          while (iterator.hasNext()) {
+            JenkinsChangeListener listener = iterator.next();
+            listener.activeJobHistoryChanged(builds);
+          }
+
+          return Status.OK_STATUS;
+        } catch (CloudBeesException e) {
+          CloudBeesUIPlugin.getDefault().getLogger().error(e);
+          return new Status(Status.ERROR, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
+        }
+      }
+    };
+
+    job.setUser(userAction);
+    if (CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
       job.schedule();
     }
   }
