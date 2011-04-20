@@ -19,4 +19,5 @@ Require-Bundle: com.cloudbees.eclipse.core,
  org.eclipse.ui.forms,
  org.eclipse.ui.ide
 Export-Package: com.cloudbees.eclipse.ui,
- com.cloudbees.eclipse.ui.internal.action
+ com.cloudbees.eclipse.ui.internal.action,
+ com.cloudbees.eclipse.ui.wizard

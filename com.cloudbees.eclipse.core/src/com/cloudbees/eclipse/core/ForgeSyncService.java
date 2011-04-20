@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
@@ -12,6 +13,8 @@ import org.osgi.framework.Bundle;
 
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync.ChangeSetPathItem;
+import com.cloudbees.eclipse.core.forge.api.ForgeSync.TYPE;
+import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 
 /**
@@ -22,7 +25,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
  */
 public class ForgeSyncService {
 
-  private List<ForgeSync> providers = new ArrayList<ForgeSync>();
+  private final List<ForgeSync> providers = new ArrayList<ForgeSync>();
 
   public ForgeSyncService() {
   }
@@ -39,7 +42,8 @@ public class ForgeSyncService {
     return false;
   }
 
-  public String[] sync(final ForgeSync.TYPE type, final Properties props, final IProgressMonitor monitor) throws CloudBeesException {
+  public String[] sync(final ForgeSync.TYPE type, final Properties props, final IProgressMonitor monitor)
+      throws CloudBeesException {
     int ticksPerProcess = 100 / Math.max(this.providers.size(), 1);
     if (ticksPerProcess <= 0) {
       ticksPerProcess = 1;
@@ -86,4 +90,10 @@ public class ForgeSyncService {
     return false;
   }
 
+  public void addToRepository(TYPE type, Repo repo, IProject project, IProgressMonitor monitor)
+      throws CloudBeesException {
+    for (ForgeSync provider : this.providers) {
+      provider.addToRepository(type, repo, project, monitor);
+    }
+  }
 }

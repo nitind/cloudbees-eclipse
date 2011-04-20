@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.egit.core.Activator;
@@ -32,6 +33,7 @@ import org.eclipse.ui.PlatformUI;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
+import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
@@ -42,6 +44,7 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
  */
 public class ForgeEGitSync implements ForgeSync {
 
+  @Override
   public ACTION sync(final TYPE type, final Properties props, final IProgressMonitor monitor) throws CloudBeesException {
 
     if (!ForgeSync.TYPE.GIT.equals(type)) {
@@ -60,6 +63,7 @@ public class ForgeEGitSync implements ForgeSync {
       monitor.beginTask("Syncing EGit repository '" + url + "'", 10);
 
       PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+        @Override
         public void run() {
           monitor.subTask("Checking already cloned local repositories");
           monitor.worked(2);
@@ -122,7 +126,6 @@ public class ForgeEGitSync implements ForgeSync {
         }
       });
 
-
     } finally {
       monitor.worked(10);
       monitor.done();
@@ -162,6 +165,7 @@ public class ForgeEGitSync implements ForgeSync {
     return false;
   }
 
+  @Override
   public boolean openRemoteFile(final JenkinsScmConfig scmConfig, final ChangeSetPathItem item,
       final IProgressMonitor monitor) {
     for (JenkinsScmConfig.Repository repo : scmConfig.repos) {
@@ -220,6 +224,7 @@ public class ForgeEGitSync implements ForgeSync {
       final IEditorPart[] editor = new IEditorPart[1];
 
       PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+        @Override
         public void run() {
           IWorkbenchPage activePage = CloudBeesUIPlugin.getActiveWindow().getActivePage();
           try {
@@ -235,5 +240,13 @@ public class ForgeEGitSync implements ForgeSync {
       e.printStackTrace(); // TODO: handle exception
       return false;
     }
+  }
+
+  @Override
+  public void addToRepository(TYPE type, Repo repo, IProject project, IProgressMonitor monitor) {
+    if (type != TYPE.GIT) {
+      return;
+    }
+
   }
 }
