@@ -7,11 +7,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
+import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
-import com.cloudbees.eclipse.ui.wizard.NewJenkinsJobComposite;
-import com.cloudbees.eclipse.ui.wizard.CBWizardSupport;
 import com.cloudbees.eclipse.ui.wizard.CBWizardPage;
+import com.cloudbees.eclipse.ui.wizard.CBWizardSupport;
+import com.cloudbees.eclipse.ui.wizard.NewJenkinsJobComposite;
 
 public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
 
@@ -96,7 +97,7 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
       @Override
       protected Repo[] getRepos() {
         try {
-          return CBWizardSupport.getRepos(getContainer());
+          return CBWizardSupport.getRepos(getContainer(), ForgeSync.TYPE.SVN);
         } catch (Exception e) {
           CBRunUiActivator.logError(e); // TODO
           return new Repo[] {};
@@ -127,8 +128,16 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
     return this.jenkinsComposite.isMakeNewJob();
   }
 
+  public boolean isAddNewRepository() {
+    return this.repositoryComposite.isAddNewRepo();
+  }
+
   public JenkinsInstance getJenkinsInstance() {
     return this.jenkinsComposite.getJenkinsInstance();
+  }
+
+  public Repo getRepo() {
+    return this.repositoryComposite.getSelectedRepo();
   }
 
   public void updateErrorStatus(String message) {

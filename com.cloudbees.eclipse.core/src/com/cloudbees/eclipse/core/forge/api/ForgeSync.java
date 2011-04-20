@@ -2,9 +2,11 @@ package com.cloudbees.eclipse.core.forge.api;
 
 import java.util.Properties;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet.ChangeSetItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 
@@ -17,7 +19,7 @@ public interface ForgeSync {
   enum ACTION {
     CHECKED("Checked"), ADDED("Added"), CLONED("Cloned"), SKIPPED("Skipped"), CANCELLED("Cancelled");
 
-    private String label;
+    private final String label;
 
     private ACTION(final String label) {
       this.label = label;
@@ -47,4 +49,6 @@ public interface ForgeSync {
   ACTION sync(TYPE type, Properties props, IProgressMonitor monitor) throws CloudBeesException;
 
   boolean openRemoteFile(JenkinsScmConfig scmConfig, ChangeSetPathItem item, IProgressMonitor monitor);
+
+  void addToRepository(TYPE type, Repo repo, IProject project, IProgressMonitor monitor) throws CloudBeesException;
 }

@@ -19,15 +19,12 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
+import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class CBWizardSupport {
-
-  private static class Failiure<T extends Exception> {
-    public T cause;
-  }
 
   public static JenkinsInstance[] getJenkinsInstances(IWizardContainer container) throws Exception {
     JenkinsInstance[] result = null;
@@ -65,6 +62,10 @@ public class CBWizardSupport {
   }
 
   public static Repo[] getRepos(IWizardContainer container) throws Exception {
+    return getRepos(container, null);
+  }
+
+  public static Repo[] getRepos(IWizardContainer container, final ForgeSync.TYPE type) throws Exception {
     Repo[] result = null;
 
     final List<Repo> repos = new ArrayList<AccountServiceStatusResponse.AccountServices.ForgeService.Repo>();
@@ -75,7 +76,15 @@ public class CBWizardSupport {
       public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         try {
           GrandCentralService service = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-          repos.addAll(service.getForgeRepos(monitor));
+          if (type == null) {
+            repos.addAll(service.getForgeRepos(monitor));
+          } else {
+            for (Repo r : service.getForgeRepos(monitor)) {
+              if (ForgeSync.TYPE.valueOf(r.type.toUpperCase()) == type) {
+                repos.add(r);
+              }
+            }
+          }
         } catch (CloudBeesException e) {
           failiure.cause = e;
         }

@@ -8,6 +8,7 @@ import java.util.Properties;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
@@ -454,5 +455,10 @@ public class GrandCentralService {
     }
 
     return result;
+  }
+
+  public void addToRepository(IProject project, Repo repo, IProgressMonitor monitor) throws CloudBeesException {
+    com.cloudbees.eclipse.core.forge.api.ForgeSync.TYPE type = ForgeSync.TYPE.valueOf(repo.type.toUpperCase());
+    this.forgeSyncService.addToRepository(type, repo, project, monitor);
   }
 }

@@ -97,7 +97,7 @@ public abstract class CBRepositoryComposite extends Composite {
     return this.addRepoCheck.getSelection();
   }
 
-  public Repo getSeleRepo() {
+  public Repo getSelectedRepo() {
     return this.selectedRepo;
   }
 
@@ -116,7 +116,7 @@ public abstract class CBRepositoryComposite extends Composite {
       return;
     }
 
-    if (getSeleRepo() == null) {
+    if (getSelectedRepo() == null) {
       updateErrorStatus(ERR_REPO_SELECTION);
       return;
     }
