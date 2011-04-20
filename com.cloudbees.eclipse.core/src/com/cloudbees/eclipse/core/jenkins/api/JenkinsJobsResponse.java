@@ -6,7 +6,7 @@ import com.google.gson.annotations.Expose;
 
 /**
  * Main response data
- *
+ * 
  * @author ahti
  */
 public class JenkinsJobsResponse extends BaseJenkinsResponse {
@@ -20,7 +20,7 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
     final int prime = 31;
     int result = super.hashCode();
     result = prime * result + Arrays.hashCode(this.jobs);
-    result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
+    result = prime * result + (this.name == null ? 0 : this.name.hashCode());
     return result;
   }
 
@@ -86,7 +86,7 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + ((this.url == null) ? 0 : this.url.hashCode());
+      result = prime * result + (this.url == null ? 0 : this.url.hashCode());
       return result;
     }
 
@@ -116,6 +116,7 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
       public String fullDisplayName;
       public String url;
       public String builtOn;
+      public String result;
 
       // Merged from regular build request, json tree can fetch this nicely
       public Boolean building;

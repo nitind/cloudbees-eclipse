@@ -42,12 +42,59 @@ import com.cloudbees.eclipse.ui.PreferenceConstants;
  */
 public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
+  private final class FavouritesTracker extends Thread {
+    private static final int POLL_DELAY = 60 * 1000;
+    JenkinsJobsResponse previous = null;
+    private boolean halted = false;
+
+    public FavouritesTracker() {
+      super("Favourites Tracker");
+    }
+
+    @Override
+    public void run() {
+      while (!this.halted) {
+        try {
+          Thread.sleep(POLL_DELAY);
+          JenkinsJobsResponse favouritesResponse = FavouritesUtils.getFavouritesResponse(new NullProgressMonitor());
+          if (this.previous != null) {
+            for (Job j : this.previous.jobs) {
+              for (final Job q : favouritesResponse.jobs) {
+                if (q.url.equals(j.url)) {
+                  if (q.lastBuild != null && (j.lastBuild == null || q.lastBuild.number > j.lastBuild.number)) {
+                    Display.getDefault().syncExec(new Runnable() {
+
+                      @Override
+                      public void run() {
+                        FavouritesUtils.showNotification(q);
+                      }
+                    });
+                  }
+                }
+              }
+            }
+          }
+          this.previous = favouritesResponse;
+        } catch (CloudBeesException e) {
+          CloudBeesDevUiPlugin.this.logger.error(e);
+        } catch (InterruptedException e) {
+          this.halted = true;
+        }
+      }
+    }
+
+    public void halt() {
+      this.halted = true;
+    }
+  }
+
   public static final String PLUGIN_ID = "com.cloudbees.eclipse.dev.ui"; //$NON-NLS-1$
   private static CloudBeesDevUiPlugin plugin;
 
   private JobConsoleManager jobConsoleManager;
 
   private Logger logger;
+  private FavouritesTracker favouritesTracker;
 
   /**
    * The constructor
@@ -67,6 +114,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     CloudBeesDevUiPlugin.plugin = this;
     this.logger = new Logger(getLog());
     reloadForgeRepos(false);
+    this.favouritesTracker = new FavouritesTracker();
+    this.favouritesTracker.start();
   }
 
   /*
@@ -81,6 +130,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
       this.jobConsoleManager.unregister();
       this.jobConsoleManager = null;
     }
+    this.favouritesTracker.halt();
     super.stop(context);
   }
 
