@@ -15,7 +15,7 @@
     
     <!-- set default values for bees tasks -->
     <property name="bees.appid" value="" />
-    <property name="run.port" value="8080" />
+    <property name="run.port" value="8335" />
     <property name="run.environment" value="" />
     
     <path id="webapp.classpath">

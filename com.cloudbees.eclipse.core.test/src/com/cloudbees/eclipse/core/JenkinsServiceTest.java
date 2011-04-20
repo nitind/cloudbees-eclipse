@@ -38,7 +38,7 @@ public class JenkinsServiceTest {
     System.out.println("Received builds:");
 
     for (JenkinsJobsResponse.Job j : jobs) {
-      System.out.println("job: " + j.displayName);
+      System.out.println("job: " + j.getDisplayName());
     }
 
     assertTrue(jobs.length > 0);

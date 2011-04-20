@@ -14,19 +14,19 @@ public class BuildEditorInput extends NullEditorInput {
 
   private boolean lastBuildAvailable = false;
 
-  
-  public BuildEditorInput(Job job) {
+
+  public BuildEditorInput(final Job job) {
     super();
     //CloudBeesUIPlugin.getDefault().getLogger().info("Creating job details editor for url " + job.url);
     //this.job = job;
 
-    this.displayName = job.displayName;
+    this.displayName = job.getDisplayName();
 
     setJobUrl(job.url);
 
     if (job.lastBuild != null && job.lastBuild.url != null) {
       setBuildUrl(job.lastBuild.url);
-      lastBuildAvailable = true;
+      this.lastBuildAvailable = true;
     } else {
       setBuildUrl(job.url);
     }
@@ -38,32 +38,32 @@ public class BuildEditorInput extends NullEditorInput {
     return true;
   }
 
-  public void setBuildUrl(String buildUrl) {
+  public void setBuildUrl(final String buildUrl) {
     this.buildUrl = buildUrl;
   }
 
   public String getBuildUrl() {
-    return buildUrl;
+    return this.buildUrl;
   }
 
-  public void setJobUrl(String jobUrl) {
+  public void setJobUrl(final String jobUrl) {
     this.jobUrl = jobUrl;
   }
 
   public String getJobUrl() {
-    return jobUrl;
+    return this.jobUrl;
   }
 
   public String getDisplayName() {
-    return displayName;
+    return this.displayName;
   }
 
-  public void setLastBuildAvailable(boolean lastBuildAvailable) {
+  public void setLastBuildAvailable(final boolean lastBuildAvailable) {
     this.lastBuildAvailable = lastBuildAvailable;
   }
 
   public boolean isLastBuildAvailable() {
-    return lastBuildAvailable;
+    return this.lastBuildAvailable;
   }
 
 }

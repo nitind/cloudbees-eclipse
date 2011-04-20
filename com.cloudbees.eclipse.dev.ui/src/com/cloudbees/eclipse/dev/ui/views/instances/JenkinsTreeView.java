@@ -30,13 +30,14 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse.View;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
+import com.cloudbees.eclipse.dev.ui.utils.FavouritesUtils;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 import com.cloudbees.eclipse.ui.internal.action.ConfigureCloudBeesAction;
 
 /**
  * View showing both Jenkins offline installations and JaaS Nectar instances
- *
+ * 
  * @author ahtik
  */
 public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener {
@@ -81,6 +82,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
 
     this.viewer.addOpenListener(new IOpenListener() {
 
+      @Override
       public void open(final OpenEvent event) {
         ISelection sel = event.getSelection();
 
@@ -104,6 +106,14 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
               CloudBeesUIPlugin.getDefault().getLogger().error(e);
             }
             return;
+          } else if (el instanceof FavouritesInstanceGroup) {
+
+            try {
+              CloudBeesDevUiPlugin.getDefault().showJobs(FavouritesUtils.FAVOURITES, true);
+            } catch (CloudBeesException e) {
+              CloudBeesUIPlugin.getDefault().getLogger().error(e);
+            }
+
           } else if (el instanceof InstanceGroup) {
             boolean exp = JenkinsTreeView.this.viewer.getExpandedState(el);
             if (exp) {
@@ -133,11 +143,14 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
     contributeToActionBars();
 
     this.jenkinsChangeListener = new JenkinsChangeListener() {
+      @Override
       public void activeJobViewChanged(final JenkinsJobsResponse newView) {
       }
 
+      @Override
       public void jenkinsChanged(final List<JenkinsInstanceResponse> instances) {
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+          @Override
           public void run() {
             JenkinsTreeView.this.viewer.getContentProvider().inputChanged(JenkinsTreeView.this.viewer, null, instances);
           }
@@ -171,8 +184,8 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
       public void run() {
         PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(null,
             "com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage", new String[] {
-            "com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage",
-        "com.cloudbees.eclipse.ui.internal.preferences.GeneralPreferencePage" }, null);
+                "com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage",
+                "com.cloudbees.eclipse.ui.internal.preferences.GeneralPreferencePage" }, null);
         if (pref != null) {
           pref.open();
         }
@@ -204,7 +217,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 
     boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-    .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
+        .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
     this.action3.setEnabled(forgeEnabled);
 
     this.action4 = new Action() {
@@ -221,7 +234,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 
     boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-    .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
+        .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
     this.action4.setEnabled(jaasEnabled);
   }
 
@@ -230,16 +243,17 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
     this.viewer.getControl().setFocus();
   }
 
+  @Override
   public void propertyChange(final PropertyChangeEvent event) {
     if (PreferenceConstants.P_ENABLE_FORGE.equals(event.getProperty())) {
       boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-      .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
+          .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
       this.action3.setEnabled(forgeEnabled);
     }
 
     if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())) {
       boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-      .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
+          .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
       this.action4.setEnabled(jaasEnabled);
     }
 

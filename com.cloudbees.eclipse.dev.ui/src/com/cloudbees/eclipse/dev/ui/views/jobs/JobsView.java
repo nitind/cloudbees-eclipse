@@ -58,12 +58,13 @@ import com.cloudbees.eclipse.dev.ui.actions.DeleteJobAction;
 import com.cloudbees.eclipse.dev.ui.actions.OpenLastBuildAction;
 import com.cloudbees.eclipse.dev.ui.actions.OpenLogAction;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadJobsAction;
+import com.cloudbees.eclipse.dev.ui.utils.FavouritesUtils;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 
 /**
  * View showing jobs for both Jenkins offline installations and JaaS Nectar instances
- *
+ * 
  * @author ahtik
  */
 public class JobsView extends ViewPart implements IPropertyChangeListener {
@@ -79,6 +80,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   private Action actionOpenLastBuildDetails;
   private Action actionOpenLog;
   private Action actionDeleteJob;
+  private Action actionAddFavourite;
+  private Action actionRemoveFavourite;
 
   private final Map<String, Image> stateIcons = new HashMap<String, Image>();
 
@@ -164,14 +167,16 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     }
 
     boolean enabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-    .getBoolean(PreferenceConstants.P_JENKINS_REFRESH_ENABLED);
-    int secs = CloudBeesUIPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.P_JENKINS_REFRESH_INTERVAL);
+        .getBoolean(PreferenceConstants.P_JENKINS_REFRESH_ENABLED);
+    int secs = CloudBeesUIPlugin.getDefault().getPreferenceStore()
+        .getInt(PreferenceConstants.P_JENKINS_REFRESH_INTERVAL);
     if (!enabled || secs <= 0) {
       return; // disabled
     }
 
     this.regularRefresher = new Runnable() {
 
+      @Override
       public void run() {
         if (JobsView.this.regularRefresher == null) {
           return;
@@ -183,9 +188,9 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         } finally {
           if (JobsView.this.regularRefresher != null) { // not already stopped
             boolean enabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-            .getBoolean(PreferenceConstants.P_JENKINS_REFRESH_ENABLED);
+                .getBoolean(PreferenceConstants.P_JENKINS_REFRESH_ENABLED);
             int secs = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-            .getInt(PreferenceConstants.P_JENKINS_REFRESH_INTERVAL);
+                .getInt(PreferenceConstants.P_JENKINS_REFRESH_INTERVAL);
             if (enabled && secs > 0) {
               PlatformUI.getWorkbench().getDisplay().timerExec(secs * 1000, JobsView.this.regularRefresher);
             } else {
@@ -208,8 +213,10 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         JenkinsJobsResponse.Job j1 = (JenkinsJobsResponse.Job) e1;
         JenkinsJobsResponse.Job j2 = (JenkinsJobsResponse.Job) e2;
 
-        if (j1.displayName != null && j2.displayName != null) {
-          return j1.displayName.toLowerCase().compareTo(j2.displayName.toLowerCase());
+        String displayName1 = j1.displayName;
+        String displayName2 = j2.displayName;
+        if (displayName1 != null && displayName2 != null) {
+          return displayName1.toLowerCase().compareTo(displayName2.toLowerCase());
         }
 
       }
@@ -268,8 +275,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       @Override
       public void update(final ViewerCell cell) {
         JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
-        String val = job.displayName;
-        if (job.inQueue) {
+        String val = job.getDisplayName();
+        if (job.inQueue != null && job.inQueue) {
           val = val + " (in queue)";
         } else if (job.color != null && job.color.indexOf('_') > 0) {
           val = val + " (running)";
@@ -296,8 +303,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
               String matchStr = "Build stability: ";
               if (desc != null && desc.startsWith(matchStr)) {
                 cell.setText(" " + desc.substring(matchStr.length()));
-                cell.setImage(CloudBeesDevUiPlugin.getImage(
-                    CBImages.IMG_HEALTH_PREFIX + CBImages.IMG_16 + icon));
+                cell.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_HEALTH_PREFIX + CBImages.IMG_16 + icon));
               }
             }
           }
@@ -356,8 +362,6 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       }
     });
 
-
-
     /*    createColumn("Comment", 100, new CellLabelProvider() {
           public void update(ViewerCell cell) {
             JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
@@ -386,6 +390,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     this.table.addOpenListener(new IOpenListener() {
 
+      @Override
       public void open(final OpenEvent event) {
         ISelection sel = event.getSelection();
 
@@ -406,7 +411,6 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     makeActions();
     contributeToActionBars();
 
-
     MenuManager popupMenu = new MenuManager();
 
     popupMenu.add(this.actionOpenLastBuildDetails);
@@ -417,6 +421,9 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     popupMenu.add(new Separator());
     popupMenu.add(this.actionDeleteJob);
     popupMenu.add(new Separator());
+    popupMenu.add(this.actionAddFavourite);
+    popupMenu.add(this.actionRemoveFavourite);
+    popupMenu.add(new Separator());
     popupMenu.add(this.actionReloadJobs);
 
     Menu menu = popupMenu.createContextMenu(this.table.getTable());
@@ -424,27 +431,41 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     this.table.addPostSelectionChangedListener(new ISelectionChangedListener() {
 
+      @Override
       public void selectionChanged(final SelectionChangedEvent event) {
         StructuredSelection sel = (StructuredSelection) event.getSelection();
         JobsView.this.selectedJob = sel.getFirstElement();
-        boolean enable = sel.getFirstElement() != null;
-        JobsView.this.actionInvokeBuild.setEnabled(enable);
-        JobsView.this.actionOpenLastBuildDetails.setEnabled(enable);
-        JobsView.this.actionOpenLog.setEnabled(enable);
-        JobsView.this.actionDeleteJob.setEnabled(enable);
-        JobsView.this.actionOpenJobInBrowser.setEnabled(enable);
+        boolean enabled = sel.getFirstElement() != null;
+        JobsView.this.actionInvokeBuild.setEnabled(enabled);
+        JobsView.this.actionOpenLastBuildDetails.setEnabled(enabled);
+        JobsView.this.actionOpenLog.setEnabled(enabled);
+        JobsView.this.actionDeleteJob.setEnabled(enabled);
+        JobsView.this.actionOpenJobInBrowser.setEnabled(enabled);
+
+        JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
+        if (job != null) {
+          boolean isFavourite = FavouritesUtils.isFavourite(job.url);
+          JobsView.this.actionAddFavourite.setEnabled(!isFavourite);
+          JobsView.this.actionRemoveFavourite.setEnabled(isFavourite);
+        } else {
+          JobsView.this.actionAddFavourite.setEnabled(false);
+          JobsView.this.actionRemoveFavourite.setEnabled(false);
+        }
       }
     });
 
     this.jenkinsChangeListener = new JenkinsChangeListener() {
+      @Override
       public void activeJobViewChanged(final JenkinsJobsResponse newView) {
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+          @Override
           public void run() {
             JobsView.this.setInput(newView);
           }
         });
       }
 
+      @Override
       public void jenkinsChanged(final List<JenkinsInstanceResponse> instances) {
       }
     };
@@ -485,7 +506,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
   }
 
-  private TableViewerColumn createColumn(final String colName, final int width, final CellLabelProvider cellLabelProvider) {
+  private TableViewerColumn createColumn(final String colName, final int width,
+      final CellLabelProvider cellLabelProvider) {
     return createColumn(colName, width, -1, cellLabelProvider);
   }
 
@@ -605,6 +627,25 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     this.actionInvokeBuild.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_RUN));
     this.actionInvokeBuild.setEnabled(false);
 
+    this.actionAddFavourite = new Action("Add to Favourites") {
+      @Override
+      public void run() {
+        final JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
+        FavouritesUtils.addFavourite(job.url);
+        JobsView.this.actionAddFavourite.setEnabled(false);
+        JobsView.this.actionRemoveFavourite.setEnabled(true);
+      };
+    };
+
+    this.actionRemoveFavourite = new Action("Remove from Favourites") {
+      @Override
+      public void run() {
+        final JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
+        FavouritesUtils.removeFavourite(job.url);
+        JobsView.this.actionAddFavourite.setEnabled(true);
+        JobsView.this.actionRemoveFavourite.setEnabled(false);
+      };
+    };
     /*    action4.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
             .getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
      */
@@ -617,11 +658,12 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     this.table.getControl().setFocus();
   }
 
+  @Override
   public void propertyChange(final PropertyChangeEvent event) {
 
     if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())) {
       boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-      .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
+          .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
       if (!jaasEnabled) {
         setInput(null); // all gone
       }
@@ -641,8 +683,9 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     if (PreferenceConstants.P_JENKINS_REFRESH_INTERVAL.equals(event.getProperty())
         || PreferenceConstants.P_JENKINS_REFRESH_ENABLED.equals(event.getProperty())) {
       boolean enabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-      .getBoolean(PreferenceConstants.P_JENKINS_REFRESH_ENABLED);
-      int secs = CloudBeesUIPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.P_JENKINS_REFRESH_INTERVAL);
+          .getBoolean(PreferenceConstants.P_JENKINS_REFRESH_ENABLED);
+      int secs = CloudBeesUIPlugin.getDefault().getPreferenceStore()
+          .getInt(PreferenceConstants.P_JENKINS_REFRESH_INTERVAL);
       if (enabled && secs > 0) {
         startRefresher(); // start it if it was disabled by 0 value, do nothing if it was already running
       } else {

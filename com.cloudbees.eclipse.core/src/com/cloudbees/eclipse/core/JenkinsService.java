@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsConfigParser;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsConsoleLogResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
@@ -46,6 +47,10 @@ import com.google.gson.Gson;
  * @author ahti
  */
 public class JenkinsService {
+
+  enum ResponseType {
+    STRING, STREAM, HTTP
+  }
 
   /*private String url;
   private String label;*/
@@ -169,12 +174,12 @@ public class JenkinsService {
   synchronized private String retrieveWithLogin(final DefaultHttpClient httpclient, final HttpRequestBase post,
       final List<NameValuePair> params, final boolean expectRedirect, final SubProgressMonitor monitor)
   throws UnsupportedEncodingException, IOException, ClientProtocolException, CloudBeesException, Exception {
-    return (String) retrieveWithLogin(httpclient, post, params, expectRedirect, monitor, false);
+    return (String) retrieveWithLogin(httpclient, post, params, expectRedirect, monitor, ResponseType.STRING);
   }
 
   synchronized private Object retrieveWithLogin(final DefaultHttpClient httpclient, final HttpRequestBase post,
       final List<NameValuePair> params, final boolean expectRedirect, final SubProgressMonitor monitor,
-      final boolean asStream)
+      final ResponseType responseType)
   throws UnsupportedEncodingException, IOException, ClientProtocolException, CloudBeesException, Exception {
     Object bodyResponse = null;
 
@@ -206,10 +211,16 @@ public class JenkinsService {
       CloudBeesCorePlugin.getDefault().getLogger().info("Retrieve: " + post.getURI());
 
       HttpResponse resp = httpclient.execute(post);
-      if (asStream) {
-        bodyResponse = resp.getEntity().getContent();
-      } else {
+      switch (responseType) {
+      case STRING:
         bodyResponse = Utils.getResponseBody(resp);
+        break;
+      case STREAM:
+        bodyResponse = resp.getEntity().getContent();
+        break;
+      case HTTP:
+        bodyResponse = resp;
+        break;
       }
 
       if (this.jenkins.atCloud && this.jenkins.username != null && this.jenkins.username.trim().length() > 0
@@ -587,7 +598,7 @@ public class JenkinsService {
       post.setHeader("Accept", "text/html,application/xhtml+xml,application/xml");
 
       bodyResponse = (InputStream) retrieveWithLogin(httpclient, post, null, false,
-          new SubProgressMonitor(monitor, 10), true);
+          new SubProgressMonitor(monitor, 10), ResponseType.STREAM);
 
       return bodyResponse;
 
@@ -642,10 +653,11 @@ public class JenkinsService {
     }
   }
 
-  public String getBuildLog(final String url, final int start, final IProgressMonitor monitor)
+  public JenkinsConsoleLogResponse getBuildLog(final JenkinsConsoleLogResponse request, final IProgressMonitor monitor)
       throws CloudBeesException {
     monitor.setTaskName("Fetching Job build log...");
 
+    String url = request.viewUrl;
     if (url != null && !url.startsWith(this.jenkins.url)) {
       throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; job url: "
           + url);
@@ -659,19 +671,39 @@ public class JenkinsService {
       reqUrl = reqUrl + "/";
     }
 
-    String reqStr = reqUrl + "logText/progressiveHtml";
+    String reqStr = reqUrl + "logText/progressiveText?start=" + request.start;
 
     try {
       DefaultHttpClient httpclient = Utils.getAPIClient();
 
       HttpPost post = new HttpPost(reqStr);
-      //      post.setHeader("Accept", "application/json");
-      //      post.setHeader("Content-type", "application/json");
+      if (request.annotator != null) {
+        post.setHeader("X-ConsoleAnnotator", request.annotator);
+      }
 
-      String bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 10));
+      HttpResponse response = (HttpResponse) retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(
+          monitor, 10), ResponseType.HTTP);
 
-      return bodyResponse;
+      //      for (Header head : response.getAllHeaders()) {
+      //        System.out.println("header: " + head);
+      //      }
 
+      request.logPart = response.getEntity().getContent();
+      try {
+        Header moreData = response.getLastHeader("X-More-Data");
+        request.hasMore = moreData != null ? "true".equalsIgnoreCase(moreData.getValue()) : false;
+        Header textSize = response.getLastHeader("X-Text-Size");
+        request.start = textSize != null ? Long.parseLong(textSize.getValue()) : Long.MAX_VALUE;
+        Header annotator = response.getLastHeader("X-ConsoleAnnotator");
+        if (annotator != null) {
+          request.annotator = annotator.getValue();
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+        request.hasMore = false;
+      }
+
+      return request;
     } catch (Exception e) {
       throw new CloudBeesException("Failed to get Jenkins build log for '" + url + "'. "
           + (errMsg.length() > 0 && errMsg.length() < 1000 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr, e);
