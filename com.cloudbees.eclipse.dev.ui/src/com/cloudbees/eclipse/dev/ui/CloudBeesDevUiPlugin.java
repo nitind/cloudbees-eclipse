@@ -47,7 +47,7 @@ import com.cloudbees.eclipse.ui.PreferenceConstants;
 public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
   private final class FavouritesTracker extends Thread {
-    private static final int POLL_DELAY = 10 * 1000;
+    private static final int POLL_DELAY = 60 * 1000;
     JenkinsJobsResponse previous = null;
     private boolean halted = false;
 
@@ -511,6 +511,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
         try {
           PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+            @Override
             public void run() {
               try {
                 CloudBeesUIPlugin
