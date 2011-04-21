@@ -589,24 +589,21 @@ public class BuildPart extends EditorPart {
 
         BuildEditorInput details = (BuildEditorInput) getEditorInput();
 
-        //setPartName();
-        if (BuildPart.this.dataBuildDetail != null) {
-          setPartName(details.getDisplayName() + " #" + BuildPart.this.dataBuildDetail.number);
-        } else {
+        //        if (BuildPart.this.dataBuildDetail != null) {
+        //          setPartName(details.getDisplayName() + " #" + BuildPart.this.dataBuildDetail.number);
+        //        } else {
           setPartName(details.getDisplayName());
-        }
+        //        }
 
         //setContentDescription(detail.fullDisplayName);
 
         if (BuildPart.this.form != null) {
-
-          if (BuildPart.this.dataBuildDetail != null) {
+          //          if (BuildPart.this.dataBuildDetail != null) {
             BuildPart.this.form.setText("Build" + /*" #" + BuildPart.this.dataBuildDetail.number +*/" ["
                 + details.getDisplayName() + "]");
-          } else {
-            BuildPart.this.form.setText(details.getDisplayName());
-          }
-
+          //          } else {
+          //            BuildPart.this.form.setText(details.getDisplayName());
+          //          }
         }
 
         String topStr = BuildPart.this.dataBuildDetail.result != null ? BuildPart.this.dataBuildDetail.result /*+ " ("
