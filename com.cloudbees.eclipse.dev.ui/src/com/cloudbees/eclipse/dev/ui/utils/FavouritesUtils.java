@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -48,17 +49,28 @@ public class FavouritesUtils {
   private static final Color gradientEnd = new Color(Display.getDefault(), 225, 225, 200);
 
   public static JenkinsJobsResponse getFavouritesResponse(final IProgressMonitor monitor) throws CloudBeesException {
-    List<String> favourites = getFavourites();
-    HashMap<String, JenkinsService> instances = getInstances(favourites);
+    HashMap<String, String> favourites = getFavourites();
+    HashMap<String, JenkinsService> instances = getInstances(favourites.keySet());
 
     ArrayList<Job> filtered = new ArrayList<JenkinsJobsResponse.Job>();
 
     for (String instance : instances.keySet()) {
       JenkinsService jenkinsService = instances.get(instance);
-      JenkinsJobsResponse allJobs = jenkinsService.getJobs(instance, monitor);
-      for (Job j : allJobs.jobs) {
-        if (favourites.contains(j.url)) {
-          filtered.add(j);
+      try {
+        JenkinsJobsResponse allJobs = jenkinsService.getJobs(instance, monitor);
+        for (Job j : allJobs.jobs) {
+          if (favourites.containsKey(j.url)) {
+            filtered.add(j);
+          }
+        }
+      } catch (CloudBeesException e) {
+        for (String url : favourites.keySet()) {
+          if (url.startsWith(instance)) {
+            Job j = new Job();
+            j.name = favourites.get(url);
+            j.url = url;
+            filtered.add(j);
+          }
         }
       }
     }
@@ -71,10 +83,10 @@ public class FavouritesUtils {
     return jobs;
   }
 
-  private static HashMap<String, JenkinsService> getInstances(List<String> favourites) {
+  private static HashMap<String, JenkinsService> getInstances(Set<String> set) {
     HashMap<String, JenkinsService> instances = new HashMap<String, JenkinsService>();
 
-    for (String string : favourites) {
+    for (String string : set) {
       String instance = string.split("job")[0];
 
       if (instances.get(instance) == null) {
@@ -96,25 +108,34 @@ public class FavouritesUtils {
     return null;
   }
 
-  private static ArrayList<String> getFavourites() {
-    ArrayList<String> favourites = new ArrayList<String>();
+  private static HashMap<String, String> getFavourites() {
+    HashMap<String, String> favourites = new HashMap<String, String>();
 
     String pref = prefs.getString(FAVOURITES_LIST);
 
     if (!"".equals(pref)) { // we don't want an empty URL
       for (String string : pref.split(",")) {
-        favourites.add(Utils.fromB64(string));
+        String[] split = string.split(";");
+        String name;
+        String url = Utils.fromB64(split[0]);
+        if (split.length > 1) {
+          name = Utils.fromB64(split[1]);
+        } else {
+          String[] urlSplit = url.split("/");
+          name = urlSplit[urlSplit.length - 1];
+        }
+        favourites.put(url, name);
       }
     }
 
     return favourites;
   }
 
-  private static void storeFavourites(ArrayList<String> favourites) {
+  private static void storeFavourites(HashMap<String, String> favourites) {
     String pref = "";
     if (favourites != null && !favourites.isEmpty()) {
-      for (String string : favourites) {
-        pref += Utils.toB64(string) + ",";
+      for (String string : favourites.keySet()) {
+        pref += Utils.toB64(string) + ";" + Utils.toB64(favourites.get(string)) + ",";
       }
 
       pref = pref.substring(0, pref.length() - 1);
@@ -130,23 +151,23 @@ public class FavouritesUtils {
   }
 
   public static void removeFavourite(String favourite) {
-    ArrayList<String> fav = getFavourites();
-    if (fav.contains(favourite)) {
+    HashMap<String, String> fav = getFavourites();
+    if (fav.containsKey(favourite)) {
       fav.remove(favourite);
       storeFavourites(fav);
     }
   }
 
-  public static void addFavourite(String favourite) {
-    ArrayList<String> fav = getFavourites();
-    if (!fav.contains(favourite)) {
-      fav.add(favourite);
+  public static void addFavourite(String favourite, String name) {
+    HashMap<String, String> fav = getFavourites();
+    if (!fav.containsKey(favourite)) {
+      fav.put(favourite, name);
       storeFavourites(fav);
     }
   }
 
   public static boolean isFavourite(String favourite) {
-    return getFavourites().contains(favourite);
+    return getFavourites().containsKey(favourite);
   }
 
   public static void showNotification(final Job job) {
