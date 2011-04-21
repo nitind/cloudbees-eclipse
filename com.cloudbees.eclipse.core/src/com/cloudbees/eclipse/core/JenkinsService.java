@@ -554,7 +554,7 @@ public class JenkinsService {
 
       retrieveWithLogin(httpclient, post, params, true, new SubProgressMonitor(monitor, 10));
     } catch (Exception e) {
-      throw new CloudBeesException("Failed to get invoke Build for '" + jobUrl + "'. "
+      throw new CloudBeesException("Failed to get invoke JenkinsBuild for '" + jobUrl + "'. "
           + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr, e);
     }
   }

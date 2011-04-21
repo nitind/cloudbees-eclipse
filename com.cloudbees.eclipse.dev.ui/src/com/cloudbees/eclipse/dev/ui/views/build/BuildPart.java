@@ -40,6 +40,7 @@ import org.eclipse.ui.progress.IProgressService;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.jenkins.api.HealthReport;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Action.Cause;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet.ChangeSetItem;
@@ -48,6 +49,7 @@ import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.dev.ui.actions.OpenJunitViewAction;
+import com.cloudbees.eclipse.dev.ui.actions.OpenLogAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class BuildPart extends EditorPart {
@@ -76,17 +78,27 @@ public class BuildPart extends EditorPart {
   private Section sectBuildHistory;
   private Section sectRecentChanges;
   private Composite compInterm;
-  private ScrolledComposite scrolledComposite;
+  private ScrolledComposite scrolledRecentChanges;
   private RecentChangesContentProvider changesContentProvider;
   private Label changesetLabel;
+  private Action openBuildHistory;
+  private OpenLogAction openLogs;
 
   public BuildPart() {
     super();
   }
 
+  public void setData(final JenkinsBuildDetailsResponse dataBuildDetail,
+      final JenkinsJobAndBuildsResponse dataJobDetails) {
+    this.dataBuildDetail = dataBuildDetail;
+    this.dataJobDetails = dataJobDetails;
+
+    this.openLogs.setBuild(dataBuildDetail);
+  }
+
   /**
    * Create contents of the editor part.
-   * 
+   *
    * @param parent
    */
   @Override
@@ -228,15 +240,15 @@ public class BuildPart extends EditorPart {
 
     this.changesetLabel = this.formToolkit.createLabel(this.compInterm, "");
 
-    this.scrolledComposite = new ScrolledComposite(this.compInterm, SWT.H_SCROLL | SWT.V_SCROLL);
-    this.scrolledComposite.setExpandHorizontal(true);
-    this.scrolledComposite.setExpandVertical(true);
-    this.scrolledComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-    this.formToolkit.adapt(this.scrolledComposite);
-    this.formToolkit.paintBordersFor(this.scrolledComposite);
+    this.scrolledRecentChanges = new ScrolledComposite(this.compInterm, SWT.H_SCROLL | SWT.V_SCROLL);
+    this.scrolledRecentChanges.setExpandHorizontal(true);
+    this.scrolledRecentChanges.setExpandVertical(true);
+    this.scrolledRecentChanges.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    this.formToolkit.adapt(this.scrolledRecentChanges);
+    this.formToolkit.paintBordersFor(this.scrolledRecentChanges);
 
 
-    this.treeViewerRecentChanges = new TreeViewer(this.scrolledComposite, SWT.BORDER);
+    this.treeViewerRecentChanges = new TreeViewer(this.scrolledRecentChanges, SWT.BORDER);
     Tree treeRecentChanges = this.treeViewerRecentChanges.getTree();
 
     this.changesContentProvider = new RecentChangesContentProvider();
@@ -248,8 +260,8 @@ public class BuildPart extends EditorPart {
 
     this.formToolkit.adapt(treeRecentChanges);
     this.formToolkit.paintBordersFor(treeRecentChanges);
-    this.scrolledComposite.setContent(treeRecentChanges);
-    this.scrolledComposite.setMinSize(treeRecentChanges.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    this.scrolledRecentChanges.setContent(treeRecentChanges);
+    this.scrolledRecentChanges.setMinSize(treeRecentChanges.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
     //new Label(recentChangesComp, SWT.NONE);
 
@@ -283,18 +295,21 @@ public class BuildPart extends EditorPart {
     openInWeb.setToolTipText("Open with Browser"); //TODO i18n
     openInWeb.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_BROWSER));
 
-    Action openLogs = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
-      @Override
-      public void run() {
-        if (BuildPart.this.dataBuildDetail != null && BuildPart.this.dataBuildDetail.url != null) {
-          CloudBeesUIPlugin.getDefault().openWithBrowser(BuildPart.this.dataBuildDetail.url + "/consoleText");
-          return;
-        }
-
-      }
-    };
-    openLogs.setToolTipText("Open build log"); //TODO i18n
-    openLogs.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_CONSOLE));
+    this.openLogs = new OpenLogAction();
+    this.openLogs.setBuild(this.dataBuildDetail);
+    this.openLogs.setEnabled(true);
+    //    Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+    //      @Override
+    //      public void run() {
+    //        if (BuildPart.this.dataBuildDetail != null && BuildPart.this.dataBuildDetail.url != null) {
+    //          CloudBeesUIPlugin.getDefault().openWithBrowser(BuildPart.this.dataBuildDetail.url + "/consoleText");
+    //          return;
+    //        }
+    //
+    //      }
+    //    };
+    //    openLogs.setToolTipText("Open build log"); //TODO i18n
+    //    openLogs.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_CONSOLE));
 
     this.invokeBuild = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       @Override
@@ -327,12 +342,42 @@ public class BuildPart extends EditorPart {
     this.invokeBuild.setToolTipText("Run a new build for this job"); //TODO i18n
     this.invokeBuild.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_RUN));
 
-    this.form.getToolBarManager().add(reload);
-    this.form.getToolBarManager().add(new Separator());
+    this.openBuildHistory = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+      @Override
+      public void run() {
+        try {
+          final String jobUrl = BuildPart.this.getBuildEditorInput().getJobUrl();
+          org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Opening build history...") {
+            @Override
+            protected IStatus run(final IProgressMonitor monitor) {
+              try {
+                CloudBeesDevUiPlugin.getDefault().showBuildHistory(jobUrl, true);
+        //                ns.invokeBuild(jobUrl, props, monitor);
+                return org.eclipse.core.runtime.Status.OK_STATUS;
+              } catch (CloudBeesException e) {
+                //CloudBeesUIPlugin.getDefault().getLogger().error(e);
+                return new org.eclipse.core.runtime.Status(org.eclipse.core.runtime.Status.ERROR,
+                    CloudBeesUIPlugin.PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
+              }
+            }
+          };
+          job.setUser(true);
+          job.schedule();
+        } catch (CancellationException e) {
+          // cancelled by user
+        }
+      }
+    };
+    this.openBuildHistory.setToolTipText("Open build history for this job"); //TODO i18n
+    this.openBuildHistory.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_BUILD_HISTORY));
+
     this.form.getToolBarManager().add(this.invokeBuild);
     this.form.getToolBarManager().add(new Separator());
-    this.form.getToolBarManager().add(openLogs);
+    this.form.getToolBarManager().add(this.openLogs);
+    this.form.getToolBarManager().add(this.openBuildHistory);
     this.form.getToolBarManager().add(openInWeb);
+    this.form.getToolBarManager().add(new Separator());
+    this.form.getToolBarManager().add(reload);
 
     this.form.getToolBarManager().update(false);
   }
@@ -349,8 +394,10 @@ public class BuildPart extends EditorPart {
           BuildEditorInput details = (BuildEditorInput) getEditorInput();
           JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(
               getBuildEditorInput().getJobUrl());
-          BuildPart.this.dataBuildDetail = service.getJobDetails(details.getBuildUrl(), monitor);
-          BuildPart.this.dataJobDetails = service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor);
+
+          setData(service.getJobDetails(details.getBuildUrl(), monitor),
+              service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor));
+
         } catch (CloudBeesException e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
         }
@@ -376,7 +423,6 @@ public class BuildPart extends EditorPart {
     }
 
     // for some reason build details not available (for example, no build was available). fall back to job url
-    BuildEditorInput details = (BuildEditorInput) getEditorInput();
     CloudBeesUIPlugin.getDefault().openWithBrowser(getBuildEditorInput().getJobUrl());
   }
 
@@ -385,15 +431,17 @@ public class BuildPart extends EditorPart {
       public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 
         BuildEditorInput details = (BuildEditorInput) getEditorInput();
-        String newJobUrl = getBuildEditorInput().getJobUrl() + "/" + buildNo + "/";
+        String newBuildUrl = getBuildEditorInput().getJobUrl() + "/" + buildNo + "/";
 
         JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(
             getBuildEditorInput().getJobUrl());
 
         try {
-          BuildPart.this.dataBuildDetail = service.getJobDetails(newJobUrl, monitor);
+          setData(service.getJobDetails(newBuildUrl, monitor),
+              service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor));
+
           details.setBuildUrl(BuildPart.this.dataBuildDetail.url);
-          BuildPart.this.dataJobDetails = service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor);
+          details.setDisplayName(BuildPart.this.dataBuildDetail.fullDisplayName);
 
         } catch (CloudBeesException e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
@@ -426,7 +474,7 @@ public class BuildPart extends EditorPart {
 
     final BuildEditorInput details = (BuildEditorInput) getEditorInput();
 
-    if (details == null || details.getBuildUrl() == null || !getBuildEditorInput().isLastBuildAvailable()) {
+    if (details == null || details.getBuildUrl() == null) {
 
       // No last build available
       if (this.contentBuildHistory != null && !this.contentBuildHistory.isDisposed()) {
@@ -450,9 +498,8 @@ public class BuildPart extends EditorPart {
 
           try {
 
-            BuildPart.this.dataBuildDetail = service.getJobDetails(getBuildEditorInput().getBuildUrl(), monitor);
-
-            BuildPart.this.dataJobDetails = service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor);
+            setData(service.getJobDetails(getBuildEditorInput().getBuildUrl(), monitor),
+                service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor));
 
           } catch (CloudBeesException e) {
             CloudBeesUIPlugin.getDefault().getLogger().error(e);
@@ -493,7 +540,8 @@ public class BuildPart extends EditorPart {
         if (BuildPart.this.form != null) {
 
           if (BuildPart.this.dataBuildDetail != null) {
-            BuildPart.this.form.setText("Build #" + BuildPart.this.dataBuildDetail.number + " [" + details.getDisplayName() + "]");
+            BuildPart.this.form.setText("Build #" + BuildPart.this.dataBuildDetail.number + " ["
+                + details.getDisplayName() + "]");
           } else {
             BuildPart.this.form.setText(details.getDisplayName());
           }
@@ -575,8 +623,7 @@ public class BuildPart extends EditorPart {
 
     //contentBuildHistory.setBackground(composite.getBackground());
 
-    StringBuffer val = new StringBuffer();
-    for (JenkinsJobAndBuildsResponse.Build b : this.dataJobDetails.builds) {
+    for (JenkinsBuild b : this.dataJobDetails.builds) {
 
       //String result = b.result != null && b.result.length() > 0 ? " - " + b.result : "";
 
@@ -618,6 +665,7 @@ public class BuildPart extends EditorPart {
 
   }
 
+  @SuppressWarnings("unused")
   private void loadBuildSummary() {
     //details.getJob().buildable;
     //details.getJob().inQueue;
@@ -701,6 +749,7 @@ public class BuildPart extends EditorPart {
     gl.verticalSpacing = 0;
     Label imgLabel = this.formToolkit.createLabel(comp, "", SWT.NONE);
     imgLabel.setImage(image);
+    @SuppressWarnings("unused")
     Label label = this.formToolkit.createLabel(comp, text, SWT.NONE);
     return comp;
   }

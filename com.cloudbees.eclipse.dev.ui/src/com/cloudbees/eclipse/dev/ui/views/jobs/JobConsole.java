@@ -16,7 +16,6 @@ import org.eclipse.ui.console.MessageConsoleStream;
 
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsConsoleLogResponse;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job.Build;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -24,26 +23,29 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 public class JobConsole {
 
   final static String CONSOLE_TYPE = "com.cloudbees.eclipse.dev.ui.views.jobs.JobConsole";
-  final static String ATTRIBUTE_BUILD = "com.cloudbees.eclipse.dev.ui.views.jobs.JobConsole.build";
+  final static String ATTRIBUTE_URL = "com.cloudbees.eclipse.dev.ui.views.jobs.JobConsole.build";
 
   private final IConsoleManager consoleManager;
   private volatile MessageConsoleStream stream;
-  protected Build build;
+  protected String name;
+  protected String url;
 
-  public JobConsole(final IConsoleManager consoleManager, final Build build) {
+  public JobConsole(final IConsoleManager consoleManager, final String name, final String url) {
     Assert.isNotNull(consoleManager);
-    Assert.isNotNull(build);
+    Assert.isNotNull(name);
+    Assert.isNotNull(url);
     this.consoleManager = consoleManager;
-    this.build = build;
+    this.name = name;
+    this.url = url;
   }
 
   public MessageConsole show() {
     MessageConsole console = null;
     if (this.stream == null) {
-      console = new MessageConsole(NLS.bind("Output for Build \"{0}\"", this.build.fullDisplayName), CONSOLE_TYPE,
-          CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_BUILD_CONSOLE_LOG), true);
+      console = new MessageConsole(NLS.bind("Output for JenkinsBuild \"{0}\"", this.name), CONSOLE_TYPE,
+          CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_CONSOLE), true);
       this.consoleManager.addConsoles(new IConsole[] { console });
-      console.setAttribute(ATTRIBUTE_BUILD, this.build);
+      console.setAttribute(ATTRIBUTE_URL, this.url);
 
       this.stream = console.newMessageStream();
     }
@@ -62,19 +64,18 @@ public class JobConsole {
     } finally {
       this.stream = null;
     }
-    this.build = null;
   }
 
   private void retrieveLog() {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading console output for \""
-        + this.build.fullDisplayName + "\"") {
+        + this.name + "\"") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
 
         try {
-          JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(JobConsole.this.build.url);
+          JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(JobConsole.this.url);
           JenkinsConsoleLogResponse requestResponse = new JenkinsConsoleLogResponse();
-          requestResponse.viewUrl = JobConsole.this.build.url;
+          requestResponse.viewUrl = JobConsole.this.url;
 
           long safety = 60 * 60;
           do {

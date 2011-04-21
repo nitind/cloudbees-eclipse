@@ -2,35 +2,17 @@ package com.cloudbees.eclipse.dev.ui.views.build;
 
 import org.eclipse.ui.internal.part.NullEditorInput;
 
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
-
 public class BuildEditorInput extends NullEditorInput {
 
-  //private Job job;
-
   private String buildUrl;
-  private String jobUrl;
   private String displayName;
 
-  private boolean lastBuildAvailable = false;
-
-
-  public BuildEditorInput(final Job job) {
+  public BuildEditorInput(final String displayName, final String buildUrl) {
     super();
     //CloudBeesUIPlugin.getDefault().getLogger().info("Creating job details editor for url " + job.url);
-    //this.job = job;
 
-    this.displayName = job.getDisplayName();
-
-    setJobUrl(job.url);
-
-    if (job.lastBuild != null && job.lastBuild.url != null) {
-      setBuildUrl(job.lastBuild.url);
-      this.lastBuildAvailable = true;
-    } else {
-      setBuildUrl(job.url);
-    }
-
+    this.displayName = displayName;
+    this.buildUrl = buildUrl;
   }
 
   @Override
@@ -46,24 +28,33 @@ public class BuildEditorInput extends NullEditorInput {
     return this.buildUrl;
   }
 
-  public void setJobUrl(final String jobUrl) {
-    this.jobUrl = jobUrl;
-  }
-
   public String getJobUrl() {
-    return this.jobUrl;
+    if (this.buildUrl == null) {
+      return null;
+    }
+    String jobUrl = this.buildUrl;
+    jobUrl = jobUrl.trim();
+    if (jobUrl.endsWith("/")) {
+      jobUrl = jobUrl.substring(0, jobUrl.length() - 1);
+    }
+
+    try {
+      int pos = jobUrl.lastIndexOf('/');
+      @SuppressWarnings("unused")
+      long buildNr = Long.parseLong(jobUrl.substring(pos + 1, jobUrl.length()));
+      jobUrl = jobUrl.substring(0, pos); // strip build number
+    } catch (NumberFormatException e) {
+      // not a build number, let's don't strip
+    }
+
+    return jobUrl;
   }
 
   public String getDisplayName() {
     return this.displayName;
   }
 
-  public void setLastBuildAvailable(final boolean lastBuildAvailable) {
-    this.lastBuildAvailable = lastBuildAvailable;
+  public void setDisplayName(final String displayName) {
+    this.displayName = displayName;
   }
-
-  public boolean isLastBuildAvailable() {
-    return this.lastBuildAvailable;
-  }
-
 }

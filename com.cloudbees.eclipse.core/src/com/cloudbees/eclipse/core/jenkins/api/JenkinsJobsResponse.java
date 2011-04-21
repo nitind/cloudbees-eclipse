@@ -64,13 +64,13 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
 
     public Boolean buildable;
 
-    public Build lastBuild;
-    public Build lastCompletedBuild;
-    public Build lastFailedBuild;
-    public Build lastStableBuild;
-    public Build lastSuccessfulBuild;
-    public Build lastUnstableBuild;
-    public Build lastUnsuccessfulBuild;
+    public JenkinsBuild lastBuild;
+    public JenkinsBuild lastCompletedBuild;
+    public JenkinsBuild lastFailedBuild;
+    public JenkinsBuild lastStableBuild;
+    public JenkinsBuild lastSuccessfulBuild;
+    public JenkinsBuild lastUnstableBuild;
+    public JenkinsBuild lastUnsuccessfulBuild;
 
     public JenkinsJobProperty[] property;
 
@@ -111,21 +111,7 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
       }
       return true;
     }
-
-    public static class Build {
-      public String fullDisplayName;
-      public String url;
-      public String builtOn;
       public String result;
-
-      // Merged from regular build request, json tree can fetch this nicely
-      public Boolean building;
-      public Long duration;
-      public Long number;
-      public Long timestamp;
-
-    }
-
   }
 
 }

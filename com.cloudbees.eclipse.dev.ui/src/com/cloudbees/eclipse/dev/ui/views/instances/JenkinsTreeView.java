@@ -28,6 +28,7 @@ import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.jenkins.api.BaseJenkinsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse.View;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.dev.ui.utils.FavouritesUtils;
@@ -145,6 +146,9 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
     this.jenkinsChangeListener = new JenkinsChangeListener() {
       @Override
       public void activeJobViewChanged(final JenkinsJobsResponse newView) {
+      }
+
+      public void activeJobHistoryChanged(final JenkinsJobAndBuildsResponse newView) {
       }
 
       @Override

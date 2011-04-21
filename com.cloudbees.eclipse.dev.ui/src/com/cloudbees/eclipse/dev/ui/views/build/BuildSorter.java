@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.dev.ui.views.jobs;
+package com.cloudbees.eclipse.dev.ui.views.build;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -6,22 +6,20 @@ import org.eclipse.swt.SWT;
 
 import com.cloudbees.eclipse.core.jenkins.api.HealthReport;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
 
-public class JobSorter extends ViewerSorter {
+public class BuildSorter extends ViewerSorter {
 
   public final static int STATE = 1;
-  public final static int JOB = 2;
-  public final static int LAST_BUILD = 3;
-  public final static int LAST_SUCCESS = 4;
-  public final static int LAST_FAILURE = 5;
-  public static final int BUILD_STABILITY = 6;
+  public final static int BUILD = 2;
+  public final static int DURATION = 3;
+  public final static int TESTS = 4;
+  public final static int CAUSE = 5;
+  public static final int TIME = 6;
 
   private int sortCol;
   private int direction;
 
-  public JobSorter(final int sortCol) {
+  public BuildSorter(final int sortCol) {
     super();
     this.sortCol = sortCol;
     this.direction = SWT.DOWN;
@@ -30,30 +28,32 @@ public class JobSorter extends ViewerSorter {
   @Override
   public int compare(final Viewer viewer, final Object e1, final Object e2) {
 
-    JenkinsJobsResponse.Job j1 = (JenkinsJobsResponse.Job) e1;
-    JenkinsJobsResponse.Job j2 = (JenkinsJobsResponse.Job) e2;
+    JenkinsBuild b1 = (JenkinsBuild) e1;
+    JenkinsBuild b2 = (JenkinsBuild) e2;
 
     switch (this.sortCol) {
     case STATE:
-      return rev() * compState(j1, j2);
+      return rev() * compState(b1, b2);
 
-    case JOB:
-      return rev() * compJob(j1, j2);
+    case BUILD:
+      return rev() * compBuild(b1, b2);
 
-    case LAST_BUILD:
-      return rev() * compareBuildTimestamps(j1.lastBuild, j2.lastBuild);
+    case TIME:
+      return rev() * compareBuildTimestamps(b1, b2);
 
-    case LAST_SUCCESS:
-      return rev() * compareBuildTimestamps(j1.lastSuccessfulBuild, j2.lastSuccessfulBuild);
+    case DURATION:
+      return rev() * ((int) (b1.duration - b2.duration));
 
-    case LAST_FAILURE:
-      return rev() * compareBuildTimestamps(j1.lastFailedBuild, j2.lastFailedBuild);
+//    case TESTS:
+      //      return rev() * compareBuildTimestamps(b1.tests, b2.tests);
 
-    case BUILD_STABILITY:
-      return rev() * compareBuildStability(j1.healthReport, j2.healthReport);
+      //    case CAUSE:
+      //      return rev() * compareBuildTimestamps(b1.cause, b2.cause);
+
     default:
       break;
     }
+
     return rev() * super.compare(viewer, e1, e2);
   }
 
@@ -133,19 +133,19 @@ public class JobSorter extends ViewerSorter {
     return -1 * b1.timestamp.compareTo(b2.timestamp);
   }
 
-  private int compJob(final Job j1, final Job j2) {
+  private int compBuild(final JenkinsBuild j1, final JenkinsBuild j2) {
     try {
-      return j1.getDisplayName().compareToIgnoreCase(j2.getDisplayName());
+      return j1.fullDisplayName.compareToIgnoreCase(j2.fullDisplayName);
     } catch (Exception e) {
       e.printStackTrace(); // TODO handle better
       return 0;
     }
   }
 
-  private int compState(final Job j1, final Job j2) {
-    int res = j1.color.compareTo(j2.color);
+  private int compState(final JenkinsBuild j1, final JenkinsBuild j2) {
+    int res = j1.result.compareTo(j2.result);
     if (res == 0) {
-      return compJob(j1, j2);
+      return compBuild(j1, j2);
     }
     return res;
   }
