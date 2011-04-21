@@ -135,7 +135,7 @@ public class BuildSorter extends ViewerSorter {
 
   private int compBuild(final JenkinsBuild j1, final JenkinsBuild j2) {
     try {
-      return j1.fullDisplayName.compareToIgnoreCase(j2.fullDisplayName);
+      return (int) (j1.number - j2.number);
     } catch (Exception e) {
       e.printStackTrace(); // TODO handle better
       return 0;

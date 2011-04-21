@@ -264,7 +264,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     //table.getTable().setLinesVisible(true);
     this.table.getTable().setHeaderVisible(true);
 
-    createColumn("S", 20, JobSorter.STATE, new CellLabelProvider() {
+    TableViewerColumn statusCol = createColumn("S", 22, JobSorter.STATE, new CellLabelProvider() {
       @Override
       public void update(final ViewerCell cell) {
         JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
@@ -294,6 +294,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       }
 
     });
+    statusCol.getColumn().setToolTipText("Status");
 
     //TODO i18n
     TableViewerColumn namecol = createColumn("Job", 250, JobSorter.JOB, new CellLabelProvider() {
