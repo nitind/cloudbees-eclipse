@@ -66,7 +66,7 @@ import com.cloudbees.eclipse.ui.PreferenceConstants;
 
 /**
  * View showing jobs for both Jenkins offline installations and JaaS Nectar instances
- * 
+ *
  * @author ahtik
  */
 public class JobsView extends ViewPart implements IPropertyChangeListener {
@@ -291,6 +291,12 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
           cell.setText(job.color);
         }
 
+      }
+
+      @Override
+      public String getToolTipText(final Object element) {
+        JenkinsJobsResponse.Job job = (Job) element;
+        return job.color;
       }
 
     });
@@ -518,7 +524,11 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         ImageDescriptor.createFromURL(
             CloudBeesDevUiPlugin.getDefault().getBundle().getResource("/icons/jenkins-icons/16x16/grey.gif"))
             .createImage());
-
+    this.stateIcons.put(
+        "aborted",
+        ImageDescriptor.createFromURL(
+            CloudBeesDevUiPlugin.getDefault().getBundle().getResource("/icons/jenkins-icons/16x16/stop.gif"))
+            .createImage());
   }
 
   private TableViewerColumn createColumn(final String colName, final int width,
