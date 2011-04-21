@@ -10,6 +10,7 @@ import java.util.TimeZone;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.team.svn.core.connector.SVNRevision;
+import org.eclipse.team.svn.core.operation.local.management.ShareProjectOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryFile;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
@@ -145,11 +146,45 @@ public class ForgeSubversiveSync implements ForgeSync {
   }
 
   @Override
-  public void addToRepository(TYPE type, Repo repo, IProject project, IProgressMonitor monitor) {
+  public void addToRepository(TYPE type, Repo repo, IProject project, IProgressMonitor monitor)
+      throws CloudBeesException {
+
     if (type != TYPE.SVN) {
       return;
     }
 
+    boolean endsWithSlash = repo.url.endsWith("/");
+    IRepositoryLocation location = null;
+
+    for (IRepositoryLocation loc : SVNRemoteStorage.instance().getRepositoryLocations()) {
+      String url = loc.getUrl();
+
+      if (endsWithSlash && !url.endsWith("/")) {
+        url += "/";
+      }
+
+      if (url.equalsIgnoreCase(repo.url)) {
+        location = loc;
+        break;
+      }
+    }
+
+    if (location == null) {
+      throw new CloudBeesException("Could not find CloudBees SVN repository");
+    }
+
+    System.out.println(location);
+
+    ShareProjectOperation.IFolderNameMapper mapper = new ShareProjectOperation.IFolderNameMapper() {
+
+      @Override
+      public String getRepositoryFolderName(IProject project) {
+        return project.getName();
+      }
+    };
+    ShareProjectOperation operation = new ShareProjectOperation(new IProject[] { project }, location, mapper,
+        "Create new repository folder");
+    operation.run(monitor);
   }
 
 }

@@ -20,8 +20,10 @@ import org.tigris.subversion.subclipse.core.ISVNRepositoryLocation;
 import org.tigris.subversion.subclipse.core.SVNException;
 import org.tigris.subversion.subclipse.core.SVNProviderPlugin;
 import org.tigris.subversion.subclipse.core.repo.SVNRepositories;
+import org.tigris.subversion.subclipse.core.resources.LocalResourceStatus;
 import org.tigris.subversion.subclipse.core.resources.RemoteFile;
 import org.tigris.subversion.subclipse.core.resources.RemoteResource;
+import org.tigris.subversion.subclipse.core.resources.SVNWorkspaceRoot;
 import org.tigris.subversion.subclipse.ui.editor.RemoteFileEditorInput;
 import org.tigris.subversion.svnclientadapter.SVNRevision;
 import org.tigris.subversion.svnclientadapter.SVNUrl;
@@ -183,13 +185,31 @@ public class ForgeSubclipseSync implements ForgeSync {
       return;
     }
 
-    SVNSupport support = new SVNSupport();
-    if (support.isSVNFolder(project)) {
+    if (isSVNFolder(project)) {
       throw new CloudBeesException("This project is already under source control management.");
     }
 
-    ISVNRepositoryLocation location = support.getSVNRepositoryLocation(repo);
-
-    support.share(location, project, "Create new repository folder", monitor);
+    try {
+      ISVNRepositoryLocation location = SVNProviderPlugin.getPlugin().getRepository(repo.url);
+      SVNWorkspaceRoot.setSharing(project, monitor);
+      SVNWorkspaceRoot
+          .shareProject(location, project, project.getName(), "Create new repository folder", true, monitor);
+    } catch (Exception e) {
+      throw new CloudBeesException("Failed to share project", e);
+    }
   }
+
+  private boolean isSVNFolder(IProject project) {
+    boolean isSVNFolder = false;
+
+    try {
+      LocalResourceStatus projectStatus = SVNWorkspaceRoot.peekResourceStatusFor(project);
+      isSVNFolder = projectStatus != null && projectStatus.hasRemote();
+    } catch (SVNException e) {
+      e.printStackTrace();
+    }
+
+    return isSVNFolder;
+  }
+
 }
