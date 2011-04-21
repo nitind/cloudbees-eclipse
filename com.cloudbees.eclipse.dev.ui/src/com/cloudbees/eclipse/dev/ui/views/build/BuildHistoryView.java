@@ -128,7 +128,7 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
     //table.getTable().setLinesVisible(true);
     this.table.getTable().setHeaderVisible(true);
 
-    createColumn("S", 20, BuildSorter.STATE, new CellLabelProvider() {
+    TableViewerColumn statusCol = createColumn("S", 22, BuildSorter.STATE, new CellLabelProvider() {
       @Override
       public void update(final ViewerCell cell) {
         JenkinsBuild build = (JenkinsBuild) cell.getViewerRow().getElement();
@@ -158,6 +158,7 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
       }
 
     });
+    statusCol.getColumn().setToolTipText("Status");
 
     //TODO i18n
     TableViewerColumn namecol = createColumn("Build", 50, BuildSorter.BUILD, new CellLabelProvider() {
@@ -188,7 +189,7 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
       }
     });
 
-    createColumn("Duration", 100, BuildSorter.DURATION, new CellLabelProvider() {
+    createColumn("Build Duration", 100, BuildSorter.DURATION, new CellLabelProvider() {
       @Override
       public void update(final ViewerCell cell) {
         JenkinsBuild build = (JenkinsBuild) cell.getViewerRow().getElement();
@@ -200,7 +201,7 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
       }
     });
 
-    createColumn("Tests", 250, BuildSorter.TESTS, new CellLabelProvider() {
+    createColumn("Tests", 200, BuildSorter.TESTS, new CellLabelProvider() {
       @Override
       public void update(final ViewerCell cell) {
         JenkinsBuild build = (JenkinsBuild) cell.getViewerRow().getElement();
@@ -342,19 +343,6 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
     };
 
     CloudBeesUIPlugin.getDefault().addJenkinsChangeListener(this.jenkinsChangeListener);
-  }
-
-  protected String formatBuildInfo(final JenkinsBuild build) {
-    String unit = "";
-    if (build.duration != null) {
-      //TODO Implement proper human-readable duration conversion, consider using the same conversion rules that Jenkins uses
-      //CloudBeesUIPlugin.getDefault().getLogger().info("DURATION: " + build.timestamp);
-      unit = Utils.humanReadableTime((System.currentTimeMillis() - build.timestamp));
-    }
-    String timeComp = build.duration != null ? /*", " + */unit + " ago" : "";
-    //String buildComp = build.number != null ? "#" + build.number : "n/a";
-    String buildComp = " #" + build.number;
-    return timeComp + buildComp;
   }
 
   private void initImages() {
