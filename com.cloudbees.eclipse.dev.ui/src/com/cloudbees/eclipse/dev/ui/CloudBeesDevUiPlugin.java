@@ -12,6 +12,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -43,7 +44,7 @@ import com.cloudbees.eclipse.ui.PreferenceConstants;
 public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
   private final class FavouritesTracker extends Thread {
-    private static final int POLL_DELAY = 60 * 1000;
+    private static final int POLL_DELAY = 10 * 1000;
     JenkinsJobsResponse previous = null;
     private boolean halted = false;
 
@@ -57,29 +58,40 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
         try {
           Thread.sleep(POLL_DELAY);
           JenkinsJobsResponse favouritesResponse = FavouritesUtils.getFavouritesResponse(new NullProgressMonitor());
+
           if (this.previous != null) {
             for (Job j : this.previous.jobs) {
-              for (final Job q : favouritesResponse.jobs) {
-                if (q.url.equals(j.url)) {
-                  if (q.lastBuild != null && (j.lastBuild == null || q.lastBuild.number > j.lastBuild.number)) {
-                    Display.getDefault().syncExec(new Runnable() {
-
-                      @Override
-                      public void run() {
-                        FavouritesUtils.showNotification(q);
-                      }
-                    });
-                  }
-                }
-              }
+              checkJobsForNewBuild(j, favouritesResponse.jobs);
             }
           }
+
           this.previous = favouritesResponse;
+
         } catch (CloudBeesException e) {
           CloudBeesDevUiPlugin.this.logger.error(e);
         } catch (InterruptedException e) {
           this.halted = true;
         }
+      }
+    }
+
+    private void checkJobsForNewBuild(Job j, Job[] newJobs) {
+      for (final Job q : newJobs) {
+        if (q.url.equals(j.url)) {
+          showAlertIfHasNewBuild(j, q);
+        }
+      }
+    }
+
+    private void showAlertIfHasNewBuild(Job j, final Job q) {
+      if (q.lastBuild != null && (j.lastBuild == null || q.lastBuild.number > j.lastBuild.number)) {
+        Display.getDefault().syncExec(new Runnable() {
+
+          @Override
+          public void run() {
+            FavouritesUtils.showNotification(q);
+          }
+        });
       }
     }
 
@@ -266,10 +278,11 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             @Override
             public void run() {
               try {
+                boolean isFavourites = FavouritesUtils.FAVOURITES.equals(viewUrl);
                 IWorkbenchPage activePage = CloudBeesUIPlugin.getActiveWindow().getActivePage();
 
                 int hashCode;
-                if (FavouritesUtils.FAVOURITES.equals(viewUrl)) {
+                if (isFavourites) {
                   hashCode = viewUrl.hashCode();
                 } else {
                   hashCode = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getUrl().hashCode();
@@ -279,10 +292,10 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
                 int mode = userAction ? IWorkbenchPage.VIEW_ACTIVATE : IWorkbenchPage.VIEW_CREATE;
 
-                activePage.showView(JobsView.ID, urlHash, mode);
+                IViewPart view = activePage.showView(JobsView.ID, urlHash, mode);
 
               } catch (PartInitException e) {
-                CloudBeesUIPlugin.getDefault().showError("Failed to show Jobs view", e);
+                CloudBeesUIPlugin.showError("Failed to show Jobs view", e);
               }
             }
           });
@@ -330,7 +343,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
         try {
           CloudBeesUIPlugin.getActiveWindow().getActivePage().showView(viewId);
         } catch (PartInitException e) {
-          CloudBeesUIPlugin.getDefault().showError("Failed to show view: " + viewId, e);
+          CloudBeesUIPlugin.showError("Failed to show view: " + viewId, e);
         }
       }
     });
