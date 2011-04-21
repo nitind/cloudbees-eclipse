@@ -23,6 +23,7 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
+import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
@@ -30,6 +31,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
+import com.cloudbees.eclipse.dev.ui.utils.FavouritesUtils;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildEditorInput;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildHistoryView;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildPart;
@@ -43,17 +45,66 @@ import com.cloudbees.eclipse.ui.PreferenceConstants;
  */
 public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
+  private final class FavouritesTracker extends Thread {
+    private static final int POLL_DELAY = 60 * 1000;
+    JenkinsJobsResponse previous = null;
+    private boolean halted = false;
+
+    public FavouritesTracker() {
+      super("Favourites Tracker");
+    }
+
+    @Override
+    public void run() {
+      while (!this.halted) {
+        try {
+          Thread.sleep(POLL_DELAY);
+          JenkinsJobsResponse favouritesResponse = FavouritesUtils.getFavouritesResponse(new NullProgressMonitor());
+          if (this.previous != null) {
+            for (Job j : this.previous.jobs) {
+              for (final Job q : favouritesResponse.jobs) {
+                if (q.url.equals(j.url)) {
+                  if (q.lastBuild != null && (j.lastBuild == null || q.lastBuild.number > j.lastBuild.number)) {
+                    Display.getDefault().syncExec(new Runnable() {
+
+                      @Override
+                      public void run() {
+                        FavouritesUtils.showNotification(q);
+                      }
+                    });
+                  }
+                }
+              }
+            }
+          }
+          this.previous = favouritesResponse;
+        } catch (CloudBeesException e) {
+          CloudBeesDevUiPlugin.this.logger.error(e);
+        } catch (InterruptedException e) {
+          this.halted = true;
+        }
+      }
+    }
+
+    public void halt() {
+      this.halted = true;
+    }
+  }
+
   public static final String PLUGIN_ID = "com.cloudbees.eclipse.dev.ui"; //$NON-NLS-1$
   private static CloudBeesDevUiPlugin plugin;
 
   private JobConsoleManager jobConsoleManager;
 
   private Logger logger;
+  private FavouritesTracker favouritesTracker;
 
   /**
    * The constructor
    */
   public CloudBeesDevUiPlugin() {
+    CloudBeesUIPlugin.getDefault().getAllJenkinsServices()
+        .add(new JenkinsService(new JenkinsInstance("Favourite jobs", FavouritesUtils.FAVOURITES)));
   }
 
   /*
@@ -66,6 +117,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     CloudBeesDevUiPlugin.plugin = this;
     this.logger = new Logger(getLog());
     reloadForgeRepos(false);
+    this.favouritesTracker = new FavouritesTracker();
+    this.favouritesTracker.start();
   }
 
   /*
@@ -80,12 +133,13 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
       this.jobConsoleManager.unregister();
       this.jobConsoleManager = null;
     }
+    this.favouritesTracker.halt();
     super.stop(context);
   }
 
   /**
    * Returns the shared instance
-   *
+   * 
    * @return the shared instance
    */
   public static CloudBeesDevUiPlugin getDefault() {
@@ -212,15 +266,24 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
         try {
           PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+            @Override
             public void run() {
               try {
-                CloudBeesUIPlugin
-                    .getActiveWindow()
-                    .getActivePage()
-                    .showView(
-                        JobsView.ID,
-                        Long.toString(CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getUrl()
-                            .hashCode()), userAction ? IWorkbenchPage.VIEW_ACTIVATE : IWorkbenchPage.VIEW_CREATE);
+                IWorkbenchPage activePage = CloudBeesUIPlugin.getActiveWindow().getActivePage();
+
+                int hashCode;
+                if (FavouritesUtils.FAVOURITES.equals(viewUrl)) {
+                  hashCode = viewUrl.hashCode();
+                } else {
+                  hashCode = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getUrl().hashCode();
+                }
+
+                String urlHash = Long.toString(hashCode);
+
+                int mode = userAction ? IWorkbenchPage.VIEW_ACTIVATE : IWorkbenchPage.VIEW_CREATE;
+
+                activePage.showView(JobsView.ID, urlHash, mode);
+
               } catch (PartInitException e) {
                 CloudBeesUIPlugin.getDefault().showError("Failed to show Jobs view", e);
               }
@@ -231,9 +294,12 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             throw new OperationCanceledException();
           }
 
-          JenkinsJobsResponse jobs = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl)
-              .getJobs(viewUrl, monitor);
-
+          JenkinsJobsResponse jobs;
+          if (FavouritesUtils.FAVOURITES.equals(viewUrl)) {
+            jobs = FavouritesUtils.getFavouritesResponse(monitor);
+          } else {
+            jobs = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getJobs(viewUrl, monitor);
+          }
           if (monitor.isCanceled()) {
             throw new OperationCanceledException();
           }
@@ -251,6 +317,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
           return new Status(Status.ERROR, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
         }
       }
+
     };
 
     job.setUser(userAction);
@@ -261,6 +328,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
   public void showView(final String viewId) {
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override
       public void run() {
         try {
           CloudBeesUIPlugin.getActiveWindow().getActivePage().showView(viewId);
@@ -388,6 +456,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
           if (userAction) {
             final String msg = mess;
             PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+              @Override
               public void run() {
                 MessageDialog.openInformation(CloudBeesDevUiPlugin.getDefault().getWorkbench().getDisplay()
                     .getActiveShell(), "Synced Forge repositories", msg);

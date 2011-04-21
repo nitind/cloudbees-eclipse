@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorPart;
@@ -27,6 +28,7 @@ import org.tigris.subversion.svnclientadapter.SVNUrl;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
+import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
@@ -37,6 +39,7 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
  */
 public class ForgeSubclipseSync implements ForgeSync {
 
+  @Override
   public ACTION sync(final TYPE type, final Properties props, final IProgressMonitor monitor) throws CloudBeesException {
 
     if (!ForgeSync.TYPE.SVN.equals(type)) {
@@ -77,6 +80,7 @@ public class ForgeSubclipseSync implements ForgeSync {
     }
   }
 
+  @Override
   public boolean openRemoteFile(final JenkinsScmConfig scmConfig, final ChangeSetPathItem item,
       final IProgressMonitor monitor) {
     for (JenkinsScmConfig.Repository repo : scmConfig.repos) {
@@ -93,8 +97,7 @@ public class ForgeSubclipseSync implements ForgeSync {
     return false;
   }
 
-  private boolean openRemoteFile_(final String repo, final ChangeSetPathItem item,
-      final IProgressMonitor monitor) {
+  private boolean openRemoteFile_(final String repo, final ChangeSetPathItem item, final IProgressMonitor monitor) {
     try {
       SVNRepositories repos = SVNProviderPlugin.getPlugin().getRepositories();
       boolean exists = repos.isKnownRepository(repo, false);
@@ -140,6 +143,7 @@ public class ForgeSubclipseSync implements ForgeSync {
       final IEditorPart[] editor = new IEditorPart[1];
 
       PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+        @Override
         public void run() {
           try {
             IEditorRegistry registry = PlatformUI.getWorkbench().getEditorRegistry();
@@ -172,4 +176,20 @@ public class ForgeSubclipseSync implements ForgeSync {
     }
   }
 
+  @Override
+  public void addToRepository(TYPE type, Repo repo, IProject project, IProgressMonitor monitor)
+      throws CloudBeesException {
+    if (type != TYPE.SVN) {
+      return;
+    }
+
+    SVNSupport support = new SVNSupport();
+    if (support.isSVNFolder(project)) {
+      throw new CloudBeesException("This project is already under source control management.");
+    }
+
+    ISVNRepositoryLocation location = support.getSVNRepositoryLocation(repo);
+
+    support.share(location, project, "Create new repository folder", monitor);
+  }
 }

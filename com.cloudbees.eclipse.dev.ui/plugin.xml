@@ -165,5 +165,34 @@
                 </or>
             </enablement>
         </consolePatternMatchListener>
-    </extension>    
+    </extension>
+    
+    <extension
+       point="org.eclipse.ui.popupMenus">
+    	<objectContribution
+          adaptable="true"
+          id="com.cloudbees.eclipse.dev.ui.newJenkinsJob"
+          nameFilter="*"
+          objectClass="org.eclipse.core.resources.IProject">
+       <action
+             class="com.cloudbees.eclipse.dev.ui.actions.NewJenkinsJobAction"
+             enablesFor="1"
+             id="com.cloudbees.eclipse.dev.ui.action.newJenkinsJob"
+             label="New Jenkins Job"
+             menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup">
+       </action>
+       <visibility>
+          <and>
+             <objectClass
+                   name="org.eclipse.core.resources.IProject">
+             </objectClass>
+             <objectState
+                   name="projectNature"
+                   value="com.cloudbees.eclipse.core.cloudbeesNature">
+             </objectState>
+          </and>
+      	</visibility>
+    	</objectContribution>
+ 		</extension>
+     
 </plugin>

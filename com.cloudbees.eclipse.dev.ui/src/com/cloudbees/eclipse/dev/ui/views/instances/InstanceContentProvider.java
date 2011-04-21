@@ -13,15 +13,18 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 public class InstanceContentProvider implements IStructuredContentProvider, ITreeContentProvider {
   private InstanceGroup jenkinsGroup = new InstanceGroup("Jenkins", false);
   private InstanceGroup cloudGroup = new InstanceGroup("DEV@cloud", true);
+  private InstanceGroup favouritesGroup = new FavouritesInstanceGroup("Favourite jobs", false);
 
   public InstanceContentProvider() {
-    jenkinsGroup.setLoading(true);
-    cloudGroup.setLoading(true);
+    this.jenkinsGroup.setLoading(true);
+    this.cloudGroup.setLoading(true);
+    this.favouritesGroup.setLoading(false);
   }
 
+  @Override
   public void inputChanged(Viewer v, Object oldInput, Object newInput) {
-    jenkinsGroup.clear();
-    cloudGroup.clear();
+    this.jenkinsGroup.clear();
+    this.cloudGroup.clear();
 
     if (newInput == null || !(newInput instanceof List)) {
       v.refresh();
@@ -32,29 +35,33 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
       if (instance instanceof JenkinsInstanceResponse) {
         JenkinsInstanceResponse nir = (JenkinsInstanceResponse) instance;
         if (nir.atCloud) {
-          cloudGroup.addChild(nir);
+          this.cloudGroup.addChild(nir);
         } else {
-          jenkinsGroup.addChild(nir);
+          this.jenkinsGroup.addChild(nir);
         }
       }
     }
 
-    jenkinsGroup.setLoading(false);
-    cloudGroup.setLoading(false);
+    this.jenkinsGroup.setLoading(false);
+    this.cloudGroup.setLoading(false);
 
     v.refresh();
     ((TreeViewer) v).expandToLevel(2);
   }
 
+  @Override
   public void dispose() {
-    jenkinsGroup = null;
-    cloudGroup = null;
+    this.jenkinsGroup = null;
+    this.cloudGroup = null;
+    this.favouritesGroup = null;
   }
 
+  @Override
   public Object[] getElements(Object parent) {
     return getChildren(parent);
   }
 
+  @Override
   public Object getParent(Object child) {
     if (child instanceof JenkinsInstanceHolder) {
       return ((JenkinsInstanceHolder) child).getParent();
@@ -62,23 +69,24 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
     return null;
   }
 
+  @Override
   public Object[] getChildren(Object parent) {
     if (parent instanceof IViewSite) {
-      return new InstanceGroup[] { cloudGroup, jenkinsGroup };
-    } else
-    if (parent instanceof InstanceGroup) {
+      return new InstanceGroup[] { this.cloudGroup, this.jenkinsGroup, this.favouritesGroup };
+    } else if (parent instanceof InstanceGroup) {
       return ((InstanceGroup) parent).getChildren();
-    } else
-    if (parent instanceof JenkinsInstanceResponse) {
+    } else if (parent instanceof JenkinsInstanceResponse) {
       JenkinsInstanceResponse resp = (JenkinsInstanceResponse) parent;
       return resp.views;
     }
     return new Object[0];
   }
 
+  @Override
   public boolean hasChildren(Object parent) {
-    if (parent instanceof InstanceGroup)
+    if (parent instanceof InstanceGroup) {
       return ((InstanceGroup) parent).hasChildren();
+    }
 
     if (parent instanceof JenkinsInstanceResponse) {
       return ((JenkinsInstanceResponse) parent).views != null && ((JenkinsInstanceResponse) parent).views.length > 0;

@@ -8,6 +8,7 @@ import java.util.Properties;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
@@ -19,6 +20,7 @@ import com.cloudbees.eclipse.core.gc.api.AccountNamesRequest;
 import com.cloudbees.eclipse.core.gc.api.AccountNamesResponse;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusRequest;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse;
+import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
 import com.cloudbees.eclipse.core.gc.api.KeysUsingAuthRequest;
 import com.cloudbees.eclipse.core.gc.api.KeysUsingAuthResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
@@ -27,7 +29,7 @@ import com.google.gson.Gson;
 
 /**
  * Central access to CloudBees Grand Central API
- *
+ * 
  * @author ahtik
  */
 public class GrandCentralService {
@@ -57,7 +59,7 @@ public class GrandCentralService {
 
   /**
    * Validates user credential against CloudBees SSO authentication server. TODO Refactor to json-based validation
-   *
+   * 
    * @param email
    * @param password
    * @param monitor
@@ -189,254 +191,274 @@ public class GrandCentralService {
    * } catch (Exception e) { throw new
    * CloudBeesException("Failed to get api_key", e); } }
    */public void start() {
-     // Do nothing for now.
-   }
+    // Do nothing for now.
+  }
 
-   public void stop() {
-     // Do nothing for now.
-   }
+  public void stop() {
+    // Do nothing for now.
+  }
 
-   private AccountServiceStatusResponse loadAccountServices(final String account) throws CloudBeesException {
-     StringBuffer errMsg = new StringBuffer();
+  private AccountServiceStatusResponse loadAccountServices(final String account) throws CloudBeesException {
+    StringBuffer errMsg = new StringBuffer();
 
-     try {
-       HttpClient httpclient = Utils.getAPIClient();
+    try {
+      HttpClient httpclient = Utils.getAPIClient();
 
-       AccountServiceStatusRequest req = new AccountServiceStatusRequest();
-       req.account = account;
-       AuthInfo auth = getAuthInfo(null);
-       req.uid = auth.getAuth().uid;
-       req.partner_key = PK;
+      AccountServiceStatusRequest req = new AccountServiceStatusRequest();
+      req.account = account;
+      AuthInfo auth = getAuthInfo(null);
+      req.uid = auth.getAuth().uid;
+      req.partner_key = PK;
 
-       String url = BASE_URL + "account/service_status";
+      String url = BASE_URL + "account/service_status";
 
-       System.out.println("URL: " + url);
-       HttpPost post = Utils.jsonRequest(url, req);
+      System.out.println("URL: " + url);
+      HttpPost post = Utils.jsonRequest(url, req);
 
-       HttpResponse resp = httpclient.execute(post);
-       String bodyResponse = Utils.getResponseBody(resp);
+      HttpResponse resp = httpclient.execute(post);
+      String bodyResponse = Utils.getResponseBody(resp);
 
-       System.out.println("Received: " + bodyResponse);
-       Gson g = Utils.createGson();
+      System.out.println("Received: " + bodyResponse);
+      Gson g = Utils.createGson();
 
-       AccountServiceStatusResponse services = g.fromJson(bodyResponse, AccountServiceStatusResponse.class);
+      AccountServiceStatusResponse services = g.fromJson(bodyResponse, AccountServiceStatusResponse.class);
 
-       if (services.message != null && services.message.length() > 0) {
-         errMsg.append(services.message);
-       }
-       Utils.checkResponseCode(resp);
+      if (services.message != null && services.message.length() > 0) {
+        errMsg.append(services.message);
+      }
+      Utils.checkResponseCode(resp);
 
-       return services;
+      return services;
 
-     } catch (Exception e) {
-       throw new CloudBeesException("Failed to get account services info"
-           + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
-     }
-   }
+    } catch (Exception e) {
+      throw new CloudBeesException("Failed to get account services info"
+          + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
+    }
+  }
 
-   /*
-    * AccountServiceStatusResponse r = new AccountServiceStatusResponse();
-    * //r.api_version = "1.0";
-    *
-    * AccountServiceStatusResponse.ForgeService forge1 = new
-    * AccountServiceStatusResponse.ForgeService(); forge1.type = "SVN";
-    * forge1.url = "http://anonsvn.jboss.org/repos/jbpm/jbpm4/trunk/";
-    *
-    * AccountServiceStatusResponse.ForgeService forge2 = new
-    * AccountServiceStatusResponse.ForgeService(); forge2.type = "GIT";
-    * forge2.url = "https://github.com/vivek/hudson.git";
-    *
-    * r.forge = new AccountServiceStatusResponse.ForgeService[] { forge1,
-    * forge2 };
-    *
-    * r.jaas = new AccountServiceStatusResponse.JaasService[] {};
-    *
-    * return r;
-    */
+  /*
+   * AccountServiceStatusResponse r = new AccountServiceStatusResponse();
+   * //r.api_version = "1.0";
+   *
+   * AccountServiceStatusResponse.ForgeService forge1 = new
+   * AccountServiceStatusResponse.ForgeService(); forge1.type = "SVN";
+   * forge1.url = "http://anonsvn.jboss.org/repos/jbpm/jbpm4/trunk/";
+   *
+   * AccountServiceStatusResponse.ForgeService forge2 = new
+   * AccountServiceStatusResponse.ForgeService(); forge2.type = "GIT";
+   * forge2.url = "https://github.com/vivek/hudson.git";
+   *
+   * r.forge = new AccountServiceStatusResponse.ForgeService[] { forge1,
+   * forge2 };
+   *
+   * r.jaas = new AccountServiceStatusResponse.JaasService[] {};
+   *
+   * return r;
+   */
 
-   public String[] reloadForgeRepos(final IProgressMonitor monitor) throws CloudBeesException {
+  public String[] reloadForgeRepos(final IProgressMonitor monitor) throws CloudBeesException {
 
-     if (!hasAuthInfo()) {
-       return null;
-     }
+    if (!hasAuthInfo()) {
+      return null;
+    }
 
-     String[] accounts = getAccounts(monitor);
+    String[] accounts = getAccounts(monitor);
 
-     // String primaryAccount = getPrimaryAccount(monitor);
+    // String primaryAccount = getPrimaryAccount(monitor);
 
-     List<String> status = new ArrayList<String>();
+    List<String> status = new ArrayList<String>();
 
-     for (String acc : accounts) {
+    for (String acc : accounts) {
 
-       AccountServiceStatusResponse services = loadAccountServices(acc);
+      AccountServiceStatusResponse services = loadAccountServices(acc);
 
-       for (AccountServiceStatusResponse.AccountServices.ForgeService.Repo forge : services.services.forge.repos) {
-         ForgeSync.TYPE type = ForgeSync.TYPE.valueOf(forge.type.toUpperCase());
-         if (type == null) {
-           throw new CloudBeesException("Unexpected Forge repository type " + type + "!");
-         }
-         Properties props = new Properties();
-         props.put("url", forge.url);
+      for (AccountServiceStatusResponse.AccountServices.ForgeService.Repo forge : services.services.forge.repos) {
+        ForgeSync.TYPE type = ForgeSync.TYPE.valueOf(forge.type.toUpperCase());
+        if (type == null) {
+          throw new CloudBeesException("Unexpected Forge repository type " + type + "!");
+        }
+        Properties props = new Properties();
+        props.put("url", forge.url);
 
-         try {
-           monitor.beginTask("Syncing repository '" + forge.url + "'", 100);
-           String[] sts = this.forgeSyncService.sync(type, props, monitor);
-           if (sts != null && sts.length > 0) {
-             status.addAll(Arrays.asList(sts));
-           }
-         } finally {
-           monitor.done();
-         }
-       }
-     }
+        try {
+          monitor.beginTask("Syncing repository '" + forge.url + "'", 100);
+          String[] sts = this.forgeSyncService.sync(type, props, monitor);
+          if (sts != null && sts.length > 0) {
+            status.addAll(Arrays.asList(sts));
+          }
+        } finally {
+          monitor.done();
+        }
+      }
+    }
 
-     /*
-      * if (services.services.forge.repos.length == 0) { // Forge down, demo
-      * mode Properties props = new Properties(); props.put("url",
-      * "ahti@i.codehoop.com:/opt/git/cb"); String[] sts =
-      * forgeSyncService.sync(ForgeSync.TYPE.GIT, props, monitor); if (sts !=
-      * null && sts.length > 0) { status.addAll(Arrays.asList(sts)); } }
-      */
-     return status.toArray(new String[status.size()]);
-   }
+    /*
+     * if (services.services.forge.repos.length == 0) { // Forge down, demo
+     * mode Properties props = new Properties(); props.put("url",
+     * "ahti@i.codehoop.com:/opt/git/cb"); String[] sts =
+     * forgeSyncService.sync(ForgeSync.TYPE.GIT, props, monitor); if (sts !=
+     * null && sts.length > 0) { status.addAll(Arrays.asList(sts)); } }
+     */
+    return status.toArray(new String[status.size()]);
+  }
 
-   public void addForgeSyncProvider(final ForgeSync provider) {
-     this.forgeSyncService.addProvider(provider);
+  public void addForgeSyncProvider(final ForgeSync provider) {
+    this.forgeSyncService.addProvider(provider);
     System.out.println("adding: " + provider);
-   }
+  }
 
-   public boolean openRemoteFile(final JenkinsScmConfig scmConfig, final ChangeSetPathItem item,
-       final IProgressMonitor monitor) throws CloudBeesException {
-     return this.forgeSyncService.openRemoteFile(scmConfig, item, monitor);
-   }
+  public boolean openRemoteFile(final JenkinsScmConfig scmConfig, final ChangeSetPathItem item,
+      final IProgressMonitor monitor) throws CloudBeesException {
+    return this.forgeSyncService.openRemoteFile(scmConfig, item, monitor);
+  }
 
-   public List<JenkinsInstance> loadDevAtCloudInstances(final IProgressMonitor monitor) throws CloudBeesException {
+  public List<JenkinsInstance> loadDevAtCloudInstances(final IProgressMonitor monitor) throws CloudBeesException {
 
-     if (!hasAuthInfo()) {
-       return new ArrayList<JenkinsInstance>();
-     }
+    if (!hasAuthInfo()) {
+      return new ArrayList<JenkinsInstance>();
+    }
 
-     StringBuffer errMsg = new StringBuffer();
+    StringBuffer errMsg = new StringBuffer();
 
-     try {
+    try {
 
-       String[] accounts = getAccounts(monitor);
+      String[] accounts = getAccounts(monitor);
 
-       List<JenkinsInstance> instances = new ArrayList<JenkinsInstance>();
+      List<JenkinsInstance> instances = new ArrayList<JenkinsInstance>();
 
-       for (String account : accounts) {
+      for (String account : accounts) {
 
-         String url = "https://" + account + ".ci." + HOST;
+        String url = "https://" + account + ".ci." + HOST;
 
-         JenkinsInstance inst = new JenkinsInstance(account, url, this.email, this.password, true, true);
+        JenkinsInstance inst = new JenkinsInstance(account, url, this.email, this.password, true, true);
 
-         instances.add(inst);
-       }
+        instances.add(inst);
+      }
 
-       return instances;
+      return instances;
 
-     } catch (Exception e) {
-       throw new CloudBeesException("Failed to get remote DEV@cloud Jenkins instances"
-           + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
-     }
-   }
+    } catch (Exception e) {
+      throw new CloudBeesException("Failed to get remote DEV@cloud Jenkins instances"
+          + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
+    }
+  }
 
-   public String[] getAccounts(final IProgressMonitor monitor) throws CloudBeesException {
+  public String[] getAccounts(final IProgressMonitor monitor) throws CloudBeesException {
 
-     if (!hasAuthInfo()) {
-       return new String[0];
-     }
+    if (!hasAuthInfo()) {
+      return new String[0];
+    }
 
-     KeysUsingAuthResponse auth = getAuthInfo(monitor).getAuth();
-     StringBuffer errMsg = new StringBuffer();
+    KeysUsingAuthResponse auth = getAuthInfo(monitor).getAuth();
+    StringBuffer errMsg = new StringBuffer();
 
-     try {
+    try {
 
-       HttpClient httpclient = Utils.getAPIClient();
+      HttpClient httpclient = Utils.getAPIClient();
 
-       AccountNamesRequest req = new AccountNamesRequest();
-       req.uid = auth.uid;
-       req.partner_key = PK;
+      AccountNamesRequest req = new AccountNamesRequest();
+      req.uid = auth.uid;
+      req.partner_key = PK;
 
-       String url = BASE_URL + "account/names";
+      String url = BASE_URL + "account/names";
 
-       HttpPost post = Utils.jsonRequest(url, req);
+      HttpPost post = Utils.jsonRequest(url, req);
 
-       HttpResponse resp = httpclient.execute(post);
-       String bodyResponse = Utils.getResponseBody(resp);
+      HttpResponse resp = httpclient.execute(post);
+      String bodyResponse = Utils.getResponseBody(resp);
 
-       Gson g = Utils.createGson();
+      Gson g = Utils.createGson();
 
-       AccountNamesResponse services = g.fromJson(bodyResponse, AccountNamesResponse.class);
+      AccountNamesResponse services = g.fromJson(bodyResponse, AccountNamesResponse.class);
 
-       if (services.message != null && services.message.length() > 0) {
-         errMsg.append(services.message);
-       }
-       Utils.checkResponseCode(resp);
+      if (services.message != null && services.message.length() > 0) {
+        errMsg.append(services.message);
+      }
+      Utils.checkResponseCode(resp);
 
-       return services.accounts;
+      return services.accounts;
 
-     } catch (Exception e) {
-       throw new CloudBeesException("Failed to get account services info"
-           + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
-     }
+    } catch (Exception e) {
+      throw new CloudBeesException("Failed to get account services info"
+          + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
+    }
 
-   }
+  }
 
-   public String getPrimaryAccount(final IProgressMonitor monitor) throws CloudBeesException {
+  public String getPrimaryAccount(final IProgressMonitor monitor) throws CloudBeesException {
 
-     if (!hasAuthInfo()) {
-       return "";
-     }
+    if (!hasAuthInfo()) {
+      return "";
+    }
 
-     KeysUsingAuthResponse auth = getAuthInfo(monitor).getAuth();
-     StringBuffer errMsg = new StringBuffer();
+    KeysUsingAuthResponse auth = getAuthInfo(monitor).getAuth();
+    StringBuffer errMsg = new StringBuffer();
 
-     try {
+    try {
 
-       HttpClient httpclient = Utils.getAPIClient();
+      HttpClient httpclient = Utils.getAPIClient();
 
-       AccountNameRequest req = new AccountNameRequest();
-       req.uid = auth.uid;
-       req.partner_key = PK;
+      AccountNameRequest req = new AccountNameRequest();
+      req.uid = auth.uid;
+      req.partner_key = PK;
 
-       String url = BASE_URL + "account/name";
+      String url = BASE_URL + "account/name";
 
-       HttpPost post = Utils.jsonRequest(url, req);
+      HttpPost post = Utils.jsonRequest(url, req);
 
-       HttpResponse resp = httpclient.execute(post);
-       String bodyResponse = Utils.getResponseBody(resp);
+      HttpResponse resp = httpclient.execute(post);
+      String bodyResponse = Utils.getResponseBody(resp);
 
-       Gson g = Utils.createGson();
+      Gson g = Utils.createGson();
 
-       AccountNameResponse account = g.fromJson(bodyResponse, AccountNameResponse.class);
+      AccountNameResponse account = g.fromJson(bodyResponse, AccountNameResponse.class);
 
-       if (account.message != null && account.message.length() > 0) {
-         errMsg.append(account.message);
-       }
-       Utils.checkResponseCode(resp);
+      if (account.message != null && account.message.length() > 0) {
+        errMsg.append(account.message);
+      }
+      Utils.checkResponseCode(resp);
 
-       return account.account;
+      return account.account;
 
-     } catch (Exception e) {
-       throw new CloudBeesException("Failed to get account services info"
-           + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
-     }
+    } catch (Exception e) {
+      throw new CloudBeesException("Failed to get account services info"
+          + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
+    }
 
-   }
+  }
 
-   public static class AuthInfo {
+  public static class AuthInfo {
 
-     private final KeysUsingAuthResponse auth;
+    private final KeysUsingAuthResponse auth;
 
-     public AuthInfo(final KeysUsingAuthResponse services) {
-       this.auth = services;
-     }
+    public AuthInfo(final KeysUsingAuthResponse services) {
+      this.auth = services;
+    }
 
-     public KeysUsingAuthResponse getAuth() {
-       return this.auth;
-     }
+    public KeysUsingAuthResponse getAuth() {
+      return this.auth;
+    }
 
-   }
+  }
 
+  public List<Repo> getForgeRepos(IProgressMonitor monitor) throws CloudBeesException {
+    List<Repo> result = new ArrayList<AccountServiceStatusResponse.AccountServices.ForgeService.Repo>();
+
+    String[] accounts = getAccounts(monitor);
+
+    for (String acc : accounts) {
+      AccountServiceStatusResponse services = loadAccountServices(acc);
+      Repo[] repos = services.services.forge.repos;
+      for (Repo forge : repos) {
+        result.add(forge);
+      }
+    }
+
+    return result;
+  }
+
+  public void addToRepository(IProject project, Repo repo, IProgressMonitor monitor) throws CloudBeesException {
+    com.cloudbees.eclipse.core.forge.api.ForgeSync.TYPE type = ForgeSync.TYPE.valueOf(repo.type.toUpperCase());
+    this.forgeSyncService.addToRepository(type, repo, project, monitor);
+  }
 }
