@@ -10,11 +10,17 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
@@ -37,6 +43,9 @@ public class FavouritesUtils {
   private static final IPreferenceStore prefs = CloudBeesDevUiPlugin.getDefault().getPreferenceStore();
 
   private static LinkedList<Shell> shells = new LinkedList<Shell>();
+
+  private static final Color gradientStart = new Color(Display.getDefault(), 255, 255, 200);
+  private static final Color gradientEnd = new Color(Display.getDefault(), 225, 225, 200);
 
   public static JenkinsJobsResponse getFavouritesResponse(final IProgressMonitor monitor) throws CloudBeesException {
     List<String> favourites = getFavourites();
@@ -112,6 +121,12 @@ public class FavouritesUtils {
     }
 
     prefs.setValue(FAVOURITES_LIST, pref);
+    try {
+      CloudBeesDevUiPlugin.getDefault().showJobs(FAVOURITES, false);
+    } catch (CloudBeesException e) {
+      //TODO i18n
+      CloudBeesUIPlugin.showError("Failed to reload Jenkins jobs!", e);
+    }
   }
 
   public static void removeFavourite(String favourite) {
@@ -139,6 +154,37 @@ public class FavouritesUtils {
     Rectangle bounds = activeShell.getBounds();
 
     final Shell shell = new Shell(activeShell, SWT.NO_FOCUS);
+    shell.setBackgroundMode(SWT.INHERIT_DEFAULT);
+
+    shell.addListener(SWT.Resize, new Listener() {
+
+      private Image oldImage;
+
+      @Override
+      public void handleEvent(Event e) {
+        try {
+          Rectangle rect = shell.getClientArea();
+          Image newImage = new Image(Display.getDefault(), Math.max(1, rect.width), rect.height);
+          GC gc = new GC(newImage);
+
+          // fill background
+          gc.setForeground(gradientStart);
+          gc.setBackground(gradientEnd);
+          gc.fillGradientRectangle(rect.x, rect.y, rect.width, rect.height, true);
+
+          gc.dispose();
+
+          shell.setBackgroundImage(newImage);
+
+          if (this.oldImage != null) {
+            this.oldImage.dispose();
+          }
+          this.oldImage = newImage;
+        } catch (Exception e1) {
+          CloudBeesUIPlugin.showError(e1.getMessage(), e1);
+        }
+      }
+    });
 
     GridLayout layout = new GridLayout();
     layout.marginBottom = MARGIN;
@@ -154,7 +200,7 @@ public class FavouritesUtils {
         shell.setVisible(false);
       }
     });
-    Label label = new Label(shell, SWT.NONE);
+    Label label = new Label(shell, SWT.NO_BACKGROUND);
 
     String message = job.displayName + " " + job.url;
     if (job.lastBuild != null) {
@@ -191,7 +237,7 @@ public class FavouritesUtils {
         try {
           Thread.sleep(5000);
         } catch (InterruptedException e) {
-          e.printStackTrace();
+          CloudBeesUIPlugin.showError(e.getMessage(), e);
         }
         shell.getDisplay().asyncExec(new Runnable() {
 
@@ -205,4 +251,5 @@ public class FavouritesUtils {
       }
     }.start();
   }
+
 }
