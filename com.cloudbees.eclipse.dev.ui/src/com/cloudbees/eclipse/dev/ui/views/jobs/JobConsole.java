@@ -42,7 +42,7 @@ public class JobConsole {
   public MessageConsole show() {
     MessageConsole console = null;
     if (this.stream == null) {
-      console = new MessageConsole(NLS.bind("Output for JenkinsBuild \"{0}\"", this.name), CONSOLE_TYPE,
+      console = new MessageConsole(NLS.bind("Output for Build \"{0}\"", this.name), CONSOLE_TYPE,
           CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_CONSOLE), true);
       this.consoleManager.addConsoles(new IConsole[] { console });
       console.setAttribute(ATTRIBUTE_URL, this.url);
