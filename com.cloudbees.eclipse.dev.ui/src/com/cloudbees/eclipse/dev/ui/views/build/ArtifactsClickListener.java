@@ -11,7 +11,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
 public class ArtifactsClickListener implements IDoubleClickListener {
 
   public void doubleClick(final DoubleClickEvent event) {
-    JenkinsBuildDetailsResponse buildDetails = ((RecentChangesContentProvider) ((TreeViewer) event.getSource())
+    JenkinsBuildDetailsResponse buildDetails = ((ArtifactsContentProvider) ((TreeViewer) event.getSource())
         .getContentProvider()).getBuildDetails();
     Object selection = ((TreeSelection) event.getSelection()).getFirstElement();
 

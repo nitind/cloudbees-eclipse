@@ -7,6 +7,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Artifact;
 
 public class ArtifactsContentProvider implements ITreeContentProvider {
 
@@ -33,27 +34,36 @@ public class ArtifactsContentProvider implements ITreeContentProvider {
   }
 
   public Object[] getChildren(final Object parentElement) {
-    if (parentElement == null) {
-      return this.buildDetails.artifacts;
-    }
-
     if (parentElement instanceof String) {
       return new String[0];
     }
 
-    if (parentElement instanceof JenkinsBuildDetailsResponse.Artifact[]) {
-      return (JenkinsBuildDetailsResponse.Artifact[]) parentElement;
+    if (parentElement == null) {
+      return this.buildDetails.artifacts;
     }
 
     if (parentElement instanceof JenkinsBuildDetailsResponse) {
-      return ((JenkinsBuildDetailsResponse) parentElement).artifacts;
-    }
+      Artifact[] artifacts = ((JenkinsBuildDetailsResponse) parentElement).artifacts;
 
-    if (parentElement instanceof JenkinsBuildDetailsResponse.Artifact) {
       List<String> ret = new ArrayList<String>();
-      ret.add(((JenkinsBuildDetailsResponse.Artifact) parentElement).relativePath);
+      if (artifacts != null) {
+        for (Artifact art : artifacts) {
+          ret.add(art.relativePath);
+        }
+      }
+
       return ret.toArray(new String[ret.size()]);
     }
+
+    //    if (parentElement instanceof JenkinsBuildDetailsResponse.Artifact[]) {
+    //      return (JenkinsBuildDetailsResponse.Artifact[]) parentElement;
+    //    }
+    //
+    //    if (parentElement instanceof JenkinsBuildDetailsResponse.Artifact) {
+    //      List<String> ret = new ArrayList<String>();
+    //      ret.add(((JenkinsBuildDetailsResponse.Artifact) parentElement).relativePath);
+    //      return ret.toArray(new String[ret.size()]);
+    //    }
 
     System.out.println("Unknown parent: " + parentElement);
 

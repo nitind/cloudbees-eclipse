@@ -14,6 +14,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -89,6 +90,7 @@ public class BuildPart extends EditorPart {
   private Action openBuildHistory;
   private Action invokeBuild;
   private OpenLogAction openLogs;
+  private ScrolledComposite scrolledRecentChanges;
 
   public BuildPart() {
     super();
@@ -118,14 +120,14 @@ public class BuildPart extends EditorPart {
     this.form.getBody().setLayout(new GridLayout(1, true));
 
     this.compMain = new Composite(this.form.getBody(), SWT.NONE);
-    GridLayout gl_compMain = new GridLayout(2, true);
+    GridLayout gl_compMain = new GridLayout(1, true);
     this.compMain.setLayout(gl_compMain);
     this.compMain.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
     this.formToolkit.adapt(this.compMain);
     this.formToolkit.paintBordersFor(this.compMain);
 
     Composite compStatusHead = new Composite(this.compMain, SWT.NONE);
-    compStatusHead.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+    compStatusHead.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
     GridLayout rl_compStatusHead = new GridLayout();
     rl_compStatusHead.marginHeight = 0;
     rl_compStatusHead.marginWidth = 0;
@@ -142,10 +144,33 @@ public class BuildPart extends EditorPart {
     this.textTopSummary.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT));
     this.textTopSummary.setForeground(this.formToolkit.getColors().getColor(IFormColors.TITLE));
 
-    Section sectSummary = this.formToolkit.createSection(this.compMain, Section.TITLE_BAR);
-    GridData gd_sectSummary = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
-    gd_sectSummary.verticalIndent = 10;
-    sectSummary.setLayoutData(gd_sectSummary);
+    this.openJunitAction = new OpenJunitViewAction();
+
+    //createBuildHistorySection();
+
+    createRecentChangesSection();
+
+    //compMain.layout(true);
+
+    createActions();
+
+    loadInitialData();
+  }
+
+  private void createRecentChangesSection() {
+
+    SashForm sashForm = new SashForm(this.compMain, SWT.VERTICAL);
+    sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    this.formToolkit.adapt(sashForm);
+    this.formToolkit.paintBordersFor(sashForm);
+
+    Composite compTop = new Composite(sashForm, SWT.NONE);
+    this.formToolkit.adapt(compTop);
+    this.formToolkit.paintBordersFor(compTop);
+    compTop.setLayout(new GridLayout(2, true));
+
+    Section sectSummary = this.formToolkit.createSection(compTop, Section.TITLE_BAR);
+    sectSummary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
     sectSummary.setSize(107, 45);
     this.formToolkit.paintBordersFor(sectSummary);
     sectSummary.setText("Build Summary");
@@ -184,13 +209,11 @@ public class BuildPart extends EditorPart {
 
     this.contentJUnitTests = this.formToolkit.createLabel(compTests, "n/a", SWT.NONE);
     this.contentJUnitTests.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-
-    this.openJunitAction = new OpenJunitViewAction();
     this.testsLink = new Composite(compTests, SWT.NONE);
     this.formToolkit.adapt(this.testsLink);
     this.testsLink.setLayout(new GridLayout(2, false));
     Link link = new Link(this.testsLink, SWT.FLAT);
-    link.setText("Show tests results in <a>JUnit View</a>.");
+    link.setText("Show in <a>JUnit View</a>.");
     link.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(final SelectionEvent e) {
@@ -200,24 +223,46 @@ public class BuildPart extends EditorPart {
     this.formToolkit.adapt(link, false, false);
     this.testsLink.setVisible(false);
 
-    createArtifactsSection();
+    this.sectArtifacts = this.formToolkit.createSection(compTop, Section.TITLE_BAR);
+    this.sectArtifacts.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    this.sectArtifacts.setSize(107, 45);
+    this.formToolkit.paintBordersFor(this.sectArtifacts);
+    this.sectArtifacts.setText("Artifacts");
 
-    //createBuildHistorySection();
+    Composite compInterm_1 = this.formToolkit.createComposite(this.sectArtifacts, SWT.NONE);
 
-    createRecentChangesSection();
+    GridLayout gl_compInterm_1 = new GridLayout(1, false);
+    gl_compInterm_1.verticalSpacing = 0;
+    gl_compInterm_1.marginWidth = 0;
+    gl_compInterm_1.marginHeight = 0;
+    compInterm_1.setLayout(gl_compInterm_1);
+    compInterm_1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
-    //compMain.layout(true);
+    this.sectArtifacts.setClient(compInterm_1);
 
-    createActions();
+    this.artifactsLabel = this.formToolkit.createLabel(compInterm_1, "");
 
-    loadInitialData();
-  }
+    ScrolledComposite scrolledArtifacts = new ScrolledComposite(compInterm_1, SWT.H_SCROLL | SWT.V_SCROLL);
+    scrolledArtifacts.setExpandHorizontal(true);
+    scrolledArtifacts.setExpandVertical(true);
+    scrolledArtifacts.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    this.formToolkit.adapt(scrolledArtifacts);
+    this.formToolkit.paintBordersFor(scrolledArtifacts);
 
-  private void createRecentChangesSection() {
-    this.sectRecentChanges = this.formToolkit.createSection(this.compMain, Section.TITLE_BAR);
-    GridData gd_sectRecentChanges = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
-    gd_sectRecentChanges.verticalIndent = 20;
-    this.sectRecentChanges.setLayoutData(gd_sectRecentChanges);
+    this.treeViewerArtifacts = new TreeViewer(scrolledArtifacts, SWT.BORDER);
+    Tree treeArtifacts = this.treeViewerArtifacts.getTree();
+
+    this.treeViewerArtifacts.setContentProvider(new ArtifactsContentProvider());
+    this.treeViewerArtifacts.setLabelProvider(new ArtifactsLabelProvider());
+    this.treeViewerArtifacts.addDoubleClickListener(new ArtifactsClickListener());
+
+    this.treeViewerArtifacts.setInput("n/a");
+
+    this.formToolkit.adapt(treeArtifacts);
+    this.formToolkit.paintBordersFor(treeArtifacts);
+    scrolledArtifacts.setContent(treeArtifacts);
+    scrolledArtifacts.setMinSize(treeArtifacts.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    this.sectRecentChanges = this.formToolkit.createSection(sashForm, Section.TITLE_BAR);
 
     this.formToolkit.paintBordersFor(this.sectRecentChanges);
     this.sectRecentChanges.setText("Changes");
@@ -234,17 +279,14 @@ public class BuildPart extends EditorPart {
     this.sectRecentChanges.setClient(compInterm);
 
     this.changesetLabel = this.formToolkit.createLabel(compInterm, "");
+    this.scrolledRecentChanges = new ScrolledComposite(compInterm, SWT.H_SCROLL | SWT.V_SCROLL);
+    this.scrolledRecentChanges.setExpandHorizontal(true);
+    this.scrolledRecentChanges.setExpandVertical(true);
+    this.scrolledRecentChanges.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    this.formToolkit.adapt(this.scrolledRecentChanges);
+    this.formToolkit.paintBordersFor(this.scrolledRecentChanges);
 
-    ScrolledComposite scrolledRecentChanges;
-    scrolledRecentChanges = new ScrolledComposite(compInterm, SWT.H_SCROLL | SWT.V_SCROLL);
-    scrolledRecentChanges.setExpandHorizontal(true);
-    scrolledRecentChanges.setExpandVertical(true);
-    scrolledRecentChanges.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-    this.formToolkit.adapt(scrolledRecentChanges);
-    this.formToolkit.paintBordersFor(scrolledRecentChanges);
-
-
-    this.treeViewerRecentChanges = new TreeViewer(scrolledRecentChanges, SWT.BORDER);
+    this.treeViewerRecentChanges = new TreeViewer(this.scrolledRecentChanges, SWT.BORDER);
     Tree treeRecentChanges = this.treeViewerRecentChanges.getTree();
 
     this.treeViewerRecentChanges.setContentProvider(new RecentChangesContentProvider());
@@ -255,8 +297,9 @@ public class BuildPart extends EditorPart {
 
     this.formToolkit.adapt(treeRecentChanges);
     this.formToolkit.paintBordersFor(treeRecentChanges);
-    scrolledRecentChanges.setContent(treeRecentChanges);
-    scrolledRecentChanges.setMinSize(treeRecentChanges.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    this.scrolledRecentChanges.setContent(treeRecentChanges);
+    this.scrolledRecentChanges.setMinSize(treeRecentChanges.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    sashForm.setWeights(new int[] { 1, 1 });
   }
 
   private void createBuildHistorySection() {
@@ -290,50 +333,6 @@ public class BuildPart extends EditorPart {
 
     this.contentBuildHistory = this.formToolkit.createComposite(this.contentBuildHistoryHolder, SWT.NONE);
     this.contentBuildHistory.setLayout(new GridLayout(1, false));
-  }
-
-  private void createArtifactsSection() {
-    this.sectArtifacts = this.formToolkit.createSection(this.compMain, Section.TITLE_BAR);
-    GridData gd_sectArtifacts = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
-    gd_sectArtifacts.verticalIndent = 10;
-    this.sectArtifacts.setLayoutData(gd_sectArtifacts);
-    this.sectArtifacts.setSize(107, 45);
-    this.formToolkit.paintBordersFor(this.sectArtifacts);
-    this.sectArtifacts.setText("Artifacts");
-
-    Composite compInterm = this.formToolkit.createComposite(this.sectArtifacts, SWT.NONE);
-
-    GridLayout gl_compInterm = new GridLayout(1, false);
-    gl_compInterm.verticalSpacing = 0;
-    gl_compInterm.marginWidth = 0;
-    gl_compInterm.marginHeight = 0;
-    compInterm.setLayout(gl_compInterm);
-    compInterm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-
-    this.sectArtifacts.setClient(compInterm);
-
-    this.artifactsLabel = this.formToolkit.createLabel(compInterm, "");
-
-    ScrolledComposite scrolledArtifacts = new ScrolledComposite(compInterm, SWT.H_SCROLL | SWT.V_SCROLL);
-    scrolledArtifacts.setExpandHorizontal(true);
-    scrolledArtifacts.setExpandVertical(true);
-    scrolledArtifacts.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-    this.formToolkit.adapt(scrolledArtifacts);
-    this.formToolkit.paintBordersFor(scrolledArtifacts);
-
-    this.treeViewerArtifacts = new TreeViewer(scrolledArtifacts, SWT.BORDER);
-    Tree treeArtifacts = this.treeViewerArtifacts.getTree();
-
-    this.treeViewerArtifacts.setContentProvider(new ArtifactsContentProvider());
-    this.treeViewerArtifacts.setLabelProvider(new ArtifactsLabelProvider());
-    this.treeViewerArtifacts.addDoubleClickListener(new ArtifactsClickListener());
-
-    this.treeViewerArtifacts.setInput("n/a");
-
-    this.formToolkit.adapt(treeArtifacts);
-    this.formToolkit.paintBordersFor(treeArtifacts);
-    scrolledArtifacts.setContent(treeArtifacts);
-    scrolledArtifacts.setMinSize(treeArtifacts.computeSize(SWT.DEFAULT, SWT.DEFAULT));
   }
 
   private void createActions() {
@@ -636,6 +635,8 @@ public class BuildPart extends EditorPart {
         loadUnitTests();
 
         //loadBuildHistory();
+
+        loadArtifacts();
 
         loadRecentChanges();
 
