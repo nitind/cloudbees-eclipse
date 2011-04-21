@@ -78,7 +78,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
       }
     }
 
-    private void checkJobsForNewBuild(Job j, Job[] newJobs) {
+    private void checkJobsForNewBuild(final Job j, final Job[] newJobs) {
       for (final Job q : newJobs) {
         if (q.url.equals(j.url)) {
           showAlertIfHasNewBuild(j, q);
@@ -86,7 +86,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
       }
     }
 
-    private void showAlertIfHasNewBuild(Job j, final Job q) {
+    private void showAlertIfHasNewBuild(final Job j, final Job q) {
       if (q.lastBuild != null && (j.lastBuild == null || q.lastBuild.number > j.lastBuild.number)) {
         Display.getDefault().syncExec(new Runnable() {
 
@@ -258,7 +258,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
   }
 
   public static ImageDescriptor getImageDescription(final String imgKey) {
-    return CloudBeesDevUiPlugin.getDefault().getImageRegistry().getDescriptor(imgKey);
+    CloudBeesDevUiPlugin pl = CloudBeesDevUiPlugin.getDefault();
+    return pl != null ? pl.getImageRegistry().getDescriptor(imgKey) : null;
   }
 
   public void showJobs(final String viewUrl, final boolean userAction) throws CloudBeesException {
