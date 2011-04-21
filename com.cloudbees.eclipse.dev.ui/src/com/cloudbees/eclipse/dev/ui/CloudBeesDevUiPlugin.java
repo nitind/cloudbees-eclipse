@@ -139,7 +139,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
   /**
    * Returns the shared instance
-   * 
+   *
    * @return the shared instance
    */
   public static CloudBeesDevUiPlugin getDefault() {
@@ -313,8 +313,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
           return Status.OK_STATUS;
         } catch (CloudBeesException e) {
-          CloudBeesUIPlugin.getDefault().getLogger().error(e);
-          return new Status(Status.ERROR, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
+          getLogger().error(e);
+          return new Status(Status.WARNING, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
         }
       }
 
@@ -391,7 +391,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
   }
 
   public void openRemoteFile(final String jobUrl, final ForgeSync.ChangeSetPathItem item) {
-    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Jenkins jobs") {
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Opening remote file") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
         try {
@@ -413,7 +413,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
           return opened ? Status.OK_STATUS : new Status(IStatus.INFO, PLUGIN_ID, "Can't open " + item.path);
         } catch (CloudBeesException e) {
           getLogger().error(e);
-          return new Status(Status.ERROR, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
+          return new Status(Status.WARNING, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
         }
       }
     };
@@ -488,7 +488,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
       return; // no info
     }
 
-    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Jenkins jobs") {
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading build history") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
         if (!CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
@@ -533,7 +533,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
           return Status.OK_STATUS;
         } catch (CloudBeesException e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
-          return new Status(Status.ERROR, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
+          return new Status(Status.WARNING, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
         }
       }
     };

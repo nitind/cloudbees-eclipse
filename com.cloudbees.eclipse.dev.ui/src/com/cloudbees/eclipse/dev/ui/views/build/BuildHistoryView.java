@@ -205,7 +205,29 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
       public void update(final ViewerCell cell) {
         JenkinsBuild build = (JenkinsBuild) cell.getViewerRow().getElement();
         try {
-          cell.setText(""); // TODO
+          long total = 0;
+          long failed = 0;
+          long skipped = 0;
+          for (com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild.Action action : build.actions) {
+            if ("testReport".equalsIgnoreCase(action.urlName)) {
+              total += action.totalCount;
+              failed += action.failCount;
+              skipped += action.skipCount;
+            }
+          }
+
+          if (total > 0 || failed > 0 || skipped > 0) {
+            String val = "Passed: " + (total - failed - skipped);
+            if (failed > 0) {
+              val += ", failed: " + failed;
+            }
+            if (skipped > 0) {
+              val += ", skipped: " + skipped;
+            }
+            cell.setText(val);
+          } else {
+            cell.setText("");
+          }
         } catch (Throwable t) {
           cell.setText("");
         }
@@ -214,9 +236,20 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
     createColumn("Cause", 250, BuildSorter.CAUSE, new CellLabelProvider() {
       @Override
       public void update(final ViewerCell cell) {
-        JenkinsBuild job = (JenkinsBuild) cell.getViewerRow().getElement();
+        JenkinsBuild build = (JenkinsBuild) cell.getViewerRow().getElement();
+        String val = null;
         try {
-          cell.setText(""); // TODO
+          for (com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild.Action action : build.actions) {
+            if (action.causes != null && action.causes.length > 0) {
+              val = action.causes[0].shortDescription;
+              break;
+            }
+          }
+
+          if (val == null) {
+            val = "";
+          }
+          cell.setText(val);
         } catch (Throwable t) {
           cell.setText("");
         }
@@ -340,6 +373,11 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
         "FAILURE",
         ImageDescriptor.createFromURL(
             CloudBeesDevUiPlugin.getDefault().getBundle().getResource("/icons/jenkins-icons/16x16/red.gif"))
+            .createImage());
+    this.stateIcons.put(
+        "UNSTABLE",
+        ImageDescriptor.createFromURL(
+            CloudBeesDevUiPlugin.getDefault().getBundle().getResource("/icons/jenkins-icons/16x16/yellow.gif"))
             .createImage());
 
   }

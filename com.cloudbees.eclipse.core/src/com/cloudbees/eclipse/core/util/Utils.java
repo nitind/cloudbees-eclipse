@@ -49,7 +49,7 @@ public class Utils {
 
   /**
    * Converts string to US-ASCII base64 string.
-   * 
+   *
    * @param str
    * @return
    */
@@ -66,7 +66,7 @@ public class Utils {
 
   /**
    * Converts string from base64 string.
-   * 
+   *
    * @param str
    * @return
    */
@@ -212,9 +212,15 @@ public class Utils {
     long hr = mins / 60;
     long yrs = hr / 24 / 365;
 
-    if (mins < 60) {
+    if (mins <= 0) {
+      long secs = duration / 1000;
+      unit = secs + " sec";
+      if (secs > 1) {
+        unit = unit + "s";
+      }
+    } else if (mins < 60) {
       unit = mins + " min";
-      if (mins < 1) {
+      if (mins > 1) {
         unit = unit + "s";
       }
     } else if (mins < 60 * 24) {
