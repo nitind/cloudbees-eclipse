@@ -66,7 +66,7 @@ import com.cloudbees.eclipse.ui.PreferenceConstants;
 
 /**
  * View showing jobs for both Jenkins offline installations and JaaS Nectar instances
- * 
+ *
  * @author ahtik
  */
 public class JobsView extends ViewPart implements IPropertyChangeListener {
@@ -117,9 +117,9 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     this.actionOpenJobInBrowser.setEnabled(enable);
     this.actionOpenBuildHistory.setViewUrl(this.selectedJob instanceof Job ? ((Job) this.selectedJob).url : null);
     this.actionOpenBuildHistory.setEnabled(enable);
-    
-    if (job != null) {
-      boolean isFavourite = FavouritesUtils.isFavourite(job.url);
+
+    if (this.selectedJob instanceof Job) {
+      boolean isFavourite = FavouritesUtils.isFavourite(((Job) this.selectedJob).url);
       JobsView.this.actionAddFavourite.setEnabled(!isFavourite);
       JobsView.this.actionRemoveFavourite.setEnabled(isFavourite);
     } else {
