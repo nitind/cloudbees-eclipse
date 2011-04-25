@@ -23,7 +23,7 @@ import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountSer
 public abstract class CBRepositoryComposite extends Composite {
 
   private static final String GROUP_LABEL = "Forge repository";
-  private static final String FORGE_REPO_CHECK_LABEL = "Add to Forge";
+  private static final String FORGE_REPO_CHECK_LABEL = "Host at Forge";
   private static final String ERR_ADD_REPOS = "Please add repositories to your CloudBees DEV@cloud";
   private static final String ERR_REPO_SELECTION = "Repository is not selected.";
 
@@ -99,6 +99,12 @@ public abstract class CBRepositoryComposite extends Composite {
 
   public Repo getSelectedRepo() {
     return this.selectedRepo;
+  }
+
+  public void addRepoCheckListener(SelectionListener listener) {
+    if (listener != null && this.addRepoCheck != null) {
+      this.addRepoCheck.addSelectionListener(listener);
+    }
   }
 
   protected abstract Repo[] getRepos();

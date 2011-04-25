@@ -2,6 +2,8 @@ package com.cloudbees.eclipse.run.ui.wizards;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -87,6 +89,7 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
     };
 
     this.jenkinsComposite.setLayoutData(data);
+    this.jenkinsComposite.addJobCheckListener(this.checkListener);
 
     data = new GridData();
     data.grabExcessHorizontalSpace = true;
@@ -112,6 +115,7 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
     };
 
     this.repositoryComposite.setLayoutData(data);
+    this.repositoryComposite.addRepoCheckListener(this.checkListener);
 
     setControl(container);
   }
@@ -153,6 +157,34 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
   @Override
   public boolean isActivePage() {
     return isCurrentPage();
+  }
+
+  private final SelectionListener checkListener = new SelectionListener() {
+
+    @Override
+    public void widgetSelected(SelectionEvent e) {
+      handleSelected();
+    }
+
+    @Override
+    public void widgetDefaultSelected(SelectionEvent e) {
+      handleSelected();
+    }
+
+    private void handleSelected() {
+      boolean makeJob = CBServicesWizardPage.this.jenkinsComposite.isMakeNewJob();
+      boolean makeRepo = CBServicesWizardPage.this.repositoryComposite.isAddNewRepo();
+      updatePage(makeJob, makeRepo);
+    }
+  };
+
+  private void updatePage(boolean makeJob, boolean makeRepo) {
+    if (makeJob && !makeRepo) {
+      setMessage("Enable hosting in Forge to configure Jenkins job SCM automatically.", WARNING);
+      return;
+    }
+
+    setMessage(null);
   }
 
 }
