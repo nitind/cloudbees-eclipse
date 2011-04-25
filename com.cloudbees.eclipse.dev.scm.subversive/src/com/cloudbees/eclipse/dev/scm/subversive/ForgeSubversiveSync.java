@@ -173,8 +173,6 @@ public class ForgeSubversiveSync implements ForgeSync {
       throw new CloudBeesException("Could not find CloudBees SVN repository");
     }
 
-    System.out.println(location);
-
     ShareProjectOperation.IFolderNameMapper mapper = new ShareProjectOperation.IFolderNameMapper() {
 
       @Override
@@ -182,9 +180,10 @@ public class ForgeSubversiveSync implements ForgeSync {
         return project.getName();
       }
     };
-    ShareProjectOperation operation = new ShareProjectOperation(new IProject[] { project }, location, mapper,
-        "Create new repository folder");
+
+    ShareProjectOperation operation = new ShareProjectOperation(new IProject[] { project }, location, mapper, null, 1,
+        false, "Create new repository folder");
+
     operation.run(monitor);
   }
-
 }
