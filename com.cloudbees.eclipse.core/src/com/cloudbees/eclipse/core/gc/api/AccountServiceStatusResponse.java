@@ -5,7 +5,8 @@ public class AccountServiceStatusResponse extends GCBaseResponse {
   public Boolean authorized;
 
   public AccountServices services;
-  
+
+  public String username;
 
   public static class AccountServices {
 
@@ -28,8 +29,8 @@ public class AccountServiceStatusResponse extends GCBaseResponse {
     }
 
     public static class Subscription {
-      String name; // Beta, Dev+ etc
-      String status; // active, inactive
+      public String name; // Beta, Dev+ etc
+      public String status; // active, inactive
     }
 
   }
