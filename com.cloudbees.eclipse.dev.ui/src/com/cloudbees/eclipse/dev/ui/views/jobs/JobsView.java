@@ -112,11 +112,9 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     this.actionInvokeBuild.setEnabled(enable);
     this.actionOpenLastBuildDetails.setEnabled(enable);
     this.actionOpenLog.setBuild(this.selectedJob instanceof Job ? ((Job) this.selectedJob).lastBuild : null);
-    this.actionOpenLog.setEnabled(enable);
     this.actionDeleteJob.setEnabled(enable);
     this.actionOpenJobInBrowser.setEnabled(enable);
     this.actionOpenBuildHistory.setViewUrl(this.selectedJob instanceof Job ? ((Job) this.selectedJob).url : null);
-    this.actionOpenBuildHistory.setEnabled(enable);
 
     if (this.selectedJob instanceof Job) {
       boolean isFavourite = FavouritesUtils.isFavourite(((Job) this.selectedJob).url);

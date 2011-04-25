@@ -92,6 +92,8 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
       }
     }
 
+    System.out.println("new view: " + newView);
+
     if (newView == null || newView.builds == null) {
       setContentDescription("No builds available.");
       this.contentProvider.inputChanged(this.table, null, null);
@@ -111,9 +113,6 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
     this.actionReloadJobs.setViewUrl(this.jobUrl);
 
     this.table.refresh();
-
-    boolean reloadable = newView != null;
-    this.actionReloadJobs.setEnabled(reloadable);
   }
 
   @Override
@@ -184,7 +183,15 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
       public void update(final ViewerCell cell) {
         JenkinsBuild build = (JenkinsBuild) cell.getViewerRow().getElement();
 
-        cell.setText(Utils.humanReadableTime(System.currentTimeMillis() - build.timestamp) + " ago");
+        if (build.timestamp != null) {
+          try {
+            cell.setText(Utils.humanReadableTime(System.currentTimeMillis() - build.timestamp) + " ago");
+          } catch (Exception e) {
+            cell.setText("");
+          }
+        } else {
+          cell.setText("");
+        }
         cell.setImage(null);
       }
     });
@@ -193,9 +200,13 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
       @Override
       public void update(final ViewerCell cell) {
         JenkinsBuild build = (JenkinsBuild) cell.getViewerRow().getElement();
-        try {
-          cell.setText(Utils.humanReadableTime(build.duration));
-        } catch (Throwable t) {
+        if (build.duration != null) {
+          try {
+            cell.setText(Utils.humanReadableTime(build.duration));
+          } catch (Throwable t) {
+            cell.setText("");
+          }
+        } else {
           cell.setText("");
         }
       }
@@ -440,7 +451,6 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 
     this.actionReloadJobs = new ReloadBuildHistoryAction(true);
-    this.actionReloadJobs.setEnabled(false);
 
     //    this.actionOpenLastBuildDetails = new OpenLastBuildAction(this);
     //    this.actionOpenLog = new OpenLogAction(this);

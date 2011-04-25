@@ -391,6 +391,10 @@ public class JenkinsService {
         throw new CloudBeesException("Response does not contain required fields!");
       }
 
+      if (details.viewUrl == null) {
+        details.viewUrl = jobUrl;
+      }
+
       return details;
 
     } catch (Exception e) {
@@ -466,7 +470,7 @@ public class JenkinsService {
         throw new CloudBeesException("Response does not contain required fields!");
       }
 
-      details.viewUrl = this.jenkins.url;
+      details.viewUrl = jobUrl; // this.jenkins.url;
 
       return details;
 

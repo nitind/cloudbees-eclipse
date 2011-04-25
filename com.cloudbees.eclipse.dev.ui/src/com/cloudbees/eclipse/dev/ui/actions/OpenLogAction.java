@@ -2,7 +2,6 @@ package com.cloudbees.eclipse.dev.ui.actions;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Event;
 
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
@@ -20,20 +19,27 @@ public class OpenLogAction extends Action {
     super("Open console log", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS);
     setToolTipText("Open console log of this job"); //TODO i18n
     setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_CONSOLE));
-    setEnabled(false);
+    super.setEnabled(true);
+  }
+
+  @Override
+  public void setEnabled(final boolean enabled) {
+    new RuntimeException("external comps must not change this").printStackTrace();
+    // ignore
   }
 
   public void setBuild(final Object build) {
     this.build = build;
+    super.setEnabled(this.build != null);
   }
 
   @Override
   public boolean isEnabled() {
-    return this.build == null ? false : super.isEnabled();
+    return this.build != null;
   }
 
   @Override
-  public void runWithEvent(final Event event) {
+  public void run() {
     if (this.build instanceof JenkinsBuild) {
       CloudBeesDevUiPlugin.getDefault().getJobConsoleManager()
           .showConsole(((JenkinsBuild) this.build).fullDisplayName, ((JenkinsBuild) this.build).url);

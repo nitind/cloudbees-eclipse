@@ -369,7 +369,6 @@ public class BuildPart extends EditorPart {
 
     this.openLogs = new OpenLogAction();
     this.openLogs.setBuild(this.dataBuildDetail);
-    this.openLogs.setEnabled(true);
     //    Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
     //      @Override
     //      public void run() {
@@ -617,29 +616,29 @@ public class BuildPart extends EditorPart {
           //          }
         }
 
-        String topStr = BuildPart.this.dataBuildDetail.result != null ? BuildPart.this.dataBuildDetail.result /*+ " ("
-                                                                                + new Date(dataBuildDetail.timestamp) + ")"*/
-            : "";
-
-        if (BuildPart.this.dataBuildDetail.building) {
-          topStr = "BUILDING";
-        } else if (BuildPart.this.dataJobDetails.inQueue) {
-          topStr = "IN QUEUE";
-        } /*else {
-          topStr = topStr + " " + Utils.humanReadableTime((System.currentTimeMillis() - dataBuildDetail.timestamp))
-              + " ago";
+        if (BuildPart.this.dataBuildDetail != null) {
+          String topStr = BuildPart.this.dataBuildDetail.result != null ? BuildPart.this.dataBuildDetail.result /*+ " ("
+                                                                                                                + new Date(dataBuildDetail.timestamp) + ")"*/
+          : "";
+          if (BuildPart.this.dataBuildDetail.building) {
+            topStr = "BUILDING";
+          } else if (BuildPart.this.dataJobDetails.inQueue) {
+            topStr = "IN QUEUE";
+          } /*else {
+            topStr = topStr + " " + Utils.humanReadableTime((System.currentTimeMillis() - dataBuildDetail.timestamp))
+                + " ago";
+            }
+            */
+          BuildPart.this.textTopSummary.setText(topStr);
+          if ("SUCCESS".equalsIgnoreCase(BuildPart.this.dataBuildDetail.result)) {
+            BuildPart.this.statusIcon.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_COLOR_16_BLUE));
+          } else if ("FAILURE".equalsIgnoreCase(BuildPart.this.dataBuildDetail.result)) {
+            BuildPart.this.statusIcon.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_COLOR_16_RED));
+          } else if ("UNSTABLE".equalsIgnoreCase(BuildPart.this.dataBuildDetail.result)) {
+            BuildPart.this.statusIcon.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_COLOR_16_YELLOW));
+          } else {
+            BuildPart.this.statusIcon.setImage(null);
           }
-         */
-        BuildPart.this.textTopSummary.setText(topStr);
-
-        if ("SUCCESS".equalsIgnoreCase(BuildPart.this.dataBuildDetail.result)) {
-          BuildPart.this.statusIcon.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_COLOR_16_BLUE));
-        } else if ("FAILURE".equalsIgnoreCase(BuildPart.this.dataBuildDetail.result)) {
-          BuildPart.this.statusIcon.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_COLOR_16_RED));
-        } else if ("UNSTABLE".equalsIgnoreCase(BuildPart.this.dataBuildDetail.result)) {
-          BuildPart.this.statusIcon.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_COLOR_16_YELLOW));
-        } else {
-          BuildPart.this.statusIcon.setImage(null);
         }
 
         loadBuildSummary();
@@ -652,7 +651,8 @@ public class BuildPart extends EditorPart {
 
         loadRecentChanges();
 
-        BuildPart.this.invokeBuild.setEnabled(BuildPart.this.dataJobDetails.buildable);
+        BuildPart.this.invokeBuild.setEnabled(BuildPart.this.dataJobDetails != null
+            && BuildPart.this.dataJobDetails.buildable != null && BuildPart.this.dataJobDetails.buildable);
 
         //form.layout();
         //form.getBody().layout(true);
@@ -742,40 +742,43 @@ public class BuildPart extends EditorPart {
     //details.getJob().inQueue;
     //details.getJob().healthReport;
 
-    StringBuffer summary = new StringBuffer();
-    if (this.dataBuildDetail.description != null) {
-      summary.append(this.dataBuildDetail.description + "\n");
-    }
+    if (this.dataBuildDetail != null) {
+      StringBuffer summary = new StringBuffer();
+      if (this.dataBuildDetail.description != null) {
+        summary.append(this.dataBuildDetail.description + "\n");
+      }
 
-    StringBuffer causeBuffer = new StringBuffer();
-    if (this.dataBuildDetail.actions != null && this.dataBuildDetail.actions.length > 0) {
-      for (int i = 0; i < this.dataBuildDetail.actions.length; i++) {
-        com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Action action = this.dataBuildDetail.actions[i];
-        if (action.causes != null) {
-          for (int c = 0; c < action.causes.length; c++) {
-            Cause cause = action.causes[c];
-            causeBuffer.append(cause.shortDescription + "\n");
-            break; // For now let's just show the first cause
+      StringBuffer causeBuffer = new StringBuffer();
+      if (this.dataBuildDetail.actions != null && this.dataBuildDetail.actions.length > 0) {
+        for (int i = 0; i < this.dataBuildDetail.actions.length; i++) {
+          com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Action action = this.dataBuildDetail.actions[i];
+          if (action.causes != null) {
+            for (int c = 0; c < action.causes.length; c++) {
+              Cause cause = action.causes[c];
+              causeBuffer.append(cause.shortDescription + "\n");
+              break; // For now let's just show the first cause
+            }
           }
         }
       }
-    }
-    if (causeBuffer.length() > 0) {
-      summary.append(causeBuffer.toString() + "\n");
-    }
-
-    if (this.dataBuildDetail.builtOn != null && this.dataBuildDetail.timestamp != null) {
-      if (this.dataBuildDetail.builtOn != null && this.dataBuildDetail.builtOn.length() > 0) {
-        summary.append("Built on: " + this.dataBuildDetail.builtOn + " at " + (new Date(this.dataBuildDetail.timestamp)) + "\n");
-      } else {
-        summary.append("Built at " + (new Date(this.dataBuildDetail.timestamp)) + "\n");
+      if (causeBuffer.length() > 0) {
+        summary.append(causeBuffer.toString() + "\n");
       }
+
+      if (this.dataBuildDetail.builtOn != null && this.dataBuildDetail.timestamp != null) {
+        if (this.dataBuildDetail.builtOn != null && this.dataBuildDetail.builtOn.length() > 0) {
+          summary.append("Built on: " + this.dataBuildDetail.builtOn + " at "
+              + (new Date(this.dataBuildDetail.timestamp)) + "\n");
+        } else {
+          summary.append("Built at " + (new Date(this.dataBuildDetail.timestamp)) + "\n");
+        }
+      }
+
+      //summary.append("Buildable: " + details.getJob().buildable + "\n");
+      //summary.append("Build number: " + dataBuildDetail.number + "\n");
+
+      this.contentBuildSummary.setText(summary.toString());
     }
-
-    //summary.append("Buildable: " + details.getJob().buildable + "\n");
-    //summary.append("Build number: " + dataBuildDetail.number + "\n");
-
-    this.contentBuildSummary.setText(summary.toString());
 
     if (this.healthTest != null && !this.healthTest.isDisposed()) {
       this.healthTest.dispose();
@@ -788,26 +791,27 @@ public class BuildPart extends EditorPart {
     //compBuildSummary.redraw();
     //compBuildSummary.layout(true);
 
-    HealthReport[] hr = this.dataJobDetails.healthReport;
-    if (hr != null && hr.length > 0) {
-      //summary.append("\nProject Health\n");
-      for (HealthReport rep : hr) {
-        //summary.append(rep.description + "\n"); // + " Score:" + rep.score + "%\n"
-        //System.out.println("ICON URL: " + rep.iconUrl);
-        String testMatch = "Test Result: ";
-        if (rep.description.startsWith(testMatch)) {
-          this.healthTest = createImageLabel(this.compBuildSummary, rep.description.substring(testMatch.length()),
-              CloudBeesDevUiPlugin.getImage(CBImages.IMG_HEALTH_PREFIX + CBImages.IMG_24 + rep.iconUrl));
-        } else {
-          String buildMatch = "Build stability: ";
-          if (rep.description.startsWith(buildMatch)) {
-            this.healthBuild = createImageLabel(this.compBuildSummary,
-                rep.description.substring(buildMatch.length()),
+    if (this.dataJobDetails != null) {
+      HealthReport[] hr = this.dataJobDetails.healthReport;
+      if (hr != null && hr.length > 0) {
+        //summary.append("\nProject Health\n");
+        for (HealthReport rep : hr) {
+          //summary.append(rep.description + "\n"); // + " Score:" + rep.score + "%\n"
+          //System.out.println("ICON URL: " + rep.iconUrl);
+          String testMatch = "Test Result: ";
+          if (rep.description.startsWith(testMatch)) {
+            this.healthTest = createImageLabel(this.compBuildSummary, rep.description.substring(testMatch.length()),
                 CloudBeesDevUiPlugin.getImage(CBImages.IMG_HEALTH_PREFIX + CBImages.IMG_24 + rep.iconUrl));
+          } else {
+            String buildMatch = "Build stability: ";
+            if (rep.description.startsWith(buildMatch)) {
+              this.healthBuild = createImageLabel(this.compBuildSummary,
+                  rep.description.substring(buildMatch.length()),
+                  CloudBeesDevUiPlugin.getImage(CBImages.IMG_HEALTH_PREFIX + CBImages.IMG_24 + rep.iconUrl));
+            }
           }
         }
       }
-
     }
 
     BuildPart.this.compBuildSummary.layout(true);
@@ -845,8 +849,7 @@ public class BuildPart extends EditorPart {
   }
 
   private void loadUnitTests() {
-
-    if (this.dataBuildDetail.actions == null) {
+    if (this.dataBuildDetail == null || this.dataBuildDetail.actions == null) {
       this.contentJUnitTests.setText("No Tests");
       this.testsLink.setVisible(false);
       this.testsLink.getParent().layout(true);
@@ -873,7 +876,8 @@ public class BuildPart extends EditorPart {
 
     //StringBuffer changes = new StringBuffer();
     //Point origSize = treeViewerRecentChanges.getTree().getSize();
-    if (this.dataBuildDetail.changeSet != null && this.dataBuildDetail.changeSet.items != null
+    if (this.dataBuildDetail != null && this.dataBuildDetail.changeSet != null
+        && this.dataBuildDetail.changeSet.items != null
         && this.dataBuildDetail.changeSet.items.length > 0) {
       //changesContentProvider.setModel(dataBuildDetail.changeSet.items);
       this.treeViewerRecentChanges.setInput(this.dataBuildDetail);
@@ -913,7 +917,8 @@ public class BuildPart extends EditorPart {
   }
 
   private void loadArtifacts() {
-    if (this.dataBuildDetail.artifacts != null && this.dataBuildDetail.artifacts.length > 0) {
+    if (this.dataBuildDetail != null && this.dataBuildDetail.artifacts != null
+        && this.dataBuildDetail.artifacts.length > 0) {
       this.treeViewerArtifacts.setInput(this.dataBuildDetail);
       this.artifactsLabel.setVisible(false);
       this.treeViewerArtifacts.getTree().setVisible(true);
