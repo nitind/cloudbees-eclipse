@@ -65,9 +65,12 @@ public class BuildPart extends EditorPart {
 
   private Label statusIcon;
   private Composite compMain;
+  private Composite compTop;
   private Composite healthTest;
   private Composite healthBuild;
   private Label textTopSummary;
+  private Section sectSummary;
+  private Composite compSummary;
   private Composite compBuildSummary;
   private Label contentBuildSummary;
 
@@ -91,6 +94,7 @@ public class BuildPart extends EditorPart {
   private Action invokeBuild;
   private OpenLogAction openLogs;
   private ScrolledComposite scrolledRecentChanges;
+  private Label labelSpace;
 
   public BuildPart() {
     super();
@@ -148,7 +152,7 @@ public class BuildPart extends EditorPart {
 
     //createBuildHistorySection();
 
-    createRecentChangesSection();
+    createSections();
 
     //compMain.layout(true);
 
@@ -157,31 +161,34 @@ public class BuildPart extends EditorPart {
     loadInitialData();
   }
 
-  private void createRecentChangesSection() {
+  private void createSections() {
 
     SashForm sashForm = new SashForm(this.compMain, SWT.VERTICAL);
     sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
     this.formToolkit.adapt(sashForm);
     this.formToolkit.paintBordersFor(sashForm);
 
-    Composite compTop = new Composite(sashForm, SWT.NONE);
-    this.formToolkit.adapt(compTop);
-    this.formToolkit.paintBordersFor(compTop);
-    compTop.setLayout(new GridLayout(2, true));
+    this.compTop = new Composite(sashForm, SWT.NONE);
+    this.formToolkit.adapt(this.compTop);
+    this.formToolkit.paintBordersFor(this.compTop);
+    GridLayout gl_compTop = new GridLayout(2, true);
+    gl_compTop.marginWidth = 0;
+    this.compTop.setLayout(gl_compTop);
 
-    Section sectSummary = this.formToolkit.createSection(compTop, Section.TITLE_BAR);
-    sectSummary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-    sectSummary.setSize(107, 45);
-    this.formToolkit.paintBordersFor(sectSummary);
-    sectSummary.setText("Build Summary");
+    this.sectSummary = this.formToolkit.createSection(this.compTop, Section.TITLE_BAR);
+    this.sectSummary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    this.sectSummary.setSize(107, 45);
+    this.formToolkit.adapt(this.sectSummary);
+    this.formToolkit.paintBordersFor(this.sectSummary);
+    this.sectSummary.setText("Build Summary");
 
-    Composite compSummary = new Composite(sectSummary, SWT.NONE);
-    this.formToolkit.adapt(compSummary);
-    this.formToolkit.paintBordersFor(compSummary);
-    sectSummary.setClient(compSummary);
-    compSummary.setLayout(new GridLayout(1, false));
+    this.compSummary = new Composite(this.sectSummary, SWT.NONE);
+    this.formToolkit.adapt(this.compSummary);
+    this.formToolkit.paintBordersFor(this.compSummary);
+    this.sectSummary.setClient(this.compSummary);
+    this.compSummary.setLayout(new GridLayout(1, false));
 
-    this.compBuildSummary = new Composite(compSummary, SWT.NONE);
+    this.compBuildSummary = new Composite(this.compSummary, SWT.NONE);
     this.formToolkit.adapt(this.compBuildSummary);
     this.formToolkit.paintBordersFor(this.compBuildSummary);
     this.compBuildSummary.setLayout(new GridLayout(1, false));
@@ -197,11 +204,12 @@ public class BuildPart extends EditorPart {
     //    this.formToolkit.paintBordersFor(sectTests);
     //    sectTests.setText("JUnit Tests");
     //
-    Composite compTests = new Composite(compSummary, SWT.NONE);
+    Composite compTests = new Composite(this.compSummary, SWT.NONE);
     this.formToolkit.adapt(compTests);
     this.formToolkit.paintBordersFor(compTests);
     //    sectTests.setClient(compTests);
-    compTests.setLayout(new GridLayout(3, false));
+    GridLayout gl_compTests = new GridLayout(4, false);
+    compTests.setLayout(gl_compTests);
 
     Label label = this.formToolkit.createLabel(compTests, "");
     label.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_JUNIT));
@@ -209,11 +217,14 @@ public class BuildPart extends EditorPart {
 
     this.contentJUnitTests = this.formToolkit.createLabel(compTests, "n/a", SWT.NONE);
     this.contentJUnitTests.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+
+    this.labelSpace = new Label(compTests, SWT.NONE);
+    this.formToolkit.adapt(this.labelSpace, true, true);
     this.testsLink = new Composite(compTests, SWT.NONE);
     this.formToolkit.adapt(this.testsLink);
     this.testsLink.setLayout(new GridLayout(2, false));
     Link link = new Link(this.testsLink, SWT.FLAT);
-    link.setText("Show in <a>JUnit View</a>.");
+    link.setText("Show in <a>JUnit View</a>");
     link.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(final SelectionEvent e) {
@@ -223,9 +234,10 @@ public class BuildPart extends EditorPart {
     this.formToolkit.adapt(link, false, false);
     this.testsLink.setVisible(false);
 
-    this.sectArtifacts = this.formToolkit.createSection(compTop, Section.TITLE_BAR);
+    this.sectArtifacts = this.formToolkit.createSection(this.compTop, Section.TITLE_BAR);
     this.sectArtifacts.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
     this.sectArtifacts.setSize(107, 45);
+    this.formToolkit.adapt(this.sectArtifacts);
     this.formToolkit.paintBordersFor(this.sectArtifacts);
     this.sectArtifacts.setText("Artifacts");
 
@@ -583,7 +595,7 @@ public class BuildPart extends EditorPart {
   }
 
   protected void reloadUI() {
-    PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       public void run() {
 
         BuildEditorInput details = (BuildEditorInput) getEditorInput();
@@ -653,6 +665,7 @@ public class BuildPart extends EditorPart {
         BuildPart.this.form.getBody().layout(true);
         //details..form.layout();
 
+        //        BuildPart.this.form.getBody().redraw();
       }
     });
   }
@@ -795,8 +808,9 @@ public class BuildPart extends EditorPart {
         }
       }
 
-      this.compBuildSummary.layout(true);
     }
+
+    BuildPart.this.compBuildSummary.layout(true);
   }
 
   private Composite createImageLabel(final Composite parent, final String text, final Image image) {
@@ -841,7 +855,7 @@ public class BuildPart extends EditorPart {
 
     for (com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Action action : this.dataBuildDetail.actions) {
       if ("testReport".equalsIgnoreCase(action.urlName)) {
-        String val = "Total: " + action.totalCount + " Failed: " + action.failCount + " Skipped: " + action.skipCount;
+        String val = "Tests: " + action.totalCount + "  Failed: " + action.failCount + "  Skipped: " + action.skipCount;
         this.contentJUnitTests.setText(val);
         this.openJunitAction.selectionChanged(new StructuredSelection(this.dataBuildDetail));
         this.testsLink.setVisible(true);
