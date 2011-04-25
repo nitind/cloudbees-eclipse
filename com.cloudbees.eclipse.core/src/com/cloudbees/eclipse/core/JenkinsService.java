@@ -387,7 +387,7 @@ public class JenkinsService {
 
       JenkinsBuildDetailsResponse details = g.fromJson(bodyResponse, JenkinsBuildDetailsResponse.class);
 
-      if (details.fullDisplayName == null) {
+      if (details.getDisplayName() == null) {
         throw new CloudBeesException("Response does not contain required fields!");
       }
 

@@ -512,7 +512,7 @@ public class BuildPart extends EditorPart {
               service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor));
 
           details.setBuildUrl(BuildPart.this.dataBuildDetail.url);
-          details.setDisplayName(BuildPart.this.dataBuildDetail.fullDisplayName);
+          details.setDisplayName(BuildPart.this.dataBuildDetail.getDisplayName());
 
         } catch (CloudBeesException e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
@@ -620,9 +620,9 @@ public class BuildPart extends EditorPart {
           String topStr = BuildPart.this.dataBuildDetail.result != null ? BuildPart.this.dataBuildDetail.result /*+ " ("
                                                                                                                 + new Date(dataBuildDetail.timestamp) + ")"*/
           : "";
-          if (BuildPart.this.dataBuildDetail.building) {
+          if (BuildPart.this.dataBuildDetail.building != null && BuildPart.this.dataBuildDetail.building) {
             topStr = "BUILDING";
-          } else if (BuildPart.this.dataJobDetails.inQueue) {
+          } else if (BuildPart.this.dataJobDetails.inQueue != null && BuildPart.this.dataJobDetails.inQueue) {
             topStr = "IN QUEUE";
           } /*else {
             topStr = topStr + " " + Utils.humanReadableTime((System.currentTimeMillis() - dataBuildDetail.timestamp))

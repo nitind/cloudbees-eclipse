@@ -42,10 +42,10 @@ public class OpenLogAction extends Action {
   public void run() {
     if (this.build instanceof JenkinsBuild) {
       CloudBeesDevUiPlugin.getDefault().getJobConsoleManager()
-          .showConsole(((JenkinsBuild) this.build).fullDisplayName, ((JenkinsBuild) this.build).url);
+          .showConsole(((JenkinsBuild) this.build).getDisplayName(), ((JenkinsBuild) this.build).url);
     } else if (this.build instanceof JenkinsBuildDetailsResponse) {
       CloudBeesDevUiPlugin.getDefault().getJobConsoleManager()
-          .showConsole(((JenkinsBuildDetailsResponse) this.build).fullDisplayName,
+          .showConsole(((JenkinsBuildDetailsResponse) this.build).getDisplayName(),
               ((JenkinsBuildDetailsResponse) this.build).url);
     }
   }

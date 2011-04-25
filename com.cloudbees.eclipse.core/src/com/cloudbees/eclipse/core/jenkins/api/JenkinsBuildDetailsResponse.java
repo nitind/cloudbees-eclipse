@@ -6,7 +6,7 @@ import com.google.gson.annotations.Expose;
  * Main response object for the job view For more detailed test build a new class for
  * /.../job/.../391/testReport/api/json
  * ?tree=duration,failCount,passCount,skipCount,suites[cases[className,duration,name,status]]
- * 
+ *
  * @author ahti
  */
 public class JenkinsBuildDetailsResponse extends BaseJenkinsResponse {
@@ -22,6 +22,8 @@ public class JenkinsBuildDetailsResponse extends BaseJenkinsResponse {
 
   public Boolean building;
   public String description;
+  public String name;
+  public String displayName;
   public String fullDisplayName;
   public String id;
   //public Boolean keepLog;
@@ -88,4 +90,18 @@ public class JenkinsBuildDetailsResponse extends BaseJenkinsResponse {
     public String relativePath;
   }
 
+  public String getDisplayName() {
+    String result = this.fullDisplayName;
+    if (result == null) {
+      result = this.displayName;
+      if (result == null) {
+        result = this.name;
+      }
+
+      if (result != null && result.indexOf("#") < 0) {
+        result += " #" + this.number;
+      }
+    }
+    return result;
+  }
 }

@@ -2,6 +2,8 @@ package com.cloudbees.eclipse.core.jenkins.api;
 
 
 public class JenkinsBuild {
+  public String name;
+  public String displayName;
   public String fullDisplayName;
   public String url;
   public String builtOn;
@@ -28,5 +30,20 @@ public class JenkinsBuild {
     public static class Cause {
       public String shortDescription;
     }
+  }
+
+  public String getDisplayName() {
+    String result = this.fullDisplayName;
+    if (result == null) {
+      result = this.displayName;
+      if (result == null) {
+        result = this.name;
+      }
+
+      if (result != null && result.indexOf("#") < 0 && this.number != null) {
+        result += " #" + this.number;
+      }
+    }
+    return result;
   }
 }
