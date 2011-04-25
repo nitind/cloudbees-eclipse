@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
 	<actions />
-	<description>This is a mock job generated from eclipse</description>
+	<description>This is an empty job generated from eclipse</description>
 	<keepDependencies>false</keepDependencies>
 	<properties />
 	<scm class="hudson.scm.NullSCM" />
@@ -13,7 +13,7 @@
 	<concurrentBuild>false</concurrentBuild>
 	<builders>
 		<hudson.tasks.Shell>
-			<command>echo &quot;Built mock job&quot;</command>
+			<command>echo &quot;Built empty job&quot;</command>
 		</hudson.tasks.Shell>
 	</builders>
 	<publishers />

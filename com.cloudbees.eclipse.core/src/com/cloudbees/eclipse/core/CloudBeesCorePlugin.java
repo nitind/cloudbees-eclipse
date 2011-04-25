@@ -1,7 +1,13 @@
 package com.cloudbees.eclipse.core;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.eclipse.core.net.proxy.IProxyService;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -61,7 +67,7 @@ public class CloudBeesCorePlugin extends Plugin {
       this.gcService.stop();
       this.gcService = null;
     }
-    if (this.proxyServiceTracker!=null) {
+    if (this.proxyServiceTracker != null) {
       this.proxyServiceTracker.close();
     }
     super.stop(context);
@@ -87,4 +93,15 @@ public class CloudBeesCorePlugin extends Plugin {
     return this.logger;
   }
 
+  public static File getEmptyConfigXML() throws IOException {
+    Bundle bundle = CloudBeesCorePlugin.getDefault().getBundle();
+    Path path = new Path("scripts/empty_config.xml");
+    return new File(FileLocator.toFileURL(FileLocator.find(bundle, path, null)).getFile());
+  }
+
+  public static File getSCMConfigXML() throws IOException {
+    Bundle bundle = CloudBeesCorePlugin.getDefault().getBundle();
+    Path path = new Path("scripts/scm_config.xml");
+    return new File(FileLocator.toFileURL(FileLocator.find(bundle, path, null)).getFile());
+  }
 }

@@ -1,15 +1,10 @@
 package com.cloudbees.eclipse.dev.ui.views.wizards;
 
-import java.net.URL;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.ui.PlatformUI;
 
-import com.cloudbees.eclipse.core.CoreScripts;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
-import com.cloudbees.eclipse.ui.wizard.CBWizardSupport;
 
 public class JenkinsJobWizard extends Wizard {
 
@@ -38,8 +33,8 @@ public class JenkinsJobWizard extends Wizard {
     String jobName = this.jenkinsPage.getJobName();
 
     try {
-      CBWizardSupport.makeJenkinsJob(CoreScripts.getMockConfigXML(), instance, jobName, getContainer());
-      PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(instance.url));
+      // CBWizardSupport.makeJenkinsJob("", instance, jobName, getContainer()); // TODO
+      // PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(instance.url));
       return true;
     } catch (Exception e) {
       e.printStackTrace(); // TODO
@@ -47,4 +42,5 @@ public class JenkinsJobWizard extends Wizard {
     }
 
   }
+
 }
