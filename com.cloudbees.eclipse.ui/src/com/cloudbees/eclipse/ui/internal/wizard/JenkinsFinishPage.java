@@ -6,6 +6,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import com.cloudbees.eclipse.core.domain.JenkinsInstance;
+
 public class JenkinsFinishPage extends AbstractJenkinsPage {
 
   private static final String DESCR = "Here comes the text describing which cool things you can do now.\nIt's full of possibilities."; // TODO i18n
@@ -15,23 +17,24 @@ public class JenkinsFinishPage extends AbstractJenkinsPage {
   /**
    * Create the wizard.
    */
-  public JenkinsFinishPage() {
+  public JenkinsFinishPage(final JenkinsInstance ni) {
     super("finish");
+    setJenkinsInstance(ni);
   }
 
-  public void initText(Exception e) {
-    error = null;
+  public void initText(final Exception e) {
+    this.error = null;
     if (e != null) {
       // TODO format error nicely, so user can react properly
-      error = e.getLocalizedMessage();
+      this.error = e.getLocalizedMessage();
       Throwable cause = e.getCause();
       while (cause != null) {
-        error += "\n" + cause.getLocalizedMessage();
+        this.error += "\n" + cause.getLocalizedMessage();
         cause = cause.getCause();
       }
     }
 
-    if (error == null) {
+    if (this.error == null) {
       setTitle("Congratulations! Jenkins is configured properly");
       setMessage("Specified Jenkins location is working well!");
       //setDescription("Wizard Page description");
@@ -49,7 +52,7 @@ public class JenkinsFinishPage extends AbstractJenkinsPage {
    * Create contents of the wizard.
    * @param parent
    */
-  public void createControl(Composite parent) {
+  public void createControl(final Composite parent) {
     Composite container = new Composite(parent, SWT.NULL);
 
     setControl(container);
@@ -57,26 +60,26 @@ public class JenkinsFinishPage extends AbstractJenkinsPage {
     gl_container.marginWidth = 20;
     gl_container.marginHeight = 0;
     container.setLayout(gl_container);
-    
-    labelContentText = new Label(container, SWT.WRAP);
-    labelContentText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 1, 1));
+
+    this.labelContentText = new Label(container, SWT.WRAP);
+    this.labelContentText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 1, 1));
     updateContent();
   }
 
   public void updateContent() {
-    if (labelContentText == null) {
+    if (this.labelContentText == null) {
       return;
     }
-    
+
     String mess = "";
 
-    if (error != null && error.trim().length() > 0) {
-      mess += "Error: \n" + error + "\n\n";
+    if (this.error != null && this.error.trim().length() > 0) {
+      mess += "Error: \n" + this.error + "\n\n";
     } else {
       mess += DESCR;
     }
-    
-    labelContentText.setText(mess);
-    labelContentText.getParent().layout();
+
+    this.labelContentText.setText(mess);
+    this.labelContentText.getParent().layout();
   }
 }

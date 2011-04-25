@@ -385,8 +385,12 @@ public class JenkinsService {
 
       JenkinsBuildDetailsResponse details = g.fromJson(bodyResponse, JenkinsBuildDetailsResponse.class);
 
-      if (details.fullDisplayName == null) {
+      if (details.getDisplayName() == null) {
         throw new CloudBeesException("Response does not contain required fields!");
+      }
+
+      if (details.viewUrl == null) {
+        details.viewUrl = jobUrl;
       }
 
       return details;
@@ -464,7 +468,7 @@ public class JenkinsService {
         throw new CloudBeesException("Response does not contain required fields!");
       }
 
-      details.viewUrl = this.jenkins.url;
+      details.viewUrl = jobUrl; // this.jenkins.url;
 
       return details;
 

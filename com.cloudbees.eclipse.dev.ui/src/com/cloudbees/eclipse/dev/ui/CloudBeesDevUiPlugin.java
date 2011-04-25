@@ -364,7 +364,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     String name;
     String url;
     if (job.lastBuild != null && job.lastBuild.url != null) {
-      name = job.lastBuild.fullDisplayName;
+      name = job.lastBuild.getDisplayName();
       url = job.lastBuild.url;
     } else {
       name = job.getDisplayName();
@@ -384,7 +384,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     }
     try {
       CloudBeesUIPlugin.getActiveWindow().getActivePage()
-          .openEditor(new BuildEditorInput(build.fullDisplayName, build.url), BuildPart.ID);
+          .openEditor(new BuildEditorInput(build.getDisplayName(), build.url), BuildPart.ID);
     } catch (PartInitException e) {
       CloudBeesUIPlugin.getDefault().getLogger().error(e);
     }

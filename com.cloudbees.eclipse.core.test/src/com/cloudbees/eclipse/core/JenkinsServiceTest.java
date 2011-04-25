@@ -66,9 +66,9 @@ public class JenkinsServiceTest {
       System.out.println("item: " + set.msg);
     }
 
-    System.out.println("Display name: " + details.fullDisplayName);
+    System.out.println("Display name: " + details.getDisplayName());
 
-    assertTrue(details.fullDisplayName.length() > 0);
+    assertTrue(details.getDisplayName().length() > 0);
 
     assertTrue(changeset.items.length > 0);
 

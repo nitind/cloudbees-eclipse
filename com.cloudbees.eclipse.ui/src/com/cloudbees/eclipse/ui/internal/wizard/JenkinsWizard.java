@@ -10,8 +10,8 @@ public class JenkinsWizard extends Wizard {
 
   private final JenkinsInstance instance;
 
-  private final JenkinsUrlPage pageUrl = new JenkinsUrlPage();
-  private final JenkinsFinishPage pageFinish = new JenkinsFinishPage();
+  private final JenkinsUrlPage pageUrl;
+  private final JenkinsFinishPage pageFinish;
 
   public JenkinsWizard() {
     this(new JenkinsInstance());
@@ -32,14 +32,14 @@ public class JenkinsWizard extends Wizard {
     setForcePreviousAndNextButtons(true);
     setHelpAvailable(false);
 
-    pageUrl.setJenkinsInstance(ni);
-    pageFinish.setJenkinsInstance(ni);
+    this.pageUrl = new JenkinsUrlPage(ni);
+    this.pageFinish = new JenkinsFinishPage(ni);
   }
 
   @Override
   public void addPages() {
-    addPage(pageUrl);
-    addPage(pageFinish);
+    addPage(this.pageUrl);
+    addPage(this.pageFinish);
   }
 
   @Override
@@ -49,13 +49,13 @@ public class JenkinsWizard extends Wizard {
   }
 
   public JenkinsInstance getJenkinsInstance() {
-    return instance;
+    return this.instance;
   }
 
   private void saveInstanceInfo() {
 
-    // TODO shouldn't we actually save only when Apply clicked on the preference page? 
-    CloudBeesUIPlugin.getDefault().saveJenkinsInstance(instance);
+    // TODO shouldn't we actually save only when Apply clicked on the preference page?
+    CloudBeesUIPlugin.getDefault().saveJenkinsInstance(this.instance);
 
   }
 

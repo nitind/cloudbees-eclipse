@@ -26,10 +26,10 @@ public class JenkinsUrlPage extends AbstractJenkinsPage {
   /**
    * Create the wizard.
    */
-  public JenkinsUrlPage() {
+  public JenkinsUrlPage(final JenkinsInstance ni) {
     super("url");
+    setJenkinsInstance(ni);
     setMessage("Please provide a URL and label for your connection.");
-
     init();
   }
 
@@ -45,17 +45,12 @@ public class JenkinsUrlPage extends AbstractJenkinsPage {
     }
   }
 
-  public void setJenkinsInstance(JenkinsInstance ni) {
-    super.setJenkinsInstance(ni);
-    init();
-  }
-
   /**
    * Create contents of the wizard.
-   * 
+   *
    * @param parent
    */
-  public void createControl(Composite parent) {
+  public void createControl(final Composite parent) {
     Composite comp = new Composite(parent, SWT.NULL);
 
     setControl(comp);
@@ -64,26 +59,26 @@ public class JenkinsUrlPage extends AbstractJenkinsPage {
     gl_comp.marginHeight = 40;
     comp.setLayout(gl_comp);
 
+    Label lblName = new Label(comp, SWT.NONE);
+    lblName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+    lblName.setText("Local display &label:");
+
+    this.textLabel = new Text(comp, SWT.BORDER);
+    this.textLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+
     Label lblUrl = new Label(comp, SWT.NONE);
     lblUrl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
     lblUrl.setToolTipText("Jenkins location URL");
     lblUrl.setText("Jenkins &URL:");
 
-    textUrl = new Text(comp, SWT.BORDER);
-    textUrl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-
-    Label lblName = new Label(comp, SWT.NONE);
-    lblName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-    lblName.setText("Local display &label:");
-
-    textLabel = new Text(comp, SWT.BORDER);
-    textLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+    this.textUrl = new Text(comp, SWT.BORDER);
+    this.textUrl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
     new Label(comp, SWT.NONE);
     new Label(comp, SWT.NONE);
 
-    chkAuthenticate = new Button(comp, SWT.CHECK);
-    chkAuthenticate.setText("&Authenticate");
+    this.chkAuthenticate = new Button(comp, SWT.CHECK);
+    this.chkAuthenticate.setText("&Authenticate");
 
     new Label(comp, SWT.NONE);
 
@@ -91,92 +86,94 @@ public class JenkinsUrlPage extends AbstractJenkinsPage {
     lblUsername.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
     lblUsername.setText("&Username:");
 
-    textUsername = new Text(comp, SWT.BORDER);
-    textUsername.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+    this.textUsername = new Text(comp, SWT.BORDER);
+    this.textUsername.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
     final Label lblPassword = new Label(comp, SWT.NONE);
     lblPassword.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
     lblPassword.setText("&Password:");
 
-    textPassword = new Text(comp, SWT.BORDER | SWT.PASSWORD);
-    textPassword.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+    this.textPassword = new Text(comp, SWT.BORDER | SWT.PASSWORD);
+    this.textPassword.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
     ModifyListener modifyListener = new ModifyListener() {
-      public void modifyText(ModifyEvent e) {
+      public void modifyText(final ModifyEvent e) {
         validate();
       }
     };
-    textUrl.addModifyListener(modifyListener);
-    textLabel.addModifyListener(modifyListener);
-    textUsername.addModifyListener(modifyListener);
-    textPassword.addModifyListener(modifyListener);
 
     SelectionAdapter selectionListener = new SelectionAdapter() {
       @Override
-      public void widgetSelected(SelectionEvent e) {
+      public void widgetSelected(final SelectionEvent e) {
         validate();
-        boolean auth = chkAuthenticate.getSelection();
-        textUsername.setEnabled(auth);
-        textPassword.setEnabled(auth);
+        boolean auth = JenkinsUrlPage.this.chkAuthenticate.getSelection();
+        JenkinsUrlPage.this.textUsername.setEnabled(auth);
+        JenkinsUrlPage.this.textPassword.setEnabled(auth);
         lblUsername.setEnabled(auth);
         lblPassword.setEnabled(auth);
         if (!auth) {
-          textUsername.setText("");
-          textPassword.setText("");
+          JenkinsUrlPage.this.textUsername.setText("");
+          JenkinsUrlPage.this.textPassword.setText("");
         }
         validate();
       }
     };
-    chkAuthenticate.addSelectionListener(selectionListener);
+    this.chkAuthenticate.addSelectionListener(selectionListener);
 
-    setText(textUrl, instance.url);
-    setText(textLabel, instance.label);
-    setText(textUsername, instance.username);
-    setText(textPassword, instance.password);
-    chkAuthenticate.setSelection(instance.authenticate);
+    setText(this.textUrl, this.instance.url);
+    setText(this.textLabel, this.instance.label);
+    setText(this.textUsername, this.instance.username);
+    setText(this.textPassword, this.instance.password);
+    this.chkAuthenticate.setSelection(this.instance.authenticate);
+
     selectionListener.widgetSelected(null);
+
+    this.textUrl.addModifyListener(modifyListener);
+    this.textLabel.addModifyListener(modifyListener);
+    this.textUsername.addModifyListener(modifyListener);
+    this.textPassword.addModifyListener(modifyListener);
   }
 
-  private void setText(Text control, String text) {
+  private void setText(final Text control, final String text) {
     control.setText(text != null ? text : "");
   }
 
   private void validate() {
-    if (textUrl == null) {
+    if (this.textUrl == null) {
       return; // not yet
     }
 
-    if (textUrl.getText().length() == 0) {
+    if (this.textUrl.getText().length() == 0) {
       setErrorMessage("Url is empty!"); // TODO i18n
       setPageComplete(false);
       return;
     }
 
-    if (textLabel.getText().length() == 0) {
+    if (this.textLabel.getText().length() == 0) {
       setErrorMessage("Label is empty!");// TODO i18n
       setPageComplete(false);
       return;
     }
 
-    if (chkAuthenticate.getSelection()) {
-      if (textUsername.getText().trim().length() == 0) {
+    if (this.chkAuthenticate.getSelection()) {
+      if (this.textUsername.getText().trim().length() == 0) {
         setErrorMessage("Username is empty!"); // TODO i18n
         setPageComplete(false);
         return;
       }
 
-      if (textPassword.getText().trim().length() == 0) {
+      if (this.textPassword.getText().trim().length() == 0) {
         setErrorMessage("Password is empty!");// TODO i18n
         setPageComplete(false);
         return;
       }
     }
 
-    instance.url = textUrl.getText().trim();
-    instance.label = textLabel.getText().trim();
-    instance.username = textUsername.getText().trim();
-    instance.password = textPassword.getText().trim();
-    instance.authenticate = chkAuthenticate.getSelection();
+    this.instance.url = this.textUrl.getText().trim();
+    this.instance.label = this.textLabel.getText().trim();
+    this.instance.username = this.textUsername.getText().trim();
+    this.instance.password = this.textPassword.getText().trim();
+    this.instance.authenticate = this.chkAuthenticate.getSelection();
 
     setErrorMessage(null);
     setPageComplete(true);
