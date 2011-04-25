@@ -21,7 +21,7 @@ public class JenkinsInstance implements Comparable<JenkinsInstance> {
 
   public JenkinsInstance() {
   }
-  
+
   public JenkinsInstance(final String label, final String url) {
     this(label, url, null, null, false, false);
   }
@@ -83,13 +83,14 @@ public class JenkinsInstance implements Comparable<JenkinsInstance> {
    * <p>
    * Possible use cases include storing this information in preferences.
    * </p>
-   * 
+   *
    * @param instances
    * @return
    */
   public final static String encode(final List<JenkinsInstance> instances) {
     Type type = new TypeToken<List<JenkinsInstance>>(){}.getType();
-    return Utils.toB64(Utils.createGson().toJson(instances,type));
+    String json = Utils.createGson().toJson(instances,type);
+    return Utils.toB64(json);
   }
 
   /**
@@ -99,13 +100,14 @@ public class JenkinsInstance implements Comparable<JenkinsInstance> {
    * <p>
    * Possible use cases include storing this information in preferences.
    * </p>
-   * 
+   *
    * @param encodedInstances
    * @return
    */
   public final static List<JenkinsInstance> decode(final String encodedInstances) {
     Type type = new TypeToken<List<JenkinsInstance>>(){}.getType();
-    List<JenkinsInstance> ret = Utils.createGson().fromJson(Utils.fromB64(encodedInstances), type);
+    String json = Utils.fromB64(encodedInstances);
+    List<JenkinsInstance> ret = Utils.createGson().fromJson(json, type);
     if (ret == null) {
       return new ArrayList<JenkinsInstance>();
     }
@@ -118,6 +120,7 @@ public class JenkinsInstance implements Comparable<JenkinsInstance> {
     ret.append("JenkinsInstance[");
     ret.append("label=" + this.label + ";");
     ret.append("url=" + this.url + ";");
+    ret.append("auth=" + this.authenticate + ";");
     ret.append("username=" + this.username + ";");
     ret.append("password=" + ((this.password != null && this.password.length() > 0) ? "******" : ""));
     ret.append("]");

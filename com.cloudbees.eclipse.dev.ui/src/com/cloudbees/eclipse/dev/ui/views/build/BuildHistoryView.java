@@ -92,8 +92,6 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
       }
     }
 
-    System.out.println("new view: " + newView);
-
     if (newView == null || newView.builds == null) {
       setContentDescription("No builds available.");
       this.contentProvider.inputChanged(this.table, null, null);

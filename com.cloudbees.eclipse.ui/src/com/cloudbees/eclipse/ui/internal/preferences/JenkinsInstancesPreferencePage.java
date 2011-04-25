@@ -28,7 +28,7 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 /**
  * CloudBees Jenkins instances configuration
- * 
+ *
  * @author ahtik
  */
 
@@ -46,15 +46,15 @@ public class JenkinsInstancesPreferencePage extends PreferencePage implements IW
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
    */
-  public void init(IWorkbench workbench) {
+  public void init(final IWorkbench workbench) {
   }
 
   @Override
-  protected Control createContents(Composite parent) {
+  protected Control createContents(final Composite parent) {
     parent.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
     Composite comp = new Composite(parent, SWT.NONE);
@@ -80,28 +80,28 @@ public class JenkinsInstancesPreferencePage extends PreferencePage implements IW
     gl_compositeTable.marginWidth = 0;
     compositeTable.setLayout(gl_compositeTable);
 
-    table = new Table(compositeTable, SWT.BORDER | SWT.FULL_SELECTION);
-    table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-    table.setHeaderVisible(true);
-    table.setLinesVisible(true);
-    
-    table.addSelectionListener(new SelectionListener() {
-      
-      public void widgetSelected(SelectionEvent e) {
+    this.table = new Table(compositeTable, SWT.BORDER | SWT.FULL_SELECTION);
+    this.table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    this.table.setHeaderVisible(true);
+    this.table.setLinesVisible(true);
+
+    this.table.addSelectionListener(new SelectionListener() {
+
+      public void widgetSelected(final SelectionEvent e) {
         enableButtons();
       }
 
-      public void widgetDefaultSelected(SelectionEvent e) {
+      public void widgetDefaultSelected(final SelectionEvent e) {
         enableButtons();
       }
     });
 
-    TableColumn tblclmnLabel = new TableColumn(table, SWT.NONE);
-    tblclmnLabel.setWidth(217);
+    TableColumn tblclmnLabel = new TableColumn(this.table, SWT.NONE);
+    tblclmnLabel.setWidth(120);
     tblclmnLabel.setText("Label");//TODO i18n
 
-    TableColumn tblclmnUrl = new TableColumn(table, SWT.NONE);
-    tblclmnUrl.setWidth(53);
+    TableColumn tblclmnUrl = new TableColumn(this.table, SWT.NONE);
+    tblclmnUrl.setWidth(300);
     tblclmnUrl.setText("Url");//TODO i18n
 
     Composite compositeButtons = new Composite(compositeJenkinsInstances, SWT.NONE);
@@ -111,29 +111,29 @@ public class JenkinsInstancesPreferencePage extends PreferencePage implements IW
     compositeButtons.setLayout(gl_compositeButtons);
     compositeButtons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
 
-    btnAdd = new Button(compositeButtons, SWT.PUSH);
+    this.btnAdd = new Button(compositeButtons, SWT.PUSH);
     GridData gd_btnAdd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
     gd_btnAdd.widthHint = 70;
-    btnAdd.setLayoutData(gd_btnAdd);
-    btnAdd.setText("&Add...");
+    this.btnAdd.setLayoutData(gd_btnAdd);
+    this.btnAdd.setText("&Add...");
 
-    btnEdit = new Button(compositeButtons, SWT.NONE);
-    btnEdit.setEnabled(false);
+    this.btnEdit = new Button(compositeButtons, SWT.NONE);
+    this.btnEdit.setEnabled(false);
     GridData gd_btnEdit = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
     gd_btnEdit.widthHint = 70;
-    btnEdit.setLayoutData(gd_btnEdit);
-    btnEdit.setText("E&dit...");
+    this.btnEdit.setLayoutData(gd_btnEdit);
+    this.btnEdit.setText("E&dit...");
 
-    btnRemove = new Button(compositeButtons, SWT.NONE);
-    btnRemove.setEnabled(false);
+    this.btnRemove = new Button(compositeButtons, SWT.NONE);
+    this.btnRemove.setEnabled(false);
     GridData gd_btnRemove = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
     gd_btnRemove.widthHint = 70;
-    btnRemove.setLayoutData(gd_btnRemove);
-    btnRemove.setText("&Remove");
-    
+    this.btnRemove.setLayoutData(gd_btnRemove);
+    this.btnRemove.setText("&Remove");
+
     SelectionAdapter addListener = new SelectionAdapter() {
       @Override
-      public void widgetSelected(SelectionEvent e) {
+      public void widgetSelected(final SelectionEvent e) {
         Shell parent = CloudBeesUIPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell();
         WizardDialog dialog = new JenkinsWizardDialog(parent);
         dialog.create();
@@ -142,17 +142,17 @@ public class JenkinsInstancesPreferencePage extends PreferencePage implements IW
         loadTable();
       }
     };
-    btnAdd.addSelectionListener(addListener);
+    this.btnAdd.addSelectionListener(addListener);
 
     SelectionAdapter editListener = new SelectionAdapter() {
       @Override
-      public void widgetSelected(SelectionEvent e) {
+      public void widgetSelected(final SelectionEvent e) {
         TableItem[] items = JenkinsInstancesPreferencePage.this.table.getSelection();
         if (items == null || items.length <= 0) {
           return;
         }
         JenkinsInstance ni = (JenkinsInstance) items[0].getData();
-        
+
         Shell parent = CloudBeesUIPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell();
         WizardDialog dialog = new JenkinsWizardDialog(parent, ni);
         dialog.create();
@@ -161,11 +161,11 @@ public class JenkinsInstancesPreferencePage extends PreferencePage implements IW
         loadTable();
       }
     };
-    btnEdit.addSelectionListener(editListener);
+    this.btnEdit.addSelectionListener(editListener);
 
     SelectionAdapter removeListener = new SelectionAdapter() {
       @Override
-      public void widgetSelected(SelectionEvent e) {
+      public void widgetSelected(final SelectionEvent e) {
         TableItem[] items = JenkinsInstancesPreferencePage.this.table.getSelection();
         int[] itemIndices = JenkinsInstancesPreferencePage.this.table.getSelectionIndices();
         if (items == null || items.length <= 0) {
@@ -180,7 +180,7 @@ public class JenkinsInstancesPreferencePage extends PreferencePage implements IW
         JenkinsInstancesPreferencePage.this.table.remove(itemIndices);
       }
     };
-    btnRemove.addSelectionListener(removeListener);
+    this.btnRemove.addSelectionListener(removeListener);
 
     loadTable();
     return comp;
@@ -190,30 +190,30 @@ public class JenkinsInstancesPreferencePage extends PreferencePage implements IW
   private void loadTable() {
     // TODO preserve selection on reload
 
-    table.removeAll();
+    this.table.removeAll();
 
     List<JenkinsInstance> insts = CloudBeesUIPlugin.getDefault().loadManualJenkinsInstances();
     Collections.sort(insts, new Comparator<JenkinsInstance>() {
-      public int compare(JenkinsInstance o1, JenkinsInstance o2) {
+      public int compare(final JenkinsInstance o1, final JenkinsInstance o2) {
         return o1.label.compareTo(o2.label);
       }
     });
 
     for (JenkinsInstance instance : insts) {
-      TableItem tableItem = new TableItem(table, SWT.NONE);
+      TableItem tableItem = new TableItem(this.table, SWT.NONE);
       tableItem.setText(new String[] { instance.label, instance.url });
       tableItem.setData(instance);
     }
 
-    if (table.getItemCount() > 0) {
-      table.setSelection(0);
+    if (this.table.getItemCount() > 0) {
+      this.table.setSelection(0);
     }
 
     enableButtons();
   }
 
   private void enableButtons() {
-    TableItem[] items = table.getSelection();
+    TableItem[] items = this.table.getSelection();
     JenkinsInstancesPreferencePage.this.btnEdit.setEnabled(items != null && items.length > 0);
     JenkinsInstancesPreferencePage.this.btnRemove.setEnabled(items != null && items.length > 0);
   }
