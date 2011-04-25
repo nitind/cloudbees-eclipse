@@ -10,12 +10,9 @@ import org.eclipse.ui.console.IConsoleListener;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job.Build;
-
 public class JobConsoleManager {
 
-  private final Map<Build, JobConsole> consoles = new HashMap<Build, JobConsole>();
+  private final Map<String, JobConsole> consoles = new HashMap<String, JobConsole>();
 
   private final IConsoleManager consoleManager;
 
@@ -42,23 +39,24 @@ public class JobConsoleManager {
 
   protected void remove(final IConsole console) {
     if (JobConsole.CONSOLE_TYPE.equals(console.getType())) {
-      Object build = ((MessageConsole) console).getAttribute(JobConsole.ATTRIBUTE_BUILD);
-      if (build instanceof Build) {
-        JobConsole jobConsole = this.consoles.get(build);
+      Object url = ((MessageConsole) console).getAttribute(JobConsole.ATTRIBUTE_URL);
+      if (url instanceof String) {
+        JobConsole jobConsole = this.consoles.get(url);
         if (jobConsole != null) {
           jobConsole.dispose();
-          this.consoles.remove(build);
+          this.consoles.remove(url);
         }
       }
     }
   }
 
-  public JobConsole showConsole(final JenkinsJobsResponse.Job.Build build) {
-    Assert.isNotNull(build);
-    JobConsole console = this.consoles.get(build);
+  public JobConsole showConsole(final String name, final String url) {
+    Assert.isNotNull(name);
+    Assert.isNotNull(url);
+    JobConsole console = this.consoles.get(url);
     if (console == null) {
-      console = new JobConsole(this.consoleManager, build);
-      this.consoles.put(build, console);
+      console = new JobConsole(this.consoleManager, name, url);
+      this.consoles.put(url, console);
     }
     console.show();
     return console;

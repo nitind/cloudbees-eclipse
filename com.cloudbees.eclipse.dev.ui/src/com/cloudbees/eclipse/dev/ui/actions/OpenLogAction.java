@@ -4,46 +4,43 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
 
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
-import com.cloudbees.eclipse.dev.ui.views.jobs.JobsView;
 
 /**
  * @author antons
  */
 public class OpenLogAction extends Action {
 
-  private JobsView view;
+  private Object build;
 
-  public OpenLogAction(final JobsView jobsView) {
+  public OpenLogAction() {
     super("Open console log", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS);
     setToolTipText("Open console log of this job"); //TODO i18n
-    setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_BUILD_CONSOLE_LOG));
+    setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_CONSOLE));
     setEnabled(false);
-    this.view = jobsView;
+  }
+
+  public void setBuild(final Object build) {
+    this.build = build;
   }
 
   @Override
   public boolean isEnabled() {
-    if (this.view.getSelectedJob() instanceof JenkinsJobsResponse.Job) {
-      Job job = ((JenkinsJobsResponse.Job) this.view.getSelectedJob());
-      if (job.lastBuild != null) {
-        return true;
-      }
-    }
-    return false;
+    return this.build == null ? false : super.isEnabled();
   }
 
   @Override
   public void runWithEvent(final Event event) {
-    if (this.view.getSelectedJob() instanceof JenkinsJobsResponse.Job) {
-      Job job = ((JenkinsJobsResponse.Job) this.view.getSelectedJob());
-      if (job.lastBuild != null) {
-        CloudBeesDevUiPlugin.getDefault().getJobConsoleManager().showConsole(job.lastBuild);
-      }
+    if (this.build instanceof JenkinsBuild) {
+      CloudBeesDevUiPlugin.getDefault().getJobConsoleManager()
+          .showConsole(((JenkinsBuild) this.build).fullDisplayName, ((JenkinsBuild) this.build).url);
+    } else if (this.build instanceof JenkinsBuildDetailsResponse) {
+      CloudBeesDevUiPlugin.getDefault().getJobConsoleManager()
+          .showConsole(((JenkinsBuildDetailsResponse) this.build).fullDisplayName,
+              ((JenkinsBuildDetailsResponse) this.build).url);
     }
   }
-
 }

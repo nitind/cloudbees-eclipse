@@ -14,6 +14,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -40,6 +41,7 @@ import org.eclipse.ui.progress.IProgressService;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.jenkins.api.HealthReport;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Action.Cause;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet.ChangeSetItem;
@@ -48,6 +50,7 @@ import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.dev.ui.actions.OpenJunitViewAction;
+import com.cloudbees.eclipse.dev.ui.actions.OpenLogAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class BuildPart extends EditorPart {
@@ -59,34 +62,51 @@ public class BuildPart extends EditorPart {
   protected JenkinsJobAndBuildsResponse dataJobDetails;
 
   private Form form;
-  private Label textTopSummary;
-  private Composite compBuildSummary;
-  private Label contentBuildSummary;
-  private Composite contentBuildHistory;
-  private Label contentJUnitTests;
-  private OpenJunitViewAction openJunitAction;
-  private Composite testsLink;
-  private Action invokeBuild;
+
   private Label statusIcon;
   private Composite compMain;
   private Composite healthTest;
   private Composite healthBuild;
-  private Composite contentBuildHistoryHolder;
-  private TreeViewer treeViewerRecentChanges;
+  private Label textTopSummary;
+  private Composite compBuildSummary;
+  private Label contentBuildSummary;
+
   private Section sectBuildHistory;
+  private Composite contentBuildHistory;
+  private Composite contentBuildHistoryHolder;
+
+  private Label contentJUnitTests;
+  private OpenJunitViewAction openJunitAction;
+  private Composite testsLink;
+
   private Section sectRecentChanges;
-  private Composite compInterm;
-  private ScrolledComposite scrolledComposite;
-  private RecentChangesContentProvider changesContentProvider;
+  private TreeViewer treeViewerRecentChanges;
   private Label changesetLabel;
+
+  private Section sectArtifacts;
+  private TreeViewer treeViewerArtifacts;
+  private Label artifactsLabel;
+
+  private Action openBuildHistory;
+  private Action invokeBuild;
+  private OpenLogAction openLogs;
+  private ScrolledComposite scrolledRecentChanges;
 
   public BuildPart() {
     super();
   }
 
+  public void setData(final JenkinsBuildDetailsResponse dataBuildDetail,
+      final JenkinsJobAndBuildsResponse dataJobDetails) {
+    this.dataBuildDetail = dataBuildDetail;
+    this.dataJobDetails = dataJobDetails;
+
+    this.openLogs.setBuild(dataBuildDetail);
+  }
+
   /**
    * Create contents of the editor part.
-   * 
+   *
    * @param parent
    */
   @Override
@@ -100,14 +120,14 @@ public class BuildPart extends EditorPart {
     this.form.getBody().setLayout(new GridLayout(1, true));
 
     this.compMain = new Composite(this.form.getBody(), SWT.NONE);
-    GridLayout gl_compMain = new GridLayout(2, true);
+    GridLayout gl_compMain = new GridLayout(1, true);
     this.compMain.setLayout(gl_compMain);
     this.compMain.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
     this.formToolkit.adapt(this.compMain);
     this.formToolkit.paintBordersFor(this.compMain);
 
     Composite compStatusHead = new Composite(this.compMain, SWT.NONE);
-    compStatusHead.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+    compStatusHead.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
     GridLayout rl_compStatusHead = new GridLayout();
     rl_compStatusHead.marginHeight = 0;
     rl_compStatusHead.marginWidth = 0;
@@ -124,48 +144,76 @@ public class BuildPart extends EditorPart {
     this.textTopSummary.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT));
     this.textTopSummary.setForeground(this.formToolkit.getColors().getColor(IFormColors.TITLE));
 
-    Section sectSummary = this.formToolkit.createSection(this.compMain, Section.TITLE_BAR);
-    GridData gd_sectSummary = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
-    gd_sectSummary.verticalIndent = 10;
-    sectSummary.setLayoutData(gd_sectSummary);
+    this.openJunitAction = new OpenJunitViewAction();
+
+    //createBuildHistorySection();
+
+    createRecentChangesSection();
+
+    //compMain.layout(true);
+
+    createActions();
+
+    loadInitialData();
+  }
+
+  private void createRecentChangesSection() {
+
+    SashForm sashForm = new SashForm(this.compMain, SWT.VERTICAL);
+    sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    this.formToolkit.adapt(sashForm);
+    this.formToolkit.paintBordersFor(sashForm);
+
+    Composite compTop = new Composite(sashForm, SWT.NONE);
+    this.formToolkit.adapt(compTop);
+    this.formToolkit.paintBordersFor(compTop);
+    compTop.setLayout(new GridLayout(2, true));
+
+    Section sectSummary = this.formToolkit.createSection(compTop, Section.TITLE_BAR);
+    sectSummary.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
     sectSummary.setSize(107, 45);
     this.formToolkit.paintBordersFor(sectSummary);
     sectSummary.setText("Build Summary");
 
-    this.compBuildSummary = new Composite(sectSummary, SWT.NONE);
+    Composite compSummary = new Composite(sectSummary, SWT.NONE);
+    this.formToolkit.adapt(compSummary);
+    this.formToolkit.paintBordersFor(compSummary);
+    sectSummary.setClient(compSummary);
+    compSummary.setLayout(new GridLayout(1, false));
+
+    this.compBuildSummary = new Composite(compSummary, SWT.NONE);
     this.formToolkit.adapt(this.compBuildSummary);
     this.formToolkit.paintBordersFor(this.compBuildSummary);
-    sectSummary.setClient(this.compBuildSummary);
     this.compBuildSummary.setLayout(new GridLayout(1, false));
 
     this.contentBuildSummary = this.formToolkit.createLabel(this.compBuildSummary, "n/a", SWT.NONE);
     this.contentBuildSummary.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 
-    Section sectTests = this.formToolkit.createSection(this.compMain, Section.TITLE_BAR);
-    GridData gd_sectTests = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
-    gd_sectTests.verticalIndent = 10;
-    sectTests.setLayoutData(gd_sectTests);
-    sectTests.setSize(80, 45);
-    this.formToolkit.paintBordersFor(sectTests);
-    sectTests.setText("JUnit Tests");
-
-    Composite compTests = new Composite(sectTests, SWT.NONE);
+    //    Section sectTests = this.formToolkit.createSection(this.compMain, Section.TITLE_BAR);
+    //    GridData gd_sectTests = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
+    //    gd_sectTests.verticalIndent = 10;
+    //    sectTests.setLayoutData(gd_sectTests);
+    //    sectTests.setSize(80, 45);
+    //    this.formToolkit.paintBordersFor(sectTests);
+    //    sectTests.setText("JUnit Tests");
+    //
+    Composite compTests = new Composite(compSummary, SWT.NONE);
     this.formToolkit.adapt(compTests);
     this.formToolkit.paintBordersFor(compTests);
-    sectTests.setClient(compTests);
-    compTests.setLayout(new GridLayout(1, false));
+    //    sectTests.setClient(compTests);
+    compTests.setLayout(new GridLayout(3, false));
+
+    Label label = this.formToolkit.createLabel(compTests, "");
+    label.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_JUNIT));
+    label.setText("");
 
     this.contentJUnitTests = this.formToolkit.createLabel(compTests, "n/a", SWT.NONE);
     this.contentJUnitTests.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-
-    this.openJunitAction = new OpenJunitViewAction();
     this.testsLink = new Composite(compTests, SWT.NONE);
     this.formToolkit.adapt(this.testsLink);
     this.testsLink.setLayout(new GridLayout(2, false));
-    Label label = this.formToolkit.createLabel(this.testsLink, "");
-    label.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_JUNIT));
     Link link = new Link(this.testsLink, SWT.FLAT);
-    link.setText("Show tests results in <a>JUnit View</a>.");
+    link.setText("Show in <a>JUnit View</a>.");
     link.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(final SelectionEvent e) {
@@ -175,6 +223,86 @@ public class BuildPart extends EditorPart {
     this.formToolkit.adapt(link, false, false);
     this.testsLink.setVisible(false);
 
+    this.sectArtifacts = this.formToolkit.createSection(compTop, Section.TITLE_BAR);
+    this.sectArtifacts.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    this.sectArtifacts.setSize(107, 45);
+    this.formToolkit.paintBordersFor(this.sectArtifacts);
+    this.sectArtifacts.setText("Artifacts");
+
+    Composite compInterm_1 = this.formToolkit.createComposite(this.sectArtifacts, SWT.NONE);
+
+    GridLayout gl_compInterm_1 = new GridLayout(1, false);
+    gl_compInterm_1.verticalSpacing = 0;
+    gl_compInterm_1.marginWidth = 0;
+    gl_compInterm_1.marginHeight = 0;
+    compInterm_1.setLayout(gl_compInterm_1);
+    compInterm_1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
+    this.sectArtifacts.setClient(compInterm_1);
+
+    this.artifactsLabel = this.formToolkit.createLabel(compInterm_1, "");
+
+    ScrolledComposite scrolledArtifacts = new ScrolledComposite(compInterm_1, SWT.H_SCROLL | SWT.V_SCROLL);
+    scrolledArtifacts.setExpandHorizontal(true);
+    scrolledArtifacts.setExpandVertical(true);
+    scrolledArtifacts.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    this.formToolkit.adapt(scrolledArtifacts);
+    this.formToolkit.paintBordersFor(scrolledArtifacts);
+
+    this.treeViewerArtifacts = new TreeViewer(scrolledArtifacts, SWT.BORDER);
+    Tree treeArtifacts = this.treeViewerArtifacts.getTree();
+
+    this.treeViewerArtifacts.setContentProvider(new ArtifactsContentProvider());
+    this.treeViewerArtifacts.setLabelProvider(new ArtifactsLabelProvider());
+    this.treeViewerArtifacts.addDoubleClickListener(new ArtifactsClickListener());
+
+    this.treeViewerArtifacts.setInput("n/a");
+
+    this.formToolkit.adapt(treeArtifacts);
+    this.formToolkit.paintBordersFor(treeArtifacts);
+    scrolledArtifacts.setContent(treeArtifacts);
+    scrolledArtifacts.setMinSize(treeArtifacts.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    this.sectRecentChanges = this.formToolkit.createSection(sashForm, Section.TITLE_BAR);
+
+    this.formToolkit.paintBordersFor(this.sectRecentChanges);
+    this.sectRecentChanges.setText("Changes");
+
+    Composite compInterm = this.formToolkit.createComposite(this.sectRecentChanges, SWT.NONE);
+
+    GridLayout gl_compInterm = new GridLayout(1, false);
+    gl_compInterm.verticalSpacing = 0;
+    gl_compInterm.marginWidth = 0;
+    gl_compInterm.marginHeight = 0;
+    compInterm.setLayout(gl_compInterm);
+    compInterm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
+    this.sectRecentChanges.setClient(compInterm);
+
+    this.changesetLabel = this.formToolkit.createLabel(compInterm, "");
+    this.scrolledRecentChanges = new ScrolledComposite(compInterm, SWT.H_SCROLL | SWT.V_SCROLL);
+    this.scrolledRecentChanges.setExpandHorizontal(true);
+    this.scrolledRecentChanges.setExpandVertical(true);
+    this.scrolledRecentChanges.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    this.formToolkit.adapt(this.scrolledRecentChanges);
+    this.formToolkit.paintBordersFor(this.scrolledRecentChanges);
+
+    this.treeViewerRecentChanges = new TreeViewer(this.scrolledRecentChanges, SWT.BORDER);
+    Tree treeRecentChanges = this.treeViewerRecentChanges.getTree();
+
+    this.treeViewerRecentChanges.setContentProvider(new RecentChangesContentProvider());
+    this.treeViewerRecentChanges.setLabelProvider(new RecentChangesLabelProvider());
+    this.treeViewerRecentChanges.addDoubleClickListener(new RecentChangesClickListener());
+
+    this.treeViewerRecentChanges.setInput("n/a");
+
+    this.formToolkit.adapt(treeRecentChanges);
+    this.formToolkit.paintBordersFor(treeRecentChanges);
+    this.scrolledRecentChanges.setContent(treeRecentChanges);
+    this.scrolledRecentChanges.setMinSize(treeRecentChanges.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    sashForm.setWeights(new int[] { 1, 1 });
+  }
+
+  private void createBuildHistorySection() {
     this.sectBuildHistory = this.formToolkit.createSection(this.compMain, Section.TITLE_BAR);
     GridData gd_sectBuildHistory = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
     gd_sectBuildHistory.verticalIndent = 20;
@@ -205,63 +333,7 @@ public class BuildPart extends EditorPart {
 
     this.contentBuildHistory = this.formToolkit.createComposite(this.contentBuildHistoryHolder, SWT.NONE);
     this.contentBuildHistory.setLayout(new GridLayout(1, false));
-
-    this.sectRecentChanges = this.formToolkit.createSection(this.compMain, Section.TITLE_BAR);
-    GridData gd_sectRecentChanges = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
-    gd_sectRecentChanges.verticalIndent = 20;
-    this.sectRecentChanges.setLayoutData(gd_sectRecentChanges);
-
-    this.formToolkit.paintBordersFor(this.sectRecentChanges);
-    this.sectRecentChanges.setText("Changes");
-
-
-    this.compInterm = this.formToolkit.createComposite(this.sectRecentChanges, SWT.NONE);
-
-    GridLayout gl_compInterm = new GridLayout(1, false);
-    gl_compInterm.verticalSpacing = 0;
-    gl_compInterm.marginWidth = 0;
-    gl_compInterm.marginHeight = 0;
-    this.compInterm.setLayout(gl_compInterm);
-    this.compInterm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-
-    this.sectRecentChanges.setClient(this.compInterm);
-
-    this.changesetLabel = this.formToolkit.createLabel(this.compInterm, "");
-
-    this.scrolledComposite = new ScrolledComposite(this.compInterm, SWT.H_SCROLL | SWT.V_SCROLL);
-    this.scrolledComposite.setExpandHorizontal(true);
-    this.scrolledComposite.setExpandVertical(true);
-    this.scrolledComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-    this.formToolkit.adapt(this.scrolledComposite);
-    this.formToolkit.paintBordersFor(this.scrolledComposite);
-
-
-    this.treeViewerRecentChanges = new TreeViewer(this.scrolledComposite, SWT.BORDER);
-    Tree treeRecentChanges = this.treeViewerRecentChanges.getTree();
-
-    this.changesContentProvider = new RecentChangesContentProvider();
-    this.treeViewerRecentChanges.setContentProvider(this.changesContentProvider);
-    this.treeViewerRecentChanges.setLabelProvider(new RecentChangesLabelProvider());
-    this.treeViewerRecentChanges.addDoubleClickListener(new RecentChangesClickListener());
-
-    this.treeViewerRecentChanges.setInput("n/a");
-
-    this.formToolkit.adapt(treeRecentChanges);
-    this.formToolkit.paintBordersFor(treeRecentChanges);
-    this.scrolledComposite.setContent(treeRecentChanges);
-    this.scrolledComposite.setMinSize(treeRecentChanges.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-
-    //new Label(recentChangesComp, SWT.NONE);
-
-    //compMain.layout(true);
-
-    //recentChangesComp.layout(true);
-
-    createActions();
-
-    loadInitialData();
   }
-
 
   private void createActions() {
 
@@ -283,18 +355,21 @@ public class BuildPart extends EditorPart {
     openInWeb.setToolTipText("Open with Browser"); //TODO i18n
     openInWeb.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_BROWSER));
 
-    Action openLogs = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
-      @Override
-      public void run() {
-        if (BuildPart.this.dataBuildDetail != null && BuildPart.this.dataBuildDetail.url != null) {
-          CloudBeesUIPlugin.getDefault().openWithBrowser(BuildPart.this.dataBuildDetail.url + "/consoleText");
-          return;
-        }
-
-      }
-    };
-    openLogs.setToolTipText("Open build log"); //TODO i18n
-    openLogs.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_CONSOLE));
+    this.openLogs = new OpenLogAction();
+    this.openLogs.setBuild(this.dataBuildDetail);
+    this.openLogs.setEnabled(true);
+    //    Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+    //      @Override
+    //      public void run() {
+    //        if (BuildPart.this.dataBuildDetail != null && BuildPart.this.dataBuildDetail.url != null) {
+    //          CloudBeesUIPlugin.getDefault().openWithBrowser(BuildPart.this.dataBuildDetail.url + "/consoleText");
+    //          return;
+    //        }
+    //
+    //      }
+    //    };
+    //    openLogs.setToolTipText("Open build log"); //TODO i18n
+    //    openLogs.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_CONSOLE));
 
     this.invokeBuild = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       @Override
@@ -327,12 +402,42 @@ public class BuildPart extends EditorPart {
     this.invokeBuild.setToolTipText("Run a new build for this job"); //TODO i18n
     this.invokeBuild.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_RUN));
 
-    this.form.getToolBarManager().add(reload);
-    this.form.getToolBarManager().add(new Separator());
+    this.openBuildHistory = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
+      @Override
+      public void run() {
+        try {
+          final String jobUrl = BuildPart.this.getBuildEditorInput().getJobUrl();
+          org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Opening build history...") {
+            @Override
+            protected IStatus run(final IProgressMonitor monitor) {
+              try {
+                CloudBeesDevUiPlugin.getDefault().showBuildHistory(jobUrl, true);
+        //                ns.invokeBuild(jobUrl, props, monitor);
+                return org.eclipse.core.runtime.Status.OK_STATUS;
+              } catch (CloudBeesException e) {
+                //CloudBeesUIPlugin.getDefault().getLogger().error(e);
+                return new org.eclipse.core.runtime.Status(org.eclipse.core.runtime.Status.ERROR,
+                    CloudBeesUIPlugin.PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
+              }
+            }
+          };
+          job.setUser(true);
+          job.schedule();
+        } catch (CancellationException e) {
+          // cancelled by user
+        }
+      }
+    };
+    this.openBuildHistory.setToolTipText("Open build history for this job"); //TODO i18n
+    this.openBuildHistory.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_BUILD_HISTORY));
+
     this.form.getToolBarManager().add(this.invokeBuild);
     this.form.getToolBarManager().add(new Separator());
-    this.form.getToolBarManager().add(openLogs);
+    this.form.getToolBarManager().add(this.openLogs);
+    this.form.getToolBarManager().add(this.openBuildHistory);
     this.form.getToolBarManager().add(openInWeb);
+    this.form.getToolBarManager().add(new Separator());
+    this.form.getToolBarManager().add(reload);
 
     this.form.getToolBarManager().update(false);
   }
@@ -349,8 +454,10 @@ public class BuildPart extends EditorPart {
           BuildEditorInput details = (BuildEditorInput) getEditorInput();
           JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(
               getBuildEditorInput().getJobUrl());
-          BuildPart.this.dataBuildDetail = service.getJobDetails(details.getBuildUrl(), monitor);
-          BuildPart.this.dataJobDetails = service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor);
+
+          setData(service.getJobDetails(details.getBuildUrl(), monitor),
+              service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor));
+
         } catch (CloudBeesException e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
         }
@@ -376,7 +483,6 @@ public class BuildPart extends EditorPart {
     }
 
     // for some reason build details not available (for example, no build was available). fall back to job url
-    BuildEditorInput details = (BuildEditorInput) getEditorInput();
     CloudBeesUIPlugin.getDefault().openWithBrowser(getBuildEditorInput().getJobUrl());
   }
 
@@ -385,15 +491,17 @@ public class BuildPart extends EditorPart {
       public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 
         BuildEditorInput details = (BuildEditorInput) getEditorInput();
-        String newJobUrl = getBuildEditorInput().getJobUrl() + "/" + buildNo + "/";
+        String newBuildUrl = getBuildEditorInput().getJobUrl() + "/" + buildNo + "/";
 
         JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(
             getBuildEditorInput().getJobUrl());
 
         try {
-          BuildPart.this.dataBuildDetail = service.getJobDetails(newJobUrl, monitor);
+          setData(service.getJobDetails(newBuildUrl, monitor),
+              service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor));
+
           details.setBuildUrl(BuildPart.this.dataBuildDetail.url);
-          BuildPart.this.dataJobDetails = service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor);
+          details.setDisplayName(BuildPart.this.dataBuildDetail.fullDisplayName);
 
         } catch (CloudBeesException e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
@@ -426,7 +534,7 @@ public class BuildPart extends EditorPart {
 
     final BuildEditorInput details = (BuildEditorInput) getEditorInput();
 
-    if (details == null || details.getBuildUrl() == null || !getBuildEditorInput().isLastBuildAvailable()) {
+    if (details == null || details.getBuildUrl() == null) {
 
       // No last build available
       if (this.contentBuildHistory != null && !this.contentBuildHistory.isDisposed()) {
@@ -450,9 +558,8 @@ public class BuildPart extends EditorPart {
 
           try {
 
-            BuildPart.this.dataBuildDetail = service.getJobDetails(getBuildEditorInput().getBuildUrl(), monitor);
-
-            BuildPart.this.dataJobDetails = service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor);
+            setData(service.getJobDetails(getBuildEditorInput().getBuildUrl(), monitor),
+                service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor));
 
           } catch (CloudBeesException e) {
             CloudBeesUIPlugin.getDefault().getLogger().error(e);
@@ -481,23 +588,21 @@ public class BuildPart extends EditorPart {
 
         BuildEditorInput details = (BuildEditorInput) getEditorInput();
 
-        //setPartName();
-        if (BuildPart.this.dataBuildDetail != null) {
-          setPartName(details.getDisplayName() + " #" + BuildPart.this.dataBuildDetail.number);
-        } else {
+        //        if (BuildPart.this.dataBuildDetail != null) {
+        //          setPartName(details.getDisplayName() + " #" + BuildPart.this.dataBuildDetail.number);
+        //        } else {
           setPartName(details.getDisplayName());
-        }
+        //        }
 
         //setContentDescription(detail.fullDisplayName);
 
         if (BuildPart.this.form != null) {
-
-          if (BuildPart.this.dataBuildDetail != null) {
-            BuildPart.this.form.setText("Build #" + BuildPart.this.dataBuildDetail.number + " [" + details.getDisplayName() + "]");
-          } else {
-            BuildPart.this.form.setText(details.getDisplayName());
-          }
-
+          //          if (BuildPart.this.dataBuildDetail != null) {
+            BuildPart.this.form.setText("Build" + /*" #" + BuildPart.this.dataBuildDetail.number +*/" ["
+                + details.getDisplayName() + "]");
+          //          } else {
+          //            BuildPart.this.form.setText(details.getDisplayName());
+          //          }
         }
 
         String topStr = BuildPart.this.dataBuildDetail.result != null ? BuildPart.this.dataBuildDetail.result /*+ " ("
@@ -515,26 +620,27 @@ public class BuildPart extends EditorPart {
          */
         BuildPart.this.textTopSummary.setText(topStr);
 
-
-        loadBuildSummary();
-
-        // Load JUnit Tests
-        loadUnitTests();
-
-        loadBuildHistory();
-
-        // Recent Changes
-        loadRecentChanges();
-
-        BuildPart.this.invokeBuild.setEnabled(BuildPart.this.dataJobDetails.buildable);
-
         if ("SUCCESS".equalsIgnoreCase(BuildPart.this.dataBuildDetail.result)) {
           BuildPart.this.statusIcon.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_COLOR_16_BLUE));
         } else if ("FAILURE".equalsIgnoreCase(BuildPart.this.dataBuildDetail.result)) {
           BuildPart.this.statusIcon.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_COLOR_16_RED));
+        } else if ("UNSTABLE".equalsIgnoreCase(BuildPart.this.dataBuildDetail.result)) {
+          BuildPart.this.statusIcon.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_COLOR_16_YELLOW));
         } else {
           BuildPart.this.statusIcon.setImage(null);
         }
+
+        loadBuildSummary();
+
+        loadUnitTests();
+
+        //loadBuildHistory();
+
+        loadArtifacts();
+
+        loadRecentChanges();
+
+        BuildPart.this.invokeBuild.setEnabled(BuildPart.this.dataJobDetails.buildable);
 
         //form.layout();
         //form.getBody().layout(true);
@@ -575,8 +681,7 @@ public class BuildPart extends EditorPart {
 
     //contentBuildHistory.setBackground(composite.getBackground());
 
-    StringBuffer val = new StringBuffer();
-    for (JenkinsJobAndBuildsResponse.Build b : this.dataJobDetails.builds) {
+    for (JenkinsBuild b : this.dataJobDetails.builds) {
 
       //String result = b.result != null && b.result.length() > 0 ? " - " + b.result : "";
 
@@ -618,6 +723,7 @@ public class BuildPart extends EditorPart {
 
   }
 
+  @SuppressWarnings("unused")
   private void loadBuildSummary() {
     //details.getJob().buildable;
     //details.getJob().inQueue;
@@ -682,7 +788,8 @@ public class BuildPart extends EditorPart {
         } else {
           String buildMatch = "Build stability: ";
           if (rep.description.startsWith(buildMatch)) {
-            this.healthBuild = createImageLabel(this.compBuildSummary, rep.description.substring(buildMatch.length()),
+            this.healthBuild = createImageLabel(this.compBuildSummary,
+                rep.description.substring(buildMatch.length()),
                 CloudBeesDevUiPlugin.getImage(CBImages.IMG_HEALTH_PREFIX + CBImages.IMG_24 + rep.iconUrl));
           }
         }
@@ -701,6 +808,7 @@ public class BuildPart extends EditorPart {
     gl.verticalSpacing = 0;
     Label imgLabel = this.formToolkit.createLabel(comp, "", SWT.NONE);
     imgLabel.setImage(image);
+    @SuppressWarnings("unused")
     Label label = this.formToolkit.createLabel(comp, text, SWT.NONE);
     return comp;
   }
@@ -788,6 +896,20 @@ public class BuildPart extends EditorPart {
 
     //contentRecentChanges.setText(changes.toString());
 
+  }
+
+  private void loadArtifacts() {
+    if (this.dataBuildDetail.artifacts != null && this.dataBuildDetail.artifacts.length > 0) {
+      this.treeViewerArtifacts.setInput(this.dataBuildDetail);
+      this.artifactsLabel.setVisible(false);
+      this.treeViewerArtifacts.getTree().setVisible(true);
+      this.treeViewerArtifacts.refresh();
+    } else {
+      this.treeViewerArtifacts.setInput(null);
+      this.artifactsLabel.setVisible(true);
+      this.artifactsLabel.setText("No artifacts");
+      this.treeViewerArtifacts.getTree().setVisible(false);
+    }
   }
 
   @Override

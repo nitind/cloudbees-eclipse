@@ -47,16 +47,18 @@ import org.eclipse.ui.part.ViewPart;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.JenkinsService;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job.Build;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.dev.ui.actions.DeleteJobAction;
 import com.cloudbees.eclipse.dev.ui.actions.OpenLastBuildAction;
 import com.cloudbees.eclipse.dev.ui.actions.OpenLogAction;
+import com.cloudbees.eclipse.dev.ui.actions.ReloadBuildHistoryAction;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadJobsAction;
 import com.cloudbees.eclipse.dev.ui.utils.FavouritesUtils;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -64,12 +66,12 @@ import com.cloudbees.eclipse.ui.PreferenceConstants;
 
 /**
  * View showing jobs for both Jenkins offline installations and JaaS Nectar instances
- * 
+ *
  * @author ahtik
  */
 public class JobsView extends ViewPart implements IPropertyChangeListener {
 
-  public static final String ID = "com.cloudbees.eclipse.ui.views.JobsView";
+  public static final String ID = "com.cloudbees.eclipse.dev.ui.views.jobs.JobsView";
 
   private TableViewer table;
 
@@ -78,7 +80,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   private Action actionOpenJobInBrowser;
 
   private Action actionOpenLastBuildDetails;
-  private Action actionOpenLog;
+  private ReloadBuildHistoryAction actionOpenBuildHistory;
+  private OpenLogAction actionOpenLog;
   private Action actionDeleteJob;
   private Action actionAddFavourite;
   private Action actionRemoveFavourite;
@@ -101,6 +104,28 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
   public Object getSelectedJob() {
     return this.selectedJob;
+  }
+
+  public void setSelectedJob(final Object job) {
+    this.selectedJob = job;
+    boolean enable = this.selectedJob != null;
+    this.actionInvokeBuild.setEnabled(enable);
+    this.actionOpenLastBuildDetails.setEnabled(enable);
+    this.actionOpenLog.setBuild(this.selectedJob instanceof Job ? ((Job) this.selectedJob).lastBuild : null);
+    this.actionOpenLog.setEnabled(enable);
+    this.actionDeleteJob.setEnabled(enable);
+    this.actionOpenJobInBrowser.setEnabled(enable);
+    this.actionOpenBuildHistory.setViewUrl(this.selectedJob instanceof Job ? ((Job) this.selectedJob).url : null);
+    this.actionOpenBuildHistory.setEnabled(enable);
+
+    if (this.selectedJob instanceof Job) {
+      boolean isFavourite = FavouritesUtils.isFavourite(((Job) this.selectedJob).url);
+      JobsView.this.actionAddFavourite.setEnabled(!isFavourite);
+      JobsView.this.actionRemoveFavourite.setEnabled(isFavourite);
+    } else {
+      JobsView.this.actionAddFavourite.setEnabled(false);
+      JobsView.this.actionRemoveFavourite.setEnabled(false);
+    }
   }
 
   public ReloadJobsAction getReloadJobsAction() {
@@ -239,7 +264,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     //table.getTable().setLinesVisible(true);
     this.table.getTable().setHeaderVisible(true);
 
-    createColumn("S", 20, JobSorter.STATE, new CellLabelProvider() {
+    TableViewerColumn statusCol = createColumn("S", 22, JobSorter.STATE, new CellLabelProvider() {
       @Override
       public void update(final ViewerCell cell) {
         JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
@@ -268,7 +293,14 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
       }
 
+      @Override
+      public String getToolTipText(final Object element) {
+        JenkinsJobsResponse.Job job = (Job) element;
+        return job.color;
+      }
+
     });
+    statusCol.getColumn().setToolTipText("Status");
 
     //TODO i18n
     TableViewerColumn namecol = createColumn("Job", 250, JobSorter.JOB, new CellLabelProvider() {
@@ -415,6 +447,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     popupMenu.add(this.actionOpenLastBuildDetails);
     popupMenu.add(this.actionOpenLog);
+    popupMenu.add(this.actionOpenBuildHistory);
     popupMenu.add(new Separator());
     popupMenu.add(this.actionOpenJobInBrowser);
     popupMenu.add(this.actionInvokeBuild);
@@ -434,23 +467,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       @Override
       public void selectionChanged(final SelectionChangedEvent event) {
         StructuredSelection sel = (StructuredSelection) event.getSelection();
-        JobsView.this.selectedJob = sel.getFirstElement();
-        boolean enabled = sel.getFirstElement() != null;
-        JobsView.this.actionInvokeBuild.setEnabled(enabled);
-        JobsView.this.actionOpenLastBuildDetails.setEnabled(enabled);
-        JobsView.this.actionOpenLog.setEnabled(enabled);
-        JobsView.this.actionDeleteJob.setEnabled(enabled);
-        JobsView.this.actionOpenJobInBrowser.setEnabled(enabled);
-
-        JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
-        if (job != null) {
-          boolean isFavourite = FavouritesUtils.isFavourite(job.url);
-          JobsView.this.actionAddFavourite.setEnabled(!isFavourite);
-          JobsView.this.actionRemoveFavourite.setEnabled(isFavourite);
-        } else {
-          JobsView.this.actionAddFavourite.setEnabled(false);
-          JobsView.this.actionRemoveFavourite.setEnabled(false);
-        }
+        setSelectedJob(sel.getFirstElement());
       }
     });
 
@@ -466,6 +483,10 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       }
 
       @Override
+      public void activeJobHistoryChanged(final JenkinsJobAndBuildsResponse newView) {
+      }
+
+      @Override
       public void jenkinsChanged(final List<JenkinsInstanceResponse> instances) {
       }
     };
@@ -473,7 +494,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     CloudBeesUIPlugin.getDefault().addJenkinsChangeListener(this.jenkinsChangeListener);
   }
 
-  protected String formatBuildInfo(final Build build) {
+  protected String formatBuildInfo(final JenkinsBuild build) {
     String unit = "";
     if (build.duration != null) {
       //TODO Implement proper human-readable duration conversion, consider using the same conversion rules that Jenkins uses
@@ -488,7 +509,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
   private void initImages() {
 
-    String[] icons = { "blue", "red", "yellow" };
+    String[] icons = { "blue", "red", "yellow", "grey" };
 
     for (int i = 0; i < icons.length; i++) {
       //TODO Refactor to use CBImages!
@@ -503,7 +524,11 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         ImageDescriptor.createFromURL(
             CloudBeesDevUiPlugin.getDefault().getBundle().getResource("/icons/jenkins-icons/16x16/grey.gif"))
             .createImage());
-
+    this.stateIcons.put(
+        "aborted",
+        ImageDescriptor.createFromURL(
+            CloudBeesDevUiPlugin.getDefault().getBundle().getResource("/icons/jenkins-icons/16x16/stop.gif"))
+            .createImage());
   }
 
   private TableViewerColumn createColumn(final String colName, final int width,
@@ -579,7 +604,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     this.actionReloadJobs.setEnabled(false);
 
     this.actionOpenLastBuildDetails = new OpenLastBuildAction(this);
-    this.actionOpenLog = new OpenLogAction(this);
+    this.actionOpenBuildHistory = new ReloadBuildHistoryAction(false);
+    this.actionOpenLog = new OpenLogAction();
     this.actionDeleteJob = new DeleteJobAction(this);
 
     this.actionOpenJobInBrowser = new Action("Open with Browser...", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
@@ -631,7 +657,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       @Override
       public void run() {
         final JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
-        FavouritesUtils.addFavourite(job.url);
+        FavouritesUtils.addFavourite(job.url, job.name);
         JobsView.this.actionAddFavourite.setEnabled(false);
         JobsView.this.actionRemoveFavourite.setEnabled(true);
       };
