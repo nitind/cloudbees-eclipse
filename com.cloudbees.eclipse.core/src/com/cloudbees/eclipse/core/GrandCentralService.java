@@ -461,4 +461,12 @@ public class GrandCentralService {
     com.cloudbees.eclipse.core.forge.api.ForgeSync.TYPE type = ForgeSync.TYPE.valueOf(repo.type.toUpperCase());
     this.forgeSyncService.addToRepository(type, repo, project, monitor);
   }
+
+  public boolean isUnderSvnScm(IProject project) {
+    return this.forgeSyncService.isUnderSvnScm(project);
+  }
+
+  public Repo getSvnRepo(IProject project) {
+    return this.forgeSyncService.getSvnRepo(project);
+  }
 }

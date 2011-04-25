@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.run.ui.wizards;
+package com.cloudbees.eclipse.ui.wizard;
 
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Label;
 
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
 
-public abstract class CBRepositoryComposite extends Composite {
+public abstract class SelectRepositoryComposite extends Composite {
 
   private static final String GROUP_LABEL = "Forge repository";
   private static final String FORGE_REPO_CHECK_LABEL = "Host at Forge";
@@ -34,7 +34,7 @@ public abstract class CBRepositoryComposite extends Composite {
   private Combo repoCombo;
   private ComboViewer repoComboViewer;
 
-  public CBRepositoryComposite(Composite parent) {
+  public SelectRepositoryComposite(Composite parent) {
     super(parent, SWT.NONE);
     init();
   }
@@ -82,11 +82,10 @@ public abstract class CBRepositoryComposite extends Composite {
     this.repoComboViewer.setLabelProvider(new RepoLabelProvider());
     this.repoComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
-      @Override
       public void selectionChanged(SelectionChangedEvent event) {
-        ISelection selection = CBRepositoryComposite.this.repoComboViewer.getSelection();
+        ISelection selection = SelectRepositoryComposite.this.repoComboViewer.getSelection();
         if (selection instanceof StructuredSelection) {
-          CBRepositoryComposite.this.selectedRepo = (Repo) ((StructuredSelection) selection).getFirstElement();
+          SelectRepositoryComposite.this.selectedRepo = (Repo) ((StructuredSelection) selection).getFirstElement();
         }
         validate();
       }
@@ -132,24 +131,22 @@ public abstract class CBRepositoryComposite extends Composite {
 
   private class MakeForgeRepoSelectionListener implements SelectionListener {
 
-    @Override
     public void widgetSelected(SelectionEvent e) {
       handleEvent();
     }
 
-    @Override
     public void widgetDefaultSelected(SelectionEvent e) {
       handleEvent();
     }
 
     private void handleEvent() {
       boolean selected = isAddNewRepo();
-      if (selected && CBRepositoryComposite.this.repos == null) {
-        CBRepositoryComposite.this.repos = getRepos();
-        CBRepositoryComposite.this.repoComboViewer.add(CBRepositoryComposite.this.repos);
+      if (selected && SelectRepositoryComposite.this.repos == null) {
+        SelectRepositoryComposite.this.repos = getRepos();
+        SelectRepositoryComposite.this.repoComboViewer.add(SelectRepositoryComposite.this.repos);
       }
-      CBRepositoryComposite.this.repoLabel.setEnabled(selected);
-      CBRepositoryComposite.this.repoCombo.setEnabled(selected);
+      SelectRepositoryComposite.this.repoLabel.setEnabled(selected);
+      SelectRepositoryComposite.this.repoCombo.setEnabled(selected);
       validate();
     }
   }

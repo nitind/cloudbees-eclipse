@@ -51,4 +51,8 @@ public interface ForgeSync {
   boolean openRemoteFile(JenkinsScmConfig scmConfig, ChangeSetPathItem item, IProgressMonitor monitor);
 
   void addToRepository(TYPE type, Repo repo, IProject project, IProgressMonitor monitor) throws CloudBeesException;
+
+  boolean isUnderSvnScm(IProject project);
+
+  Repo getSvnRepo(IProject project);
 }

@@ -96,4 +96,22 @@ public class ForgeSyncService {
       provider.addToRepository(type, repo, project, monitor);
     }
   }
+
+  public boolean isUnderSvnScm(IProject project) {
+    for (ForgeSync provider : this.providers) {
+      if (provider.isUnderSvnScm(project)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public Repo getSvnRepo(IProject project) {
+    for (ForgeSync provider : this.providers) {
+      if (provider.isUnderSvnScm(project)) {
+        return provider.getSvnRepo(project);
+      }
+    }
+    return null;
+  }
 }

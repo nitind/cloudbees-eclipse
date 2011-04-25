@@ -12,6 +12,7 @@ import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
+import com.cloudbees.eclipse.ui.wizard.SelectRepositoryComposite;
 import com.cloudbees.eclipse.ui.wizard.CBWizardPage;
 import com.cloudbees.eclipse.ui.wizard.CBWizardSupport;
 import com.cloudbees.eclipse.ui.wizard.NewJenkinsJobComposite;
@@ -23,7 +24,7 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
   private static final String PAGE_DESCRIPTION = "Optionally you can integrate your project with CloudBees services.";
 
   private NewJenkinsJobComposite jenkinsComposite;
-  private CBRepositoryComposite repositoryComposite;
+  private SelectRepositoryComposite repositoryComposite;
 
   protected CBServicesWizardPage() {
     super(PAGE_NAME);
@@ -95,7 +96,7 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
     data.grabExcessHorizontalSpace = true;
     data.horizontalAlignment = SWT.FILL;
 
-    this.repositoryComposite = new CBRepositoryComposite(container) {
+    this.repositoryComposite = new SelectRepositoryComposite(container) {
 
       @Override
       protected Repo[] getRepos() {

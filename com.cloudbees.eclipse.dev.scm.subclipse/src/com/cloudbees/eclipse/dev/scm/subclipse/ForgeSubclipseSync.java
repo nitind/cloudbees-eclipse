@@ -185,13 +185,12 @@ public class ForgeSubclipseSync implements ForgeSync {
       return;
     }
 
-    if (isSVNFolder(project)) {
+    if (isUnderSvnScm(project)) {
       throw new CloudBeesException("This project is already under source control management.");
     }
 
     try {
       ISVNRepositoryLocation location = SVNProviderPlugin.getPlugin().getRepository(repo.url);
-      SVNWorkspaceRoot.setSharing(project, monitor);
       SVNWorkspaceRoot
           .shareProject(location, project, project.getName(), "Create new repository folder", true, monitor);
     } catch (Exception e) {
@@ -199,7 +198,8 @@ public class ForgeSubclipseSync implements ForgeSync {
     }
   }
 
-  private boolean isSVNFolder(IProject project) {
+  @Override
+  public boolean isUnderSvnScm(IProject project) {
     boolean isSVNFolder = false;
 
     try {
@@ -210,6 +210,21 @@ public class ForgeSubclipseSync implements ForgeSync {
     }
 
     return isSVNFolder;
+  }
+
+  @Override
+  public Repo getSvnRepo(IProject project) {
+    Repo repo = null;
+    try {
+      LocalResourceStatus projectStatus = SVNWorkspaceRoot.peekResourceStatusFor(project);
+      repo = new Repo();
+      repo.type = ForgeSync.TYPE.SVN.name();
+      repo.url = projectStatus.getUrlString();
+    } catch (SVNException e) {
+      e.printStackTrace();
+    }
+
+    return repo;
   }
 
 }

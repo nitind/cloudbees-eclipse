@@ -9,11 +9,13 @@ import java.util.TimeZone;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.team.svn.core.connector.SVNChangeStatus;
 import org.eclipse.team.svn.core.connector.SVNRevision;
 import org.eclipse.team.svn.core.operation.local.management.ShareProjectOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryFile;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
+import org.eclipse.team.svn.core.utility.FileUtility;
 import org.eclipse.team.svn.core.utility.SVNUtility;
 import org.eclipse.team.svn.ui.operation.OpenRemoteFileOperation;
 
@@ -186,4 +188,25 @@ public class ForgeSubversiveSync implements ForgeSync {
 
     operation.run(monitor);
   }
+
+  @Override
+  public boolean isUnderSvnScm(IProject project) {
+    return FileUtility.alreadyOnSVN(project);
+  }
+
+  @Override
+  public Repo getSvnRepo(IProject project) {
+    SVNChangeStatus status = SVNUtility.getSVNInfoForNotConnected(project);
+    Repo repo = null;
+
+    if (status != null) {
+      repo = new Repo();
+      repo.type = ForgeSync.TYPE.SVN.name();
+      repo.url = status.url;
+      return repo;
+    }
+
+    return repo;
+  }
+
 }
