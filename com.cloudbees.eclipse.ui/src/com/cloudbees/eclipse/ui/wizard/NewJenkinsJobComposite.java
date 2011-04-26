@@ -80,6 +80,12 @@ public abstract class NewJenkinsJobComposite extends Composite {
     return this.jenkinsInstance;
   }
 
+  public void addJobCheckListener(SelectionListener listener) {
+    if (listener != null && this.makeJobCheck != null) {
+      this.makeJobCheck.addSelectionListener(listener);
+    }
+  }
+
   protected void createJobCheck() {
     GridData data = new GridData();
     data.horizontalSpan = 2;

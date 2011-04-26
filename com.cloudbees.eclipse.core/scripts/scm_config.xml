@@ -1,0 +1,42 @@
+<project>
+	<actions />
+	<description></description>
+	<keepDependencies>false</keepDependencies>
+	<properties />
+	<scm class="hudson.scm.SubversionSCM">
+		<locations>
+			<hudson.scm.SubversionSCM_-ModuleLocation>
+				<remote></remote>
+				<local>.</local>
+			</hudson.scm.SubversionSCM_-ModuleLocation>
+		</locations>
+		<excludedRegions />
+		<includedRegions />
+		<excludedUsers />
+		<excludedRevprop />
+		<excludedCommitMessages />
+		<workspaceUpdater class="hudson.scm.subversion.UpdateUpdater" />
+	</scm>
+	<canRoam>true</canRoam>
+	<disabled>false</disabled>
+	<blockBuildWhenDownstreamBuilding>false
+	</blockBuildWhenDownstreamBuilding>
+	<blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+	<triggers class="vector">
+		<hudson.triggers.SCMTrigger>
+			<spec>* * * * *</spec>
+		</hudson.triggers.SCMTrigger>
+		<hudson.triggers.TimerTrigger>
+			<spec>5 * * * *</spec>
+		</hudson.triggers.TimerTrigger>
+	</triggers>
+	<concurrentBuild>false</concurrentBuild>
+	<builders>
+		<hudson.tasks.Ant>
+			<targets />
+			<antName>Ant 1.8.1</antName>
+		</hudson.tasks.Ant>
+	</builders>
+	<publishers />
+	<buildWrappers />
+</project>

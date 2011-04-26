@@ -29,7 +29,7 @@ import com.google.gson.Gson;
 
 /**
  * Central access to CloudBees Grand Central API
- * 
+ *
  * @author ahtik
  */
 public class GrandCentralService {
@@ -59,7 +59,7 @@ public class GrandCentralService {
 
   /**
    * Validates user credential against CloudBees SSO authentication server. TODO Refactor to json-based validation
-   * 
+   *
    * @param email
    * @param password
    * @param monitor
@@ -279,6 +279,9 @@ public class GrandCentralService {
         }
         Properties props = new Properties();
         props.put("url", forge.url);
+        props.put("user", services.username);
+        props.put("account", this.email);
+        props.put("password", this.password);
 
         try {
           monitor.beginTask("Syncing repository '" + forge.url + "'", 100);
@@ -441,7 +444,7 @@ public class GrandCentralService {
 
   }
 
-  public List<Repo> getForgeRepos(IProgressMonitor monitor) throws CloudBeesException {
+  public List<Repo> getForgeRepos(final IProgressMonitor monitor) throws CloudBeesException {
     List<Repo> result = new ArrayList<AccountServiceStatusResponse.AccountServices.ForgeService.Repo>();
 
     String[] accounts = getAccounts(monitor);
@@ -457,8 +460,16 @@ public class GrandCentralService {
     return result;
   }
 
-  public void addToRepository(IProject project, Repo repo, IProgressMonitor monitor) throws CloudBeesException {
+  public void addToRepository(final IProject project, final Repo repo, final IProgressMonitor monitor) throws CloudBeesException {
     com.cloudbees.eclipse.core.forge.api.ForgeSync.TYPE type = ForgeSync.TYPE.valueOf(repo.type.toUpperCase());
     this.forgeSyncService.addToRepository(type, repo, project, monitor);
+  }
+
+  public boolean isUnderSvnScm(final IProject project) {
+    return this.forgeSyncService.isUnderSvnScm(project);
+  }
+
+  public Repo getSvnRepo(final IProject project) {
+    return this.forgeSyncService.getSvnRepo(project);
   }
 }

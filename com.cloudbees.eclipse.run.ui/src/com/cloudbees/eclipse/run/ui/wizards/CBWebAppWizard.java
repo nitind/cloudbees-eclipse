@@ -2,6 +2,7 @@ package com.cloudbees.eclipse.run.ui.wizards;
 
 import java.text.MessageFormat;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbenchPage;
@@ -26,8 +27,6 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
     super();
     setNeedsProgressMonitor(true);
     setWindowTitle(WINDOW_TITLE);
-    setDefaultPageImageDescriptor(CBRunUiActivator.imageDescriptorFromPlugin(CBRunUiActivator.PLUGIN_ID,
-        Images.CLOUDBEES_WIZ_ICON_PATH));
     CloudBeesDevCorePlugin.getDefault(); // initialize forge providers
   }
 
@@ -96,4 +95,12 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
   public CBServicesWizardPage getServicesPage() {
     return this.servicesPage;
   }
+
+  @Override
+  protected void initializeDefaultPageImageDescriptor() {
+    ImageDescriptor descriptor = CBRunUiActivator.imageDescriptorFromPlugin(CBRunUiActivator.PLUGIN_ID,
+        Images.CLOUDBEES_WIZ_ICON_PATH);
+    setDefaultPageImageDescriptor(descriptor);
+  }
+
 }

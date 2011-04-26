@@ -148,7 +148,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       String label = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(newView.viewUrl).getLabel();
 
       String viewInfo = "";
-      if (newView.name != null && newView.name.length() > 0) {
+      if (newView.name != null && newView.name.length() > 0 && label != null && !newView.name.equals(label)) {
         viewInfo = newView.name + " [";
       }
       setContentDescription(viewInfo + label + (viewInfo.length() > 0 ? "]" : "") + " (" + new Date() + ")");

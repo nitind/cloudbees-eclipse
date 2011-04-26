@@ -5,13 +5,20 @@ import java.text.MessageFormat;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
+import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
+import com.cloudbees.eclipse.core.forge.api.ForgeSync;
+import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
 import com.cloudbees.eclipse.ui.wizard.CBWizardSupport;
 import com.cloudbees.eclipse.ui.wizard.NewJenkinsJobComposite;
+import com.cloudbees.eclipse.ui.wizard.SelectRepositoryComposite;
 
 public class JenkinsJobWizardPage extends WizardPage {
 
@@ -20,8 +27,9 @@ public class JenkinsJobWizardPage extends WizardPage {
   private static final String DESCRIPTION = "Create new Jenkins job for this project.";
   private static final String JOB_NAME = "Build {0}";
 
-  private final IProject project;
   private NewJenkinsJobComposite jenkinsComposite;
+  private SelectRepositoryComposite repoComposite;
+  private final IProject project;
 
   protected JenkinsJobWizardPage(IProject project) {
     super(NAME);
@@ -83,6 +91,32 @@ public class JenkinsJobWizardPage extends WizardPage {
 
     this.jenkinsComposite.setLayoutData(data);
 
+    if (!isUnderSCM()) {
+      this.repoComposite = new SelectRepositoryComposite(container) {
+
+        @Override
+        protected void updateErrorStatus(String errorMsg) {
+          JenkinsJobWizardPage.this.updateErrorStatus(errorMsg);
+        }
+
+        @Override
+        protected Repo[] getRepos() {
+          try {
+            return CBWizardSupport.getRepos(getContainer(), ForgeSync.TYPE.SVN);
+          } catch (Exception e) {
+            e.printStackTrace(); // FIXME
+            return new Repo[] {};
+          }
+        }
+      };
+
+      this.repoComposite.setLayoutData(data);
+
+      RepoCheckListener repoCheckListener = new RepoCheckListener();
+      this.repoComposite.addRepoCheckListener(repoCheckListener);
+      repoCheckListener.handleSelection();
+    }
+
     String jobName = MessageFormat.format(JOB_NAME, this.project.getName());
     this.jenkinsComposite.setJobNameText(jobName);
 
@@ -100,5 +134,55 @@ public class JenkinsJobWizardPage extends WizardPage {
 
   public String getJobName() {
     return this.jenkinsComposite.getJobNameText();
+  }
+
+  public Repo getRepo() {
+    if (this.repoComposite != null) {
+      return this.repoComposite.getSelectedRepo();
+    } else {
+      try {
+        return CloudBeesCorePlugin.getDefault().getGrandCentralService().getSvnRepo(this.project);
+      } catch (CloudBeesException e) {
+        e.printStackTrace();
+      }
+    }
+    return null;
+  }
+
+  public boolean isAddNewRepo() {
+    if (this.repoComposite != null) {
+      return this.repoComposite.isAddNewRepo();
+    }
+    return false;
+  }
+
+  public boolean isUnderSCM() {
+    try {
+      return CloudBeesCorePlugin.getDefault().getGrandCentralService().isUnderSvnScm(this.project);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+
+  private class RepoCheckListener implements SelectionListener {
+
+    @Override
+    public void widgetSelected(SelectionEvent e) {
+      handleSelection();
+    }
+
+    @Override
+    public void widgetDefaultSelected(SelectionEvent e) {
+      handleSelection();
+    }
+
+    public void handleSelection() {
+      if (JenkinsJobWizardPage.this.repoComposite.isAddNewRepo()) {
+        setMessage(null);
+      } else {
+        setMessage("Enable hosting in Forge to configure Jenkins job SCM automatically.", WARNING);
+      }
+    }
   }
 }

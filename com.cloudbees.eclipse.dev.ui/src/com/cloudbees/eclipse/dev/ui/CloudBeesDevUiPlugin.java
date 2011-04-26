@@ -185,7 +185,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/history_view.gif")));
 
     reg.put(CBImages.IMG_FOLDER_HOSTED,
-        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_run.png")));
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_cb.png")));
     reg.put(CBImages.IMG_FOLDER_LOCAL,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_run.png")));
     reg.put(CBImages.IMG_INSTANCE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/jenkins.png")));
@@ -430,7 +430,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
           return opened ? Status.OK_STATUS : new Status(IStatus.INFO, PLUGIN_ID, "Can't open " + item.path);
         } catch (CloudBeesException e) {
           getLogger().error(e);
-          return new Status(Status.WARNING, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
+          return new Status(Status.ERROR, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
         }
       }
     };
@@ -551,7 +551,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
           return Status.OK_STATUS;
         } catch (CloudBeesException e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
-          return new Status(Status.WARNING, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
+          return new Status(Status.ERROR, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
         }
       }
     };

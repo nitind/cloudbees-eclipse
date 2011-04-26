@@ -25,13 +25,15 @@ import org.eclipse.ui.wizards.datatransfer.ImportOperation;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesNature;
-import com.cloudbees.eclipse.core.CoreScripts;
 import com.cloudbees.eclipse.core.GrandCentralService;
+import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.NatureUtil;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
+import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.run.core.CBRunCoreScripts;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
+import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.wizard.CBWizardSupport;
 import com.cloudbees.eclipse.ui.wizard.Failiure;
 
@@ -54,6 +56,7 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
   private String jobName;
   private URI locationURI;
   private Failiure<Exception> failiure;
+  private JenkinsService jenkinsService;
 
   public CBWebAppWizardFinishOperation(CBWebAppWizard wizard) {
     this.wizard = wizard;
@@ -91,6 +94,12 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
     this.jobName = this.servicesPage.getJobNameText();
     this.locationURI = URIUtil.append(this.uri, projectName);
     this.failiure = new Failiure<Exception>();
+
+    CloudBeesUIPlugin plugin = CloudBeesUIPlugin.getDefault();
+    JenkinsInstance instance = CBWebAppWizardFinishOperation.this.servicesPage.getJenkinsInstance();
+    if (instance != null) {
+      this.jenkinsService = plugin.lookupJenkinsService(instance);
+    }
   }
 
   @Override
@@ -106,13 +115,6 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
 
       NatureUtil.addNatures(this.project, new String[] { CloudBeesNature.NATURE_ID }, monitor);
 
-      if (CBWebAppWizardFinishOperation.this.isMakeJenkinsJob) {
-        File configXML = CoreScripts.getMockConfigXML(); // FIXME
-        JenkinsInstance instance = CBWebAppWizardFinishOperation.this.servicesPage.getJenkinsInstance();
-        CBWizardSupport.makeJenkinsJob(configXML, instance, CBWebAppWizardFinishOperation.this.jobName,
-            CBWebAppWizardFinishOperation.this.wizard.getContainer());
-      }
-
       if (CBWebAppWizardFinishOperation.this.isAddNewRepo) {
         GrandCentralService service = CloudBeesCorePlugin.getDefault().getGrandCentralService();
         service.addToRepository(this.project, this.repo, monitor);
@@ -120,7 +122,7 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
     } catch (Exception e) {
       this.failiure.cause = e;
     } finally {
-      monitor.done();
+      //monitor.done();
     }
   }
 
@@ -129,6 +131,12 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
     try {
       CBRunCoreScripts.executeCopySampleWebAppScript(this.uri.getPath(), this.project.getName());
       this.wizard.getContainer().run(true, false, this);
+
+      if (CBWebAppWizardFinishOperation.this.isMakeJenkinsJob) {
+        CBWizardSupport
+            .makeJenkinsJob(createConfigXML(), this.jenkinsService, this.jobName, this.wizard.getContainer());
+      }
+
       if (this.failiure.cause != null) {
         handleException(this.failiure.cause);
       }
@@ -146,5 +154,23 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
     ex.printStackTrace();
     IStatus status = new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, ex.getMessage(), ex);
     ErrorDialog.openError(this.wizard.getShell(), ERROR_TITLE, ERROR_MSG, status);
+  }
+
+  private String createConfigXML() throws Exception {
+    if (this.isAddNewRepo) {
+      String description = "Builds " + this.project.getName() + " with SCM support";
+
+      String url = this.repo.url;
+      if (!url.endsWith("/")) {
+        url += "/";
+      }
+      url += this.project.getName();
+
+      return Utils.createSCMConfig(description, url);
+
+    } else {
+      String description = "Builds " + this.project.getName() + " without SCM support";
+      return Utils.createEmptyConfig(description);
+    }
   }
 }

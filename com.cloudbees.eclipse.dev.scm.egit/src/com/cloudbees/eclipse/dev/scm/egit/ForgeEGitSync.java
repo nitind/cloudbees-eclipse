@@ -247,6 +247,16 @@ public class ForgeEGitSync implements ForgeSync {
     if (type != TYPE.GIT) {
       return;
     }
+    // TODO
+  }
 
+  @Override
+  public boolean isUnderSvnScm(IProject project) {
+    return false;
+  }
+
+  @Override
+  public Repo getSvnRepo(IProject project) {
+    return null;
   }
 }

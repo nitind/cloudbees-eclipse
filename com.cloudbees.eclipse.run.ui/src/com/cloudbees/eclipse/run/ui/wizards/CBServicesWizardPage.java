@@ -2,6 +2,8 @@ package com.cloudbees.eclipse.run.ui.wizards;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -10,6 +12,7 @@ import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
+import com.cloudbees.eclipse.ui.wizard.SelectRepositoryComposite;
 import com.cloudbees.eclipse.ui.wizard.CBWizardPage;
 import com.cloudbees.eclipse.ui.wizard.CBWizardSupport;
 import com.cloudbees.eclipse.ui.wizard.NewJenkinsJobComposite;
@@ -21,7 +24,7 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
   private static final String PAGE_DESCRIPTION = "Optionally you can integrate your project with CloudBees services.";
 
   private NewJenkinsJobComposite jenkinsComposite;
-  private CBRepositoryComposite repositoryComposite;
+  private SelectRepositoryComposite repositoryComposite;
 
   protected CBServicesWizardPage() {
     super(PAGE_NAME);
@@ -87,12 +90,13 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
     };
 
     this.jenkinsComposite.setLayoutData(data);
+    this.jenkinsComposite.addJobCheckListener(this.checkListener);
 
     data = new GridData();
     data.grabExcessHorizontalSpace = true;
     data.horizontalAlignment = SWT.FILL;
 
-    this.repositoryComposite = new CBRepositoryComposite(container) {
+    this.repositoryComposite = new SelectRepositoryComposite(container) {
 
       @Override
       protected Repo[] getRepos() {
@@ -112,6 +116,7 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
     };
 
     this.repositoryComposite.setLayoutData(data);
+    this.repositoryComposite.addRepoCheckListener(this.checkListener);
 
     setControl(container);
   }
@@ -153,6 +158,34 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
   @Override
   public boolean isActivePage() {
     return isCurrentPage();
+  }
+
+  private final SelectionListener checkListener = new SelectionListener() {
+
+    @Override
+    public void widgetSelected(SelectionEvent e) {
+      handleSelected();
+    }
+
+    @Override
+    public void widgetDefaultSelected(SelectionEvent e) {
+      handleSelected();
+    }
+
+    private void handleSelected() {
+      boolean makeJob = CBServicesWizardPage.this.jenkinsComposite.isMakeNewJob();
+      boolean makeRepo = CBServicesWizardPage.this.repositoryComposite.isAddNewRepo();
+      updatePage(makeJob, makeRepo);
+    }
+  };
+
+  private void updatePage(boolean makeJob, boolean makeRepo) {
+    if (makeJob && !makeRepo) {
+      setMessage("Enable hosting in Forge to configure Jenkins job SCM automatically.", WARNING);
+      return;
+    }
+
+    setMessage(null);
   }
 
 }

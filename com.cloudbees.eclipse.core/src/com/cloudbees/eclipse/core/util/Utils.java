@@ -32,6 +32,7 @@ import org.apache.http.params.HttpParams;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.XMLReplace;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -49,7 +50,7 @@ public class Utils {
 
   /**
    * Converts string to US-ASCII base64 string.
-   *
+   * 
    * @param str
    * @return
    */
@@ -66,7 +67,7 @@ public class Utils {
 
   /**
    * Converts string from base64 string.
-   *
+   * 
    * @param str
    * @return
    */
@@ -130,6 +131,7 @@ public class Utils {
       }
 
       TrustStrategy trustAllStrategy = new TrustStrategy() {
+        @Override
         public boolean isTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
           return true;
         }
@@ -251,4 +253,13 @@ public class Utils {
     return null;
   }
 
+  public static String createEmptyConfig(String description) throws Exception {
+    XMLReplace xmlReplace = XMLReplace.getInstance(CloudBeesCorePlugin.getEmptyConfigXML());
+    return xmlReplace.addReplacement("description", description).replaceToString();
+  }
+
+  public static String createSCMConfig(String description, String url) throws Exception {
+    XMLReplace xmlReplace = XMLReplace.getInstance(CloudBeesCorePlugin.getSCMConfigXML());
+    return xmlReplace.addReplacement("description", description).addReplacement("remote", url).replaceToString();
+  }
 }

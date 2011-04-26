@@ -1,6 +1,5 @@
 package com.cloudbees.eclipse.ui.wizard;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,16 +115,15 @@ public class CBWizardSupport {
     return StructuredSelection.EMPTY;
   }
 
-  public static void makeJenkinsJob(final File configXML, final JenkinsInstance instance, final String jobName,
+  public static void makeJenkinsJob(final String configXML, final JenkinsService jenkinsService, final String jobName,
       IWizardContainer container) throws Exception {
 
     final Failiure<CloudBeesException> failiure = new Failiure<CloudBeesException>();
+
     IRunnableWithProgress operation = new IRunnableWithProgress() {
 
       public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         try {
-          CloudBeesUIPlugin plugin = CloudBeesUIPlugin.getDefault();
-          JenkinsService jenkinsService = plugin.lookupJenkinsService(instance);
           jenkinsService.createJenkinsJob(jobName, configXML, monitor);
         } catch (CloudBeesException e) {
           failiure.cause = e;
