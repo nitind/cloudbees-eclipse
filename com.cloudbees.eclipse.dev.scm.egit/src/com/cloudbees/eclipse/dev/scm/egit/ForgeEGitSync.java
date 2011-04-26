@@ -1,6 +1,8 @@
 package com.cloudbees.eclipse.dev.scm.egit;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -20,6 +22,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepository;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jsch.internal.core.JSchCorePlugin;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
@@ -35,11 +38,14 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
+import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.KeyPair;
 
 /**
  * Forge repo sync provider for EGIT
- * 
+ *
  * @author ahtik
  */
 public class ForgeEGitSync implements ForgeSync {
@@ -197,7 +203,8 @@ public class ForgeEGitSync implements ForgeSync {
           for (RemoteConfig remo : allRemotes) {
             List<URIish> uris = remo.getURIs();
             for (URIish uri : uris) {
-              System.out.println("Checking URI: " + uri + " - " + proposal.equals(uri));
+              CloudBeesDevCorePlugin.getDefault().getLogger()
+                  .info("Checking URI: " + uri + " - " + proposal.equals(uri));
               if (proposal.equals(uri)) {
                 repository = fr;
                 break all;
@@ -205,12 +212,11 @@ public class ForgeEGitSync implements ForgeSync {
             }
           }
         } catch (Exception e) {
-          System.out.println(e); // TODO
-          //          CloudBeesCorePlugin.getDefault().getLogger().error(e);
+          CloudBeesDevCorePlugin.getDefault().getLogger().error(e);
         }
       }
 
-      System.out.println("Repo: " + repository);
+      CloudBeesDevCorePlugin.getDefault().getLogger().info("Repo: " + repository);
 
       if (repository == null) {
         throw new CloudBeesException("Failed to find mapped repository for " + repo);
@@ -237,13 +243,13 @@ public class ForgeEGitSync implements ForgeSync {
 
       return editor[0] != null;
     } catch (Exception e) {
-      e.printStackTrace(); // TODO: handle exception
+      CloudBeesDevCorePlugin.getDefault().getLogger().error(e); // TODO handle better?
       return false;
     }
   }
 
   @Override
-  public void addToRepository(TYPE type, Repo repo, IProject project, IProgressMonitor monitor) {
+  public void addToRepository(final TYPE type, final Repo repo, final IProject project, final IProgressMonitor monitor) {
     if (type != TYPE.GIT) {
       return;
     }
@@ -251,12 +257,55 @@ public class ForgeEGitSync implements ForgeSync {
   }
 
   @Override
-  public boolean isUnderSvnScm(IProject project) {
+  public boolean isUnderSvnScm(final IProject project) {
     return false;
   }
 
   @Override
-  public Repo getSvnRepo(IProject project) {
+  public Repo getSvnRepo(final IProject project) {
     return null;
+  }
+
+  private void generateRSAKeys() {
+    try {
+      int type = KeyPair.RSA;
+
+      final KeyPair[] _kpair = new KeyPair[1];
+      final int __type = type;
+      final JSchException[] _e = new JSchException[1];
+      //      BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
+      //        public void run() {
+      //          try {
+      _kpair[0] = KeyPair.genKeyPair(JSchCorePlugin.getPlugin().getJSch(), __type);
+      //          } catch (JSchException e) {
+      //            _e[0] = e;
+      //          }
+      //        }
+      //      });
+      if (_e[0] != null) {
+        throw _e[0];
+      }
+      KeyPair kpair = _kpair[0];
+
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      String kpairComment = "RSA-1024"; //$NON-NLS-1$
+      kpair.writePublicKey(out, kpairComment);
+      out.close();
+      String publicKey = out.toString();
+
+      //      keyFingerPrintText.setText(kpair.getFingerPrint());
+      //      keyCommentText.setText(kpairComment);
+      //      keyPassphrase1Text.setText(""); //$NON-NLS-1$
+      //      keyPassphrase2Text.setText(""); //$NON-NLS-1$
+
+    } catch (IOException ee) {
+      ok = false;
+    } catch (JSchException ee) {
+      ok = false;
+    }
+    //    if (!ok) {
+    //      MessageDialog.openError(getShell(), Messages.CVSSSH2PreferencePage_error, Messages.CVSSSH2PreferencePage_47);
+    //    }
+
   }
 }
