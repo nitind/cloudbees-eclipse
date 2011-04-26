@@ -56,7 +56,9 @@ public class InstanceLabelProvider extends LabelProvider implements IFontProvide
 
   @Override
   public Image getImage(final Object obj) {
-    if (obj instanceof InstanceGroup) {
+    if (obj instanceof FavouritesInstanceGroup) {
+      return CloudBeesDevUiPlugin.getImage(CBImages.IMG_VIEW);
+    } else if (obj instanceof InstanceGroup) {
       //return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.);
       if (((InstanceGroup) obj).isCloudHosted()) {
         return CloudBeesDevUiPlugin.getImage(CBImages.IMG_FOLDER_HOSTED);

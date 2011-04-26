@@ -38,7 +38,7 @@ import com.cloudbees.eclipse.ui.internal.action.ConfigureCloudBeesAction;
 
 /**
  * View showing both Jenkins offline installations and JaaS Nectar instances
- * 
+ *
  * @author ahtik
  */
 public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener {
@@ -59,6 +59,13 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
 
     @Override
     public int compare(final Viewer viewer, final Object e1, final Object e2) {
+      if (e1 instanceof FavouritesInstanceGroup) {
+        return -1;
+      }
+      if (e2 instanceof FavouritesInstanceGroup) {
+        return +1;
+      }
+
       if (e1 instanceof JenkinsInstanceResponse.View && e2 instanceof JenkinsInstanceResponse.View) {
         JenkinsInstanceResponse.View v1 = (View) e1;
         JenkinsInstanceResponse.View v2 = (View) e2;
