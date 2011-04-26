@@ -45,6 +45,8 @@ public class ForgeSubversiveSync implements ForgeSync {
 
       IRepositoryLocation loc = SVNRemoteStorage.instance().newRepositoryLocation();
       loc.setUrl(url);
+      loc.setUsername(props.getProperty("user"));
+      loc.setPassword(props.getProperty("password"));
       monitor.worked(1);
 
       Exception ex = SVNUtility.validateRepositoryLocation(loc);
@@ -148,7 +150,7 @@ public class ForgeSubversiveSync implements ForgeSync {
   }
 
   @Override
-  public void addToRepository(TYPE type, Repo repo, IProject project, IProgressMonitor monitor)
+  public void addToRepository(final TYPE type, final Repo repo, final IProject project, final IProgressMonitor monitor)
       throws CloudBeesException {
 
     if (type != TYPE.SVN) {
@@ -178,7 +180,7 @@ public class ForgeSubversiveSync implements ForgeSync {
     ShareProjectOperation.IFolderNameMapper mapper = new ShareProjectOperation.IFolderNameMapper() {
 
       @Override
-      public String getRepositoryFolderName(IProject project) {
+      public String getRepositoryFolderName(final IProject project) {
         return project.getName();
       }
     };
@@ -190,12 +192,12 @@ public class ForgeSubversiveSync implements ForgeSync {
   }
 
   @Override
-  public boolean isUnderSvnScm(IProject project) {
+  public boolean isUnderSvnScm(final IProject project) {
     return FileUtility.alreadyOnSVN(project);
   }
 
   @Override
-  public Repo getSvnRepo(IProject project) {
+  public Repo getSvnRepo(final IProject project) {
     SVNChangeStatus status = SVNUtility.getSVNInfoForNotConnected(project);
     Repo repo = null;
 
