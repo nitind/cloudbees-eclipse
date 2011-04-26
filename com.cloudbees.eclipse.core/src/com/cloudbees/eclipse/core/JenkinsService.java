@@ -41,7 +41,7 @@ import com.google.gson.Gson;
 
 /**
  * Service to access Jenkins instances
- * 
+ *
  * @author ahti
  */
 public class JenkinsService {
@@ -509,9 +509,9 @@ public class JenkinsService {
 
       return config;
     } catch (Exception e) {
-      throw new CloudBeesException("Failed to get Jenkins SCM config for '" + jobUrl + "'. "
-          + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr + " - Response: "
-          + bodyResponse, e);
+      throw new CloudBeesException("Failed to get Jenkins SCM config from '" + reqStr + "'. "
+          + (errMsg.length() > 0 ? " (" + errMsg + ")" : "")
+          + (bodyResponse == null ? "" : " - Response: " + bodyResponse), e);
     }
   }
 
