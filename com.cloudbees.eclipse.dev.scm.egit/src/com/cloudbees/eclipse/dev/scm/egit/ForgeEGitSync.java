@@ -299,9 +299,9 @@ public class ForgeEGitSync implements ForgeSync {
       //      keyPassphrase2Text.setText(""); //$NON-NLS-1$
 
     } catch (IOException ee) {
-      ok = false;
+      //      ok = false;
     } catch (JSchException ee) {
-      ok = false;
+      //      ok = false;
     }
     //    if (!ok) {
     //      MessageDialog.openError(getShell(), Messages.CVSSSH2PreferencePage_error, Messages.CVSSSH2PreferencePage_47);
