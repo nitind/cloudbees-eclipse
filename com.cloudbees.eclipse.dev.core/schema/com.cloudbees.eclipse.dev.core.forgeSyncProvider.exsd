@@ -54,6 +54,16 @@
          </documentation>
       </annotation>
       <complexType>
+         <attribute name="enabler" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Points to the implementation class of the com.cloudbees.eclipse.core.forge.api.ForgeSyncEnabler. The sync provider is loaded only if enabler checks that dependencies are ok.
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":com.cloudbees.eclipse.core.forge.api.ForgeSync"/>
+               </appinfo>
+            </annotation>
+         </attribute>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>

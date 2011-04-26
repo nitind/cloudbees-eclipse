@@ -14,13 +14,7 @@ public class CloudBeesScmEgitPlugin extends AbstractUIPlugin {
   @Override
   public void start(final BundleContext bundleContext) throws Exception {
     super.start(bundleContext);
-
-    //    if ((ForgeSyncService.bundleActive("org.eclipse.egit.core") || ForgeSyncService.bundleActive("org.eclipse.egit"))
-    //        && ForgeSyncService.bundleActive("org.eclipse.jgit")) {
-    //      CloudBeesCorePlugin.getDefault().getGrandCentralService().addForgeSyncProvider(new ForgeEGitSync());
-    //    }
-
-    CloudBeesScmEgitPlugin.plugin = this;
+    plugin = this;
   }
 
   /*
@@ -29,7 +23,7 @@ public class CloudBeesScmEgitPlugin extends AbstractUIPlugin {
    */
   @Override
   public void stop(final BundleContext bundleContext) throws Exception {
-    CloudBeesScmEgitPlugin.plugin = null;
+    plugin = null;
     super.stop(bundleContext);
   }
 

@@ -5,6 +5,7 @@
    <extension
          point="com.cloudbees.eclipse.dev.core.forgeSyncProvider">
       <forgeSyncProvider
+      		enabler="com.cloudbees.eclipse.dev.scm.subversive.ForgeSubversiveSyncEnabler"
             class="com.cloudbees.eclipse.dev.scm.subversive.ForgeSubversiveSync">
       </forgeSyncProvider>
    </extension>

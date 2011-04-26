@@ -5,6 +5,7 @@
    <extension
          point="com.cloudbees.eclipse.dev.core.forgeSyncProvider">
       <forgeSyncProvider
+      		enabler="com.cloudbees.eclipse.dev.scm.egit.ForgeEGitSyncEnabler"
             class="com.cloudbees.eclipse.dev.scm.egit.ForgeEGitSync">
       </forgeSyncProvider>
    </extension>

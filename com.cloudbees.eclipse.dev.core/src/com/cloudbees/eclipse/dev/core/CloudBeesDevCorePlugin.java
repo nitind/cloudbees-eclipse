@@ -11,6 +11,7 @@ import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
+import com.cloudbees.eclipse.core.forge.api.ForgeSyncEnabler;
 
 public class CloudBeesDevCorePlugin extends Plugin {
 
@@ -51,10 +52,16 @@ public class CloudBeesDevCorePlugin extends Plugin {
     for (IExtension extension : extensions) {
       for (IConfigurationElement element : extension.getConfigurationElements()) {
         try {
-          Object executableExtension = element.createExecutableExtension("class");
-          if (executableExtension instanceof ForgeSync) {
+          Object enabler = element.createExecutableExtension("enabler");
+          if (enabler == null || !(enabler instanceof ForgeSyncEnabler) || !((ForgeSyncEnabler) enabler).isEnabled()) {
+            getLogger().info("skipping sync provider: " + enabler + " because of dependencies");
+            continue;
+          }
+
+          Object provider = element.createExecutableExtension("class");
+          if (provider instanceof ForgeSync) {
             CloudBeesCorePlugin.getDefault().getGrandCentralService()
-                .addForgeSyncProvider(((ForgeSync) executableExtension));
+                .addForgeSyncProvider(((ForgeSync) provider));
           }
         } catch (CloudBeesException e) {
           e.printStackTrace(); // FIXME
