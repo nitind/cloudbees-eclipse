@@ -45,7 +45,7 @@ public class FavouritesUtils {
 
   private static LinkedList<Shell> shells = new LinkedList<Shell>();
 
-  private static final Color gradientStart = new Color(Display.getDefault(), 255, 255, 200);
+  private static final Color gradientStart = new Color(Display.getDefault(), 245, 245, 200);
   private static final Color gradientEnd = new Color(Display.getDefault(), 225, 225, 200);
 
   public static JenkinsJobsResponse getFavouritesResponse(final IProgressMonitor monitor) throws CloudBeesException {

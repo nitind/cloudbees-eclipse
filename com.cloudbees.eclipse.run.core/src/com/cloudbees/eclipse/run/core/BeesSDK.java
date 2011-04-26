@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.IPath;
 
 import com.cloudbees.api.ApplicationDeployArchiveResponse;
 import com.cloudbees.api.ApplicationInfo;
+import com.cloudbees.api.ApplicationListResponse;
 import com.cloudbees.api.ApplicationStatusResponse;
 import com.cloudbees.api.BeesClient;
 import com.cloudbees.api.BeesClientConfiguration;
@@ -24,6 +25,12 @@ import com.cloudbees.eclipse.run.sdk.CBSdkActivator;
 public class BeesSDK {
 
   public static final String API_URL = "https://api.cloudbees.com/api";
+
+  public static ApplicationListResponse getList() throws Exception {
+    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    BeesClient client = getBeesClient(grandCentralService);
+    return client.applicationList();
+  }
 
   public static ApplicationInfo getServerState(IProject project) throws Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
@@ -53,10 +60,16 @@ public class BeesSDK {
   }
 
   public static ApplicationDeployArchiveResponse deploy(IProject project, boolean build) throws Exception {
+    String id = project.getName();
+    return deploy(project, id, build);
+  }
+
+  public static ApplicationDeployArchiveResponse deploy(IProject project, String id, boolean build)
+      throws CloudBeesException, CoreException, FileNotFoundException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
 
-    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + project.getName();//$NON-NLS-1$
+    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + id;//$NON-NLS-1$
 
     IPath workspacePath = project.getLocation().removeLastSegments(1);
     IPath buildPath = getWarFile(project, build).getFullPath();
