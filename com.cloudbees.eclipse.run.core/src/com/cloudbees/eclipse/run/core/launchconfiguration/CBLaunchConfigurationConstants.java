@@ -9,6 +9,7 @@ public interface CBLaunchConfigurationConstants {
   String ATTR_CB_PROJECT_NAME = CBRunCoreActivator.PLUGIN_ID + ".projectName";
   String PROJECT = "PROJECT";
   String ATTR_CB_LAUNCH_BROWSER = CBRunCoreActivator.PLUGIN_ID + ".browser";
+  String ATTR_CB_LAUNCH_CUSTOM_ID = CBRunCoreActivator.PLUGIN_ID + ".customId";
   public static final String COM_CLOUDBEES_ECLIPSE_WST = "com.cloudbees.eclipse.wst";
   public static final String DO_NOTHING = "DO_NOTHING";
 
