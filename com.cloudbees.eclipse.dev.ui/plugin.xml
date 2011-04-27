@@ -56,6 +56,15 @@
             </view>
         </perspectiveExtension>
         <perspectiveExtension
+              targetID="com.cloudbees.eclipse.ui.CloudBeesPerspective">
+           <view
+                 id="com.cloudbees.eclipse.dev.ui.views.instances.JenkinsTreeView"
+                 ratio="0.7"
+                 relationship="bottom"
+                 relative="org.eclipse.jdt.ui.PackageExplorer">
+           </view>
+        </perspectiveExtension>
+        <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaPerspective">
             <view
                 relative="org.eclipse.ui.views.ProblemView"
@@ -72,6 +81,14 @@
             </view>
         </perspectiveExtension>
         <perspectiveExtension
+              targetID="com.cloudbees.eclipse.ui.CloudBeesPerspective">
+           <view
+                 id="com.cloudbees.eclipse.dev.ui.views.jobs.JobsView"
+                 relationship="stack"
+                 relative="org.eclipse.ui.views.ProblemView">
+           </view>
+        </perspectiveExtension>
+        <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaPerspective">
             <view
                 relative="org.eclipse.ui.views.ProblemView"
@@ -86,6 +103,14 @@
                 relationship="stack"
                 id="com.cloudbees.eclipse.dev.ui.views.build.BuildHistoryView">
             </view>
+        </perspectiveExtension>
+        <perspectiveExtension
+              targetID="com.cloudbees.eclipse.ui.CloudBeesPerspective">
+           <view
+                 id="com.cloudbees.eclipse.dev.ui.views.build.BuildHistoryView"
+                 relationship="stack"
+                 relative="org.eclipse.ui.views.ProblemView">
+           </view>
         </perspectiveExtension>
     </extension>
     

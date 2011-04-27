@@ -218,6 +218,14 @@
 				id="com.cloudbees.eclipse.run.ui.views.AppListView">
 			</view>
 		</perspectiveExtension>
+  <perspectiveExtension
+        targetID="com.cloudbees.eclipse.ui.CloudBeesPerspective">
+     <view
+           id="com.cloudbees.eclipse.run.ui.views.AppListView"
+           relationship="stack"
+           relative="org.eclipse.ui.views.ProblemView">
+     </view>
+  </perspectiveExtension>
 	</extension>
 
 
