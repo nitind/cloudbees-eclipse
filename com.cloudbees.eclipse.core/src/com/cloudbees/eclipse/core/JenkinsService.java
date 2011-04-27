@@ -184,10 +184,13 @@ public class JenkinsService {
     boolean tryToLogin = true; // false for BasicAuth, true for redirect login
     do {
 
-      if ((this.jenkins.atCloud || this.jenkins.authenticate) && this.jenkins.username != null
-          && this.jenkins.username.trim().length() > 0 && this.jenkins.password != null
+      if (this.jenkins.username != null && this.jenkins.username.trim().length() > 0 && this.jenkins.password != null
           && this.jenkins.password.trim().length() > 0) {
-        //post.addHeader("Authorization", "Basic " + Utils.toB64(this.jenkins.username + ":" + this.jenkins.password));
+        if (this.jenkins.atCloud) {
+          //post.addHeader("Authorization", "Basic " + Utils.toB64(this.jenkins.username + ":" + this.jenkins.password));
+        } else if (this.jenkins.authenticate) {
+          post.addHeader("Authorization", "Basic " + Utils.toB64(this.jenkins.username + ":" + this.jenkins.password));
+        }
       }
 
       List<NameValuePair> nvps = new ArrayList<NameValuePair>();
