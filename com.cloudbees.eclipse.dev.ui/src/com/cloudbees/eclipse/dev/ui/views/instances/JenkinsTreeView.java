@@ -5,6 +5,7 @@ import java.util.List;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -54,6 +55,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
   private Action action2; // Attach Jenkins
   private Action action3; // Reload Forge repositories
   private Action action4; // Reload Jenkins repositories
+  private Action action5; // Configure SSH keys
 
   class NameSorter extends ViewerSorter {
 
@@ -183,6 +185,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
   private void fillLocalPullDown(final IMenuManager manager) {
     manager.add(this.action1);
     manager.add(this.action2);
+    manager.add(this.action5);
     manager.add(new Separator());
     manager.add(this.action3);
     manager.add(this.action4);
@@ -247,6 +250,36 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
     boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
         .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
     this.action4.setEnabled(jaasEnabled);
+
+    this.action5 = new Action() {
+      @Override
+      public void run() {
+        PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+          @Override
+          public void run() {
+            MessageDialog
+                .openInformation(
+                    getSite().getShell(),
+                    "Configure SSH keys",
+                    "In order to access Git or SVN via SSH you need to configure public-private keys.\n\n"
+                        + "In the next step the Eclipse SSH preferences page will open. Also in the browser will be open the corresponding 'User settings' configuration page at CloudBees site.\n\n"
+                        + "Either load an existing key or generate a new one on the 'Key Management' tab and then copy-paste the public key in the browser to the CloudBees 'User settings/Public Key' field.");
+          }
+        });
+
+        PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(getSite().getShell(),
+            "org.eclipse.jsch.ui.SSHPreferences", new String[] { "org.eclipse.ui.net.NetPreferences",
+                "org.eclipse.jsch.ui.SSHPreferences" }, null);
+
+        CloudBeesUIPlugin.getDefault().openWithBrowser("https://grandcentral.cloudbees.com/account/edit");
+
+        if (pref != null) {
+          pref.open();
+        }
+      }
+    };
+    this.action5.setText("Configure SSH keys...");
+    this.action5.setToolTipText("Configure SSH keys used to access the git or svn repositories");
   }
 
   @Override
