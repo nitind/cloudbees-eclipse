@@ -32,7 +32,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
-import com.cloudbees.eclipse.dev.ui.utils.FavouritesUtils;
+import com.cloudbees.eclipse.dev.ui.utils.FavoritesUtils;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildEditorInput;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildHistoryView;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildPart;
@@ -46,13 +46,13 @@ import com.cloudbees.eclipse.ui.PreferenceConstants;
  */
 public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
-  private final class FavouritesTracker extends Thread {
+  private final class FavoritesTracker extends Thread {
     private static final int POLL_DELAY = 60 * 1000;
     JenkinsJobsResponse previous = null;
     private boolean halted = false;
 
-    public FavouritesTracker() {
-      super("Favourites Tracker");
+    public FavoritesTracker() {
+      super("Favorites Tracker");
     }
 
     @Override
@@ -60,15 +60,15 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
       while (!this.halted) {
         try {
           Thread.sleep(POLL_DELAY);
-          JenkinsJobsResponse favouritesResponse = FavouritesUtils.getFavouritesResponse(new NullProgressMonitor());
+          JenkinsJobsResponse favoritesResponse = FavoritesUtils.getFavoritesResponse(new NullProgressMonitor());
 
           if (this.previous != null) {
             for (Job j : this.previous.jobs) {
-              checkJobsForNewBuild(j, favouritesResponse.jobs);
+              checkJobsForNewBuild(j, favoritesResponse.jobs);
             }
           }
 
-          this.previous = favouritesResponse;
+          this.previous = favoritesResponse;
 
         } catch (CloudBeesException e) {
           CloudBeesDevUiPlugin.this.logger.error(e);
@@ -92,7 +92,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
           @Override
           public void run() {
-            FavouritesUtils.showNotification(q);
+            FavoritesUtils.showNotification(q);
           }
         });
       }
@@ -109,14 +109,14 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
   private JobConsoleManager jobConsoleManager;
 
   private Logger logger;
-  private FavouritesTracker favouritesTracker;
+  private FavoritesTracker favoritesTracker;
 
   /**
    * The constructor
    */
   public CloudBeesDevUiPlugin() {
     CloudBeesUIPlugin.getDefault().getAllJenkinsServices()
-        .add(new JenkinsService(new JenkinsInstance("Favourite jobs", FavouritesUtils.FAVOURITES)));
+        .add(new JenkinsService(new JenkinsInstance("Favorite jobs", FavoritesUtils.FAVORITES)));
   }
 
   /*
@@ -129,8 +129,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     CloudBeesDevUiPlugin.plugin = this;
     this.logger = new Logger(getLog());
     reloadForgeRepos(false);
-    this.favouritesTracker = new FavouritesTracker();
-    this.favouritesTracker.start();
+    this.favoritesTracker = new FavoritesTracker();
+    this.favoritesTracker.start();
   }
 
   /*
@@ -145,13 +145,13 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
       this.jobConsoleManager.unregister();
       this.jobConsoleManager = null;
     }
-    this.favouritesTracker.halt();
+    this.favoritesTracker.halt();
     super.stop(context);
   }
 
   /**
    * Returns the shared instance
-   *
+   * 
    * @return the shared instance
    */
   public static CloudBeesDevUiPlugin getDefault() {
@@ -285,11 +285,11 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             @Override
             public void run() {
               try {
-                boolean isFavourites = FavouritesUtils.FAVOURITES.equals(viewUrl);
+                boolean isFavorites = FavoritesUtils.FAVORITES.equals(viewUrl);
                 IWorkbenchPage activePage = CloudBeesUIPlugin.getActiveWindow().getActivePage();
 
                 int hashCode;
-                if (isFavourites) {
+                if (isFavorites) {
                   hashCode = viewUrl.hashCode();
                 } else {
                   hashCode = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getUrl().hashCode();
@@ -312,8 +312,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
           }
 
           JenkinsJobsResponse jobs;
-          if (FavouritesUtils.FAVOURITES.equals(viewUrl)) {
-            jobs = FavouritesUtils.getFavouritesResponse(monitor);
+          if (FavoritesUtils.FAVORITES.equals(viewUrl)) {
+            jobs = FavoritesUtils.getFavoritesResponse(monitor);
           } else {
             jobs = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getJobs(viewUrl, monitor);
           }

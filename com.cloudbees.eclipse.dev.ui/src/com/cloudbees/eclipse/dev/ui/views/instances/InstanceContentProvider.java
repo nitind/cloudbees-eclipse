@@ -13,12 +13,12 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 public class InstanceContentProvider implements IStructuredContentProvider, ITreeContentProvider {
   private InstanceGroup jenkinsGroup = new InstanceGroup("Jenkins", false);
   private InstanceGroup cloudGroup = new InstanceGroup("DEV@cloud", true);
-  private InstanceGroup favouritesGroup = new FavouritesInstanceGroup("Favourite jobs", false);
+  private InstanceGroup favoritesGroup = new FavoritesInstanceGroup("Favorite jobs", false);
 
   public InstanceContentProvider() {
     this.jenkinsGroup.setLoading(true);
     this.cloudGroup.setLoading(true);
-    this.favouritesGroup.setLoading(false);
+    this.favoritesGroup.setLoading(false);
   }
 
   @Override
@@ -53,7 +53,7 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
   public void dispose() {
     this.jenkinsGroup = null;
     this.cloudGroup = null;
-    this.favouritesGroup = null;
+    this.favoritesGroup = null;
   }
 
   @Override
@@ -72,7 +72,7 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
   @Override
   public Object[] getChildren(Object parent) {
     if (parent instanceof IViewSite) {
-      return new InstanceGroup[] { this.cloudGroup, this.jenkinsGroup, this.favouritesGroup };
+      return new InstanceGroup[] { this.cloudGroup, this.jenkinsGroup, this.favoritesGroup };
     } else if (parent instanceof InstanceGroup) {
       return ((InstanceGroup) parent).getChildren();
     } else if (parent instanceof JenkinsInstanceResponse) {

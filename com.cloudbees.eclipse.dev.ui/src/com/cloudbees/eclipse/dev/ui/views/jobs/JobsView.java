@@ -60,13 +60,13 @@ import com.cloudbees.eclipse.dev.ui.actions.OpenLastBuildAction;
 import com.cloudbees.eclipse.dev.ui.actions.OpenLogAction;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadBuildHistoryAction;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadJobsAction;
-import com.cloudbees.eclipse.dev.ui.utils.FavouritesUtils;
+import com.cloudbees.eclipse.dev.ui.utils.FavoritesUtils;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 
 /**
  * View showing jobs for both Jenkins offline installations and JaaS Nectar instances
- *
+ * 
  * @author ahtik
  */
 public class JobsView extends ViewPart implements IPropertyChangeListener {
@@ -83,8 +83,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   private ReloadBuildHistoryAction actionOpenBuildHistory;
   private OpenLogAction actionOpenLog;
   private Action actionDeleteJob;
-  private Action actionAddFavourite;
-  private Action actionRemoveFavourite;
+  private Action actionAddFavorite;
+  private Action actionRemoveFavorite;
 
   private final Map<String, Image> stateIcons = new HashMap<String, Image>();
 
@@ -117,12 +117,12 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     this.actionOpenBuildHistory.setViewUrl(this.selectedJob instanceof Job ? ((Job) this.selectedJob).url : null);
 
     if (this.selectedJob instanceof Job) {
-      boolean isFavourite = FavouritesUtils.isFavourite(((Job) this.selectedJob).url);
-      JobsView.this.actionAddFavourite.setEnabled(!isFavourite);
-      JobsView.this.actionRemoveFavourite.setEnabled(isFavourite);
+      boolean isFavorite = FavoritesUtils.isFavorite(((Job) this.selectedJob).url);
+      JobsView.this.actionAddFavorite.setEnabled(!isFavorite);
+      JobsView.this.actionRemoveFavorite.setEnabled(isFavorite);
     } else {
-      JobsView.this.actionAddFavourite.setEnabled(false);
-      JobsView.this.actionRemoveFavourite.setEnabled(false);
+      JobsView.this.actionAddFavorite.setEnabled(false);
+      JobsView.this.actionRemoveFavorite.setEnabled(false);
     }
   }
 
@@ -452,8 +452,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     popupMenu.add(new Separator());
     popupMenu.add(this.actionDeleteJob);
     popupMenu.add(new Separator());
-    popupMenu.add(this.actionAddFavourite);
-    popupMenu.add(this.actionRemoveFavourite);
+    popupMenu.add(this.actionAddFavorite);
+    popupMenu.add(this.actionRemoveFavorite);
     popupMenu.add(new Separator());
     popupMenu.add(this.actionReloadJobs);
 
@@ -651,23 +651,23 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     this.actionInvokeBuild.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_RUN));
     this.actionInvokeBuild.setEnabled(false);
 
-    this.actionAddFavourite = new Action("Add to Favourites") {
+    this.actionAddFavorite = new Action("Add to Favorites") {
       @Override
       public void run() {
         final JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
-        FavouritesUtils.addFavourite(job.url, job.name);
-        JobsView.this.actionAddFavourite.setEnabled(false);
-        JobsView.this.actionRemoveFavourite.setEnabled(true);
+        FavoritesUtils.addFavorite(job.url, job.name);
+        JobsView.this.actionAddFavorite.setEnabled(false);
+        JobsView.this.actionRemoveFavorite.setEnabled(true);
       };
     };
 
-    this.actionRemoveFavourite = new Action("Remove from Favourites") {
+    this.actionRemoveFavorite = new Action("Remove from Favorites") {
       @Override
       public void run() {
         final JenkinsJobsResponse.Job job = (Job) JobsView.this.selectedJob;
-        FavouritesUtils.removeFavourite(job.url);
-        JobsView.this.actionAddFavourite.setEnabled(true);
-        JobsView.this.actionRemoveFavourite.setEnabled(false);
+        FavoritesUtils.removeFavorite(job.url);
+        JobsView.this.actionAddFavorite.setEnabled(true);
+        JobsView.this.actionRemoveFavorite.setEnabled(false);
       };
     };
     /*    action4.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()

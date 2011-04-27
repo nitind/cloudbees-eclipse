@@ -31,14 +31,14 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse.View;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
-import com.cloudbees.eclipse.dev.ui.utils.FavouritesUtils;
+import com.cloudbees.eclipse.dev.ui.utils.FavoritesUtils;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 import com.cloudbees.eclipse.ui.internal.action.ConfigureCloudBeesAction;
 
 /**
  * View showing both Jenkins offline installations and JaaS Nectar instances
- *
+ * 
  * @author ahtik
  */
 public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener {
@@ -59,10 +59,10 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
 
     @Override
     public int compare(final Viewer viewer, final Object e1, final Object e2) {
-      if (e1 instanceof FavouritesInstanceGroup) {
+      if (e1 instanceof FavoritesInstanceGroup) {
         return -1;
       }
-      if (e2 instanceof FavouritesInstanceGroup) {
+      if (e2 instanceof FavoritesInstanceGroup) {
         return +1;
       }
 
@@ -114,10 +114,10 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
               CloudBeesUIPlugin.getDefault().getLogger().error(e);
             }
             return;
-          } else if (el instanceof FavouritesInstanceGroup) {
+          } else if (el instanceof FavoritesInstanceGroup) {
 
             try {
-              CloudBeesDevUiPlugin.getDefault().showJobs(FavouritesUtils.FAVOURITES, true);
+              CloudBeesDevUiPlugin.getDefault().showJobs(FavoritesUtils.FAVORITES, true);
             } catch (CloudBeesException e) {
               CloudBeesUIPlugin.getDefault().getLogger().error(e);
             }
@@ -155,6 +155,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
       public void activeJobViewChanged(final JenkinsJobsResponse newView) {
       }
 
+      @Override
       public void activeJobHistoryChanged(final JenkinsJobAndBuildsResponse newView) {
       }
 

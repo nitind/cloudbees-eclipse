@@ -33,13 +33,13 @@ import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
-public class FavouritesUtils {
+public class FavoritesUtils {
 
   private static final int MARGIN = 10;
 
-  private static final String FAVOURITES_LIST = "FAVOURITES_LIST";
+  private static final String FAVORITES_LIST = "FAVORITES_LIST";
 
-  public static final String FAVOURITES = "favourites://";//$NON-NLS-1$
+  public static final String FAVORITES = "favorites://";//$NON-NLS-1$
 
   private static final IPreferenceStore prefs = CloudBeesDevUiPlugin.getDefault().getPreferenceStore();
 
@@ -48,9 +48,9 @@ public class FavouritesUtils {
   private static final Color gradientStart = new Color(Display.getDefault(), 245, 245, 200);
   private static final Color gradientEnd = new Color(Display.getDefault(), 225, 225, 200);
 
-  public static JenkinsJobsResponse getFavouritesResponse(final IProgressMonitor monitor) throws CloudBeesException {
-    HashMap<String, String> favourites = getFavourites();
-    HashMap<String, JenkinsService> instances = getInstances(favourites.keySet());
+  public static JenkinsJobsResponse getFavoritesResponse(final IProgressMonitor monitor) throws CloudBeesException {
+    HashMap<String, String> favorites = getFavorites();
+    HashMap<String, JenkinsService> instances = getInstances(favorites.keySet());
 
     ArrayList<Job> filtered = new ArrayList<JenkinsJobsResponse.Job>();
 
@@ -59,15 +59,15 @@ public class FavouritesUtils {
       try {
         JenkinsJobsResponse allJobs = jenkinsService.getJobs(instance, monitor);
         for (Job j : allJobs.jobs) {
-          if (favourites.containsKey(j.url)) {
+          if (favorites.containsKey(j.url)) {
             filtered.add(j);
           }
         }
       } catch (CloudBeesException e) {
-        for (String url : favourites.keySet()) {
+        for (String url : favorites.keySet()) {
           if (url.startsWith(instance)) {
             Job j = new Job();
-            j.name = favourites.get(url);
+            j.name = favorites.get(url);
             j.url = url;
             filtered.add(j);
           }
@@ -76,8 +76,8 @@ public class FavouritesUtils {
     }
 
     JenkinsJobsResponse jobs = new JenkinsJobsResponse();
-    jobs.name = "Favourite jobs";
-    jobs.viewUrl = FAVOURITES;
+    jobs.name = "Favorite jobs";
+    jobs.viewUrl = FAVORITES;
     jobs.jobs = filtered.toArray(new Job[filtered.size()]);
 
     return jobs;
@@ -108,10 +108,10 @@ public class FavouritesUtils {
     return null;
   }
 
-  private static HashMap<String, String> getFavourites() {
-    HashMap<String, String> favourites = new HashMap<String, String>();
+  private static HashMap<String, String> getFavorites() {
+    HashMap<String, String> favorites = new HashMap<String, String>();
 
-    String pref = prefs.getString(FAVOURITES_LIST);
+    String pref = prefs.getString(FAVORITES_LIST);
 
     if (!"".equals(pref)) { // we don't want an empty URL
       for (String string : pref.split(",")) {
@@ -124,50 +124,50 @@ public class FavouritesUtils {
           String[] urlSplit = url.split("/");
           name = urlSplit[urlSplit.length - 1];
         }
-        favourites.put(url, name);
+        favorites.put(url, name);
       }
     }
 
-    return favourites;
+    return favorites;
   }
 
-  private static void storeFavourites(HashMap<String, String> favourites) {
+  private static void storeFavorites(HashMap<String, String> favorites) {
     String pref = "";
-    if (favourites != null && !favourites.isEmpty()) {
-      for (String string : favourites.keySet()) {
-        pref += Utils.toB64(string) + ";" + Utils.toB64(favourites.get(string)) + ",";
+    if (favorites != null && !favorites.isEmpty()) {
+      for (String string : favorites.keySet()) {
+        pref += Utils.toB64(string) + ";" + Utils.toB64(favorites.get(string)) + ",";
       }
 
       pref = pref.substring(0, pref.length() - 1);
     }
 
-    prefs.setValue(FAVOURITES_LIST, pref);
+    prefs.setValue(FAVORITES_LIST, pref);
     try {
-      CloudBeesDevUiPlugin.getDefault().showJobs(FAVOURITES, false);
+      CloudBeesDevUiPlugin.getDefault().showJobs(FAVORITES, false);
     } catch (CloudBeesException e) {
       //TODO i18n
       CloudBeesUIPlugin.showError("Failed to reload Jenkins jobs!", e);
     }
   }
 
-  public static void removeFavourite(String favourite) {
-    HashMap<String, String> fav = getFavourites();
-    if (fav.containsKey(favourite)) {
-      fav.remove(favourite);
-      storeFavourites(fav);
+  public static void removeFavorite(String favorite) {
+    HashMap<String, String> fav = getFavorites();
+    if (fav.containsKey(favorite)) {
+      fav.remove(favorite);
+      storeFavorites(fav);
     }
   }
 
-  public static void addFavourite(String favourite, String name) {
-    HashMap<String, String> fav = getFavourites();
-    if (!fav.containsKey(favourite)) {
-      fav.put(favourite, name);
-      storeFavourites(fav);
+  public static void addFavorite(String favorite, String name) {
+    HashMap<String, String> fav = getFavorites();
+    if (!fav.containsKey(favorite)) {
+      fav.put(favorite, name);
+      storeFavorites(fav);
     }
   }
 
-  public static boolean isFavourite(String favourite) {
-    return getFavourites().containsKey(favourite);
+  public static boolean isFavorite(String favouite) {
+    return getFavorites().containsKey(favouite);
   }
 
   public static void showNotification(final Job job) {
