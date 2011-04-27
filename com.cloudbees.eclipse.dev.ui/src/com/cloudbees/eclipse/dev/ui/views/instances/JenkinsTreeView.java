@@ -263,7 +263,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
                     "Configure SSH keys",
                     "In order to access Git or SVN via SSH you need to configure public-private keys.\n\n"
                         + "In the next step the Eclipse SSH preferences page will open. Also in the browser will be open the corresponding 'User settings' configuration page at CloudBees site.\n\n"
-                        + "Either load an existing key or generate a new one on the 'Key Management' tab and then copy-paste the public key in the browser to the CloudBees 'User settings/Public Key' field.");
+                        + "Either load an existing key or generate a new one on the 'Key Management' tab and then copy-paste the public key to the browser into the CloudBees 'User settings/Public Key' field.");
           }
         });
 
