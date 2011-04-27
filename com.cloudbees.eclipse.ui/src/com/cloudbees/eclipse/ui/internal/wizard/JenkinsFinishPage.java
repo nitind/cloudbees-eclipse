@@ -10,7 +10,9 @@ import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 
 public class JenkinsFinishPage extends AbstractJenkinsPage {
 
-  private static final String DESCR = "Here comes the text describing which cool things you can do now.\nIt's full of possibilities."; // TODO i18n
+  private static final String DESCR = "The configured Jenkins location will appear in CloubBees Eclipse views,\n\n"
+      + "where you can browse Jenkins views, jobs, job details, console logs,\n\n"
+      + "JUnit test reports, run new builds and perform other actions!"; // TODO i18n
   private String error;
   private Label labelContentText;
 
