@@ -56,7 +56,7 @@ import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.dev.ui.actions.DeleteJobAction;
-import com.cloudbees.eclipse.dev.ui.actions.OpenLastBuildAction;
+import com.cloudbees.eclipse.dev.ui.actions.OpenBuildAction;
 import com.cloudbees.eclipse.dev.ui.actions.OpenLogAction;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadBuildHistoryAction;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadJobsAction;
@@ -79,7 +79,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   private Action actionInvokeBuild;
   private Action actionOpenJobInBrowser;
 
-  private Action actionOpenLastBuildDetails;
+  private OpenBuildAction actionOpenLastBuildDetails;
   private ReloadBuildHistoryAction actionOpenBuildHistory;
   private OpenLogAction actionOpenLog;
   private Action actionDeleteJob;
@@ -110,7 +110,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     this.selectedJob = job;
     boolean enable = this.selectedJob != null;
     this.actionInvokeBuild.setEnabled(enable);
-    this.actionOpenLastBuildDetails.setEnabled(enable);
+    this.actionOpenLastBuildDetails.setBuild(this.selectedJob instanceof Job ? ((Job) this.selectedJob).lastBuild
+        : null);
     this.actionOpenLog.setBuild(this.selectedJob instanceof Job ? ((Job) this.selectedJob).lastBuild : null);
     this.actionDeleteJob.setEnabled(enable);
     this.actionOpenJobInBrowser.setEnabled(enable);
@@ -587,11 +588,10 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   }
 
   private void fillLocalPullDown(final IMenuManager manager) {
-    //manager.add(this.actionOpenLastBuildDetails);
-    manager.add(this.actionOpenJobInBrowser);
-    manager.add(this.actionInvokeBuild);
-    manager.add(new Separator());
-    manager.add(this.actionReloadJobs);
+    manager.add(this.actionOpenLastBuildDetails);
+    manager.add(this.actionOpenLog);
+    manager.add(this.actionAddFavourite);
+    manager.add(this.actionRemoveFavourite);
   }
 
   private void makeActions() {
@@ -601,7 +601,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     this.actionReloadJobs = new ReloadJobsAction();
     this.actionReloadJobs.setEnabled(false);
 
-    this.actionOpenLastBuildDetails = new OpenLastBuildAction(this);
+    this.actionOpenLastBuildDetails = new OpenBuildAction(true);
     this.actionOpenBuildHistory = new ReloadBuildHistoryAction(false);
     this.actionOpenLog = new OpenLogAction();
     this.actionDeleteJob = new DeleteJobAction(this);

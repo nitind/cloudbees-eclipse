@@ -50,6 +50,8 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
+import com.cloudbees.eclipse.dev.ui.actions.OpenBuildAction;
+import com.cloudbees.eclipse.dev.ui.actions.OpenLogAction;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadBuildHistoryAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
@@ -60,6 +62,8 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
 
   private TableViewer table;
 
+  protected OpenBuildAction actionOpenBuild;
+  protected OpenLogAction actionOpenLog;
   protected ReloadBuildHistoryAction actionReloadJobs;
   private Action actionInvokeBuild;
   private Action actionOpenBuildInBrowser;
@@ -308,14 +312,12 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
 
     MenuManager popupMenu = new MenuManager();
 
-    //    popupMenu.add(this.actionOpenLastBuildDetails);
-    //    popupMenu.add(this.actionOpenLog);
-    //popupMenu.add(new Separator());
+    popupMenu.add(this.actionOpenBuild);
+    popupMenu.add(this.actionOpenLog);
+    popupMenu.add(new Separator());
     popupMenu.add(this.actionOpenBuildInBrowser);
     popupMenu.add(this.actionInvokeBuild);
     popupMenu.add(new Separator());
-    //    popupMenu.add(this.actionDeleteJob);
-    //popupMenu.add(new Separator());
     popupMenu.add(this.actionReloadJobs);
 
     Menu menu = popupMenu.createContextMenu(this.table.getTable());
@@ -326,12 +328,13 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
       public void selectionChanged(final SelectionChangedEvent event) {
         StructuredSelection sel = (StructuredSelection) event.getSelection();
         BuildHistoryView.this.selectedBuild = sel.getFirstElement();
-        boolean enable = sel.getFirstElement() != null;
+        boolean enable = BuildHistoryView.this.selectedBuild != null;
         BuildHistoryView.this.actionInvokeBuild.setEnabled(enable);
-        //        BuildHistoryView.this.actionOpenLastBuildDetails.setEnabled(enable);
-        //        BuildHistoryView.this.actionOpenLog.setEnabled(enable);
-        //        BuildHistoryView.this.actionDeleteJob.setEnabled(enable);
         BuildHistoryView.this.actionOpenBuildInBrowser.setEnabled(enable);
+        BuildHistoryView.this.actionOpenBuild.setBuild(BuildHistoryView.this.selectedBuild);
+        BuildHistoryView.this.actionOpenLog.setBuild(BuildHistoryView.this.selectedBuild);
+
+        getViewSite().getActionBars().getToolBarManager().update(true);
       }
     });
 
@@ -429,7 +432,8 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
   }
 
   private void fillLocalToolBar(final IToolBarManager manager) {
-    //manager.add(this.actionOpenLastBuildDetails);
+    //    manager.add(this.actionOpenBuild);
+    //    manager.add(this.actionOpenLog);
     manager.add(this.actionOpenBuildInBrowser);
     manager.add(this.actionInvokeBuild);
     manager.add(new Separator());
@@ -437,20 +441,23 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
   }
 
   private void fillLocalPullDown(final IMenuManager manager) {
-    //manager.add(this.actionOpenLastBuildDetails);
-    manager.add(this.actionOpenBuildInBrowser);
-    manager.add(this.actionInvokeBuild);
-    manager.add(new Separator());
-    manager.add(this.actionReloadJobs);
+    manager.add(this.actionOpenBuild);
+    manager.add(this.actionOpenLog);
+    //    manager.add(this.actionInvokeBuild);
+    //    manager.add(new Separator());
+    //    manager.add(this.actionReloadJobs);
   }
 
   private void makeActions() {
 
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 
+    this.actionOpenBuild = new OpenBuildAction(false);
+    this.actionOpenLog = new OpenLogAction();
+
     this.actionReloadJobs = new ReloadBuildHistoryAction(true);
 
-    //    this.actionOpenLastBuildDetails = new OpenLastBuildAction(this);
+    //    this.actionOpenLastBuildDetails = new OpenBuildAction(this);
     //    this.actionOpenLog = new OpenLogAction(this);
     //    this.actionDeleteJob = new DeleteJobAction(this);
 
