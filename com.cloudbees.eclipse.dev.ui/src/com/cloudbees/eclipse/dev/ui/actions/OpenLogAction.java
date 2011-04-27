@@ -16,16 +16,10 @@ public class OpenLogAction extends Action {
   private Object build;
 
   public OpenLogAction() {
-    super("Open console log", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS);
-    setToolTipText("Open console log of this job"); //TODO i18n
+    super("Open console log", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS); //TODO i18n
+    setToolTipText("Open console log"); //TODO i18n
     setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_CONSOLE));
     super.setEnabled(true);
-  }
-
-  @Override
-  public void setEnabled(final boolean enabled) {
-    new RuntimeException("external comps must not change this").printStackTrace();
-    // ignore
   }
 
   public void setBuild(final Object build) {
