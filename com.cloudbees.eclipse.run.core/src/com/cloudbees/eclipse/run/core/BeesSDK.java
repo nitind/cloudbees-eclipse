@@ -1,6 +1,7 @@
 package com.cloudbees.eclipse.run.core;
 
 import java.io.FileNotFoundException;
+import java.io.OutputStream;
 
 import org.apache.tools.ant.listener.TimestampedLogger;
 import org.eclipse.ant.core.AntRunner;
@@ -76,6 +77,22 @@ public class BeesSDK {
 
     String warFile = workspacePath.toOSString() + buildPath.toOSString();
     return client.applicationDeployWar(appId, null, null, warFile, null, null);
+  }
+
+  /**
+   * Establishes a persistent connection to an application log so that you can see new messages as they are written to
+   * the logs. This is provides a "cloud-friendly" replacement for the ubiquitous "tail" command many developers use to
+   * monitor/debug application log files.
+   * 
+   * @param appID
+   * @param logName
+   *          valid options are "server", "access" or "error"
+   * @param outputStream
+   * @throws Exception
+   */
+  public static void tail(String appID, String logName, OutputStream outputStream) throws Exception {
+    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    getBeesClient(grandCentralService).tailLog(appID, logName, outputStream);
   }
 
   private static IFile getWarFile(IProject project, boolean build) throws CloudBeesException, CoreException,

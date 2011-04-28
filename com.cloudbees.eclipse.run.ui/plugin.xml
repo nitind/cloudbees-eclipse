@@ -81,6 +81,29 @@
 				</and>
 			</visibility>
 		</objectContribution>
+  <objectContribution
+        adaptable="true"
+        id="com.cloudbees.eclipse.run.ui.tail"
+        nameFilter="*"
+        objectClass="org.eclipse.core.resources.IProject">
+     <action
+           class="com.cloudbees.eclipse.run.ui.popup.actions.TailAction"
+           enablesFor="1"
+           id="com.cloudbees.eclipse.run.ui.action.tail"
+           label="Tail"
+           menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup">
+     </action>
+     <visibility>
+        <and>
+           <objectClass
+                 name="org.eclipse.core.resources.IProject">
+           </objectClass>
+           <objectState
+                 name="projectNature"
+                 value="com.cloudbees.eclipse.core.cloudbeesNature">
+           </objectState>
+        </and></visibility>
+  </objectContribution>
 	</extension>
 
 
