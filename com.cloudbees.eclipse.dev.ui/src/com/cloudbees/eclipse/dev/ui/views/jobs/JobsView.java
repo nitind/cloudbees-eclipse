@@ -590,8 +590,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   private void fillLocalPullDown(final IMenuManager manager) {
     manager.add(this.actionOpenLastBuildDetails);
     manager.add(this.actionOpenLog);
-    manager.add(this.actionAddFavourite);
-    manager.add(this.actionRemoveFavourite);
+    manager.add(this.actionAddFavorite);
+    manager.add(this.actionRemoveFavorite);
   }
 
   private void makeActions() {
