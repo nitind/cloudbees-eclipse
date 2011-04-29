@@ -82,27 +82,37 @@
 			</visibility>
 		</objectContribution>
   <objectContribution
-        adaptable="true"
-        id="com.cloudbees.eclipse.run.ui.tail"
-        nameFilter="*"
-        objectClass="org.eclipse.core.resources.IProject">
+        adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.tail.server"
+        objectClass="com.cloudbees.api.ApplicationInfo">
      <action
-           class="com.cloudbees.eclipse.run.ui.popup.actions.TailAction"
+           class="com.cloudbees.eclipse.run.ui.popup.actions.AbstractTailAction$TailServerLogAction"
            enablesFor="1"
-           id="com.cloudbees.eclipse.run.ui.action.tail"
-           label="Tail"
-           menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup">
+           id="com.cloudbees.eclipse.run.ui.action.tail.server"
+           label="Tail Server Log">
      </action>
-     <visibility>
-        <and>
-           <objectClass
-                 name="org.eclipse.core.resources.IProject">
-           </objectClass>
-           <objectState
-                 name="projectNature"
-                 value="com.cloudbees.eclipse.core.cloudbeesNature">
-           </objectState>
-        </and></visibility>
+  </objectContribution>
+  <objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.tail.access"
+        objectClass="com.cloudbees.api.ApplicationInfo">
+     <action
+           class="com.cloudbees.eclipse.run.ui.popup.actions.AbstractTailAction$TailAccessLogAction"
+           enablesFor="1"
+           id="com.cloudbees.eclipse.run.ui.action.tail.access"
+           label="Tail Access Log">
+     </action>
+  </objectContribution>
+  <objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.tail.error"
+        objectClass="com.cloudbees.api.ApplicationInfo">
+     <action
+           class="com.cloudbees.eclipse.run.ui.popup.actions.AbstractTailAction$TailErrorLogAction"
+           enablesFor="1"
+           id="com.cloudbees.eclipse.run.ui.action.tail.error"
+           label="Tail Error Log">
+     </action>
   </objectContribution>
 	</extension>
 

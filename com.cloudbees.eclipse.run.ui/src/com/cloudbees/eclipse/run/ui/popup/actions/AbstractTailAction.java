@@ -2,11 +2,10 @@ package com.cloudbees.eclipse.run.ui.popup.actions;
 
 import java.text.MessageFormat;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
@@ -17,29 +16,35 @@ import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.internal.ObjectPluginAction;
 
+import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
 
 @SuppressWarnings("restriction")
-public class TailAction implements IObjectActionDelegate {
+public abstract class AbstractTailAction implements IObjectActionDelegate {
+
+  public static final String LOG_NAME_SERVER = "server";
+  public static final String LOG_NAME_ACCESS = "access";
+  public static final String LOG_NAME_ERROR = "error";
 
   @Override
   public void run(IAction action) {
     if (action instanceof ObjectPluginAction) {
+      ObjectPluginAction pluginAction = (ObjectPluginAction) action;
+      ISelection selection = pluginAction.getSelection();
 
-      ISelection selection = ((ObjectPluginAction) action).getSelection();
+      if (selection instanceof IStructuredSelection) {
+        IStructuredSelection structSelection = (IStructuredSelection) selection;
+        Object element = structSelection.getFirstElement();
 
-      if (selection instanceof StructuredSelection) {
-        final Object firstElement = ((StructuredSelection) selection).getFirstElement();
+        if (element instanceof ApplicationInfo) {
+          final ApplicationInfo appInfo = (ApplicationInfo) element;
 
-        if (firstElement instanceof IProject) {
-          final IProject project = (IProject) firstElement;
           Display.getCurrent().asyncExec(new Runnable() {
-
             @Override
             public void run() {
-              tail(project);
+              tail(appInfo, getLogName());
             }
           });
         }
@@ -77,10 +82,9 @@ public class TailAction implements IObjectActionDelegate {
     return console;
   }
 
-  private void tail(final IProject project) {
+  private void tail(final ApplicationInfo appInfo, final String logName) {
     IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
-    final String logName = "access"; // TODO
-    String consoleName = MessageFormat.format("Tail {0} :: {1}", logName, project.getName());
+    String consoleName = MessageFormat.format("Tail {0} log :: {1}", logName, appInfo.getTitle());
     final IOConsole console = getTailConsole(consoleName);
     manager.showConsoleView(console);
 
@@ -90,7 +94,7 @@ public class TailAction implements IObjectActionDelegate {
       public void run() {
         IOConsoleOutputStream consoleOutputStream = console.newOutputStream();
         try {
-          BeesSDK.tail("imade/alpacentauri", logName, consoleOutputStream); // TODO
+          BeesSDK.tail(appInfo.getId(), logName, consoleOutputStream);
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -98,5 +102,34 @@ public class TailAction implements IObjectActionDelegate {
     });
 
     t.start();
+  }
+
+  protected abstract String getLogName();
+
+  public static class TailServerLogAction extends AbstractTailAction {
+
+    @Override
+    protected String getLogName() {
+      return LOG_NAME_SERVER;
+    }
+
+  }
+
+  public static class TailAccessLogAction extends AbstractTailAction {
+
+    @Override
+    protected String getLogName() {
+      return LOG_NAME_ACCESS;
+    }
+
+  }
+
+  public static class TailErrorLogAction extends AbstractTailAction {
+
+    @Override
+    protected String getLogName() {
+      return LOG_NAME_ERROR;
+    }
+
   }
 }

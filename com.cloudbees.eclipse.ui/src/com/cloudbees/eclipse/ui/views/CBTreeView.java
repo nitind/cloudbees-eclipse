@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
@@ -55,8 +56,7 @@ public class CBTreeView extends ViewPart implements IPropertyChangeListener {
   public CBTreeView() {
 
     IExtension[] extensions = Platform.getExtensionRegistry()
-        .getExtensionPoint(CloudBeesUIPlugin.PLUGIN_ID, "cbTreeProvider")
-        .getExtensions();
+        .getExtensionPoint(CloudBeesUIPlugin.PLUGIN_ID, "cbTreeProvider").getExtensions();
 
     List<ICBTreeProvider> prs = new ArrayList<ICBTreeProvider>();
     for (IExtension extension : extensions) {
@@ -122,6 +122,12 @@ public class CBTreeView extends ViewPart implements IPropertyChangeListener {
     });
 
     MenuManager popupMenu = new MenuManager();
+    popupMenu.setRemoveAllWhenShown(true);
+    popupMenu.addMenuListener(new IMenuListener() {
+      public void menuAboutToShow(IMenuManager mgr) {
+      }
+    });
+
     IActionBars bars = getViewSite().getActionBars();
     IMenuManager pullDownMenu = bars.getMenuManager();
     IToolBarManager toolbarMenu = bars.getToolBarManager();
@@ -142,8 +148,9 @@ public class CBTreeView extends ViewPart implements IPropertyChangeListener {
 
     Menu menu = popupMenu.createContextMenu(this.viewer.getTree());
     this.viewer.getTree().setMenu(menu);
+    getSite().registerContextMenu(popupMenu, this.viewer);
 
-//    this.jenkinsChangeListener = new JenkinsChangeListener() {
+    //    this.jenkinsChangeListener = new JenkinsChangeListener() {
     //      @Override
     //      public void activeJobViewChanged(final JenkinsJobsResponse newView) {
     //      }
