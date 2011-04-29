@@ -83,13 +83,13 @@
 		</objectContribution>
   <objectContribution
         adaptable="false"
-        id="com.cloudbees.eclipse.run.ui.tail.server"
+        id="com.cloudbees.eclipse.run.ui.tail.error"
         objectClass="com.cloudbees.api.ApplicationInfo">
      <action
-           class="com.cloudbees.eclipse.run.ui.popup.actions.AbstractTailAction$TailServerLogAction"
+           class="com.cloudbees.eclipse.run.ui.popup.actions.AbstractTailAction$TailErrorLogAction"
            enablesFor="1"
-           id="com.cloudbees.eclipse.run.ui.action.tail.server"
-           label="Tail Server Log">
+           id="com.cloudbees.eclipse.run.ui.action.tail.error"
+           label="Tail Error Log">
      </action>
   </objectContribution>
   <objectContribution
@@ -105,13 +105,13 @@
   </objectContribution>
   <objectContribution
         adaptable="false"
-        id="com.cloudbees.eclipse.run.ui.tail.error"
+        id="com.cloudbees.eclipse.run.ui.tail.server"
         objectClass="com.cloudbees.api.ApplicationInfo">
      <action
-           class="com.cloudbees.eclipse.run.ui.popup.actions.AbstractTailAction$TailErrorLogAction"
+           class="com.cloudbees.eclipse.run.ui.popup.actions.AbstractTailAction$TailServerLogAction"
            enablesFor="1"
-           id="com.cloudbees.eclipse.run.ui.action.tail.error"
-           label="Tail Error Log">
+           id="com.cloudbees.eclipse.run.ui.action.tail.server"
+           label="Tail Server Log">
      </action>
   </objectContribution>
 	</extension>
