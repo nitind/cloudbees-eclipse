@@ -43,7 +43,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobProperty;
 
 /**
  * CloudBees Eclipse Toolkit UI Plugin
- * 
+ *
  * @author ahtik
  */
 public class CloudBeesUIPlugin extends AbstractUIPlugin {
@@ -122,7 +122,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   /**
    * Returns the shared instance
-   * 
+   *
    * @return the shared instance
    */
   public static CloudBeesUIPlugin getDefault() {
@@ -220,17 +220,17 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   public void reloadAllJenkins(final boolean userAction) {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job(
-        "Loading DEV@Cloud & Jenkins instances") {
+        "Loading DEV@cloud & Jenkins instances") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
         if (!getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
-          return new Status(Status.INFO, PLUGIN_ID, "DEV@Cloud Continuous Integration is not enabled");
+          return new Status(Status.INFO, PLUGIN_ID, "DEV@cloud Continuous Integration is not enabled");
         }
 
         Exception toReport = null;
 
         try {
-          monitor.beginTask("Reading DEV@Cloud and Jenkins configuration", 1000);
+          monitor.beginTask("Reading DEV@cloud and Jenkins configuration", 1000);
 
           List<JenkinsInstance> instances = new ArrayList<JenkinsInstance>();
           try {
@@ -342,7 +342,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   public JenkinsService getJenkinsServiceForUrl(final String serviceOrViewOrJobUrl) {
-    Iterator<JenkinsService> iter = this.jenkinsRegistry.iterator();
+    Iterator<JenkinsService> iter = new ArrayList<JenkinsService>(this.jenkinsRegistry).iterator();
     while (iter.hasNext()) {
       JenkinsService service = iter.next();
       if (serviceOrViewOrJobUrl.startsWith(service.getUrl())) {
@@ -406,7 +406,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   /**
    * As secure storage is not providing change listener functionality, we must call this programmatically.
-   * 
+   *
    * @throws CloudBeesException
    */
   public void fireSecureStorageChanged() throws CloudBeesException {

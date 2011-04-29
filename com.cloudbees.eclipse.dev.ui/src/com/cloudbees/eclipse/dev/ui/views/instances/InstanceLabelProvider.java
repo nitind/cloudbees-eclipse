@@ -33,6 +33,7 @@ public class InstanceLabelProvider extends LabelProvider implements IFontProvide
 
       return gr.isLoading() ? gr.getName() + " (loading)" : gr.getName();
     }
+
     if (obj instanceof JenkinsInstanceResponse) {
       JenkinsInstanceResponse inst = (JenkinsInstanceResponse) obj;
 
@@ -51,7 +52,7 @@ public class InstanceLabelProvider extends LabelProvider implements IFontProvide
       JenkinsInstanceResponse.View view = (View) obj;
       return view.name;
     }
-    return obj.toString();
+    return null;
   }
 
   @Override
@@ -65,7 +66,6 @@ public class InstanceLabelProvider extends LabelProvider implements IFontProvide
         //imgFolderHosted;
       }
       return CloudBeesDevUiPlugin.getImage(CBImages.IMG_FOLDER_LOCAL);
-
     }
 
     if (obj instanceof JenkinsInstanceResponse) {
@@ -76,29 +76,23 @@ public class InstanceLabelProvider extends LabelProvider implements IFontProvide
     }
 
     return null;
-    //String imageKey = ISharedImages.IMG_OBJ_ELEMENT;
-    /*    String imageKey = ISharedImages.IMG_OBJ_ELEMENT;
-        if (obj instanceof InstanceGroup) {
-          imageKey = ISharedImages.IMG_OBJ_PROJECT;
-        }
-        return PlatformUI.getWorkbench().getSharedImages().getImage(imageKey);*/
   }
 
-  public Font getFont(final Object element) {
-    if (element instanceof InstanceGroup) {
-      InstanceGroup gr = (InstanceGroup) element;
+  public Font getFont(final Object obj) {
+    if (obj instanceof InstanceGroup) {
+      InstanceGroup gr = (InstanceGroup) obj;
       if (gr.isLoading()) {
         return JFaceResources.getFontRegistry().getItalic(JFaceResources.DEFAULT_FONT);
       }
     }
 
-    if (element instanceof JenkinsInstanceResponse.View) {
-      View view = (JenkinsInstanceResponse.View) element;
+    if (obj instanceof JenkinsInstanceResponse.View) {
+      View view = (JenkinsInstanceResponse.View) obj;
       if (view.isPrimary) {
         return JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
       }
-    } else if (element instanceof JenkinsInstanceResponse) {
-      if (((JenkinsInstanceResponse) element).offline) {
+    } else if (obj instanceof JenkinsInstanceResponse) {
+      if (((JenkinsInstanceResponse) obj).offline) {
         return JFaceResources.getFontRegistry().getItalic(JFaceResources.DEFAULT_FONT);
       }
     }

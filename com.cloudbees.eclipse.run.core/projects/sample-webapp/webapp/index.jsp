@@ -653,7 +653,7 @@ html {
         
         
         <li><a
-        href="https://cloudbees.zendesk.com/forums/326992-kbase-run-cloud">RUN@Cloud
+        href="https://cloudbees.zendesk.com/forums/326992-kbase-run-cloud">RUN@cloud
         knowledgebase and tutorials</a></li>
 
 	        <li><a

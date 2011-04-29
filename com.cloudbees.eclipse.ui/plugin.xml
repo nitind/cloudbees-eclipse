@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+
+	<extension-point id="com.cloudbees.eclipse.ui.cbTreeProvider"
+		name="cbTreeProvider" schema="schema/com.cloudbees.eclipse.ui.cbTreeProvider.exsd" />
+
     <extension
         point="org.eclipse.ui.preferencePages">
         <page
@@ -142,6 +146,7 @@
             </action>
         </objectContribution>
     </extension>
+    
     <extension
           point="org.eclipse.ui.perspectives">
        <perspective
@@ -151,4 +156,50 @@
              name="CloudBees">
        </perspective>
     </extension>
+    
+    <extension
+        point="org.eclipse.ui.views">
+        <category
+            name="CloudBees"
+            id="com.cloudbees.eclipse">
+        </category>
+        <view
+            name="CloudBees"
+            icon="icons/16x16/cb_plain.png"
+            category="com.cloudbees.eclipse"
+            class="com.cloudbees.eclipse.ui.views.CBTreeView"
+            id="com.cloudbees.eclipse.ui.views.CBTreeView">
+        </view>
+	</extension>    
+	
+    <extension
+        point="org.eclipse.ui.perspectiveExtensions">
+        <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+            <view
+                ratio="0.7"
+                relative="org.eclipse.jdt.ui.PackageExplorer"
+                relationship="bottom"
+                id="com.cloudbees.eclipse.ui.views.CBTreeView">
+            </view>
+        </perspectiveExtension>
+        <perspectiveExtension
+            targetID="org.eclipse.ui.resourcePerspective">
+            <view
+                ratio="0.7"
+                relative="org.eclipse.ui.views.ContentOutline"
+                relationship="stack"
+                id="com.cloudbees.eclipse.ui.views.CBTreeView">
+            </view>
+        </perspectiveExtension>
+        <perspectiveExtension
+              targetID="com.cloudbees.eclipse.ui.CloudBeesPerspective">
+           <view
+                 id="com.cloudbees.eclipse.ui.views.CBTreeView"
+                 ratio="0.7"
+                 relationship="bottom"
+                 relative="org.eclipse.jdt.ui.PackageExplorer">
+           </view>
+        </perspectiveExtension>
+	</extension>	
 </plugin>

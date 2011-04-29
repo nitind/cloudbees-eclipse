@@ -22,12 +22,14 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
   }
 
   @Override
-  public void inputChanged(Viewer v, Object oldInput, Object newInput) {
+  public void inputChanged(final Viewer v, final Object oldInput, final Object newInput) {
     this.jenkinsGroup.clear();
     this.cloudGroup.clear();
 
     if (newInput == null || !(newInput instanceof List)) {
-      v.refresh();
+      if (v != null) {
+        v.refresh();
+      }
       return;
     }
 
@@ -45,8 +47,10 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
     this.jenkinsGroup.setLoading(false);
     this.cloudGroup.setLoading(false);
 
-    v.refresh();
-    ((TreeViewer) v).expandToLevel(2);
+    if (v != null) {
+      v.refresh();
+      ((TreeViewer) v).expandToLevel(2);
+    }
   }
 
   @Override
@@ -57,12 +61,12 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
   }
 
   @Override
-  public Object[] getElements(Object parent) {
+  public Object[] getElements(final Object parent) {
     return getChildren(parent);
   }
 
   @Override
-  public Object getParent(Object child) {
+  public Object getParent(final Object child) {
     if (child instanceof JenkinsInstanceHolder) {
       return ((JenkinsInstanceHolder) child).getParent();
     }
@@ -70,7 +74,7 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
   }
 
   @Override
-  public Object[] getChildren(Object parent) {
+  public Object[] getChildren(final Object parent) {
     if (parent instanceof IViewSite) {
       return new InstanceGroup[] { this.cloudGroup, this.jenkinsGroup, this.favoritesGroup };
     } else if (parent instanceof InstanceGroup) {
@@ -83,7 +87,7 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
   }
 
   @Override
-  public boolean hasChildren(Object parent) {
+  public boolean hasChildren(final Object parent) {
     if (parent instanceof InstanceGroup) {
       return ((InstanceGroup) parent).hasChildren();
     }
