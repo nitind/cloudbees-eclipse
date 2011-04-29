@@ -4,17 +4,6 @@
 
     <extension
         point="org.eclipse.ui.views">
-        <category
-            name="CloudBees"
-            id="com.cloudbees.eclipse">
-        </category>
-        <view
-            name="CloudBees"
-            icon="icons/16x16/cb_plain.png"
-            category="com.cloudbees.eclipse"
-            class="com.cloudbees.eclipse.dev.ui.views.instances.JenkinsTreeView"
-            id="com.cloudbees.eclipse.dev.ui.views.instances.JenkinsTreeView">
-        </view>
         <view
             name="Build Jobs"
             icon="icons/cb_run_wheel_topleft.png"
@@ -37,33 +26,6 @@
     
     <extension
         point="org.eclipse.ui.perspectiveExtensions">
-        <perspectiveExtension
-            targetID="org.eclipse.jdt.ui.JavaPerspective">
-            <view
-                ratio="0.7"
-                relative="org.eclipse.jdt.ui.PackageExplorer"
-                relationship="bottom"
-                id="com.cloudbees.eclipse.dev.ui.views.instances.JenkinsTreeView">
-            </view>
-        </perspectiveExtension>
-        <perspectiveExtension
-            targetID="org.eclipse.ui.resourcePerspective">
-            <view
-                ratio="0.7"
-                relative="org.eclipse.ui.views.ContentOutline"
-                relationship="stack"
-                id="com.cloudbees.eclipse.dev.ui.views.instances.JenkinsTreeView">
-            </view>
-        </perspectiveExtension>
-        <perspectiveExtension
-              targetID="com.cloudbees.eclipse.ui.CloudBeesPerspective">
-           <view
-                 id="com.cloudbees.eclipse.dev.ui.views.instances.JenkinsTreeView"
-                 ratio="0.7"
-                 relationship="bottom"
-                 relative="org.eclipse.jdt.ui.PackageExplorer">
-           </view>
-        </perspectiveExtension>
         <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaPerspective">
             <view
@@ -123,6 +85,7 @@
             name="Build details">
         </editor>
     </extension>
+    
     <extension
         point="org.eclipse.ui.console.consolePageParticipants">
         <consolePageParticipant
@@ -135,6 +98,7 @@
             </enablement>
         </consolePageParticipant>
     </extension>
+    
     <extension
         point="org.eclipse.ui.console.consolePatternMatchListeners">
         <consolePatternMatchListener
@@ -218,6 +182,13 @@
           </and>
       	</visibility>
     	</objectContribution>
- 		</extension>
+ 	</extension>
+ 	
+    <extension
+          point="com.cloudbees.eclipse.ui.cbTreeProvider">
+       <cbTreeProvider
+             class="com.cloudbees.eclipse.dev.ui.views.instances.JenkinsTreeView">
+       </cbTreeProvider>
+    </extension>
      
 </plugin>

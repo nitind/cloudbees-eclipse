@@ -1,28 +1,28 @@
-package com.cloudbees.eclipse.ui.internal.action;
+package com.cloudbees.eclipse.dev.ui.actions;
 
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import com.cloudbees.eclipse.ui.views.CBTreeAction;
 
-public class ConfigureCloudBeesAction extends CBTreeAction {
+public class ConfigureJenkinsInstancesAction extends CBTreeAction {
 
-  public ConfigureCloudBeesAction() {
+  public ConfigureJenkinsInstancesAction() {
     super();
-    setText("Configure CloudBees access...");
-    setToolTipText("Configure CloudBees account access");
-    /*    action1.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
-            .getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-    */
+    setText("Attach Jenkins instances...");
+    setToolTipText("Attach more Jenkins instances to monitor");
 
+    /*    setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
+            .getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
+     */
   }
 
   @Override
   public void run() {
     PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(null,
-        "com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage", new String[] {
+        "com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage", new String[] {
             "com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage",
-            "com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage" }, null);
+            "com.cloudbees.eclipse.ui.internal.preferences.GeneralPreferencePage" }, null);
     if (pref != null) {
       pref.open();
     }

@@ -220,15 +220,21 @@
 		</launchConfigurationType>
 	</extension>
 
-	<extension point="org.eclipse.ui.views">
+	<!--extension point="org.eclipse.ui.views">
 		<category name="CloudBees" id="com.cloudbees.eclipse">
 		</category>
 		<view name="RUN@cloud apps" icon="icons/16x16/cb_run_arr_topleft.png"
 			category="com.cloudbees.eclipse" class="com.cloudbees.eclipse.run.ui.views.AppListView"
 			id="com.cloudbees.eclipse.run.ui.views.AppListView" allowMultiple="false">
 		</view>
-	</extension>
+	</extension-->
 
+    <extension
+          point="com.cloudbees.eclipse.ui.cbTreeProvider">
+       <cbTreeProvider
+             class="com.cloudbees.eclipse.run.ui.views.AppListView">
+       </cbTreeProvider>
+    </extension>
 
 	<extension point="org.eclipse.ui.perspectiveExtensions">
 		<perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
