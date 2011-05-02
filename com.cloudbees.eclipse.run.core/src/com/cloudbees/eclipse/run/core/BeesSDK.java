@@ -48,27 +48,29 @@ public class BeesSDK {
   }
 
   public static ApplicationStatusResponse stop(IProject project) throws Exception {
-    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + project.getName();//$NON-NLS-1$
-    return stop(appId);
+    return stop(project.getName());
   }
 
   public static ApplicationStatusResponse stop(String id) throws CloudBeesException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
-    return client.applicationStop(id);
+
+    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + id;//$NON-NLS-1$
+
+    return client.applicationStop(appId);
   }
 
   public static ApplicationStatusResponse start(IProject project) throws Exception {
-    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + project.getName();//$NON-NLS-1$
-    return start(appId);
+    return start(project.getName());
   }
 
   public static ApplicationStatusResponse start(String id) throws CloudBeesException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+
     BeesClient client = getBeesClient(grandCentralService);
-    return client.applicationStart(id);
+    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + id;//$NON-NLS-1$
+
+    return client.applicationStart(appId);
   }
 
   public static ApplicationDeployArchiveResponse deploy(IProject project, boolean build) throws Exception {
