@@ -105,6 +105,17 @@
 				enablesFor="1" id="com.cloudbees.eclipse.run.ui.deploy.cloud" label="Stop in RUN@cloud@">
 			</action>
 		</objectContribution>
+  <objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.runAtCloudApps"
+        objectClass="java.lang.String">
+     <action
+           class="com.cloudbees.eclipse.run.ui.popup.actions.RefreshAction"
+           enablesFor="1"
+           id="com.cloudbees.eclipse.run.ui.action.refresh"
+           label="Refresh">
+     </action>
+  </objectContribution>
 	</extension>
 
 

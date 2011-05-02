@@ -19,6 +19,7 @@ import org.eclipse.ui.internal.ObjectPluginAction;
 import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
+import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 @SuppressWarnings("restriction")
 public class StartAction implements IObjectActionDelegate {
@@ -89,9 +90,10 @@ public class StartAction implements IObjectActionDelegate {
       final ISelection selection = ((ObjectPluginAction) action).getSelection();
 
       if (selection instanceof StructuredSelection) {
-        ProgressMonitorDialog monitor = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
         try {
+          ProgressMonitorDialog monitor = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
           monitor.run(false, false, new IRunnableWithProgressImplementation(selection));
+          CloudBeesUIPlugin.getDefault().reloadAllJenkins(true);
         } catch (Exception e) {
           CBRunUiActivator.logError(e);
         }

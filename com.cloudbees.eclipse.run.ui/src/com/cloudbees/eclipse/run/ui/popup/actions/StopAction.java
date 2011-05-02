@@ -19,6 +19,7 @@ import org.eclipse.ui.internal.ObjectPluginAction;
 import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
+import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 @SuppressWarnings("restriction")
 public class StopAction implements IObjectActionDelegate {
@@ -92,6 +93,7 @@ public class StopAction implements IObjectActionDelegate {
         ProgressMonitorDialog monitor = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
         try {
           monitor.run(false, false, new IRunnableWithProgressImplementation(selection));
+          CloudBeesUIPlugin.getDefault().reloadAllJenkins(true);
         } catch (Exception e) {
           CBRunUiActivator.logError(e);
         }
