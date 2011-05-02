@@ -10,7 +10,11 @@ final class AppLabelProvider extends LabelProvider {
     if (element instanceof ApplicationInfo) {
       ApplicationInfo elem = (ApplicationInfo) element;
       return elem.getId() + " (" + elem.getStatus() + ")";
+    } else if (element instanceof ApplicationDetail) {
+      ApplicationDetail detail = (ApplicationDetail) element;
+      return detail.attributeName + ": " + detail.attributeValue;
     }
     return super.getText(element);
   }
+
 }
