@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: RUN@cloud WST components
+Bundle-SymbolicName: com.cloudbees.eclipse.run.wst;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.cloudbees.eclipse.run.wst.Activator
+Bundle-Vendor: CLOUDBEES
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.wst.server.core;bundle-version="1.1.206",
+ org.eclipse.core.resources;bundle-version="3.6.0",
+ com.cloudbees.eclipse.run.core,
+ org.eclipse.debug.core;bundle-version="3.6.0",
+ com.cloudbees.eclipse.run.sdk;bundle-version="0.6.0",
+ com.cloudbees.eclipse.core;bundle-version="1.0.2"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Export-Package: com.cloudbees.eclipse.run.wst

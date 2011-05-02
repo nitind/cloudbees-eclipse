@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.run.core.wst;
+package com.cloudbees.eclipse.run.wst;
 
 import org.eclipse.wst.server.core.model.RuntimeDelegate;
 

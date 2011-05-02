@@ -8,18 +8,19 @@ Bundle-Vendor: Cloud Bees, Inc
 Require-Bundle: com.cloudbees.eclipse.run.core,
  org.eclipse.ui.ide,
  com.cloudbees.eclipse.core,
- org.eclipse.wst.server.core,
  org.eclipse.debug.ui,
  org.eclipse.jdt.ui,
- org.eclipse.wst.server.ui,
  org.eclipse.jdt.core,
- org.eclipse.wst.common.project.facet.ui,
  com.cloudbees.eclipse.run.sdk,
  com.cloudbees.eclipse.ui,
  org.eclipse.ant.launching,
  org.eclipse.jdt.launching,
  org.eclipse.ant.ui,
- com.cloudbees.eclipse.dev.core;bundle-version="1.0.2",
- org.eclipse.ui.console
+ com.cloudbees.eclipse.dev.core,
+ org.eclipse.ui.console,
+ org.eclipse.core.runtime,
+ org.eclipse.jface,
+ org.eclipse.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
+Export-Package: com.cloudbees.eclipse.run.ui.launchconfiguration

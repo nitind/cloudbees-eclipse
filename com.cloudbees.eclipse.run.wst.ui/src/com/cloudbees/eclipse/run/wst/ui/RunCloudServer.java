@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.run.ui.wizards;
+package com.cloudbees.eclipse.run.wst.ui;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.SWT;
