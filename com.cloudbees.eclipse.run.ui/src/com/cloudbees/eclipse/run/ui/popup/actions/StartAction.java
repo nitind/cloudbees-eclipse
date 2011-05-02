@@ -2,7 +2,6 @@ package com.cloudbees.eclipse.run.ui.popup.actions;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -20,7 +19,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.internal.Server;
 
-import com.cloudbees.eclipse.run.core.BeesSDK;
+import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
@@ -39,20 +38,22 @@ public class StartAction implements IObjectActionDelegate {
       monitor.beginTask("Starting RUN@cloud server", 1);
       Object firstElement = ((StructuredSelection) this.selection).getFirstElement();
 
-      if (firstElement instanceof IProject) {
+      if (firstElement instanceof ApplicationInfo) {
         try {
+          ApplicationInfo appInfo = (ApplicationInfo) firstElement;
           IServer[] servers = ServerCore.getServers();
 
           for (IServer iServer : servers) {
             String attribute = iServer.getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
-            String name = ((IProject) firstElement).getName();
+            //String name = ((IProject) firstElement).getName();
 
-            if (name.equals(attribute) && "com.cloudbees.eclipse.core.runcloud".equals(iServer.getServerType().getId())) {
+            if (appInfo.getId().equals(attribute)
+                && "com.cloudbees.eclipse.core.runcloud".equals(iServer.getServerType().getId())) {
               ((Server) iServer).setServerState(IServer.STATE_STARTED);
             }
           }
 
-          BeesSDK.start((IProject) firstElement);
+          //BeesSDK.start(appInfo.getId());
           monitor.done();
 
         } catch (Exception e) {
