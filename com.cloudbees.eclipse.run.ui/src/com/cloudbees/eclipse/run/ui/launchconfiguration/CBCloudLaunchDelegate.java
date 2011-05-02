@@ -12,18 +12,23 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.internal.ServerWorkingCopy;
 
 import com.cloudbees.api.ApplicationDeployArchiveResponse;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
+import com.cloudbees.eclipse.run.core.wst.WSTUtil;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
 public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
+  @SuppressWarnings("restriction")
   @Override
   public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
       throws CoreException {
@@ -36,12 +41,24 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
       for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
         if (project.getName().equals(projectName)) {
           String id = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
+
+          //FIXME move to extension
+          ServerWorkingCopy server = (ServerWorkingCopy) WSTUtil.getServer(id, project);
+          server.setServerState(IServer.STATE_STARTING);
+          ILaunchConfigurationWorkingCopy wc = configuration.getWorkingCopy();
+          wc.setAttribute("server-id", server.getId()); // HACK
+          wc.doSave();
+
           ApplicationDeployArchiveResponse deploy;
           if ("".equals(id)) {
             deploy = BeesSDK.deploy(project, true);
           } else {
             deploy = BeesSDK.deploy(project, id, true);
           }
+
+          //FIXME move to extension
+          server.setServerPublishState(IServer.PUBLISH_STATE_NONE);
+          server.setServerState(IServer.STATE_STARTED);
           monitor.done();
 
           if (needLaunch) {

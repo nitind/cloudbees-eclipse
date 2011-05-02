@@ -11,7 +11,6 @@ import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
-import com.cloudbees.api.ApplicationDeployArchiveResponse;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
@@ -70,9 +69,14 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
       }
 
       String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+      String appId = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
       IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
-      ApplicationDeployArchiveResponse deploy = BeesSDK.deploy(project, true);
+      if ("".equals(appId)) {
+        BeesSDK.deploy(project, true);
+      } else {
+        BeesSDK.deploy(project, appId, true);
+      }
       setServerPublishState(IServer.PUBLISH_STATE_NONE);
       setServerState(IServer.STATE_STARTED);
       return null;
@@ -86,8 +90,18 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
       throws CoreException {
     try {
       String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+      String appId = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
+
+      workingCopy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, appId);
+      workingCopy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, projectName);
+      workingCopy.doSave();
+
       IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-      BeesSDK.start(project);
+      if ("".equals(appId)) {
+        BeesSDK.start(project);
+      } else {
+        BeesSDK.start(appId);
+      }
     } catch (Exception e) {
       CBRunCoreActivator.logError(e);
     }
