@@ -34,35 +34,47 @@ public class BeesSDK {
   }
 
   public static ApplicationInfo getServerState(IProject project) throws Exception {
+    String id = project.getName();
+    return getServerState(id);
+  }
+
+  public static ApplicationInfo getServerState(String id) throws CloudBeesException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
 
-    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + project.getName();//$NON-NLS-1$
+    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + id;//$NON-NLS-1$
 
     return client.applicationInfo(appId);
   }
 
   public static ApplicationStatusResponse stop(IProject project) throws Exception {
+    return stop(project.getName());
+  }
+
+  public static ApplicationStatusResponse stop(String id) throws CloudBeesException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
 
-    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + project.getName();//$NON-NLS-1$
+    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + id;//$NON-NLS-1$
 
     return client.applicationStop(appId);
   }
 
   public static ApplicationStatusResponse start(IProject project) throws Exception {
+    return start(project.getName());
+  }
+
+  public static ApplicationStatusResponse start(String id) throws CloudBeesException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
 
     BeesClient client = getBeesClient(grandCentralService);
-    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + project.getName();//$NON-NLS-1$
+    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + id;//$NON-NLS-1$
 
     return client.applicationStart(appId);
   }
 
   public static ApplicationDeployArchiveResponse deploy(IProject project, boolean build) throws Exception {
-    String id = project.getName();
-    return deploy(project, id, build);
+    return deploy(project, project.getName(), build);
   }
 
   public static ApplicationDeployArchiveResponse deploy(IProject project, String id, boolean build)
