@@ -49,6 +49,17 @@
 		</objectContribution>
   <objectContribution
         adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.delete"
+        objectClass="com.cloudbees.api.ApplicationInfo">
+     <action
+           class="com.cloudbees.eclipse.run.ui.popup.actions.DeleteAction"
+           enablesFor="1"
+           id="com.cloudbees.eclipse.run.ui.action.delete"
+           label="Delete in RUN@cloud@">
+     </action>
+  </objectContribution>
+  <objectContribution
+        adaptable="false"
         id="com.cloudbees.eclipse.run.ui.tail.error"
         objectClass="com.cloudbees.api.ApplicationInfo">
      <action

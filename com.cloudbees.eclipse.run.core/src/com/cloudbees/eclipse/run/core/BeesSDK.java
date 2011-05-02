@@ -96,15 +96,26 @@ public class BeesSDK {
    * the logs. This is provides a "cloud-friendly" replacement for the ubiquitous "tail" command many developers use to
    * monitor/debug application log files.
    * 
-   * @param appID
+   * @param appId
    * @param logName
    *          valid options are "server", "access" or "error"
    * @param outputStream
    * @throws Exception
    */
-  public static void tail(String appID, String logName, OutputStream outputStream) throws Exception {
+  public static void tail(String appId, String logName, OutputStream outputStream) throws Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    getBeesClient(grandCentralService).tailLog(appID, logName, outputStream);
+    getBeesClient(grandCentralService).tailLog(appId, logName, outputStream);
+  }
+
+  /**
+   * Delete an application
+   * 
+   * @param appId
+   * @throws Exception
+   */
+  public static void delete(String appId) throws Exception {
+    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    getBeesClient(grandCentralService).applicationDelete(appId);
   }
 
   private static IFile getWarFile(IProject project, boolean build) throws CloudBeesException, CoreException,
