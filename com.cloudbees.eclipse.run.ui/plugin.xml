@@ -116,6 +116,17 @@
            label="Refresh">
      </action>
   </objectContribution>
+  <objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.openInBrowser"
+        objectClass="com.cloudbees.api.ApplicationInfo">
+     <action
+           class="com.cloudbees.eclipse.run.ui.popup.actions.OpenInBrowserAction"
+           enablesFor="1"
+           id="com.cloudbees.eclipse.run.ui.action.openInBrowser"
+           label="Open In Browser">
+     </action>
+  </objectContribution>
 	</extension>
 
 
