@@ -4,6 +4,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IViewSite;
 
+import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.api.ApplicationListResponse;
 
 final class AppContentProvider implements ITreeContentProvider {
@@ -36,6 +37,17 @@ final class AppContentProvider implements ITreeContentProvider {
     if (this.data != null && element instanceof String && ((String) element).startsWith("RUN@")) {
       return this.data.getApplications().toArray();
     }
+
+    if (element instanceof ApplicationInfo) {
+      ApplicationInfo info = (ApplicationInfo) element;
+      ApplicationDetail[] details = new ApplicationDetail[2];
+      details[0] = new ApplicationDetail("Created", info.getCreated());
+      if (info.getUrls().length > 0) {
+        details[1] = new ApplicationDetail("URL", "http://" + info.getUrls()[0]);
+      }
+      return details;
+    }
+
     //    if (inputElement instanceof ApplicationListResponse) {
     //      return ((ApplicationListResponse) inputElement).getApplications().toArray();
     //    }
