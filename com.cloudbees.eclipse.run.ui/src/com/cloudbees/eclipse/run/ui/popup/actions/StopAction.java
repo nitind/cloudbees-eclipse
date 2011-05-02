@@ -93,7 +93,7 @@ public class StopAction implements IObjectActionDelegate {
         ProgressMonitorDialog monitor = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
         try {
           monitor.run(false, false, new IRunnableWithProgressImplementation(selection));
-          CloudBeesUIPlugin.getDefault().reloadAllJenkins(true);
+          CloudBeesUIPlugin.getDefault().fireApplicationInfoChanged();
         } catch (Exception e) {
           CBRunUiActivator.logError(e);
         }

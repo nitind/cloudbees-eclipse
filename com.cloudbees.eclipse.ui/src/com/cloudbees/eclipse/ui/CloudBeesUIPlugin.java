@@ -32,6 +32,7 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import com.cloudbees.eclipse.core.ApplicationInfoChangeListener;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsChangeListener;
@@ -43,7 +44,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobProperty;
 
 /**
  * CloudBees Eclipse Toolkit UI Plugin
- *
+ * 
  * @author ahtik
  */
 public class CloudBeesUIPlugin extends AbstractUIPlugin {
@@ -58,9 +59,11 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   private Logger logger;
 
-  private List<JenkinsService> jenkinsRegistry = new ArrayList<JenkinsService>();
+  private final List<JenkinsService> jenkinsRegistry = new ArrayList<JenkinsService>();
 
-  private List<JenkinsChangeListener> jenkinsChangeListeners = new ArrayList<JenkinsChangeListener>();
+  private final List<JenkinsChangeListener> jenkinsChangeListeners = new ArrayList<JenkinsChangeListener>();
+
+  private final List<ApplicationInfoChangeListener> applicationInfoChangeListeners = new ArrayList<ApplicationInfoChangeListener>();
 
   private IPropertyChangeListener prefListener;
 
@@ -122,7 +125,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   /**
    * Returns the shared instance
-   *
+   * 
    * @return the shared instance
    */
   public static CloudBeesUIPlugin getDefault() {
@@ -406,7 +409,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   /**
    * As secure storage is not providing change listener functionality, we must call this programmatically.
-   *
+   * 
    * @throws CloudBeesException
    */
   public void fireSecureStorageChanged() throws CloudBeesException {
@@ -444,4 +447,29 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
     return getPreferenceStore().getString(PreferenceConstants.P_PASSWORD);
   }
+
+  public void addApplicationInfoChangeListener(final ApplicationInfoChangeListener listener) {
+    if (listener != null) {
+      this.applicationInfoChangeListeners.add(listener);
+    }
+  }
+
+  public void removeApplicationInfoChangeListener(final ApplicationInfoChangeListener listener) {
+    if (listener != null) {
+      this.applicationInfoChangeListeners.remove(listener);
+    }
+  }
+
+  public List<ApplicationInfoChangeListener> getApplicationInfoChangeListeners() {
+    return Collections.unmodifiableList(this.applicationInfoChangeListeners);
+  }
+
+  public void fireApplicationInfoChanged() {
+    Iterator<ApplicationInfoChangeListener> iterator = this.applicationInfoChangeListeners.iterator();
+    while (iterator.hasNext()) {
+      ApplicationInfoChangeListener listener = iterator.next();
+      listener.applicationInfoChanged();
+    }
+  }
+
 }

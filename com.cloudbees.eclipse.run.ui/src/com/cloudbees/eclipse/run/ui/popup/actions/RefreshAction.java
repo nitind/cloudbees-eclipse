@@ -11,7 +11,7 @@ public class RefreshAction implements IObjectActionDelegate {
 
   @Override
   public void run(IAction action) {
-    CloudBeesUIPlugin.getDefault().reloadAllJenkins(true);
+    CloudBeesUIPlugin.getDefault().fireApplicationInfoChanged();
   }
 
   @Override

@@ -93,7 +93,7 @@ public class StartAction implements IObjectActionDelegate {
         try {
           ProgressMonitorDialog monitor = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
           monitor.run(false, false, new IRunnableWithProgressImplementation(selection));
-          CloudBeesUIPlugin.getDefault().reloadAllJenkins(true);
+          CloudBeesUIPlugin.getDefault().fireApplicationInfoChanged();
         } catch (Exception e) {
           CBRunUiActivator.logError(e);
         }

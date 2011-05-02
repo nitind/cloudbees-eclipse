@@ -1,7 +1,5 @@
 package com.cloudbees.eclipse.run.ui.views;
 
-import java.util.List;
-
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -14,10 +12,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
 import com.cloudbees.api.ApplicationListResponse;
+import com.cloudbees.eclipse.core.ApplicationInfoChangeListener;
 import com.cloudbees.eclipse.core.JenkinsChangeListener;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -26,7 +22,7 @@ import com.cloudbees.eclipse.ui.views.ICBTreeProvider;
 
 /**
  * View for showing all available apps in RUN@cloud
- *
+ * 
  * @author ahtik
  */
 public class AppListView extends ViewPart implements IPropertyChangeListener, ICBTreeProvider {
@@ -40,24 +36,18 @@ public class AppListView extends ViewPart implements IPropertyChangeListener, IC
 
   protected JenkinsChangeListener jenkinsChangeListener;
 
+  protected ApplicationInfoChangeListener applicationChangeListener;
+
   public void init() {
 
-    this.jenkinsChangeListener = new JenkinsChangeListener() {
-      @Override
-      public void activeJobViewChanged(final JenkinsJobsResponse newView) {
-      }
+    this.applicationChangeListener = new ApplicationInfoChangeListener() {
 
       @Override
-      public void activeJobHistoryChanged(final JenkinsJobAndBuildsResponse newView) {
-      }
-
-      @Override
-      public void jenkinsChanged(final List<JenkinsInstanceResponse> instances) {
+      public void applicationInfoChanged() {
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
           @Override
           public void run() {
             try {
-              // temporary here
               ApplicationListResponse list = BeesSDK.getList();
               AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, list);
               AppListView.this.viewer.refresh(true);
@@ -69,10 +59,9 @@ public class AppListView extends ViewPart implements IPropertyChangeListener, IC
       }
     };
 
-    CloudBeesUIPlugin.getDefault().addJenkinsChangeListener(this.jenkinsChangeListener);
+    CloudBeesUIPlugin.getDefault().addApplicationInfoChangeListener(this.applicationChangeListener);
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
-
-    CloudBeesUIPlugin.getDefault().reloadAllJenkins(false);
+    CloudBeesUIPlugin.getDefault().fireApplicationInfoChanged();
   }
 
   @Override

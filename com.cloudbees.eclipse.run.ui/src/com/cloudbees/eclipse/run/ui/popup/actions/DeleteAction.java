@@ -63,7 +63,7 @@ public class DeleteAction implements IObjectActionDelegate {
             if (confirmed) {
               ProgressMonitorDialog monitor = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
               monitor.run(false, false, new RunnableWithProgressImpl((ApplicationInfo) element));
-              CloudBeesUIPlugin.getDefault().reloadAllJenkins(true);
+              CloudBeesUIPlugin.getDefault().fireApplicationInfoChanged();
             }
           } catch (Exception e) {
             CBRunUiActivator.logError(e);

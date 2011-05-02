@@ -25,6 +25,7 @@ import com.cloudbees.api.ApplicationDeployArchiveResponse;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
+import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 @SuppressWarnings("restriction")
 public class DeployAction implements IObjectActionDelegate {
@@ -83,9 +84,10 @@ public class DeployAction implements IObjectActionDelegate {
         final Object firstElement = ((StructuredSelection) selection).getFirstElement();
 
         if (firstElement instanceof IProject) {
-          ProgressMonitorDialog monitor = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
           try {
+            ProgressMonitorDialog monitor = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
             monitor.run(false, false, new IRunnableWithProgressImplementation(firstElement));
+            CloudBeesUIPlugin.getDefault().fireApplicationInfoChanged();
           } catch (Exception e) {
             CBRunUiActivator.logError(e);
           }
