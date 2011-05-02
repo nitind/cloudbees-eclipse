@@ -6,6 +6,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
@@ -57,9 +58,13 @@ public class DeleteAction implements IObjectActionDelegate {
 
         if (element instanceof ApplicationInfo) {
           try {
-            ProgressMonitorDialog monitor = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
-            monitor.run(false, false, new RunnableWithProgressImpl((ApplicationInfo) element));
-            CloudBeesUIPlugin.getDefault().reloadAllJenkins(true);
+            boolean confirmed = MessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "Delete",
+                "Are you sure you want to delete this project from RUN@cloud?");
+            if (confirmed) {
+              ProgressMonitorDialog monitor = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
+              monitor.run(false, false, new RunnableWithProgressImpl((ApplicationInfo) element));
+              CloudBeesUIPlugin.getDefault().reloadAllJenkins(true);
+            }
           } catch (Exception e) {
             CBRunUiActivator.logError(e);
           }
