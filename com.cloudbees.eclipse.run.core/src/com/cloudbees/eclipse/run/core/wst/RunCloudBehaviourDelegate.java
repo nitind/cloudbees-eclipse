@@ -23,9 +23,8 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
   @Override
   public void stop(boolean force) {
     try {
-      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
-      IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-      BeesSDK.stop(project);
+      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
+      BeesSDK.stop(projectName);
     } catch (Exception e) {
       CBRunCoreActivator.logError(e);
     }
@@ -40,10 +39,9 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
   @Override
   protected void initialize(IProgressMonitor monitor) {
     try {
-      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
-      IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
 
-      setState(BeesSDK.getServerState(project).getStatus());
+      setState(BeesSDK.getServerState(projectName).getStatus());
     } catch (Exception e) {
       CBRunCoreActivator.logError(e);
       setServerState(IServer.STATE_UNKNOWN);
