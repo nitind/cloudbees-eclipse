@@ -2,7 +2,6 @@ package com.cloudbees.eclipse.run.ui.popup.actions;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -16,12 +15,9 @@ import org.eclipse.ui.IActionDelegate;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.internal.ObjectPluginAction;
-import org.eclipse.wst.server.core.IServer;
-import org.eclipse.wst.server.core.ServerCore;
-import org.eclipse.wst.server.core.internal.Server;
 
+import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.eclipse.run.core.BeesSDK;
-import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
 @SuppressWarnings("restriction")
@@ -39,20 +35,24 @@ public class StartAction implements IObjectActionDelegate {
       monitor.beginTask("Starting RUN@cloud server", 1);
       Object firstElement = ((StructuredSelection) this.selection).getFirstElement();
 
-      if (firstElement instanceof IProject) {
+      if (firstElement instanceof ApplicationInfo) {
         try {
-          IServer[] servers = ServerCore.getServers();
+          ApplicationInfo appInfo = (ApplicationInfo) firstElement;
 
-          for (IServer iServer : servers) {
-            String attribute = iServer.getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
-            String name = ((IProject) firstElement).getName();
+          // FIXME currently cannot match with server
+          //          IServer[] servers = ServerCore.getServers();
+          //          for (IServer iServer : servers) {
+          //            String attribute = iServer.getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+          //            String name = ((IProject) firstElement).getName();
+          //
+          //            if (appInfo.getId().equals(attribute)
+          //                && "com.cloudbees.eclipse.core.runcloud".equals(iServer.getServerType().getId())) {
+          //              ((Server) iServer).setServerState(IServer.STATE_STARTED);
+          //            }
+          //          }
 
-            if (name.equals(attribute) && "com.cloudbees.eclipse.core.runcloud".equals(iServer.getServerType().getId())) {
-              ((Server) iServer).setServerState(IServer.STATE_STARTED);
-            }
-          }
-
-          BeesSDK.start((IProject) firstElement);
+          String id = appInfo.getId();
+          BeesSDK.start(id.substring(id.indexOf("/") + 1));
           monitor.done();
 
         } catch (Exception e) {

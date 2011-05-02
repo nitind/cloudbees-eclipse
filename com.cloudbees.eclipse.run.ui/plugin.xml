@@ -47,40 +47,6 @@
 				</and>
 			</visibility>
 		</objectContribution>
-		<objectContribution adaptable="true"
-			id="com.cloudbees.eclipse.run.ui.stop" nameFilter="*"
-			objectClass="org.eclipse.core.resources.IProject">
-			<action class="com.cloudbees.eclipse.run.ui.popup.actions.StartAction"
-				enablesFor="1" id="com.cloudbees.eclipse.run.ui.deploy.cloud" label="Start in RUN@cloud@"
-				menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup">
-			</action>
-			<visibility>
-				<and>
-					<objectClass name="org.eclipse.core.resources.IProject">
-					</objectClass>
-					<objectState name="projectNature"
-						value="com.cloudbees.eclipse.core.cloudbeesNature">
-					</objectState>
-				</and>
-			</visibility>
-		</objectContribution>
-		<objectContribution adaptable="true"
-			id="com.cloudbees.eclipse.run.ui.start" nameFilter="*"
-			objectClass="org.eclipse.core.resources.IProject">
-			<action class="com.cloudbees.eclipse.run.ui.popup.actions.StopAction"
-				enablesFor="1" id="com.cloudbees.eclipse.run.ui.deploy.cloud" label="Stop in RUN@cloud@"
-				menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup">
-			</action>
-			<visibility>
-				<and>
-					<objectClass name="org.eclipse.core.resources.IProject">
-					</objectClass>
-					<objectState name="projectNature"
-						value="com.cloudbees.eclipse.core.cloudbeesNature">
-					</objectState>
-				</and>
-			</visibility>
-		</objectContribution>
   <objectContribution
         adaptable="false"
         id="com.cloudbees.eclipse.run.ui.tail.error"
@@ -114,6 +80,20 @@
            label="Tail Server Log">
      </action>
   </objectContribution>
+		<objectContribution adaptable="false"
+			id="com.cloudbees.eclipse.run.ui.stop"
+			objectClass="com.cloudbees.api.ApplicationInfo">
+			<action class="com.cloudbees.eclipse.run.ui.popup.actions.StartAction"
+				enablesFor="1" id="com.cloudbees.eclipse.run.ui.deploy.cloud" label="Start in RUN@cloud@">
+			</action>
+		</objectContribution>
+		<objectContribution adaptable="false"
+			id="com.cloudbees.eclipse.run.ui.start"
+			objectClass="com.cloudbees.api.ApplicationInfo">
+			<action class="com.cloudbees.eclipse.run.ui.popup.actions.StopAction"
+				enablesFor="1" id="com.cloudbees.eclipse.run.ui.deploy.cloud" label="Stop in RUN@cloud@">
+			</action>
+		</objectContribution>
 	</extension>
 
 
