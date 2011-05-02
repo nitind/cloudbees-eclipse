@@ -15,12 +15,9 @@ import org.eclipse.ui.IActionDelegate;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.internal.ObjectPluginAction;
-import org.eclipse.wst.server.core.IServer;
-import org.eclipse.wst.server.core.ServerCore;
-import org.eclipse.wst.server.core.internal.Server;
 
 import com.cloudbees.api.ApplicationInfo;
-import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
+import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
 @SuppressWarnings("restriction")
@@ -41,19 +38,20 @@ public class StopAction implements IObjectActionDelegate {
       if (firstElement instanceof ApplicationInfo) {
         try {
           ApplicationInfo appInfo = (ApplicationInfo) firstElement;
-          IServer[] servers = ServerCore.getServers();
 
-          for (IServer iServer : servers) {
-            String attribute = iServer.getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
-            //String name = ((IProject) firstElement).getName();
+          // FIXME currently cannot match with server
+          //          IServer[] servers = ServerCore.getServers();
+          //          for (IServer iServer : servers) {
+          //            String attribute = iServer.getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+          //            String name = ((IProject) firstElement).getName();
+          //
+          //            if (appInfo.getId().equals(attribute)
+          //                && "com.cloudbees.eclipse.core.runcloud".equals(iServer.getServerType().getId())) {
+          //              ((Server) iServer).setServerState(IServer.STATE_STOPPED);
+          //            }
+          //          }
 
-            if (appInfo.getId().equals(attribute)
-                && "com.cloudbees.eclipse.core.runcloud".equals(iServer.getServerType().getId())) {
-              ((Server) iServer).setServerState(IServer.STATE_STOPPED);
-            }
-          }
-
-          //BeesSDK.stop(appInfo.getId());
+          BeesSDK.stop(appInfo.getId());
           monitor.done();
 
         } catch (Exception e) {
