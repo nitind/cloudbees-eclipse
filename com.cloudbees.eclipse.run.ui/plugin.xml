@@ -61,6 +61,17 @@
   </objectContribution>
   <objectContribution
         adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.showProperties"
+        objectClass="com.cloudbees.api.ApplicationInfo">
+     <action
+           class="com.cloudbees.eclipse.run.ui.popup.actions.ShowPropertiesAction"
+           enablesFor="1"
+           id="com.cloudbees.eclipse.run.ui.action.showProperties"
+           label="Properties">
+     </action>
+  </objectContribution>
+  <objectContribution
+        adaptable="false"
         id="com.cloudbees.eclipse.run.ui.tail.error"
         objectClass="com.cloudbees.api.ApplicationInfo">
      <action
