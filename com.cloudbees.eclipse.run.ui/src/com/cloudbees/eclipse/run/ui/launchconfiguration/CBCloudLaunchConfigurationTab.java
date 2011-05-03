@@ -24,14 +24,9 @@ public class CBCloudLaunchConfigurationTab extends CBLaunchConfigurationTab {
 
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    //    super.performApply(configuration);
     String projectName = this.content.getText();
     configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, projectName);
 
-    if (this.launchButton != null) {
-      configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_BROWSER,
-          this.launchButton.getSelection());
-    }
     if (this.customId != null) {
       if (this.customId.getSelection()) {
         configuration
