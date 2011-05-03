@@ -17,16 +17,20 @@ final class AppLabelProvider extends LabelProvider {
 
   @Override
   public String getText(final Object element) {
+    if (element instanceof String) {
+      return (String) element;
+    }
+
     if (element instanceof ApplicationInfo) {
       ApplicationInfo elem = (ApplicationInfo) element;
       return elem.getId() + " (" + elem.getStatus() + ")";
     }
-    return super.getText(element);
+
+    return null;
   }
 
   @Override
-  public Image getImage(Object element) {
-
+  public Image getImage(final Object element) {
     if (element instanceof String) {
       return FOLDER;
     }
@@ -35,6 +39,6 @@ final class AppLabelProvider extends LabelProvider {
       return TOMCAT;
     }
 
-    return super.getImage(element);
+    return null;
   }
 }
