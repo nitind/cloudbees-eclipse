@@ -72,6 +72,8 @@ public class CBRunUiActivator extends AbstractUIPlugin {
   protected void initializeImageRegistry(ImageRegistry reg) {
     super.initializeImageRegistry(reg);
     reg.put(Images.CLOUDBEES_ICON_16x16, imageDescriptorFromPlugin(PLUGIN_ID, Images.CLOUDBEES_ICON_16x16_PATH));
+    reg.put(Images.CLOUDBEES_TOMCAT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, Images.CLOUDBEES_TOMCAT_ICON_PATH));
+    reg.put(Images.CLOUDBEES_FOLDER, imageDescriptorFromPlugin(PLUGIN_ID, Images.CLOUDBEES_FOLDER_PATH));
   }
 
 }

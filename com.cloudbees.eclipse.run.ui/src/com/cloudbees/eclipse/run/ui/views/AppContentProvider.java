@@ -31,7 +31,7 @@ final class AppContentProvider implements ITreeContentProvider {
   @Override
   public Object[] getChildren(final Object element) {
     if (element instanceof IViewSite) {
-      return new Object[] { "RUN@cloud apps" };
+      return new Object[] { "RUN@cloud Tomcat apps" };
     }
     if (this.data != null && element instanceof String && ((String) element).startsWith("RUN@")) {
       return this.data.getApplications().toArray();
