@@ -55,7 +55,7 @@
         point="org.eclipse.ui.decorators">
         <decorator
             adaptable="true"
-            icon="icons/16x16/cb_project.png"
+            icon="icons/16x16/cb_project2.png"
             id="com.cloudbees.eclipse.ui.project"
             label="%project.decorator.label"
             lightweight="true"

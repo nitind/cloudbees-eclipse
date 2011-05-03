@@ -103,23 +103,27 @@
            label="Tail Server Log">
      </action>
   </objectContribution>
-		<objectContribution adaptable="false"
-			id="com.cloudbees.eclipse.run.ui.stop"
-			objectClass="com.cloudbees.api.ApplicationInfo">
+		<objectContribution
+        adaptable="true"
+        id="com.cloudbees.eclipse.run.ui.start"
+        nameFilter="*"
+        objectClass="com.cloudbees.api.ApplicationInfo">
 			<action class="com.cloudbees.eclipse.run.ui.popup.actions.StartAction"
 				enablesFor="1" id="com.cloudbees.eclipse.run.ui.deploy.cloud" label="Start in RUN@cloud@">
 			</action>
 		</objectContribution>
-		<objectContribution adaptable="false"
-			id="com.cloudbees.eclipse.run.ui.start"
-			objectClass="com.cloudbees.api.ApplicationInfo">
+		<objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.stop"
+        nameFilter="*"
+        objectClass="com.cloudbees.api.ApplicationInfo">
 			<action class="com.cloudbees.eclipse.run.ui.popup.actions.StopAction"
 				enablesFor="1" id="com.cloudbees.eclipse.run.ui.deploy.cloud" label="Stop in RUN@cloud@">
 			</action>
 		</objectContribution>
   <objectContribution
         adaptable="false"
-        id="com.cloudbees.eclipse.run.ui.runAtCloudApps"
+        id="com.cloudbees.eclipse.run.ui.refreshRunAtCloudApps"
         objectClass="java.lang.String">
      <action
            class="com.cloudbees.eclipse.run.ui.popup.actions.RefreshAction"
