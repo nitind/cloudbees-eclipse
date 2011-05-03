@@ -59,7 +59,7 @@
             id="com.cloudbees.eclipse.ui.project"
             label="%project.decorator.label"
             lightweight="true"
-            location="BOTTOM_RIGHT"
+            location="TOP_LEFT"
             state="true">
             <enablement>
                 <and>
