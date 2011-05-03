@@ -6,6 +6,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.swt.SWT;
 
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Artifact;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.dev.ui.views.build.ArtifactsClickListener;
@@ -23,7 +24,20 @@ public class DeployWarAction extends Action {
 
   public void setBuild(final JenkinsBuildDetailsResponse build) {
     this.build = build;
-    super.setEnabled(this.build != null);
+    super.setEnabled(isBuildDeployable());
+  }
+
+  private boolean isBuildDeployable() {
+    if (this.build == null || this.build.artifacts == null) {
+      return false;
+    }
+    for (Artifact art : this.build.artifacts) {
+      if (art.relativePath.endsWith(".war")) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   @Override
@@ -33,13 +47,13 @@ public class DeployWarAction extends Action {
 
   @Override
   public boolean isEnabled() {
-    return this.build != null;
+    return isBuildDeployable();
   }
 
   @Override
   public void run() {
     try {
-      if (this.build == null) {
+      if (!isBuildDeployable()) {
         return;
       }
 
