@@ -8,12 +8,9 @@ import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
@@ -43,7 +40,6 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
   private static final String TAB_NAME = "CloudBees Application";
 
   protected ProjectSelectionComposite content;
-  protected Button launchButton;
   protected Composite main;
 
   @Override
@@ -60,26 +56,6 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
         updateLaunchConfigurationDialog();
       }
 
-    });
-    this.launchButton = new Button(this.main, SWT.CHECK);
-    this.launchButton.setLayoutData(new GridData());
-    this.launchButton.setSelection(true);
-    GridData layoutData = new GridData();
-    layoutData.grabExcessHorizontalSpace = true;
-    layoutData.horizontalSpan = 2;
-    this.launchButton.setLayoutData(layoutData);
-    this.launchButton.setText("Open browser after launch.");
-    this.launchButton.addSelectionListener(new SelectionListener() {
-
-      @Override
-      public void widgetSelected(SelectionEvent e) {
-        updateLaunchConfigurationDialog();
-      }
-
-      @Override
-      public void widgetDefaultSelected(SelectionEvent e) {
-
-      }
     });
 
     setControl(this.main);
@@ -98,8 +74,6 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
         projectName = this.content.getDefaultSelection();
       }
       this.content.setText(projectName);
-      this.launchButton.setSelection(configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_BROWSER,
-          false));
     } catch (CoreException e) {
       CBRunUiActivator.logError(e);
     }
@@ -111,8 +85,6 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     try {
       CBRunUtil.addDefaultAttributes(configuration, projectName);
 
-      configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_BROWSER,
-          this.launchButton.getSelection());
     } catch (CoreException e) {
       CBRunUiActivator.logError(e);
     }

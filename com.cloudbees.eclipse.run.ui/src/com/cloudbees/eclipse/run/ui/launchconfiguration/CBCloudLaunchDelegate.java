@@ -7,23 +7,20 @@ import java.net.URL;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
-import org.eclipse.wst.server.core.IServer;
-import org.eclipse.wst.server.core.internal.ServerWorkingCopy;
 
 import com.cloudbees.api.ApplicationDeployArchiveResponse;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
-import com.cloudbees.eclipse.run.core.wst.WSTUtil;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
 public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
@@ -42,23 +39,27 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
         if (project.getName().equals(projectName)) {
           String id = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
 
-          //FIXME move to extension
-          ServerWorkingCopy server = (ServerWorkingCopy) WSTUtil.getServer(id, project);
-          server.setServerState(IServer.STATE_STARTING);
-          ILaunchConfigurationWorkingCopy wc = configuration.getWorkingCopy();
-          wc.setAttribute("server-id", server.getId()); // HACK
-          wc.doSave();
-
           ApplicationDeployArchiveResponse deploy;
           if ("".equals(id)) {
             deploy = BeesSDK.deploy(project, true);
           } else {
             deploy = BeesSDK.deploy(project, id, true);
           }
+          IExtension[] extensions = Platform.getExtensionRegistry()
+              .getExtensionPoint(CBRunUiActivator.PLUGIN_ID, "launchDelegateAditions").getExtensions();
 
-          //FIXME move to extension
-          server.setServerPublishState(IServer.PUBLISH_STATE_NONE);
-          server.setServerState(IServer.STATE_STARTED);
+          for (IExtension extension : extensions) {
+            for (IConfigurationElement element : extension.getConfigurationElements()) {
+              try {
+                Object executableExtension = element.createExecutableExtension("actions");
+                if (executableExtension instanceof ILaunchExtraAction) {
+                  ((ILaunchExtraAction) executableExtension).action(configuration, project);
+                }
+              } catch (CoreException e) {
+                CBRunUiActivator.logError(e);
+              }
+            }
+          }
           monitor.done();
 
           if (needLaunch) {
@@ -67,8 +68,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
         }
       }
     } catch (Exception e) {
-      Status status = new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, e.getMessage());
-      CBRunUiActivator.getDefault().getLog().log(status);
+      CBRunUiActivator.logError(e);
     }
 
   }
