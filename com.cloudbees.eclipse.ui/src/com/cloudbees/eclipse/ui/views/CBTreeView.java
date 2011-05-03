@@ -91,6 +91,7 @@ public class CBTreeView extends ViewPart implements IPropertyChangeListener {
 
     for (ICBTreeProvider provider : this.providers) {
       provider.setViewer(this.viewer);
+      getSite().setSelectionProvider(this.viewer);
     }
 
     this.viewer.addOpenListener(new IOpenListener() {

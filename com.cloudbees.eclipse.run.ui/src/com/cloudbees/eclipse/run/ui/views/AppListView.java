@@ -80,6 +80,7 @@ public class AppListView extends ViewPart implements IPropertyChangeListener, IC
     this.viewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION);
     this.viewer.setContentProvider(this.contentProvider);
     this.viewer.setLabelProvider(this.labelProvider);
+    getSite().setSelectionProvider(this.viewer);
     init();
   }
 
@@ -109,7 +110,6 @@ public class AppListView extends ViewPart implements IPropertyChangeListener, IC
 
   @Override
   public boolean open(final Object object) {
-
     return false;
   }
 
