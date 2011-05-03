@@ -51,7 +51,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
           for (IExtension extension : extensions) {
             for (IConfigurationElement element : extension.getConfigurationElements()) {
               try {
-                Object executableExtension = element.createExecutableExtension("delegate");
+                Object executableExtension = element.createExecutableExtension("actions");
                 if (executableExtension instanceof ILaunchExtraAction) {
                   ((ILaunchExtraAction) executableExtension).action(configuration, project);
                 }
