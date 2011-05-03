@@ -2,7 +2,7 @@ package com.cloudbees.eclipse.run.ui.launchconfiguration;
 
 import static com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME;
 
-import java.net.URL;
+import java.io.FileNotFoundException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -13,12 +13,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
-import com.cloudbees.api.ApplicationDeployArchiveResponse;
+import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
@@ -29,7 +27,6 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
   @Override
   public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
       throws CoreException {
-    boolean needLaunch = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_BROWSER, true);
 
     monitor.beginTask("Deploying to RUN@cloud", 1);
     try {
@@ -39,32 +36,18 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
         if (project.getName().equals(projectName)) {
           String id = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
 
-          ApplicationDeployArchiveResponse deploy;
-          if ("".equals(id)) {
-            deploy = BeesSDK.deploy(project, true);
-          } else {
-            deploy = BeesSDK.deploy(project, id, true);
-          }
-          IExtension[] extensions = Platform.getExtensionRegistry()
-              .getExtensionPoint(CBRunUiActivator.PLUGIN_ID, "launchDelegateAditions").getExtensions();
+          if (configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_WST_FLAG, false)) {
 
-          for (IExtension extension : extensions) {
-            for (IConfigurationElement element : extension.getConfigurationElements()) {
-              try {
-                Object executableExtension = element.createExecutableExtension("actions");
-                if (executableExtension instanceof ILaunchExtraAction) {
-                  ((ILaunchExtraAction) executableExtension).action(configuration, project);
-                }
-              } catch (CoreException e) {
-                CBRunUiActivator.logError(e);
-              }
-            }
+            start(project, id);
+            removeWstFlag(configuration);
+
+          } else {
+            deploy(project, id);
           }
+
+          handleExtensions(configuration, project);
           monitor.done();
 
-          if (needLaunch) {
-            openBrowser(deploy);
-          }
         }
       }
     } catch (Exception e) {
@@ -73,24 +56,46 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
   }
 
-  private void openBrowser(ApplicationDeployArchiveResponse deploy) {
-    final String url = deploy.getUrl();
-    if (url != null) {
-      Display.getDefault().asyncExec(new Runnable() {
-
-        @Override
-        public void run() {
-          try {
-
-            IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
-            browserSupport.getExternalBrowser().openURL(new URL(url));
-
-          } catch (Exception e) {
-            CBRunUiActivator.logError(e);
-          }
-
-        }
-      });
+  private void deploy(IProject project, String id) throws Exception, CloudBeesException, CoreException,
+      FileNotFoundException {
+    if ("".equals(id)) {
+      BeesSDK.deploy(project, true);
+    } else {
+      BeesSDK.deploy(project, id, true);
     }
+  }
+
+  private void start(IProject project, String id) throws Exception, CloudBeesException {
+    if ("".equals(id)) {
+      BeesSDK.start(project);
+    } else {
+      BeesSDK.start(id);
+    }
+  }
+
+  private ILaunchConfigurationWorkingCopy removeWstFlag(ILaunchConfiguration configuration) throws CoreException {
+    ILaunchConfigurationWorkingCopy workingCopy = configuration.getWorkingCopy();
+    workingCopy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_WST_FLAG, false);
+    workingCopy.doSave();
+    return workingCopy;
+  }
+
+  private IExtension[] handleExtensions(ILaunchConfiguration configuration, IProject project) {
+    IExtension[] extensions = Platform.getExtensionRegistry()
+        .getExtensionPoint(CBRunUiActivator.PLUGIN_ID, "launchDelegateAditions").getExtensions();
+
+    for (IExtension extension : extensions) {
+      for (IConfigurationElement element : extension.getConfigurationElements()) {
+        try {
+          Object executableExtension = element.createExecutableExtension("actions");
+          if (executableExtension instanceof ILaunchExtraAction) {
+            ((ILaunchExtraAction) executableExtension).action(configuration, project);
+          }
+        } catch (CoreException e) {
+          CBRunUiActivator.logError(e);
+        }
+      }
+    }
+    return extensions;
   }
 }

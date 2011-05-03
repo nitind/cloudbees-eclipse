@@ -25,10 +25,11 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
     try {
       String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
       BeesSDK.stop(projectName);
+      setServerState(IServer.STATE_STOPPED);
     } catch (Exception e) {
       CBRunCoreActivator.logError(e);
     }
-    setServerState(IServer.STATE_STOPPED);
+    setServerState(IServer.STATE_UNKNOWN);
   }
 
   @Override
@@ -79,6 +80,7 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
       setServerState(IServer.STATE_STARTED);
       return null;
     } catch (Exception e) {
+      setServerState(IServer.STATE_UNKNOWN);
       return new Status(IStatus.ERROR, CBRunCoreActivator.PLUGIN_ID, e.getMessage(), e);
     }
   }
@@ -92,17 +94,11 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
 
       workingCopy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, appId);
       workingCopy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, projectName);
-      workingCopy.doSave();
+      workingCopy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_WST_FLAG, true);
 
-      IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-      if ("".equals(appId)) {
-        BeesSDK.start(project);
-      } else {
-        BeesSDK.start(appId);
-      }
     } catch (Exception e) {
       CBRunCoreActivator.logError(e);
     }
-    setServerState(IServer.STATE_STARTED);
+    setServerState(IServer.STATE_STARTING);
   }
 }

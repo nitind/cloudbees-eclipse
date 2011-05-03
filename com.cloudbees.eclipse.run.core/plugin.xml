@@ -3,4 +3,5 @@
 <plugin>
 <extension-point id="com.cloudbees.eclipse.run.core.processLifecycleHook"
 		name="launchHook" schema="schema/com.cloudbees.eclipse.run.core.processLifecycleHook.exsd" />
+<extension-point id="com.cloudbees.eclipse.run.core.statusUpdater" name="statusUpdater" schema="schema/com.cloudbees.eclipse.run.core.statusUpdater.exsd"/>
 </plugin>
