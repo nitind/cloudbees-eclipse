@@ -609,7 +609,7 @@ public class JenkinsService {
 
     } catch (Exception e) {
       throw new CloudBeesException("Failed to get Jenkins job test report for '" + url + "'. "
-          + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr + " - Response: "
+          + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + "Request string: " + reqStr + " - Response: "
           + Utils.readString(bodyResponse), e);
     }
   }
@@ -710,6 +710,37 @@ public class JenkinsService {
     } catch (Exception e) {
       throw new CloudBeesException("Failed to get Jenkins build log for '" + url + "'. "
           + (errMsg.length() > 0 && errMsg.length() < 1000 ? " (" + errMsg + ")" : "") + "Request string:" + reqStr, e);
+    }
+  }
+
+  public InputStream getArtifact(final String url, final IProgressMonitor monitor) throws CloudBeesException {
+    monitor.setTaskName("Fetching Jenkins artifact...");
+
+    if (url != null && !url.startsWith(this.jenkins.url)) {
+      throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; artifact url: "
+          + url);
+    }
+
+    StringBuffer errMsg = new StringBuffer();
+
+    InputStream bodyResponse = null;
+    try {
+      DefaultHttpClient httpclient = Utils.getAPIClient();
+
+      HttpGet post = new HttpGet(url);
+
+      bodyResponse = (InputStream) retrieveWithLogin(httpclient, post, null, false,
+          new SubProgressMonitor(monitor, 10), ResponseType.STREAM);
+
+      return bodyResponse;
+
+    } catch (Exception e) {
+      String readString = Utils.readString(bodyResponse);
+      if (readString != null && readString.length() > 100) {
+        readString = readString.substring(0, 100);
+      }
+      throw new CloudBeesException("Failed to get Jenkins artifact '" + url + "'. "
+          + (errMsg.length() > 0 ? " (" + errMsg + ")" : "") + " - Response: " + readString, e);
     }
   }
 

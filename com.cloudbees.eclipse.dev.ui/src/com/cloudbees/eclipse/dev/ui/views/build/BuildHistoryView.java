@@ -5,10 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CancellationException;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -42,7 +39,6 @@ import org.eclipse.ui.part.ViewPart;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsChangeListener;
-import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
@@ -50,6 +46,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
+import com.cloudbees.eclipse.dev.ui.actions.InvokeBuildAction;
 import com.cloudbees.eclipse.dev.ui.actions.OpenBuildAction;
 import com.cloudbees.eclipse.dev.ui.actions.OpenLogAction;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadBuildHistoryAction;
@@ -65,7 +62,7 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
   protected OpenBuildAction actionOpenBuild;
   protected OpenLogAction actionOpenLog;
   protected ReloadBuildHistoryAction actionReloadJobs;
-  private Action actionInvokeBuild;
+  private InvokeBuildAction actionInvokeBuild;
   private Action actionOpenBuildInBrowser;
 
   private final Map<String, Image> stateIcons = new HashMap<String, Image>();
@@ -329,7 +326,7 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
         StructuredSelection sel = (StructuredSelection) event.getSelection();
         BuildHistoryView.this.selectedBuild = sel.getFirstElement();
         boolean enable = BuildHistoryView.this.selectedBuild != null;
-        BuildHistoryView.this.actionInvokeBuild.setEnabled(enable);
+        BuildHistoryView.this.actionInvokeBuild.setJob(BuildHistoryView.this.selectedBuild);
         BuildHistoryView.this.actionOpenBuildInBrowser.setEnabled(enable);
         BuildHistoryView.this.actionOpenBuild.setBuild(BuildHistoryView.this.selectedBuild);
         BuildHistoryView.this.actionOpenLog.setBuild(BuildHistoryView.this.selectedBuild);
@@ -475,43 +472,9 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
     this.actionOpenBuildInBrowser.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_BROWSER));
     this.actionOpenBuildInBrowser.setEnabled(false);
 
-    this.actionInvokeBuild = new Action("Run a new build for this job", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
-      @Override
-      public void run() {
-        try {
-          final JenkinsBuild job = (JenkinsBuild) BuildHistoryView.this.selectedBuild;
-          final JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(job.url);
-          // TODO get job to get the params?
-          final Map<String, String> props = null;//CloudBeesUIPlugin.getDefault().getJobPropValues(job.property);
-          org.eclipse.core.runtime.jobs.Job sjob = new org.eclipse.core.runtime.jobs.Job("Building job...") {
-            @Override
-            protected IStatus run(final IProgressMonitor monitor) {
-              try {
-                ns.invokeBuild(job.url, props, monitor);
-                return org.eclipse.core.runtime.Status.OK_STATUS;
-              } catch (CloudBeesException e) {
-                //CloudBeesUIPlugin.getDefault().getLogger().error(e);
-                return new org.eclipse.core.runtime.Status(org.eclipse.core.runtime.Status.ERROR,
-                    CloudBeesUIPlugin.PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
-              }
-            }
-          };
-          sjob.setUser(true);
-          sjob.schedule();
-        } catch (CancellationException e) {
-          // cancelled by user
-        }
-      }
-    };
-    this.actionInvokeBuild.setToolTipText("Run a new build for this job"); //TODO i18n
-    this.actionInvokeBuild.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_RUN));
-    this.actionInvokeBuild.setEnabled(false);
+    this.actionInvokeBuild = new InvokeBuildAction();
 
-    /*    action4.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
-            .getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-     */
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
-
   }
 
   @Override

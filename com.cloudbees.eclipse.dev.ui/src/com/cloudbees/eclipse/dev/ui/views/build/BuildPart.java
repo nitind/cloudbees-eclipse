@@ -2,7 +2,6 @@ package com.cloudbees.eclipse.dev.ui.views.build;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
-import java.util.Map;
 import java.util.concurrent.CancellationException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -49,6 +48,8 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
+import com.cloudbees.eclipse.dev.ui.actions.DeployWarAction;
+import com.cloudbees.eclipse.dev.ui.actions.InvokeBuildAction;
 import com.cloudbees.eclipse.dev.ui.actions.OpenJunitViewAction;
 import com.cloudbees.eclipse.dev.ui.actions.OpenLogAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -85,16 +86,17 @@ public class BuildPart extends EditorPart {
   private Section sectRecentChanges;
   private TreeViewer treeViewerRecentChanges;
   private Label changesetLabel;
+  private ScrolledComposite scrolledRecentChanges;
+  private Label labelSpace;
 
   private Section sectArtifacts;
   private TreeViewer treeViewerArtifacts;
   private Label artifactsLabel;
 
   private Action openBuildHistory;
-  private Action invokeBuild;
+  private InvokeBuildAction invokeBuild;
   private OpenLogAction openLogs;
-  private ScrolledComposite scrolledRecentChanges;
-  private Label labelSpace;
+  private DeployWarAction deployWar;
 
   public BuildPart() {
     super();
@@ -105,7 +107,10 @@ public class BuildPart extends EditorPart {
     this.dataBuildDetail = dataBuildDetail;
     this.dataJobDetails = dataJobDetails;
 
-    this.openLogs.setBuild(dataBuildDetail);
+    this.openLogs.setBuild(this.dataBuildDetail);
+    this.deployWar.setBuild(this.dataBuildDetail);
+    this.invokeBuild.setJob(this.dataJobDetails);
+    //this.openBuildHistory.setViewUrl(dataJobDetails.viewUrl);
   }
 
   /**
@@ -369,50 +374,14 @@ public class BuildPart extends EditorPart {
 
     this.openLogs = new OpenLogAction();
     this.openLogs.setBuild(this.dataBuildDetail);
-    //    Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
-    //      @Override
-    //      public void run() {
-    //        if (BuildPart.this.dataBuildDetail != null && BuildPart.this.dataBuildDetail.url != null) {
-    //          CloudBeesUIPlugin.getDefault().openWithBrowser(BuildPart.this.dataBuildDetail.url + "/consoleText");
-    //          return;
-    //        }
-    //
-    //      }
-    //    };
-    //    openLogs.setToolTipText("Open build log"); //TODO i18n
-    //    openLogs.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_CONSOLE));
 
-    this.invokeBuild = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
-      @Override
-      public void run() {
-        try {
-          final String jobUrl = BuildPart.this.getBuildEditorInput().getJobUrl();
-          final JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(jobUrl);
-          final Map<String, String> props = CloudBeesUIPlugin.getDefault().getJobPropValues(
-              BuildPart.this.dataJobDetails.property);
-          org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Building job...") {
-            @Override
-            protected IStatus run(final IProgressMonitor monitor) {
-              try {
-                ns.invokeBuild(jobUrl, props, monitor);
-                return org.eclipse.core.runtime.Status.OK_STATUS;
-              } catch (CloudBeesException e) {
-                //CloudBeesUIPlugin.getDefault().getLogger().error(e);
-                return new org.eclipse.core.runtime.Status(org.eclipse.core.runtime.Status.ERROR,
-                    CloudBeesUIPlugin.PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
-              }
-            }
-          };
-          job.setUser(true);
-          job.schedule();
-        } catch (CancellationException e) {
-          // cancelled by user
-        }
-      }
-    };
-    this.invokeBuild.setToolTipText("Run a new build for this job"); //TODO i18n
-    this.invokeBuild.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_RUN));
+    this.deployWar = new DeployWarAction();
+    this.deployWar.setBuild(this.dataBuildDetail);
 
+    this.invokeBuild = new InvokeBuildAction();
+    this.invokeBuild.setJob(this.dataJobDetails);
+
+    // TODO replace with ReloadBuildHistoryAction
     this.openBuildHistory = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       @Override
       public void run() {
@@ -443,6 +412,7 @@ public class BuildPart extends EditorPart {
     this.openBuildHistory.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_BUILD_HISTORY));
 
     this.form.getToolBarManager().add(this.invokeBuild);
+    this.form.getToolBarManager().add(this.deployWar);
     this.form.getToolBarManager().add(new Separator());
     this.form.getToolBarManager().add(this.openLogs);
     this.form.getToolBarManager().add(this.openBuildHistory);
@@ -650,9 +620,6 @@ public class BuildPart extends EditorPart {
         loadArtifacts();
 
         loadRecentChanges();
-
-        BuildPart.this.invokeBuild.setEnabled(BuildPart.this.dataJobDetails != null
-            && BuildPart.this.dataJobDetails.buildable != null && BuildPart.this.dataJobDetails.buildable);
 
         //form.layout();
         //form.getBody().layout(true);

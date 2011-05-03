@@ -151,7 +151,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
   /**
    * Returns the shared instance
-   * 
+   *
    * @return the shared instance
    */
   public static CloudBeesDevUiPlugin getDefault() {
@@ -183,6 +183,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     reg.put(CBImages.IMG_RUN, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/lrun_obj.png")));
     reg.put(CBImages.IMG_BUILD_HISTORY,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/history_view.gif")));
+    reg.put(CBImages.IMG_DEPLOY,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/clock.gif")));
 
     reg.put(CBImages.IMG_FOLDER_HOSTED,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_cb.png")));
