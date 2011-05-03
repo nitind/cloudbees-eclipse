@@ -25,10 +25,11 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
     try {
       String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
       BeesSDK.stop(projectName);
+      setServerState(IServer.STATE_STOPPED);
     } catch (Exception e) {
       CBRunCoreActivator.logError(e);
     }
-    setServerState(IServer.STATE_STOPPED);
+    setServerState(IServer.STATE_UNKNOWN);
   }
 
   @Override
@@ -79,6 +80,7 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
       setServerState(IServer.STATE_STARTED);
       return null;
     } catch (Exception e) {
+      setServerState(IServer.STATE_UNKNOWN);
       return new Status(IStatus.ERROR, CBRunCoreActivator.PLUGIN_ID, e.getMessage(), e);
     }
   }
@@ -97,6 +99,6 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
     } catch (Exception e) {
       CBRunCoreActivator.logError(e);
     }
-    setServerState(IServer.STATE_STARTED);
+    setServerState(IServer.STATE_STARTING);
   }
 }
