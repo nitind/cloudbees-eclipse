@@ -92,14 +92,8 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
 
       workingCopy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, appId);
       workingCopy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, projectName);
-      workingCopy.doSave();
+      workingCopy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_WST_FLAG, true);
 
-      IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-      if ("".equals(appId)) {
-        BeesSDK.start(project);
-      } else {
-        BeesSDK.start(appId);
-      }
     } catch (Exception e) {
       CBRunCoreActivator.logError(e);
     }

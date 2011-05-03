@@ -29,7 +29,7 @@ import com.google.gson.Gson;
 
 /**
  * Central access to CloudBees Grand Central API
- *
+ * 
  * @author ahtik
  */
 public class GrandCentralService {
@@ -59,7 +59,7 @@ public class GrandCentralService {
 
   /**
    * Validates user credential against CloudBees SSO authentication server. TODO Refactor to json-based validation
-   *
+   * 
    * @param email
    * @param password
    * @param monitor
@@ -388,6 +388,7 @@ public class GrandCentralService {
 
   }
 
+  @Deprecated
   public String getPrimaryAccount(final IProgressMonitor monitor) throws CloudBeesException {
 
     if (!hasAuthInfo()) {
@@ -460,7 +461,8 @@ public class GrandCentralService {
     return result;
   }
 
-  public void addToRepository(final IProject project, final Repo repo, final IProgressMonitor monitor) throws CloudBeesException {
+  public void addToRepository(final IProject project, final Repo repo, final IProgressMonitor monitor)
+      throws CloudBeesException {
     com.cloudbees.eclipse.core.forge.api.ForgeSync.TYPE type = ForgeSync.TYPE.valueOf(repo.type.toUpperCase());
     this.forgeSyncService.addToRepository(type, repo, project, monitor);
   }
