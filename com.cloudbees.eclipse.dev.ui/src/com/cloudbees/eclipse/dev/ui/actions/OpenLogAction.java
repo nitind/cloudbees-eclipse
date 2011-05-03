@@ -19,7 +19,12 @@ public class OpenLogAction extends Action {
     super("Open console log", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS); //TODO i18n
     setToolTipText("Open console log"); //TODO i18n
     setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_CONSOLE));
-    super.setEnabled(true);
+    super.setEnabled(false);
+  }
+
+  @Override
+  public void setEnabled(final boolean enable) {
+    // ignore
   }
 
   public void setBuild(final Object build) {

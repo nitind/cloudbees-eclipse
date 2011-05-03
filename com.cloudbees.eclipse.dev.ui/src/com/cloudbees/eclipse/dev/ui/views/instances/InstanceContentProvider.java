@@ -11,9 +11,9 @@ import org.eclipse.ui.IViewSite;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 
 public class InstanceContentProvider implements IStructuredContentProvider, ITreeContentProvider {
-  private InstanceGroup jenkinsGroup = new InstanceGroup("Jenkins", false);
-  private InstanceGroup cloudGroup = new InstanceGroup("DEV@cloud", true);
-  private InstanceGroup favoritesGroup = new FavoritesInstanceGroup("Favorite jobs", false);
+  private InstanceGroup jenkinsGroup = new InstanceGroup("On-premise Jenkins", false);
+  private InstanceGroup cloudGroup = new InstanceGroup("DEV@cloud Jenkins", true);
+  private InstanceGroup favoritesGroup = new FavoritesInstanceGroup("Favorite Jenkins Jobs", false);
 
   public InstanceContentProvider() {
     this.jenkinsGroup.setLoading(true);

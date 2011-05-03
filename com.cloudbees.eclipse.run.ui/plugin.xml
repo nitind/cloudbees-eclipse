@@ -61,6 +61,17 @@
   </objectContribution>
   <objectContribution
         adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.showProperties"
+        objectClass="com.cloudbees.api.ApplicationInfo">
+     <action
+           class="com.cloudbees.eclipse.run.ui.popup.actions.ShowPropertiesAction"
+           enablesFor="1"
+           id="com.cloudbees.eclipse.run.ui.action.showProperties"
+           label="Properties">
+     </action>
+  </objectContribution>
+  <objectContribution
+        adaptable="false"
         id="com.cloudbees.eclipse.run.ui.tail.error"
         objectClass="com.cloudbees.api.ApplicationInfo">
      <action
@@ -264,6 +275,16 @@
      </view>
   </perspectiveExtension>
 	</extension>
+ <extension
+       point="org.eclipse.core.runtime.adapters">
+    <factory
+          adaptableType="com.cloudbees.api.ApplicationInfo"
+          class="com.cloudbees.eclipse.run.ui.views.ApplicationInfoAdapterFactory">
+       <adapter
+             type="org.eclipse.ui.views.properties.IPropertySource">
+       </adapter>
+    </factory>
+ </extension>
 
 
 </plugin>

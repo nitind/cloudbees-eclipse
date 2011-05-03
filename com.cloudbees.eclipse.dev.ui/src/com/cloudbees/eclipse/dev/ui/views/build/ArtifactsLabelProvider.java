@@ -1,41 +1,22 @@
 package com.cloudbees.eclipse.dev.ui.views.build;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.DecorationOverlayIcon;
-import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.team.ui.TeamImages;
 
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
+import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.dev.ui.CBImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 
 public class ArtifactsLabelProvider extends LabelProvider {
 
-  private Image imgAdded;
-  private Image imgDeleted;
-  private Image imgModified;
-  private Image imgChangeSet;
-
-  private ImageDescriptor IMG_DESC_CHANGESET = TeamImages.getImageDescriptor("obj/changeset_obj.gif");
-
   public ArtifactsLabelProvider() {
     super();
-    this.imgAdded = new DecorationOverlayIcon(CloudBeesDevUiPlugin.getImage(CBImages.IMG_FILE),
-        CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_FILE_ADDED), IDecoration.BOTTOM_RIGHT).createImage();
-    this.imgDeleted = new DecorationOverlayIcon(CloudBeesDevUiPlugin.getImage(CBImages.IMG_FILE),
-        CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_FILE_DELETED), IDecoration.BOTTOM_RIGHT).createImage();
-    this.imgModified = new DecorationOverlayIcon(CloudBeesDevUiPlugin.getImage(CBImages.IMG_FILE),
-        CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_FILE_MODIFIED), IDecoration.BOTTOM_RIGHT).createImage();
-    this.imgChangeSet = this.IMG_DESC_CHANGESET.createImage();
-
   }
 
   @Override
   public String getText(final Object element) {
-    if (element instanceof JenkinsBuildDetailsResponse.Artifact) {
-      String path = ((JenkinsBuildDetailsResponse.Artifact) element).relativePath;
+    if (element instanceof ForgeSync.ArtifactPathItem) {
+      String path = ((ForgeSync.ArtifactPathItem) element).item.relativePath;
       return path;
     }
 
@@ -44,36 +25,18 @@ public class ArtifactsLabelProvider extends LabelProvider {
 
   @Override
   public Image getImage(final Object element) {
-    //    if (element instanceof ChangeSetItem) {
-    //      return this.imgChangeSet;
-    //    }
-    //    if (element instanceof ChangeSetPathItem) {
-    //      TYPE type = ((ChangeSetPathItem) element).type;
-    //      if (type == TYPE.ADDED) {
-    //        return this.imgAdded;
-    //      }
-    //      if (type == TYPE.MODIFIED) {
-    //        return this.imgModified;
-    //      }
-    //      if (type == TYPE.DELETED) {
-    //        return this.imgDeleted;
-    //      }
-    //      return CloudBeesDevUiPlugin.getImage(CBImages.IMG_FILE);
-    //    }
+    if (element instanceof ForgeSync.ArtifactPathItem) {
+      if (((ForgeSync.ArtifactPathItem) element).item.relativePath.endsWith(".war")) {
+        return CloudBeesDevUiPlugin.getImage(CBImages.IMG_DEPLOY);
+      }
+      return CloudBeesDevUiPlugin.getImage(CBImages.IMG_FILE);
+    }
 
     return super.getImage(element);
   }
 
   @Override
   public void dispose() {
-    this.imgChangeSet.dispose();
-    this.imgAdded.dispose();
-    this.imgDeleted.dispose();
-    this.imgModified.dispose();
-    this.imgChangeSet = null;
-    this.imgAdded = null;
-    this.imgDeleted = null;
-    this.imgModified = null;
     super.dispose();
   }
 

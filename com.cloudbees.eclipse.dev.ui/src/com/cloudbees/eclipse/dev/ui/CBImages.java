@@ -17,6 +17,7 @@ public interface CBImages {
 
   String IMG_BROWSER = "IMG_BROWSER";
   String IMG_RUN = "IMG_RUN";
+  String IMG_DEPLOY = "IMG_DEPLOY";
   String IMG_BUILD_HISTORY = "IMG_BUILD_HISTORY";
 
   String IMG_COLOR_PREFIX = "IMG_COLOR_";

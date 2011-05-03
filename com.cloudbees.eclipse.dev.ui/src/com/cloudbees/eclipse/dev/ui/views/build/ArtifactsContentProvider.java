@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
+import com.cloudbees.eclipse.core.forge.api.ForgeSync.ArtifactPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Artifact;
 
@@ -38,21 +39,17 @@ public class ArtifactsContentProvider implements ITreeContentProvider {
       return new String[0];
     }
 
-    if (parentElement == null) {
-      return this.buildDetails.artifacts;
-    }
+    if (parentElement == null || parentElement instanceof JenkinsBuildDetailsResponse) {
+      Artifact[] artifacts = (this.buildDetails).artifacts;
 
-    if (parentElement instanceof JenkinsBuildDetailsResponse) {
-      Artifact[] artifacts = ((JenkinsBuildDetailsResponse) parentElement).artifacts;
-
-      List<String> ret = new ArrayList<String>();
+      List<ArtifactPathItem> ret = new ArrayList<ArtifactPathItem>();
       if (artifacts != null) {
         for (Artifact art : artifacts) {
-          ret.add(art.relativePath);
+          ret.add(new ArtifactPathItem(this.buildDetails, art));
         }
       }
 
-      return ret.toArray(new String[ret.size()]);
+      return ret.toArray(new ArtifactPathItem[ret.size()]);
     }
 
     //    if (parentElement instanceof JenkinsBuildDetailsResponse.Artifact[]) {

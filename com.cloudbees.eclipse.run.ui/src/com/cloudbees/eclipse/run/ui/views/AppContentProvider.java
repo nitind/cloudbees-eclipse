@@ -4,7 +4,6 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IViewSite;
 
-import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.api.ApplicationListResponse;
 
 final class AppContentProvider implements ITreeContentProvider {
@@ -32,20 +31,11 @@ final class AppContentProvider implements ITreeContentProvider {
   @Override
   public Object[] getChildren(final Object element) {
     if (element instanceof IViewSite) {
-      return new Object[] { "RUN@cloud apps" };
+      return new Object[] { "RUN@cloud Tomcat apps" };
     }
     if (this.data != null && element instanceof String && ((String) element).startsWith("RUN@")) {
       return this.data.getApplications().toArray();
-    }
-
-    if (element instanceof ApplicationInfo) {
-      ApplicationInfo info = (ApplicationInfo) element;
-      ApplicationDetail[] details = new ApplicationDetail[2];
-      details[0] = new ApplicationDetail("Created", info.getCreated());
-      if (info.getUrls().length > 0) {
-        details[1] = new ApplicationDetail("URL", "http://" + info.getUrls()[0]);
-      }
-      return details;
+      //return getAdapters(this.data.getApplications());
     }
 
     //    if (inputElement instanceof ApplicationListResponse) {
@@ -64,4 +54,13 @@ final class AppContentProvider implements ITreeContentProvider {
     Object[] children = getChildren(element);
     return children != null && children.length > 0;
   }
+
+  //  private Object[] getAdapters(List<ApplicationInfo> list) {
+  //    List<ApplicationInfoAdaptable> res = new ArrayList<ApplicationInfoAdaptable>();
+  //    for (ApplicationInfo appInfo : list) {
+  //      res.add(new ApplicationInfoAdaptable(appInfo));
+  //    }
+  //    return res.toArray();
+  //  }
+
 }

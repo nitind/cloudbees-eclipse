@@ -32,7 +32,12 @@ public class BuildEditorInput extends NullEditorInput {
     if (this.buildUrl == null) {
       return null;
     }
-    String jobUrl = this.buildUrl;
+    String jobUrl = getJobUrl(this.buildUrl);
+    return jobUrl;
+  }
+
+  public static String getJobUrl(final String buildUrl) {
+    String jobUrl = buildUrl;
     jobUrl = jobUrl.trim();
     if (jobUrl.endsWith("/")) {
       jobUrl = jobUrl.substring(0, jobUrl.length() - 1);
@@ -46,7 +51,6 @@ public class BuildEditorInput extends NullEditorInput {
     } catch (NumberFormatException e) {
       // not a build number, let's don't strip
     }
-
     return jobUrl;
   }
 
