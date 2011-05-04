@@ -47,30 +47,36 @@ public class BeesSDK {
     return client.applicationInfo(appId);
   }
 
-  public static ApplicationStatusResponse stop(final IProject project) throws Exception {
-    return stop(project.getName());
-  }
+  //  public static ApplicationStatusResponse stop(final IProject project) throws Exception {
+  //    return stop(project.getName());
+  //  }
 
   public static ApplicationStatusResponse stop(final String id) throws CloudBeesException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    return stop(grandCentralService.getCachedPrimaryUser(false), id);
+  }
+
+  public static ApplicationStatusResponse stop(final String accountName, final String id) throws CloudBeesException,
+      Exception {
+    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
-
-    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + id;//$NON-NLS-1$
-
-    return client.applicationStop(appId);
+    return client.applicationStop(accountName + "/" + id);
   }
 
-  public static ApplicationStatusResponse start(final IProject project) throws Exception {
-    return start(project.getName());
-  }
+  //  public static ApplicationStatusResponse start(final IProject project) throws Exception {
+  //    return start(project.getName());
+  //  }
 
   public static ApplicationStatusResponse start(final String id) throws CloudBeesException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    return start(grandCentralService.getCachedPrimaryUser(false), id);
+  }
 
+  public static ApplicationStatusResponse start(final String accountName, final String id) throws CloudBeesException,
+      Exception {
+    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
-    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + id;//$NON-NLS-1$
-
-    return client.applicationStart(appId);
+    return client.applicationStart(accountName + "/" + id);
   }
 
   public static ApplicationDeployArchiveResponse deploy(final IProject project, final boolean build) throws Exception {
@@ -102,7 +108,7 @@ public class BeesSDK {
    * Establishes a persistent connection to an application log so that you can see new messages as they are written to
    * the logs. This is provides a "cloud-friendly" replacement for the ubiquitous "tail" command many developers use to
    * monitor/debug application log files.
-   *
+   * 
    * @param appId
    * @param logName
    *          valid options are "server", "access" or "error"
@@ -116,7 +122,7 @@ public class BeesSDK {
 
   /**
    * Delete an application
-   *
+   * 
    * @param appId
    * @throws Exception
    */
@@ -125,8 +131,8 @@ public class BeesSDK {
     getBeesClient(grandCentralService).applicationDelete(appId);
   }
 
-  private static IFile getWarFile(final IProject project, final boolean build) throws CloudBeesException, CoreException,
-      FileNotFoundException {
+  private static IFile getWarFile(final IProject project, final boolean build) throws CloudBeesException,
+      CoreException, FileNotFoundException {
     if (build) {
       runTargets(project, new String[] { "dist" });
     }
@@ -172,7 +178,8 @@ public class BeesSDK {
     return client;
   }
 
-  private static void runTargets(final IProject project, final String[] targets) throws CloudBeesException, CoreException {
+  private static void runTargets(final IProject project, final String[] targets) throws CloudBeesException,
+      CoreException {
     AntRunner runner = new AntRunner();
 
     runner.setBuildFileLocation(getBuildXmlPath(project));
@@ -193,7 +200,7 @@ public class BeesSDK {
 
   /**
    * Construct full path for the build.xml
-   *
+   * 
    * @param project
    * @return
    */
