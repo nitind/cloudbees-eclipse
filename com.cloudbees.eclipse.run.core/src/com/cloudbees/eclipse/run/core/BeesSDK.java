@@ -47,10 +47,6 @@ public class BeesSDK {
     return client.applicationInfo(appId);
   }
 
-  //  public static ApplicationStatusResponse stop(final IProject project) throws Exception {
-  //    return stop(project.getName());
-  //  }
-
   public static ApplicationStatusResponse stop(final String id) throws CloudBeesException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     return stop(grandCentralService.getCachedPrimaryUser(false), id);
@@ -62,10 +58,6 @@ public class BeesSDK {
     BeesClient client = getBeesClient(grandCentralService);
     return client.applicationStop(accountName + "/" + id);
   }
-
-  //  public static ApplicationStatusResponse start(final IProject project) throws Exception {
-  //    return start(project.getName());
-  //  }
 
   public static ApplicationStatusResponse start(final String id) throws CloudBeesException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
