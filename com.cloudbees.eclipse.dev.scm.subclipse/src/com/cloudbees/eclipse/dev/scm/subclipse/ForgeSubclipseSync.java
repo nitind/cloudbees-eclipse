@@ -50,18 +50,16 @@ public class ForgeSubclipseSync implements ForgeSync {
       return;
     }
 
-    String url = instance.url;
-
-    if (url == null) {
+    if (instance.url == null) {
       throw new IllegalArgumentException("url not provided!");
     }
 
     try {
-      monitor.beginTask("Validating SVN repository connection '" + url + "'...", 10);
+      monitor.beginTask("Validating SVN repository connection '" + instance.url + "'...", 10);
       monitor.worked(1);
 
       SVNRepositories repos = SVNProviderPlugin.getPlugin().getRepositories();
-      boolean exists = repos.isKnownRepository(url, false);
+      boolean exists = repos.isKnownRepository(instance.url, false);
       if (exists) {
         monitor.worked(9);
         instance.status = ForgeInstance.STATUS.SYNCED;
