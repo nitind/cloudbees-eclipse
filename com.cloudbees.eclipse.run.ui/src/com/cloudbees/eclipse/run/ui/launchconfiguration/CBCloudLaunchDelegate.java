@@ -67,6 +67,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
   private void start(IProject project, String id) throws Exception, CloudBeesException {
     if ("".equals(id)) {
+      System.out.println("Did not have ID");
       //BeesSDK.start(project);
     } else {
       BeesSDK.start(id);
