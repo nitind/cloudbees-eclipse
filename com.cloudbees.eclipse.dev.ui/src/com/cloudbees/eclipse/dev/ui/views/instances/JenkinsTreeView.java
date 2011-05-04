@@ -23,6 +23,7 @@ import org.eclipse.ui.part.ViewPart;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsChangeListener;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.jenkins.api.BaseJenkinsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse.View;
@@ -31,7 +32,6 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.dev.ui.actions.ConfigureJenkinsInstancesAction;
 import com.cloudbees.eclipse.dev.ui.actions.ConfigureSshKeysAction;
-import com.cloudbees.eclipse.dev.ui.actions.ReloadForgeReposAction;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadJenkinsInstancesAction;
 import com.cloudbees.eclipse.dev.ui.utils.FavoritesUtils;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -57,7 +57,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
 
   private CBTreeAction configureAccountAction = new ConfigureCloudBeesAction();
   private CBTreeAction attachJenkinsAction = new ConfigureJenkinsInstancesAction();
-  private CBTreeAction reloadForgeAction = new ReloadForgeReposAction();
+  //  private CBTreeAction reloadForgeAction = new ReloadForgeReposAction();
   private CBTreeAction reloadJenkinsAction = new ReloadJenkinsInstancesAction();
   private CBTreeAction configureSshAction = new ConfigureSshKeysAction();
 
@@ -86,9 +86,9 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
   }
 
   public void init() {
-    boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-        .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
-    this.reloadForgeAction.setEnabled(forgeEnabled);
+    //    boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
+    //        .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
+    //    this.reloadForgeAction.setEnabled(forgeEnabled);
 
     boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
         .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
@@ -111,6 +111,9 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
             JenkinsTreeView.this.contentProvider.inputChanged(JenkinsTreeView.this.viewer, null, instances);
           }
         });
+      }
+
+      public void forgeChanged(final List<ForgeInstance> instances) {
       }
     };
 
@@ -156,20 +159,20 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
     manager.add(this.attachJenkinsAction);
     manager.add(this.configureSshAction);
     manager.add(new Separator());
-    manager.add(this.reloadForgeAction);
+    //    manager.add(this.reloadForgeAction);
     manager.add(this.reloadJenkinsAction);
   }
 
   private void makeActions() {
     this.configureAccountAction = new ConfigureCloudBeesAction();
     this.attachJenkinsAction = new ConfigureJenkinsInstancesAction();
-    this.reloadForgeAction = new ReloadForgeReposAction();
+    //    this.reloadForgeAction = new ReloadForgeReposAction();
     this.reloadJenkinsAction = new ReloadJenkinsInstancesAction();
     this.configureSshAction = new ConfigureSshKeysAction();
 
-    boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-        .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
-    this.reloadForgeAction.setEnabled(forgeEnabled);
+    //    boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
+    //        .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
+    //    this.reloadForgeAction.setEnabled(forgeEnabled);
 
     boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
         .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
@@ -185,11 +188,11 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
 
   @Override
   public void propertyChange(final PropertyChangeEvent event) {
-    if (PreferenceConstants.P_ENABLE_FORGE.equals(event.getProperty())) {
-      boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-          .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
-      this.reloadForgeAction.setEnabled(forgeEnabled);
-    }
+    //    if (PreferenceConstants.P_ENABLE_FORGE.equals(event.getProperty())) {
+    //      boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
+    //          .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
+    //      this.reloadForgeAction.setEnabled(forgeEnabled);
+    //    }
 
     if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())) {
       boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
@@ -218,7 +221,8 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
 
   @Override
   public CBTreeAction[] getActions() {
-    return new CBTreeAction[] { this.configureAccountAction, this.attachJenkinsAction, this.reloadForgeAction, this.reloadJenkinsAction,
+    return new CBTreeAction[] { this.configureAccountAction, this.attachJenkinsAction, /*this.reloadForgeAction,*/
+        this.reloadJenkinsAction,
         this.configureSshAction };
   }
 

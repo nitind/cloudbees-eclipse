@@ -190,5 +190,12 @@
              class="com.cloudbees.eclipse.dev.ui.views.instances.JenkinsTreeView">
        </cbTreeProvider>
     </extension>
+
+    <extension
+          point="com.cloudbees.eclipse.ui.cbTreeProvider">
+       <cbTreeProvider
+             class="com.cloudbees.eclipse.dev.ui.views.instances.ForgeTreeView">
+       </cbTreeProvider>
+    </extension>
      
 </plugin>
