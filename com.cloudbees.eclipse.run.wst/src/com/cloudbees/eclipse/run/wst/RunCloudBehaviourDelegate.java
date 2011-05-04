@@ -28,8 +28,8 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
       setServerState(IServer.STATE_STOPPED);
     } catch (Exception e) {
       CBRunCoreActivator.logError(e);
+      setServerState(IServer.STATE_UNKNOWN);
     }
-    setServerState(IServer.STATE_UNKNOWN);
   }
 
   @Override
