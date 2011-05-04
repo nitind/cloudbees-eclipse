@@ -5,6 +5,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -74,6 +75,10 @@ public class CBRunUiActivator extends AbstractUIPlugin {
     reg.put(Images.CLOUDBEES_ICON_16x16, imageDescriptorFromPlugin(PLUGIN_ID, Images.CLOUDBEES_ICON_16x16_PATH));
     reg.put(Images.CLOUDBEES_TOMCAT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, Images.CLOUDBEES_TOMCAT_ICON_PATH));
     reg.put(Images.CLOUDBEES_FOLDER, imageDescriptorFromPlugin(PLUGIN_ID, Images.CLOUDBEES_FOLDER_PATH));
+    reg.put(Images.CLOUDBEES_WIZ_ICON, imageDescriptorFromPlugin(PLUGIN_ID, Images.CLOUDBEES_WIZ_ICON_PATH));
   }
 
+  public static Image getImage(final String imgKey) {
+    return CBRunUiActivator.getDefault().getImageRegistry().get(imgKey);
+  }
 }

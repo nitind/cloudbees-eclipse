@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.internal.ui.SWTFactory;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -30,7 +31,7 @@ import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
 @SuppressWarnings("restriction")
-public abstract class AbstractAccountSelectorComposite extends Composite {
+public abstract class AccountSelecionComposite extends Composite {
 
   private static final String GROUP_TITLE = "Account";
   private static final String BUTTON_LABEL = "Choose...";
@@ -42,7 +43,7 @@ public abstract class AbstractAccountSelectorComposite extends Composite {
   private GrandCentralService gcService;
   private List<String> accountNames;
 
-  public AbstractAccountSelectorComposite(Composite parent) {
+  public AccountSelecionComposite(Composite parent) {
     super(parent, SWT.NONE);
     prepare(parent);
     createComponents(parent);
@@ -57,9 +58,9 @@ public abstract class AbstractAccountSelectorComposite extends Composite {
         @Override
         public IStatus runInUIThread(IProgressMonitor monitor) {
           try {
-            String[] accounts = AbstractAccountSelectorComposite.this.gcService.getAccounts(monitor);
+            String[] accounts = AccountSelecionComposite.this.gcService.getAccounts(monitor);
             for (String accountName : accounts) {
-              AbstractAccountSelectorComposite.this.accountNames.add(accountName);
+              AccountSelecionComposite.this.accountNames.add(accountName);
             }
             return Status.OK_STATUS;
           } catch (CloudBeesException e) {
@@ -72,8 +73,6 @@ public abstract class AbstractAccountSelectorComposite extends Composite {
       if (!status.isOK()) {
         handleException("Exception while fetching account names", status);
       }
-
-      System.out.println(this.accountNames);
 
     } catch (CloudBeesException e) {
       handleException("Exception while preparing account data", e);
@@ -111,12 +110,12 @@ public abstract class AbstractAccountSelectorComposite extends Composite {
 
       @Override
       public void widgetSelected(SelectionEvent e) {
-        // TODO
+        openAccountSelectionDialog();
       }
 
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        // TODO
+        openAccountSelectionDialog();
       }
 
     });
@@ -126,16 +125,8 @@ public abstract class AbstractAccountSelectorComposite extends Composite {
 
   public IStatus validate() {
     String currentText = this.accountNameText.getText();
-    boolean found = false;
 
-    for (String accountName : AbstractAccountSelectorComposite.this.accountNames) {
-      if (currentText.equals(accountName)) {
-        found = true;
-        break;
-      }
-    }
-
-    if (!found) {
+    if (!this.accountNames.contains(currentText)) {
       String error = MessageFormat.format("Can''t find CloudBees account with name ''{0}''.", currentText);
       return new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, error);
     }
@@ -162,5 +153,15 @@ public abstract class AbstractAccountSelectorComposite extends Composite {
   private void handleException(String msg, IStatus status) {
     CBRunUiActivator.logError(status.getException());
     ErrorDialog.openError(getShell(), ERROR_TITLE, msg, status);
+  }
+
+  private void openAccountSelectionDialog() {
+    String[] accountNamesArray = new String[this.accountNames.size()];
+    this.accountNames.toArray(accountNamesArray);
+    AccountSelectionDialog dialog = new AccountSelectionDialog(getShell(), accountNamesArray);
+    dialog.open();
+    if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
+      this.accountNameText.setText(dialog.getSelectedAccountName());
+    }
   }
 }

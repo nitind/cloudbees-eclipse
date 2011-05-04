@@ -6,6 +6,7 @@ public interface Images {
   String ICONS16 = ICONS + "/16x16";
 
   String CLOUDBEES_WIZ_ICON_PATH = ICONS + "/cb_wiz_icon.png";
+  String CLOUDBEES_WIZ_ICON = Images.class.getSimpleName() + ".cb_wiz_icon.png";
 
   String CLOUDBEES_ICON_16x16_PATH = ICONS16 + "/cb_plain.png";
   String CLOUDBEES_ICON_16x16 = Images.class.getSimpleName() + ".cb_plain.png";
