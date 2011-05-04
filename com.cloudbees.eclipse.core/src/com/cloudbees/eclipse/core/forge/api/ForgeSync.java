@@ -7,8 +7,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet.ChangeSetItem;
+import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 
 public interface ForgeSync {
@@ -30,32 +29,6 @@ public interface ForgeSync {
       return this.label;
     }
   };
-
-  static class ChangeSetPathItem {
-    public enum TYPE {
-      ADDED, DELETED, MODIFIED
-    };
-
-    public TYPE type;
-    public String path;
-    public ChangeSetItem parent;
-
-    public ChangeSetPathItem(final ChangeSetItem parent, final TYPE type, final String string) {
-      this.type = type;
-      this.path = string;
-      this.parent = parent;
-    }
-  }
-
-  static class ArtifactPathItem {
-    public JenkinsBuildDetailsResponse parent;
-    public JenkinsBuildDetailsResponse.Artifact item;
-
-    public ArtifactPathItem(final JenkinsBuildDetailsResponse parent, final JenkinsBuildDetailsResponse.Artifact item) {
-      this.parent = parent;
-      this.item = item;
-    }
-  }
 
   ACTION sync(TYPE type, Properties props, IProgressMonitor monitor) throws CloudBeesException;
 

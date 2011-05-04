@@ -25,7 +25,7 @@ import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
-import com.cloudbees.eclipse.core.forge.api.ForgeSync;
+import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
@@ -409,7 +409,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
   }
 
-  public void openRemoteFile(final String jobUrl, final ForgeSync.ChangeSetPathItem item) {
+  public void openRemoteFile(final String jobUrl, final ChangeSetPathItem item) {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Opening remote file") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
