@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Properties;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -35,8 +34,9 @@ import org.eclipse.ui.PlatformUI;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
-import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
+import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -51,19 +51,18 @@ import com.jcraft.jsch.KeyPair;
 public class ForgeEGitSync implements ForgeSync {
 
   @Override
-  public ACTION sync(final TYPE type, final Properties props, final IProgressMonitor monitor) throws CloudBeesException {
+  public void sync(final ForgeInstance instance, final String passwd, final IProgressMonitor monitor)
+      throws CloudBeesException {
 
-    if (!ForgeSync.TYPE.GIT.equals(type)) {
-      return ACTION.SKIPPED;
+    if (!ForgeInstance.TYPE.GIT.equals(instance.type)) {
+      return;
     }
 
-    final String url = props.getProperty("url");
+    final String url = instance.url;
 
     if (url == null) {
       throw new IllegalArgumentException("url not provided!");
     }
-
-    final ACTION[] result = new ACTION[] { ACTION.SKIPPED };
 
     try {
       monitor.beginTask("Syncing EGit repository '" + url + "'", 10);
@@ -76,7 +75,7 @@ public class ForgeEGitSync implements ForgeSync {
 
           if (isAlreadyCloned(url)) {
             monitor.worked(8);
-            result[0] = ACTION.CHECKED;
+            instance.status = ForgeInstance.STATUS.SYNCED;
             return;
           }
 
@@ -125,9 +124,9 @@ public class ForgeEGitSync implements ForgeSync {
           //      throw new CloudBeesException(e);
 
           if (res == Window.OK) {
-            result[0] = ACTION.CLONED;
+            instance.status = ForgeInstance.STATUS.SYNCED;
           } else {
-            result[0] = ACTION.CANCELLED;
+            instance.status = ForgeInstance.STATUS.CANCELLED;
           }
         }
       });
@@ -136,8 +135,6 @@ public class ForgeEGitSync implements ForgeSync {
       monitor.worked(10);
       monitor.done();
     }
-
-    return result[0];
   }
 
   protected boolean isAlreadyCloned(final String url) {
@@ -175,7 +172,7 @@ public class ForgeEGitSync implements ForgeSync {
   public boolean openRemoteFile(final JenkinsScmConfig scmConfig, final ChangeSetPathItem item,
       final IProgressMonitor monitor) {
     for (JenkinsScmConfig.Repository repo : scmConfig.repos) {
-      if (!ForgeSync.TYPE.GIT.equals(repo.type)) {
+      if (!ForgeInstance.TYPE.GIT.equals(repo.type)) {
         continue;
       }
 
@@ -249,10 +246,11 @@ public class ForgeEGitSync implements ForgeSync {
   }
 
   @Override
-  public void addToRepository(final TYPE type, final Repo repo, final IProject project, final IProgressMonitor monitor) {
-    if (type != TYPE.GIT) {
+  public void addToRepository(final ForgeInstance instance, final IProject project, final IProgressMonitor monitor) {
+    if (!ForgeInstance.TYPE.GIT.equals(instance.type)) {
       return;
     }
+
     // TODO
   }
 
@@ -262,7 +260,7 @@ public class ForgeEGitSync implements ForgeSync {
   }
 
   @Override
-  public Repo getSvnRepo(final IProject project) {
+  public ForgeInstance getMainRepo(final IProject project) {
     return null;
   }
 

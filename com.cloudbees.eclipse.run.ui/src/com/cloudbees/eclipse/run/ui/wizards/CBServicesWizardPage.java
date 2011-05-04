@@ -9,13 +9,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
-import com.cloudbees.eclipse.core.forge.api.ForgeSync;
-import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
-import com.cloudbees.eclipse.ui.wizard.SelectRepositoryComposite;
 import com.cloudbees.eclipse.ui.wizard.CBWizardPage;
 import com.cloudbees.eclipse.ui.wizard.CBWizardSupport;
 import com.cloudbees.eclipse.ui.wizard.NewJenkinsJobComposite;
+import com.cloudbees.eclipse.ui.wizard.SelectRepositoryComposite;
 
 public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
 
@@ -33,7 +32,7 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
   }
 
   @Override
-  public void createControl(Composite parent) {
+  public void createControl(final Composite parent) {
     Composite container = new Composite(parent, SWT.NULL);
 
     GridLayout layout = new GridLayout(1, true);
@@ -99,17 +98,17 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
     this.repositoryComposite = new SelectRepositoryComposite(container) {
 
       @Override
-      protected Repo[] getRepos() {
+      protected ForgeInstance[] getRepos() {
         try {
-          return CBWizardSupport.getRepos(getContainer(), ForgeSync.TYPE.SVN);
+          return CBWizardSupport.getRepos(getContainer(), ForgeInstance.TYPE.SVN);
         } catch (Exception e) {
           CBRunUiActivator.logError(e); // TODO
-          return new Repo[] {};
+          return new ForgeInstance[0];
         }
       }
 
       @Override
-      protected void updateErrorStatus(String errorMsg) {
+      protected void updateErrorStatus(final String errorMsg) {
         CBServicesWizardPage.this.updateErrorStatus(errorMsg);
       }
 
@@ -125,7 +124,7 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
     return this.jenkinsComposite.getJobNameText();
   }
 
-  public void setJobNameText(String text) {
+  public void setJobNameText(final String text) {
     this.jenkinsComposite.setJobNameText(text);
   }
 
@@ -141,11 +140,11 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
     return this.jenkinsComposite.getJenkinsInstance();
   }
 
-  public Repo getRepo() {
+  public ForgeInstance getRepo() {
     return this.repositoryComposite.getSelectedRepo();
   }
 
-  public void updateErrorStatus(String message) {
+  public void updateErrorStatus(final String message) {
     setErrorMessage(message);
     setPageComplete(message == null);
   }
@@ -163,12 +162,12 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
   private final SelectionListener checkListener = new SelectionListener() {
 
     @Override
-    public void widgetSelected(SelectionEvent e) {
+    public void widgetSelected(final SelectionEvent e) {
       handleSelected();
     }
 
     @Override
-    public void widgetDefaultSelected(SelectionEvent e) {
+    public void widgetDefaultSelected(final SelectionEvent e) {
       handleSelected();
     }
 
@@ -179,7 +178,7 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
     }
   };
 
-  private void updatePage(boolean makeJob, boolean makeRepo) {
+  private void updatePage(final boolean makeJob, final boolean makeRepo) {
     if (makeJob && !makeRepo) {
       setMessage("Enable hosting in Forge to configure Jenkins job SCM automatically.", WARNING);
       return;

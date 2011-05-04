@@ -6,7 +6,7 @@ import java.util.List;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-import com.cloudbees.eclipse.core.forge.api.ForgeSync.ArtifactPathItem;
+import com.cloudbees.eclipse.core.jenkins.api.ArtifactPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Artifact;
 

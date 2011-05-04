@@ -14,8 +14,7 @@ import org.eclipse.swt.widgets.Composite;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
-import com.cloudbees.eclipse.core.forge.api.ForgeSync;
-import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.ui.wizard.CBWizardSupport;
 import com.cloudbees.eclipse.ui.wizard.NewJenkinsJobComposite;
 import com.cloudbees.eclipse.ui.wizard.SelectRepositoryComposite;
@@ -31,7 +30,7 @@ public class JenkinsJobWizardPage extends WizardPage {
   private SelectRepositoryComposite repoComposite;
   private final IProject project;
 
-  protected JenkinsJobWizardPage(IProject project) {
+  protected JenkinsJobWizardPage(final IProject project) {
     super(NAME);
     setTitle(TITLE);
     setDescription(DESCRIPTION);
@@ -39,7 +38,7 @@ public class JenkinsJobWizardPage extends WizardPage {
   }
 
   @Override
-  public void createControl(Composite parent) {
+  public void createControl(final Composite parent) {
     Composite container = new Composite(parent, SWT.NULL);
 
     GridLayout layout = new GridLayout(1, true);
@@ -95,17 +94,17 @@ public class JenkinsJobWizardPage extends WizardPage {
       this.repoComposite = new SelectRepositoryComposite(container) {
 
         @Override
-        protected void updateErrorStatus(String errorMsg) {
+        protected void updateErrorStatus(final String errorMsg) {
           JenkinsJobWizardPage.this.updateErrorStatus(errorMsg);
         }
 
         @Override
-        protected Repo[] getRepos() {
+        protected ForgeInstance[] getRepos() {
           try {
-            return CBWizardSupport.getRepos(getContainer(), ForgeSync.TYPE.SVN);
+            return CBWizardSupport.getRepos(getContainer(), ForgeInstance.TYPE.SVN);
           } catch (Exception e) {
             e.printStackTrace(); // FIXME
-            return new Repo[] {};
+            return new ForgeInstance[0];
           }
         }
       };
@@ -123,7 +122,7 @@ public class JenkinsJobWizardPage extends WizardPage {
     setControl(container);
   }
 
-  public void updateErrorStatus(String message) {
+  public void updateErrorStatus(final String message) {
     setErrorMessage(message);
     setPageComplete(message == null);
   }
@@ -136,7 +135,7 @@ public class JenkinsJobWizardPage extends WizardPage {
     return this.jenkinsComposite.getJobNameText();
   }
 
-  public Repo getRepo() {
+  public ForgeInstance getRepo() {
     if (this.repoComposite != null) {
       return this.repoComposite.getSelectedRepo();
     } else {
@@ -168,12 +167,12 @@ public class JenkinsJobWizardPage extends WizardPage {
   private class RepoCheckListener implements SelectionListener {
 
     @Override
-    public void widgetSelected(SelectionEvent e) {
+    public void widgetSelected(final SelectionEvent e) {
       handleSelection();
     }
 
     @Override
-    public void widgetDefaultSelected(SelectionEvent e) {
+    public void widgetDefaultSelected(final SelectionEvent e) {
       handleSelection();
     }
 

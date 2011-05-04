@@ -29,42 +29,46 @@ import org.tigris.subversion.svnclientadapter.SVNRevision;
 import org.tigris.subversion.svnclientadapter.SVNUrl;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
-import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
+import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 /**
  * Forge repo sync provider for Subclipse
- * 
+ *
  * @author ahtik
  */
 public class ForgeSubclipseSync implements ForgeSync {
 
   @Override
-  public ACTION sync(final TYPE type, final Properties props, final IProgressMonitor monitor) throws CloudBeesException {
+  public void sync(final ForgeInstance instance, final String passwd, final IProgressMonitor monitor)
+      throws CloudBeesException {
 
-    if (!ForgeSync.TYPE.SVN.equals(type)) {
-      return ACTION.SKIPPED;
+    if (!ForgeInstance.TYPE.SVN.equals(instance.type)) {
+      return;
     }
 
-    String url = props.getProperty("url");
-
-    if (url == null) {
+    if (instance.url == null) {
       throw new IllegalArgumentException("url not provided!");
     }
 
     try {
-      monitor.beginTask("Validating SVN repository connection '" + url + "'...", 10);
+      monitor.beginTask("Validating SVN repository connection '" + instance.url + "'...", 10);
       monitor.worked(1);
 
       SVNRepositories repos = SVNProviderPlugin.getPlugin().getRepositories();
-      boolean exists = repos.isKnownRepository(url, false);
+      boolean exists = repos.isKnownRepository(instance.url, false);
       if (exists) {
         monitor.worked(9);
-        return ACTION.CHECKED;
+        instance.status = ForgeInstance.STATUS.SYNCED;
       }
 
+      Properties props = new Properties();
+      props.setProperty("url", instance.url);
+      props.setProperty("user", instance.user);
+      props.setProperty("password", passwd);
       ISVNRepositoryLocation rep = SVNProviderPlugin.getPlugin().getRepositories().createRepository(props);
       monitor.worked(5);
 
@@ -72,7 +76,7 @@ public class ForgeSubclipseSync implements ForgeSync {
       SVNProviderPlugin.getPlugin().getRepositories().addOrUpdateRepository(rep);
       monitor.worked(4);
 
-      return ACTION.ADDED;
+      instance.status = ForgeInstance.STATUS.SYNCED;
 
     } catch (SVNException e) {
       throw new CloudBeesException("Failed to create missing repository!", e);
@@ -86,7 +90,7 @@ public class ForgeSubclipseSync implements ForgeSync {
   public boolean openRemoteFile(final JenkinsScmConfig scmConfig, final ChangeSetPathItem item,
       final IProgressMonitor monitor) {
     for (JenkinsScmConfig.Repository repo : scmConfig.repos) {
-      if (!ForgeSync.TYPE.SVN.equals(repo.type)) {
+      if (!ForgeInstance.TYPE.SVN.equals(repo.type)) {
         continue;
       }
 
@@ -179,9 +183,9 @@ public class ForgeSubclipseSync implements ForgeSync {
   }
 
   @Override
-  public void addToRepository(TYPE type, Repo repo, IProject project, IProgressMonitor monitor)
+  public void addToRepository(final ForgeInstance instance, final IProject project, final IProgressMonitor monitor)
       throws CloudBeesException {
-    if (type != TYPE.SVN) {
+    if (!ForgeInstance.TYPE.SVN.equals(instance.type)) {
       return;
     }
 
@@ -190,7 +194,7 @@ public class ForgeSubclipseSync implements ForgeSync {
     }
 
     try {
-      ISVNRepositoryLocation location = SVNProviderPlugin.getPlugin().getRepository(repo.url);
+      ISVNRepositoryLocation location = SVNProviderPlugin.getPlugin().getRepository(instance.url);
       SVNWorkspaceRoot
           .shareProject(location, project, project.getName(), "Create new repository folder", true, monitor);
     } catch (Exception e) {
@@ -199,7 +203,7 @@ public class ForgeSubclipseSync implements ForgeSync {
   }
 
   @Override
-  public boolean isUnderSvnScm(IProject project) {
+  public boolean isUnderSvnScm(final IProject project) {
     boolean isSVNFolder = false;
 
     try {
@@ -213,18 +217,15 @@ public class ForgeSubclipseSync implements ForgeSync {
   }
 
   @Override
-  public Repo getSvnRepo(IProject project) {
-    Repo repo = null;
+  public ForgeInstance getMainRepo(final IProject project) {
     try {
       LocalResourceStatus projectStatus = SVNWorkspaceRoot.peekResourceStatusFor(project);
-      repo = new Repo();
-      repo.type = ForgeSync.TYPE.SVN.name();
-      repo.url = projectStatus.getUrlString();
+      ForgeInstance repo = new ForgeInstance(projectStatus.getUrlString(), null, ForgeInstance.TYPE.SVN);
+      return repo;
     } catch (SVNException e) {
-      e.printStackTrace();
+      e.printStackTrace(); // TODO log or report
+      return null;
     }
-
-    return repo;
   }
 
 }

@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
-import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 
 public abstract class SelectRepositoryComposite extends Composite {
 
@@ -27,14 +27,14 @@ public abstract class SelectRepositoryComposite extends Composite {
   private static final String ERR_ADD_REPOS = "Please add repositories to your CloudBees DEV@cloud";
   private static final String ERR_REPO_SELECTION = "Repository is not selected.";
 
-  private Repo[] repos;
-  private Repo selectedRepo;
+  private ForgeInstance[] repos;
+  private ForgeInstance selectedRepo;
   private Button addRepoCheck;
   private Label repoLabel;
   private Combo repoCombo;
   private ComboViewer repoComboViewer;
 
-  public SelectRepositoryComposite(Composite parent) {
+  public SelectRepositoryComposite(final Composite parent) {
     super(parent, SWT.NONE);
     init();
   }
@@ -82,10 +82,11 @@ public abstract class SelectRepositoryComposite extends Composite {
     this.repoComboViewer.setLabelProvider(new RepoLabelProvider());
     this.repoComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
-      public void selectionChanged(SelectionChangedEvent event) {
+      public void selectionChanged(final SelectionChangedEvent event) {
         ISelection selection = SelectRepositoryComposite.this.repoComboViewer.getSelection();
         if (selection instanceof StructuredSelection) {
-          SelectRepositoryComposite.this.selectedRepo = (Repo) ((StructuredSelection) selection).getFirstElement();
+          SelectRepositoryComposite.this.selectedRepo = (ForgeInstance) ((StructuredSelection) selection)
+              .getFirstElement();
         }
         validate();
       }
@@ -96,17 +97,17 @@ public abstract class SelectRepositoryComposite extends Composite {
     return this.addRepoCheck.getSelection();
   }
 
-  public Repo getSelectedRepo() {
+  public ForgeInstance getSelectedRepo() {
     return this.selectedRepo;
   }
 
-  public void addRepoCheckListener(SelectionListener listener) {
+  public void addRepoCheckListener(final SelectionListener listener) {
     if (listener != null && this.addRepoCheck != null) {
       this.addRepoCheck.addSelectionListener(listener);
     }
   }
 
-  protected abstract Repo[] getRepos();
+  protected abstract ForgeInstance[] getRepos();
 
   protected abstract void updateErrorStatus(String errorMsg);
 
@@ -131,11 +132,11 @@ public abstract class SelectRepositoryComposite extends Composite {
 
   private class MakeForgeRepoSelectionListener implements SelectionListener {
 
-    public void widgetSelected(SelectionEvent e) {
+    public void widgetSelected(final SelectionEvent e) {
       handleEvent();
     }
 
-    public void widgetDefaultSelected(SelectionEvent e) {
+    public void widgetDefaultSelected(final SelectionEvent e) {
       handleEvent();
     }
 
@@ -154,10 +155,10 @@ public abstract class SelectRepositoryComposite extends Composite {
   private class RepoLabelProvider extends LabelProvider {
 
     @Override
-    public String getText(Object element) {
-      if (element instanceof Repo) {
-        Repo repo = (Repo) element;
-        return repo.url + " [" + repo.type + "]";
+    public String getText(final Object element) {
+      if (element instanceof ForgeInstance) {
+        ForgeInstance repo = (ForgeInstance) element;
+        return repo.url + " [" + repo.type.toString().toLowerCase() + "]";
       }
 
       return super.getText(element);
