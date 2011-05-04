@@ -1,7 +1,5 @@
 package com.cloudbees.eclipse.run.core;
 
-import java.util.HashMap;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -12,11 +10,11 @@ import com.cloudbees.api.ApplicationListResponse;
 
 public class ApplicationPoller extends Thread {
 
-  private static int delay = 60 * 1000 * 60; // once a hour
+  private static final int MINUTE = 60;
+  private static final int SECOND = 1000;
+  private static int delay = 2 * MINUTE * SECOND;
 
   private boolean stop = false;
-
-  private final HashMap<String, ApplicationInfo> lastState = new HashMap<String, ApplicationInfo>();
 
   public ApplicationPoller() {
     super("ApplicationPoller");
@@ -24,11 +22,13 @@ public class ApplicationPoller extends Thread {
 
   @Override
   public void run() {
-    this.stop = true; //FIXME: this poller is not yet used, lets disable it first.
+    this.stop = false;
 
     while (!this.stop) {
       try {
-        pollLoop();
+        fetchAndUpdate();
+
+        Thread.sleep(delay);
       } catch (Exception e) {
         e.printStackTrace();
         CBRunCoreActivator.logError(e);
@@ -36,22 +36,50 @@ public class ApplicationPoller extends Thread {
     }
   }
 
-  private void pollLoop() throws Exception {
-    ApplicationListResponse list = BeesSDK.getList();
-    for (ApplicationInfo info : list.getApplications()) {
-
-      String id = info.getId();
-      ApplicationInfo aInfo = this.lastState.get(id);
-
-      if (aInfo != null && aInfo.getStatus().equals(info.getStatus())) {
-        updateStatus(id, info.getStatus(), info);
-      }
-
-      this.lastState.put(id, info);
+  public void fetchAndUpdate() throws Exception {
+    if (this.stop) {
+      return;
     }
-    Thread.sleep(delay);
+
+    ApplicationListResponse list = BeesSDK.getList();
+
+    updateStatus(list);
+    for (ApplicationInfo info : list.getApplications()) {
+      updateStatus(info.getId(), info.getStatus(), info);
+    }
   }
 
+  /**
+   * Update entire list
+   * 
+   * @param list
+   */
+  private void updateStatus(ApplicationListResponse list) {
+    IExtension[] extensions = Platform.getExtensionRegistry()
+        .getExtensionPoint(CBRunCoreActivator.PLUGIN_ID, "statusUpdater").getExtensions();
+
+    for (IExtension extension : extensions) {
+      for (IConfigurationElement element : extension.getConfigurationElements()) {
+        try {
+          Object executableExtension = element.createExecutableExtension("updater");
+          if (executableExtension instanceof IStatusUpdater) {
+            ((IStatusUpdater) executableExtension).update(list);
+          }
+        } catch (CoreException e) {
+          CBRunCoreActivator.logError(e);
+        }
+      }
+    }
+
+  }
+
+  /**
+   * Update one app at a time.
+   * 
+   * @param id
+   * @param status
+   * @param info
+   */
   private void updateStatus(String id, String status, ApplicationInfo info) {
     IExtension[] extensions = Platform.getExtensionRegistry()
         .getExtensionPoint(CBRunCoreActivator.PLUGIN_ID, "statusUpdater").getExtensions();

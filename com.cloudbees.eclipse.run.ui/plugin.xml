@@ -312,6 +312,12 @@
        </adapter>
     </factory>
  </extension>
+ <extension
+       point="com.cloudbees.eclipse.run.core.statusUpdater">
+    <updater
+          updater="com.cloudbees.eclipse.run.ui.views.AppStatusUpdater">
+    </updater>
+ </extension>
 
 
 </plugin>
