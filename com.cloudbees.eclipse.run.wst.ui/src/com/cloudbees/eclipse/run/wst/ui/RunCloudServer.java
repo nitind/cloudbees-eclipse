@@ -46,7 +46,7 @@ public class RunCloudServer extends WizardFragment {
       private void updateServerName() {
         ServerWorkingCopy server = (ServerWorkingCopy) getTaskModel().getObject("server");
         server.setName(getText() + " running at RUN@cloud");
-        server.setAttribute(CBLaunchConfigurationConstants.PROJECT, getText());
+        server.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, getText());
       }
     };
     this.composite.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GREEN));

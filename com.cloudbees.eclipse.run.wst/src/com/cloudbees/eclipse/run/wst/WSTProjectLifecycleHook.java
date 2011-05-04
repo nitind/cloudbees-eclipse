@@ -47,7 +47,7 @@ public class WSTProjectLifecycleHook implements CBProjectProcessLifecycleHook {
         continue;
       }
 
-      String nameAttribute = server.getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+      String nameAttribute = server.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, "");
       if (projectName.equals(nameAttribute)) {
         foundServer = (Server) server;
         break;
