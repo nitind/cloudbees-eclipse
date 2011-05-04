@@ -2,7 +2,6 @@ package com.cloudbees.eclipse.core;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -11,16 +10,15 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.osgi.framework.Bundle;
 
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
-import com.cloudbees.eclipse.core.forge.api.ForgeSync.ChangeSetPathItem;
-import com.cloudbees.eclipse.core.forge.api.ForgeSync.TYPE;
-import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
+import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 
 /**
  * Main service for syncing Forge repositories and Eclipse repository entries. Currently supported providers are EGit,
  * Sublclipse, Subversive
- * 
+ *
  * @author ahtik
  */
 public class ForgeSyncService {
@@ -42,7 +40,7 @@ public class ForgeSyncService {
     return false;
   }
 
-  public String[] sync(final ForgeSync.TYPE type, final Properties props, final IProgressMonitor monitor)
+  public String[] sync(final ForgeInstance instance, final String password, final IProgressMonitor monitor)
       throws CloudBeesException {
     int ticksPerProcess = 100 / Math.max(this.providers.size(), 1);
     if (ticksPerProcess <= 0) {
@@ -55,10 +53,7 @@ public class ForgeSyncService {
       }
 
       try {
-        ForgeSync.ACTION act = provider.sync(type, props, new SubProgressMonitor(monitor, ticksPerProcess));
-        if (!ForgeSync.ACTION.SKIPPED.equals(act)) {
-          status.add(act.getLabel() + " " + type + ": " + props.getProperty("url"));
-        }
+        provider.sync(instance, password, new SubProgressMonitor(monitor, ticksPerProcess));
       } catch (Exception e) {
         CloudBeesCorePlugin.getDefault().getLogger().error(e);
       }
@@ -90,14 +85,14 @@ public class ForgeSyncService {
     return false;
   }
 
-  public void addToRepository(TYPE type, Repo repo, IProject project, IProgressMonitor monitor)
+  public void addToRepository(final ForgeInstance instance, final IProject project, final IProgressMonitor monitor)
       throws CloudBeesException {
     for (ForgeSync provider : this.providers) {
-      provider.addToRepository(type, repo, project, monitor);
+      provider.addToRepository(instance, project, monitor);
     }
   }
 
-  public boolean isUnderSvnScm(IProject project) {
+  public boolean isUnderSvnScm(final IProject project) {
     for (ForgeSync provider : this.providers) {
       if (provider.isUnderSvnScm(project)) {
         return true;
@@ -106,10 +101,10 @@ public class ForgeSyncService {
     return false;
   }
 
-  public Repo getSvnRepo(IProject project) {
+  public ForgeInstance getSvnRepo(final IProject project) {
     for (ForgeSync provider : this.providers) {
       if (provider.isUnderSvnScm(project)) {
-        return provider.getSvnRepo(project);
+        return provider.getMainRepo(project);
       }
     }
     return null;

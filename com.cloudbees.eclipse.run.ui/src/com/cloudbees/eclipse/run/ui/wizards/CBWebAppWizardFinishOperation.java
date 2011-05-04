@@ -29,13 +29,13 @@ import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.NatureUtil;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
-import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.run.core.CBRunCoreScripts;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.wizard.CBWizardSupport;
-import com.cloudbees.eclipse.ui.wizard.Failiure;
+import com.cloudbees.eclipse.ui.wizard.Failure;
 
 public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
 
@@ -52,13 +52,13 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
   private ImportOperation importOperation;
   private boolean isMakeJenkinsJob;
   private boolean isAddNewRepo;
-  private Repo repo;
+  private ForgeInstance repo;
   private String jobName;
   private URI locationURI;
-  private Failiure<Exception> failiure;
+  private Failure<Exception> failiure;
   private JenkinsService jenkinsService;
 
-  public CBWebAppWizardFinishOperation(CBWebAppWizard wizard) {
+  public CBWebAppWizardFinishOperation(final CBWebAppWizard wizard) {
     this.wizard = wizard;
     this.nameAndLocPage = wizard.getNameAndLocationPage();
     this.servicesPage = wizard.getServicesPage();
@@ -82,7 +82,7 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
     IImportStructureProvider structureProvider = FileSystemStructureProvider.INSTANCE;
     IOverwriteQuery overwriteQuery = new IOverwriteQuery() {
       @Override
-      public String queryOverwrite(String pathString) {
+      public String queryOverwrite(final String pathString) {
         return IOverwriteQuery.NO_ALL;
       }
     };
@@ -93,7 +93,7 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
     this.repo = this.servicesPage.getRepo();
     this.jobName = this.servicesPage.getJobNameText();
     this.locationURI = URIUtil.append(this.uri, projectName);
-    this.failiure = new Failiure<Exception>();
+    this.failiure = new Failure<Exception>();
 
     CloudBeesUIPlugin plugin = CloudBeesUIPlugin.getDefault();
     JenkinsInstance instance = CBWebAppWizardFinishOperation.this.servicesPage.getJenkinsInstance();
@@ -103,7 +103,7 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
   }
 
   @Override
-  public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+  public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
     try {
       if (CBWebAppWizardFinishOperation.this.useDefaultLocation) {
         this.importOperation.setContext(CBWebAppWizardFinishOperation.this.wizard.getShell());
@@ -150,7 +150,7 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
     return true;
   }
 
-  private void handleException(Exception ex) {
+  private void handleException(final Exception ex) {
     ex.printStackTrace();
     IStatus status = new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, ex.getMessage(), ex);
     ErrorDialog.openError(this.wizard.getShell(), ERROR_TITLE, ERROR_MSG, status);

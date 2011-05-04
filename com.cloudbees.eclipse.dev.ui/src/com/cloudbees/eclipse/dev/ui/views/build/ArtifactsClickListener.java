@@ -22,7 +22,7 @@ import org.eclipse.ui.PlatformUI;
 import com.cloudbees.api.ApplicationDeployArchiveResponse;
 import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.eclipse.core.JenkinsService;
-import com.cloudbees.eclipse.core.forge.api.ForgeSync.ArtifactPathItem;
+import com.cloudbees.eclipse.core.jenkins.api.ArtifactPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Artifact;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;

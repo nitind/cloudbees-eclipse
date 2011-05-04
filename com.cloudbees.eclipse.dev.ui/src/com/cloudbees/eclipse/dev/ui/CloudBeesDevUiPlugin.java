@@ -1,6 +1,7 @@
 package com.cloudbees.eclipse.dev.ui;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -25,7 +26,8 @@ import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
-import com.cloudbees.eclipse.core.forge.api.ForgeSync;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
+import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
@@ -151,7 +153,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
   /**
    * Returns the shared instance
-   * 
+   *
    * @return the shared instance
    */
   public static CloudBeesDevUiPlugin getDefault() {
@@ -409,7 +411,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
   }
 
-  public void openRemoteFile(final String jobUrl, final ForgeSync.ChangeSetPathItem item) {
+  public void openRemoteFile(final String jobUrl, final ChangeSetPathItem item) {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Opening remote file") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
@@ -457,20 +459,23 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
         try {
           monitor.beginTask("Loading Forge repositories", 1000);
 
-          String[] status = CloudBeesCorePlugin.getDefault().getGrandCentralService().reloadForgeRepos(monitor);
+          List<ForgeInstance> forgeRepos = CloudBeesUIPlugin.getDefault().getForgeRepos(monitor);
 
-          String mess = "";
-          if (status != null) {
-            for (String st : status) {
-              mess += st + "\n\n";
-            }
+          String mess = new String();
+          int step = 1000 / Math.max(forgeRepos.size(), 1);
+          for (ForgeInstance repo : forgeRepos) {
+            CloudBeesCorePlugin.getDefault().getGrandCentralService().syncForge(repo, monitor);
+            mess += repo.status + " " + repo.url + "\n\n";
+            monitor.worked(step);
           }
 
-          if (mess.length() == 0) {
+          monitor.worked(step);
+
+          // TODO persist new forge state
+
+          if (forgeRepos.isEmpty()) {
             mess = "Found no Forge repositories!";
           }
-
-          monitor.worked(1000);
 
           if (userAction) {
             final String msg = mess;

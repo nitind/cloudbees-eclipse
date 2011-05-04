@@ -15,12 +15,12 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
-import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.wizard.CBWizardSupport;
-import com.cloudbees.eclipse.ui.wizard.Failiure;
+import com.cloudbees.eclipse.ui.wizard.Failure;
 
 public class JenkinsJobWizard extends Wizard {
 
@@ -31,7 +31,7 @@ public class JenkinsJobWizard extends Wizard {
   private final IProject project;
   private JenkinsJobWizardPage jenkinsPage;
 
-  public JenkinsJobWizard(IProject project) {
+  public JenkinsJobWizard(final IProject project) {
     this.project = project;
     setNeedsProgressMonitor(true);
     setWindowTitle(WINDOW_TITLE);
@@ -50,7 +50,7 @@ public class JenkinsJobWizard extends Wizard {
     String jobName = this.jenkinsPage.getJobName();
     boolean isUnderSCM = this.jenkinsPage.isUnderSCM();
     boolean isAddNewRepo = this.jenkinsPage.isAddNewRepo();
-    Repo repo = this.jenkinsPage.getRepo();
+    ForgeInstance repo = this.jenkinsPage.getRepo();
 
     try {
       if (isAddNewRepo) {
@@ -70,13 +70,13 @@ public class JenkinsJobWizard extends Wizard {
     return true;
   }
 
-  private void addNewRepo(final IProject project, final Repo repo) throws Exception {
-    final Failiure<CloudBeesException> failiure = new Failiure<CloudBeesException>();
+  private void addNewRepo(final IProject project, final ForgeInstance repo) throws Exception {
+    final Failure<CloudBeesException> failiure = new Failure<CloudBeesException>();
 
     IRunnableWithProgress operation = new IRunnableWithProgress() {
 
       @Override
-      public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+      public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         try {
           GrandCentralService service = CloudBeesCorePlugin.getDefault().getGrandCentralService();
           service.addToRepository(project, repo, monitor);
@@ -93,7 +93,8 @@ public class JenkinsJobWizard extends Wizard {
     }
   }
 
-  private String createConfigXML(boolean isAddNewRepo, boolean isUnderSCM, Repo repo) throws Exception {
+  private String createConfigXML(final boolean isAddNewRepo, final boolean isUnderSCM, final ForgeInstance repo)
+      throws Exception {
     if (isAddNewRepo || isUnderSCM) {
       String description = "Builds " + this.project.getName() + " with SCM support";
 
@@ -114,7 +115,7 @@ public class JenkinsJobWizard extends Wizard {
     }
   }
 
-  private void handleException(Exception ex) {
+  private void handleException(final Exception ex) {
     ex.printStackTrace();
     IStatus status = new Status(IStatus.ERROR, CloudBeesDevCorePlugin.PLUGIN_ID, ex.getMessage(), ex);
     ErrorDialog.openError(getShell(), ERROR_TITLE, ERROR_MSG, status);
