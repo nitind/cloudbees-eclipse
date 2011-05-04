@@ -6,8 +6,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -34,29 +32,53 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
       } else {
         setErrorMessage(status.getMessage());
       }
+      updateLaunchConfigurationDialog();
+    }
+  }
+
+  private final class AccountSelectorCompositeImpl extends AbstractAccountSelectorComposite {
+
+    public AccountSelectorCompositeImpl(Composite parent) {
+      super(parent);
+    }
+
+    @Override
+    public void handleUpdate() {
+      IStatus status = validate();
+      if (status.isOK()) {
+        setErrorMessage(null);
+        setMessage("Run CloudBees application");
+      } else {
+        setErrorMessage(status.getMessage());
+      }
     }
   }
 
   private static final String TAB_NAME = "CloudBees Application";
 
-  protected ProjectSelectionComposite content;
+  protected ProjectSelectionComposite projectSelector;
+  protected AbstractAccountSelectorComposite accountSelector;
   protected Composite main;
 
   @Override
   public void createControl(Composite parent) {
     this.main = new Composite(parent, SWT.NONE);
     this.main.setLayout(new GridLayout(2, false));
-    this.content = new ProjectSelectionCompositeForLauncher(this.main, SWT.None);
-    this.content.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-    this.content.addModifyListener(new ModifyListener() {
 
-      @Override
-      public void modifyText(ModifyEvent e) {
-        CBLaunchConfigurationTab.this.content.handleUpdate();
-        updateLaunchConfigurationDialog();
-      }
+    this.projectSelector = new ProjectSelectionCompositeForLauncher(this.main, SWT.None);
+    this.projectSelector.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+    //    this.projectSelector.addModifyListener(new ModifyListener() {
+    //
+    //      @Override
+    //      public void modifyText(ModifyEvent e) {
+    //        CBLaunchConfigurationTab.this.projectSelector.handleUpdate();
+    //        updateLaunchConfigurationDialog();
+    //      }
+    //
+    //    });
 
-    });
+    this.accountSelector = new AccountSelectorCompositeImpl(this.main);
+    this.accountSelector.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
     setControl(this.main);
   }
@@ -71,9 +93,9 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
       String projectName = configuration
           .getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, new String());
       if (projectName == null || projectName.length() == 0) {
-        projectName = this.content.getDefaultSelection();
+        projectName = this.projectSelector.getDefaultSelection();
       }
-      this.content.setText(projectName);
+      this.projectSelector.setText(projectName);
     } catch (CoreException e) {
       CBRunUiActivator.logError(e);
     }
@@ -81,10 +103,9 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    String projectName = this.content.getText();
+    String projectName = this.projectSelector.getText();
     try {
       CBRunUtil.addDefaultAttributes(configuration, projectName);
-
     } catch (CoreException e) {
       CBRunUiActivator.logError(e);
     }
@@ -102,7 +123,7 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public boolean isValid(ILaunchConfiguration launchConfig) {
-    return this.content.validate().getSeverity() == IStatus.OK;
+    return this.projectSelector.validate().getSeverity() == IStatus.OK;
   }
 
 }

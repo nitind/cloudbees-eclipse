@@ -30,7 +30,7 @@ public class CBRunCoreActivator extends Plugin {
   public void start(BundleContext bundleContext) throws Exception {
     CBRunCoreActivator.context = bundleContext;
     plugin = this;
-    poller.start();
+    getPoller().start();
   }
 
   /*
@@ -40,7 +40,7 @@ public class CBRunCoreActivator extends Plugin {
   @Override
   public void stop(BundleContext bundleContext) throws Exception {
     CBProjectProcessService.getInstance().terminateAllProcesses();
-    poller.halt();
+    getPoller().halt();
     CBRunCoreActivator.context = null;
     plugin = null;
   }
@@ -48,6 +48,10 @@ public class CBRunCoreActivator extends Plugin {
   public static void logError(Exception e) {
     IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage());
     plugin.getLog().log(status);
+  }
+
+  public static ApplicationPoller getPoller() {
+    return poller;
   }
 
 }

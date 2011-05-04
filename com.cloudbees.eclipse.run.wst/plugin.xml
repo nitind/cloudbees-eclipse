@@ -54,4 +54,10 @@
 			id="com.cloudbees.eclipse.run.core.wstHook">
 		</hook>
 	</extension>
+ <extension
+       point="com.cloudbees.eclipse.run.core.statusUpdater">
+    <updater
+          updater="com.cloudbees.eclipse.run.wst.WSTUpdater">
+    </updater>
+ </extension>
 </plugin>
