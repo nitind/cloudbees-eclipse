@@ -8,6 +8,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.team.ui.TeamImages;
 
 import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
+import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem.TYPE;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Author;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet.ChangeSetItem;
 import com.cloudbees.eclipse.dev.ui.CBImages;

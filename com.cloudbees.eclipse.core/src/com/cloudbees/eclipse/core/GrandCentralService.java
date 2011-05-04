@@ -1,9 +1,7 @@
 package com.cloudbees.eclipse.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -12,6 +10,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.gc.api.AccountNameRequest;
 import com.cloudbees.eclipse.core.gc.api.AccountNameResponse;
@@ -29,7 +28,7 @@ import com.google.gson.Gson;
 
 /**
  * Central access to CloudBees Grand Central API
- * 
+ *
  * @author ahtik
  */
 public class GrandCentralService {
@@ -59,7 +58,7 @@ public class GrandCentralService {
 
   /**
    * Validates user credential against CloudBees SSO authentication server. TODO Refactor to json-based validation
-   * 
+   *
    * @param email
    * @param password
    * @param monitor
@@ -236,78 +235,14 @@ public class GrandCentralService {
     }
   }
 
-  /*
-   * AccountServiceStatusResponse r = new AccountServiceStatusResponse();
-   * //r.api_version = "1.0";
-   *
-   * AccountServiceStatusResponse.ForgeService forge1 = new
-   * AccountServiceStatusResponse.ForgeService(); forge1.type = "SVN";
-   * forge1.url = "http://anonsvn.jboss.org/repos/jbpm/jbpm4/trunk/";
-   *
-   * AccountServiceStatusResponse.ForgeService forge2 = new
-   * AccountServiceStatusResponse.ForgeService(); forge2.type = "GIT";
-   * forge2.url = "https://github.com/vivek/hudson.git";
-   *
-   * r.forge = new AccountServiceStatusResponse.ForgeService[] { forge1,
-   * forge2 };
-   *
-   * r.jaas = new AccountServiceStatusResponse.JaasService[] {};
-   *
-   * return r;
-   */
-
-  public String[] reloadForgeRepos(final IProgressMonitor monitor) throws CloudBeesException {
-
-    if (!hasAuthInfo()) {
-      return null;
-    }
-
-    String[] accounts = getAccounts(monitor);
-
-    // String primaryAccount = getPrimaryAccount(monitor);
-
-    List<String> status = new ArrayList<String>();
-
-    for (String acc : accounts) {
-
-      AccountServiceStatusResponse services = loadAccountServices(acc);
-
-      for (AccountServiceStatusResponse.AccountServices.ForgeService.Repo forge : services.services.forge.repos) {
-        ForgeSync.TYPE type = ForgeSync.TYPE.valueOf(forge.type.toUpperCase());
-        if (type == null) {
-          throw new CloudBeesException("Unexpected Forge repository type " + type + "!");
-        }
-        Properties props = new Properties();
-        props.put("url", forge.url);
-        props.put("user", services.username);
-        props.put("account", this.email);
-        props.put("password", this.password);
-
-        try {
-          monitor.beginTask("Syncing repository '" + forge.url + "'", 100);
-          String[] sts = this.forgeSyncService.sync(type, props, monitor);
-          if (sts != null && sts.length > 0) {
-            status.addAll(Arrays.asList(sts));
-          }
-        } finally {
-          monitor.done();
-        }
-      }
-    }
-
-    /*
-     * if (services.services.forge.repos.length == 0) { // Forge down, demo
-     * mode Properties props = new Properties(); props.put("url",
-     * "ahti@i.codehoop.com:/opt/git/cb"); String[] sts =
-     * forgeSyncService.sync(ForgeSync.TYPE.GIT, props, monitor); if (sts !=
-     * null && sts.length > 0) { status.addAll(Arrays.asList(sts)); } }
-     */
-    return status.toArray(new String[status.size()]);
-  }
-
   public void addForgeSyncProvider(final ForgeSync provider) {
     this.forgeSyncService.addProvider(provider);
     System.out.println("adding: " + provider);
+  }
+
+  public void syncForge(final ForgeInstance forge, final IProgressMonitor monitor) throws CloudBeesException {
+    monitor.subTask("Syncing repository '" + forge.url + "'");
+    this.forgeSyncService.sync(forge, this.password, monitor);
   }
 
   public boolean openRemoteFile(final JenkinsScmConfig scmConfig, final ChangeSetPathItem item,
@@ -445,8 +380,8 @@ public class GrandCentralService {
 
   }
 
-  public List<Repo> getForgeRepos(final IProgressMonitor monitor) throws CloudBeesException {
-    List<Repo> result = new ArrayList<AccountServiceStatusResponse.AccountServices.ForgeService.Repo>();
+  public List<ForgeInstance> getForgeRepos(final IProgressMonitor monitor) throws CloudBeesException {
+    List<ForgeInstance> result = new ArrayList<ForgeInstance>();
 
     String[] accounts = getAccounts(monitor);
 
@@ -454,24 +389,23 @@ public class GrandCentralService {
       AccountServiceStatusResponse services = loadAccountServices(acc);
       Repo[] repos = services.services.forge.repos;
       for (Repo forge : repos) {
-        result.add(forge);
+        result.add(new ForgeInstance(forge.url, services.username, ForgeInstance.TYPE.valueOf(forge.type)));
       }
     }
 
     return result;
   }
 
-  public void addToRepository(final IProject project, final Repo repo, final IProgressMonitor monitor)
+  public void addToRepository(final IProject project, final ForgeInstance forge, final IProgressMonitor monitor)
       throws CloudBeesException {
-    com.cloudbees.eclipse.core.forge.api.ForgeSync.TYPE type = ForgeSync.TYPE.valueOf(repo.type.toUpperCase());
-    this.forgeSyncService.addToRepository(type, repo, project, monitor);
+    this.forgeSyncService.addToRepository(forge, project, monitor);
   }
 
   public boolean isUnderSvnScm(final IProject project) {
     return this.forgeSyncService.isUnderSvnScm(project);
   }
 
-  public Repo getSvnRepo(final IProject project) {
+  public ForgeInstance getSvnRepo(final IProject project) {
     return this.forgeSyncService.getSvnRepo(project);
   }
 }

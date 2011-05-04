@@ -16,7 +16,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.cloudbees.eclipse.core.forge.api.ForgeSync;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 
 public class JenkinsConfigParser {
 
@@ -76,7 +76,7 @@ public class JenkinsConfigParser {
     for (int i = 0; remotes != null && i < remotes.getLength(); i++) {
       Node remote = remotes.item(i);
       JenkinsScmConfig.Repository repo = new JenkinsScmConfig.Repository();
-      repo.type = ForgeSync.TYPE.GIT;
+      repo.type = ForgeInstance.TYPE.GIT;
       repos.add(repo);
       gitRepos.add(repo);
 
@@ -112,7 +112,7 @@ public class JenkinsConfigParser {
     for (int i = 0; remotes != null && i < remotes.getLength(); i++) {
       Node remote = remotes.item(i);
       JenkinsScmConfig.Repository repo = new JenkinsScmConfig.Repository();
-      repo.type = ForgeSync.TYPE.SVN;
+      repo.type = ForgeInstance.TYPE.SVN;
       repo.url = remote.getFirstChild().getNodeValue();
       repos.add(repo);
     }
@@ -122,7 +122,7 @@ public class JenkinsConfigParser {
     String scm = getTextValue(((Element) scmNode), "cvsroot");
     if (scm != null) {
       JenkinsScmConfig.Repository repo = new JenkinsScmConfig.Repository();
-      repo.type = ForgeSync.TYPE.CVS;
+      repo.type = ForgeInstance.TYPE.CVS;
       repo.url = scm;
       repos.add(repo);
     }

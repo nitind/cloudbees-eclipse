@@ -39,12 +39,13 @@ import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobProperty;
 
 /**
  * CloudBees Eclipse Toolkit UI Plugin
- * 
+ *
  * @author ahtik
  */
 public class CloudBeesUIPlugin extends AbstractUIPlugin {
@@ -125,7 +126,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   /**
    * Returns the shared instance
-   * 
+   *
    * @return the shared instance
    */
   public static CloudBeesUIPlugin getDefault() {
@@ -409,7 +410,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   /**
    * As secure storage is not providing change listener functionality, we must call this programmatically.
-   * 
+   *
    * @throws CloudBeesException
    */
   public void fireSecureStorageChanged() throws CloudBeesException {
@@ -470,6 +471,12 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       ApplicationInfoChangeListener listener = iterator.next();
       listener.applicationInfoChanged();
     }
+  }
+
+  public List<ForgeInstance> getForgeRepos(final IProgressMonitor monitor) throws CloudBeesException {
+    // TODO merge from registry && online
+    List<ForgeInstance> forgeRepos = CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeRepos(monitor);
+    return forgeRepos;
   }
 
 }

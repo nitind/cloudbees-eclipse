@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Properties;
 import java.util.TimeZone;
 
 import org.eclipse.core.resources.IProject;
@@ -20,21 +19,22 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
 import org.eclipse.team.svn.ui.operation.OpenRemoteFileOperation;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
-import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
 import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 
 public class ForgeSubversiveSync implements ForgeSync {
 
   @Override
-  public ACTION sync(final TYPE type, final Properties props, final IProgressMonitor monitor) throws CloudBeesException {
+  public void sync(final ForgeInstance instance, final String passwd, final IProgressMonitor monitor)
+      throws CloudBeesException {
 
-    if (!ForgeSync.TYPE.SVN.equals(type)) {
-      return ACTION.SKIPPED;
+    if (!ForgeInstance.TYPE.SVN.equals(instance.type)) {
+      return;
     }
 
-    String url = props.getProperty("url");
+    String url = instance.url;
 
     if (url == null) {
       throw new IllegalArgumentException("url not provided!");
@@ -46,8 +46,8 @@ public class ForgeSubversiveSync implements ForgeSync {
 
       IRepositoryLocation loc = SVNRemoteStorage.instance().newRepositoryLocation();
       loc.setUrl(url);
-      loc.setUsername(props.getProperty("user"));
-      loc.setPassword(props.getProperty("password"));
+      loc.setUsername(instance.user);
+      loc.setPassword(passwd);
       monitor.worked(1);
 
       Exception ex = SVNUtility.validateRepositoryLocation(loc);
@@ -61,7 +61,7 @@ public class ForgeSubversiveSync implements ForgeSync {
       SVNRemoteStorage.instance().addRepositoryLocation(loc);
       monitor.worked(7);
 
-      return ACTION.ADDED;
+      instance.status = ForgeInstance.STATUS.SYNCED;
 
     } finally {
       monitor.worked(10);
@@ -73,7 +73,7 @@ public class ForgeSubversiveSync implements ForgeSync {
   public boolean openRemoteFile(final JenkinsScmConfig scmConfig, final ChangeSetPathItem item,
       final IProgressMonitor monitor) {
     for (JenkinsScmConfig.Repository repo : scmConfig.repos) {
-      if (!ForgeSync.TYPE.SVN.equals(repo.type)) {
+      if (!ForgeInstance.TYPE.SVN.equals(repo.type)) {
         continue;
       }
 
@@ -151,14 +151,14 @@ public class ForgeSubversiveSync implements ForgeSync {
   }
 
   @Override
-  public void addToRepository(final TYPE type, final Repo repo, final IProject project, final IProgressMonitor monitor)
+  public void addToRepository(final ForgeInstance instance, final IProject project, final IProgressMonitor monitor)
       throws CloudBeesException {
 
-    if (type != TYPE.SVN) {
+    if (!ForgeInstance.TYPE.SVN.equals(instance.type)) {
       return;
     }
 
-    boolean endsWithSlash = repo.url.endsWith("/");
+    boolean endsWithSlash = instance.url.endsWith("/");
     IRepositoryLocation location = null;
 
     for (IRepositoryLocation loc : SVNRemoteStorage.instance().getRepositoryLocations()) {
@@ -168,7 +168,7 @@ public class ForgeSubversiveSync implements ForgeSync {
         url += "/";
       }
 
-      if (url.equalsIgnoreCase(repo.url)) {
+      if (url.equalsIgnoreCase(instance.url)) {
         location = loc;
         break;
       }
@@ -198,18 +198,14 @@ public class ForgeSubversiveSync implements ForgeSync {
   }
 
   @Override
-  public Repo getSvnRepo(final IProject project) {
+  public ForgeInstance getMainRepo(final IProject project) {
     SVNChangeStatus status = SVNUtility.getSVNInfoForNotConnected(project);
-    Repo repo = null;
 
     if (status != null) {
-      repo = new Repo();
-      repo.type = ForgeSync.TYPE.SVN.name();
-      repo.url = status.url;
-      return repo;
+      return new ForgeInstance(status.url, null, ForgeInstance.TYPE.SVN);
     }
 
-    return repo;
+    return null;
   }
 
 }
