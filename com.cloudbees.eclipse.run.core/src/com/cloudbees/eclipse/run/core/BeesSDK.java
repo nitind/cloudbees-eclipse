@@ -56,7 +56,23 @@ public class BeesSDK {
       Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
-    return client.applicationStop(accountName + "/" + id);
+    ApplicationStatusResponse applicationStop = client.applicationStop(accountName + "/" + id);
+    update();
+    return applicationStop;
+  }
+
+  private static void update() throws Exception {
+    new Thread("Manual AppList Update") {
+      @Override
+      public void run() {
+        try {
+          Thread.sleep(5 * 1000);
+          CBRunCoreActivator.getPoller().fetchAndUpdate();
+        } catch (Exception e) {
+          CBRunCoreActivator.logError(e);
+        }
+      }
+    }.start();
   }
 
   public static ApplicationStatusResponse start(final String id) throws CloudBeesException, Exception {
@@ -68,7 +84,9 @@ public class BeesSDK {
       Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
-    return client.applicationStart(accountName + "/" + id);
+    ApplicationStatusResponse applicationStart = client.applicationStart(accountName + "/" + id);
+    update();
+    return applicationStart;
   }
 
   public static ApplicationDeployArchiveResponse deploy(final IProject project, final boolean build) throws Exception {
@@ -86,14 +104,23 @@ public class BeesSDK {
     IPath buildPath = getWarFile(project, build).getFullPath();
 
     String warFile = workspacePath.toOSString() + buildPath.toOSString();
-    return client.applicationDeployWar(appId, null, null, warFile, null, null);
+    ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, warFile,
+        null, null);
+    update();
+
+    return applicationDeployWar;
   }
 
   public static ApplicationDeployArchiveResponse deploy(final String appId, final String warUrl)
       throws CloudBeesException, CoreException, FileNotFoundException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
-    return client.applicationDeployWar(appId, null, null, warUrl, null, null);
+
+    ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, warUrl,
+        null, null);
+    update();
+
+    return applicationDeployWar;
   }
 
   /**

@@ -8,13 +8,16 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
+import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.api.ApplicationListResponse;
 import com.cloudbees.eclipse.core.ApplicationInfoChangeListener;
 import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.run.core.BeesSDK;
+import com.cloudbees.eclipse.run.core.IStatusUpdater;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.views.CBTreeAction;
@@ -38,6 +41,8 @@ public class AppListView extends ViewPart implements IPropertyChangeListener, IC
 
   protected ApplicationInfoChangeListener applicationChangeListener;
 
+  private IStatusUpdater statusUpdater;
+
   public void init() {
 
     this.applicationChangeListener = new ApplicationInfoChangeListener() {
@@ -58,6 +63,26 @@ public class AppListView extends ViewPart implements IPropertyChangeListener, IC
         });
       }
     };
+    this.statusUpdater = new IStatusUpdater() {
+
+      @Override
+      public void update(ApplicationListResponse response) {
+        AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, response);
+        Display.getDefault().asyncExec(new Runnable() {
+
+          @Override
+          public void run() {
+            AppListView.this.viewer.refresh(true);
+          }
+        });
+      }
+
+      @Override
+      public void update(String id, String status, ApplicationInfo info) {
+
+      }
+    };
+    AppStatusUpdater.addListener(this.statusUpdater);
 
     CloudBeesUIPlugin.getDefault().addApplicationInfoChangeListener(this.applicationChangeListener);
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
@@ -66,6 +91,7 @@ public class AppListView extends ViewPart implements IPropertyChangeListener, IC
 
   @Override
   public void dispose() {
+    AppStatusUpdater.removeListener(this.statusUpdater);
     CloudBeesUIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
     CloudBeesUIPlugin.getDefault().removeJenkinsChangeListener(this.jenkinsChangeListener);
     this.jenkinsChangeListener = null;
