@@ -46,7 +46,7 @@ public class RunCloudLocal extends WizardFragment {
       private void updateServerName() {
         ServerWorkingCopy server = (ServerWorkingCopy) getTaskModel().getObject("server");
         server.setName(getText() + " running at localhost");
-        server.setAttribute(CBLaunchConfigurationConstants.PROJECT, getText());
+        server.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, getText());
       }
     };
     this.composite.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GREEN));

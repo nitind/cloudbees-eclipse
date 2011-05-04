@@ -21,7 +21,7 @@ public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
   @Override
   public void stop(boolean force) {
     try {
-      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, "");
       CBProjectProcessService.getInstance().terminateProcess(projectName);
     } catch (DebugException e) {
       CBRunCoreActivator.logError(e);
@@ -42,7 +42,7 @@ public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
   public void setupLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IProgressMonitor monitor)
       throws CoreException {
 
-    String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+    String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, "");
     CBRunUtil.addDefaultAttributes(workingCopy, projectName);
 
   }

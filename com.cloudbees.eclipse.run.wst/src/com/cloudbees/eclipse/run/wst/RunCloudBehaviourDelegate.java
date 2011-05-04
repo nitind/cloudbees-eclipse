@@ -23,13 +23,16 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
   @Override
   public void stop(boolean force) {
     try {
-      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
-      BeesSDK.stop(projectName);
+      String id = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
+      if (id.equals("")) {
+        id = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, "");
+      }
+      BeesSDK.stop(id);
       setServerState(IServer.STATE_STOPPED);
     } catch (Exception e) {
       CBRunCoreActivator.logError(e);
+      setServerState(IServer.STATE_UNKNOWN);
     }
-    setServerState(IServer.STATE_UNKNOWN);
   }
 
   @Override
@@ -67,7 +70,7 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
         return null;
       }
 
-      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, "");
       String appId = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
       IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
@@ -89,7 +92,7 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
   public void setupLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IProgressMonitor monitor)
       throws CoreException {
     try {
-      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
+      String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, "");
       String appId = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
 
       workingCopy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, appId);
