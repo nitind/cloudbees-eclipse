@@ -68,6 +68,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   private IPropertyChangeListener prefListener;
 
+  private final List<ForgeInstance> forgeRegistry = new ArrayList<ForgeInstance>();
+
   public CloudBeesUIPlugin() {
     super();
   }
@@ -474,9 +476,20 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   public List<ForgeInstance> getForgeRepos(final IProgressMonitor monitor) throws CloudBeesException {
-    // TODO merge from registry && online
-    List<ForgeInstance> forgeRepos = CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeRepos(monitor);
-    return forgeRepos;
+    List<ForgeInstance> cloudRepos = CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeRepos(monitor);
+
+    for (ForgeInstance forge : cloudRepos) {
+      int pos = this.forgeRegistry.indexOf(forge);
+      if (pos >= 0) {
+        ForgeInstance old = this.forgeRegistry.get(pos);
+        forge.status = old.status;
+      }
+    }
+
+    this.forgeRegistry.clear();
+    this.forgeRegistry.addAll(cloudRepos);
+
+    return cloudRepos;
   }
 
 }
