@@ -103,23 +103,47 @@
            label="Tail Server Log">
      </action>
   </objectContribution>
-		<objectContribution adaptable="false"
-			id="com.cloudbees.eclipse.run.ui.stop"
-			objectClass="com.cloudbees.api.ApplicationInfo">
+		<objectContribution
+        adaptable="true"
+        id="com.cloudbees.eclipse.run.ui.start"
+        nameFilter="*"
+        objectClass="com.cloudbees.api.ApplicationInfo">
 			<action class="com.cloudbees.eclipse.run.ui.popup.actions.StartAction"
 				enablesFor="1" id="com.cloudbees.eclipse.run.ui.deploy.cloud" label="Start in RUN@cloud@">
 			</action>
+   <visibility>
+      <and>
+         <objectState
+               name="status"
+               value="stopped">
+         </objectState>
+      </and>
+   </visibility>
 		</objectContribution>
-		<objectContribution adaptable="false"
-			id="com.cloudbees.eclipse.run.ui.start"
-			objectClass="com.cloudbees.api.ApplicationInfo">
+		<objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.stop"
+        nameFilter="*"
+        objectClass="com.cloudbees.api.ApplicationInfo">
 			<action class="com.cloudbees.eclipse.run.ui.popup.actions.StopAction"
 				enablesFor="1" id="com.cloudbees.eclipse.run.ui.deploy.cloud" label="Stop in RUN@cloud@">
 			</action>
+   <visibility>
+      <or>
+         <objectState
+               name="status"
+               value="hibernate">
+         </objectState>
+         <objectState
+               name="status"
+               value="active">
+         </objectState>
+      </or>
+   </visibility>
 		</objectContribution>
   <objectContribution
         adaptable="false"
-        id="com.cloudbees.eclipse.run.ui.runAtCloudApps"
+        id="com.cloudbees.eclipse.run.ui.refreshRunAtCloudApps"
         objectClass="java.lang.String">
      <action
            class="com.cloudbees.eclipse.run.ui.popup.actions.RefreshAction"
@@ -282,6 +306,9 @@
           class="com.cloudbees.eclipse.run.ui.views.ApplicationInfoAdapterFactory">
        <adapter
              type="org.eclipse.ui.views.properties.IPropertySource">
+       </adapter>
+       <adapter
+             type="org.eclipse.ui.IActionFilter">
        </adapter>
     </factory>
  </extension>

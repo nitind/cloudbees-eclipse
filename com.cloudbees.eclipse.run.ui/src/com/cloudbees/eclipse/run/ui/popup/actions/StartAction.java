@@ -53,7 +53,8 @@ public class StartAction implements IObjectActionDelegate {
           //          }
 
           String id = appInfo.getId();
-          BeesSDK.start(id.substring(id.indexOf("/") + 1));
+          int i = id.indexOf("/");
+          BeesSDK.start(id.substring(0, i), id.substring(i + 1));
           monitor.done();
 
         } catch (Exception e) {

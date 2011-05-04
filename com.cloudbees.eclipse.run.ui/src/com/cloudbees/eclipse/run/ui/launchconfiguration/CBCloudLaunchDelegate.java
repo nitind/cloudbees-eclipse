@@ -66,11 +66,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
   }
 
   private void start(IProject project, String id) throws Exception, CloudBeesException {
-    if ("".equals(id)) {
-      BeesSDK.start(project);
-    } else {
-      BeesSDK.start(id);
-    }
+    BeesSDK.start(id.equals("") ? project.getName() : id);
   }
 
   private ILaunchConfigurationWorkingCopy removeWstFlag(ILaunchConfiguration configuration) throws CoreException {

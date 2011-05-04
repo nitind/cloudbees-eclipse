@@ -53,7 +53,8 @@ public class StopAction implements IObjectActionDelegate {
           //          }
 
           String id = appInfo.getId();
-          BeesSDK.stop(id.substring(id.indexOf("/") + 1));
+          int i = id.indexOf("/");
+          BeesSDK.stop(id.substring(0, i), id.substring(i + 1));
           monitor.done();
 
         } catch (Exception e) {

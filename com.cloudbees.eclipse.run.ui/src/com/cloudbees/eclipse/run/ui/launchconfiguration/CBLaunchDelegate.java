@@ -49,7 +49,7 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
     }
 
     if (configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_BROWSER, true)) {
-      openBrowser("http://localhost:8080");
+      openBrowser("http://localhost:8335");
     }
 
   }
