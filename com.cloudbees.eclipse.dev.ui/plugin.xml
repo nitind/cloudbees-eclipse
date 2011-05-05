@@ -194,7 +194,8 @@
     <extension
           point="com.cloudbees.eclipse.ui.cbTreeProvider">
        <cbTreeProvider
-             class="com.cloudbees.eclipse.dev.ui.views.forge.ForgeTreeView      </cbTreeProvider>
+             class="com.cloudbees.eclipse.dev.ui.views.forge.ForgeTreeView">
+       </cbTreeProvider>
     </extension>
      
 </plugin>
