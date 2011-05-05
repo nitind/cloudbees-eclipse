@@ -1,6 +1,5 @@
 package com.cloudbees.eclipse.run.wst.ui;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -15,10 +14,15 @@ public class WSTExtraActions implements ILaunchExtraAction {
 
   @SuppressWarnings("restriction")
   @Override
-  public void action(ILaunchConfiguration configuration, IProject project) throws CoreException {
+  public void action(ILaunchConfiguration configuration, String projectName, boolean local) throws CoreException {
     String id = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
 
-    ServerWorkingCopy server = (ServerWorkingCopy) WSTUtil.getServer(id, project);
+    ServerWorkingCopy server;
+    if (local) {
+      server = (ServerWorkingCopy) WSTUtil.getLocalServer(id, projectName);
+    } else {
+      server = (ServerWorkingCopy) WSTUtil.getServer(id, projectName);
+    }
     server.setServerState(IServer.STATE_STARTING);
     ILaunchConfigurationWorkingCopy wc = configuration.getWorkingCopy();
     wc.setAttribute("server-id", server.getId()); // HACK
