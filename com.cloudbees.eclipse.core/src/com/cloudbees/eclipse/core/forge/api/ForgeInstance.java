@@ -23,12 +23,14 @@ public class ForgeInstance {
   public String url;
   public String user;
   public String account;
+  public String password;
   public TYPE type;
   public STATUS status = STATUS.UNKNOWN;
 
-  public ForgeInstance(final String url, final String user, final TYPE type) {
+  public ForgeInstance(final String url, final String user, final String password, final TYPE type) {
     this.url = url;
     this.user = user;
+    this.password = password;
     this.type = type;
   }
 

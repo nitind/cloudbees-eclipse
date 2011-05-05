@@ -27,7 +27,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 public class ForgeSubversiveSync implements ForgeSync {
 
   @Override
-  public void sync(final ForgeInstance instance, final String passwd, final IProgressMonitor monitor)
+  public void sync(final ForgeInstance instance, final IProgressMonitor monitor)
       throws CloudBeesException {
 
     if (!ForgeInstance.TYPE.SVN.equals(instance.type)) {
@@ -47,7 +47,7 @@ public class ForgeSubversiveSync implements ForgeSync {
       IRepositoryLocation loc = SVNRemoteStorage.instance().newRepositoryLocation();
       loc.setUrl(url);
       loc.setUsername(instance.user);
-      loc.setPassword(passwd);
+      loc.setPassword(instance.password);
       monitor.worked(1);
 
       Exception ex = SVNUtility.validateRepositoryLocation(loc);
@@ -202,7 +202,7 @@ public class ForgeSubversiveSync implements ForgeSync {
     SVNChangeStatus status = SVNUtility.getSVNInfoForNotConnected(project);
 
     if (status != null) {
-      return new ForgeInstance(status.url, null, ForgeInstance.TYPE.SVN);
+      return new ForgeInstance(status.url, null, null, ForgeInstance.TYPE.SVN);
     }
 
     return null;

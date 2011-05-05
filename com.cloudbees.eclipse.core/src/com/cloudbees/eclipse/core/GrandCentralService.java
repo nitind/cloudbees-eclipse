@@ -46,7 +46,6 @@ public class GrandCentralService {
     this.forgeSyncService = new ForgeSyncService();
     this.email = email;
     this.password = password;
-    this.forgeSyncService.setPassword(this.password);
   }
 
   public ForgeSyncService getForgeSyncService() {
@@ -56,7 +55,6 @@ public class GrandCentralService {
   public void setAuthInfo(final String email, final String password) {
     this.email = email;
     this.password = password;
-    this.forgeSyncService.setPassword(this.password);
   }
 
   /**
@@ -384,7 +382,7 @@ public class GrandCentralService {
             break;
           }
         }
-        result.add(new ForgeInstance(forge.url, services.username, type));
+        result.add(new ForgeInstance(forge.url, services.username, this.password, type));
       }
     }
 
