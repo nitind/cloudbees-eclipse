@@ -21,7 +21,6 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
   private static final String TAB_NAME = "CloudBees Application";
 
   protected ProjectSelectionComposite projectSelector;
-  protected AccountSelecionComposite accountSelector;
   protected Composite main;
 
   @Override
@@ -36,14 +35,6 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
       }
     };
     this.projectSelector.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-
-    this.accountSelector = new AccountSelecionComposite(this.main) {
-      @Override
-      public void handleUpdate() {
-        validateConfigurationTab();
-      }
-    };
-    this.accountSelector.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
     setControl(this.main);
   }
@@ -76,24 +67,18 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     }
   }
 
-  private void validateConfigurationTab() {
+  protected boolean validateConfigurationTab() {
     IStatus projectStatus = this.projectSelector.validate();
     if (!projectStatus.isOK()) {
       setErrorMessage(projectStatus.getMessage());
       updateLaunchConfigurationDialog();
-      return;
-    }
-
-    IStatus accountStatus = this.accountSelector.validate();
-    if (!accountStatus.isOK()) {
-      setErrorMessage(accountStatus.getMessage());
-      updateLaunchConfigurationDialog();
-      return;
+      return false;
     }
 
     setErrorMessage(null);
     setMessage("Run CloudBees application");
     updateLaunchConfigurationDialog();
+    return true;
   }
 
   @Override

@@ -10,6 +10,7 @@ public interface CBLaunchConfigurationConstants {
   String ATTR_CB_WST_FLAG = CBRunCoreActivator.PLUGIN_ID + ".wstFlag";
   String ATTR_CB_LAUNCH_BROWSER = CBRunCoreActivator.PLUGIN_ID + ".browser";
   String ATTR_CB_LAUNCH_CUSTOM_ID = CBRunCoreActivator.PLUGIN_ID + ".customId";
+  String ATTR_CB_LAUNCH_ACCOUNT_ID = CBRunCoreActivator.PLUGIN_ID + ".accountId";
   public static final String COM_CLOUDBEES_ECLIPSE_WST = "com.cloudbees.eclipse.wst";
   public static final String DO_NOTHING = "DO_NOTHING";
 

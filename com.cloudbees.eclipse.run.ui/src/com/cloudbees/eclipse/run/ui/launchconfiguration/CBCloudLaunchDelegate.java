@@ -34,15 +34,20 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
       for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
         if (project.getName().equals(projectName)) {
-          String id = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
+          String account = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID, "");
+          String appId = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
+
+          if (account.equals("")) {
+            throw new IllegalStateException("account cannot be empty!"); // FIXME delete, dev time testing
+          }
 
           if (configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_WST_FLAG, false)) {
 
-            start(project, id);
+            start(project, account, appId);
             removeWstFlag(configuration);
 
           } else {
-            deploy(project, id);
+            deploy(project, account, appId);
           }
 
           handleExtensions(configuration, project);
@@ -56,17 +61,14 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
   }
 
-  private void deploy(IProject project, String id) throws Exception, CloudBeesException, CoreException,
+  private void deploy(IProject project, String account, String id) throws Exception, CloudBeesException, CoreException,
       FileNotFoundException {
-    if ("".equals(id)) {
-      BeesSDK.deploy(project, true);
-    } else {
-      BeesSDK.deploy(project, id, true);
-    }
+    String appId = "".equals(id) ? project.getName() : id;
+    BeesSDK.deploy(project, account, appId, true);
   }
 
-  private void start(IProject project, String id) throws Exception, CloudBeesException {
-    BeesSDK.start(id.equals("") ? project.getName() : id);
+  private void start(IProject project, String account, String appId) throws Exception, CloudBeesException {
+    BeesSDK.start(account, appId.equals("") ? project.getName() : appId);
   }
 
   private ILaunchConfigurationWorkingCopy removeWstFlag(ILaunchConfiguration configuration) throws CoreException {

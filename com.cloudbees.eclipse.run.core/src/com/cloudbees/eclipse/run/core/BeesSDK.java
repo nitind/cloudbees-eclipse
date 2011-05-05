@@ -96,9 +96,17 @@ public class BeesSDK {
   public static ApplicationDeployArchiveResponse deploy(final IProject project, final String id, final boolean build)
       throws CloudBeesException, CoreException, FileNotFoundException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    String account = grandCentralService.getCachedPrimaryUser(false);
+    return deploy(project, account, id, build);
+  }
+
+  public static ApplicationDeployArchiveResponse deploy(final IProject project, final String account, final String id,
+      final boolean build) throws CloudBeesException, CoreException, FileNotFoundException, Exception {
+
+    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
 
-    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + id;//$NON-NLS-1$
+    String appId = account + "/" + id;//$NON-NLS-1$
 
     IPath workspacePath = project.getLocation().removeLastSegments(1);
     IPath buildPath = getWarFile(project, build).getFullPath();
