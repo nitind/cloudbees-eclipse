@@ -3,8 +3,6 @@ package com.cloudbees.eclipse.run.ui.launchconfiguration;
 import static com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME;
 import static com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants.DO_NOTHING;
 
-import java.net.URL;
-
 import org.eclipse.ant.internal.launching.launchConfigurations.AntLaunchDelegate;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -17,11 +15,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
-import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBProjectProcessService;
 import com.cloudbees.eclipse.run.core.util.CBRunUtil;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
@@ -52,11 +46,6 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
     }
 
     handleExtensions(configuration, projectName);
-
-    if (configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_BROWSER, true)) {
-      openBrowser("http://localhost:8335");
-    }
-
   }
 
   private ILaunchConfiguration modifyLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
@@ -68,27 +57,6 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
       copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, vmargs);
     }
     return copy;
-  }
-
-  private void openBrowser(final String url) {
-
-    if (url != null) {
-      Display.getDefault().asyncExec(new Runnable() {
-
-        @Override
-        public void run() {
-          try {
-
-            IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
-            browserSupport.getExternalBrowser().openURL(new URL(url));
-
-          } catch (Exception e) {
-            CBRunUiActivator.logError(e);
-          }
-
-        }
-      });
-    }
   }
 
   private class TerminateListener implements ILaunchesListener2 {

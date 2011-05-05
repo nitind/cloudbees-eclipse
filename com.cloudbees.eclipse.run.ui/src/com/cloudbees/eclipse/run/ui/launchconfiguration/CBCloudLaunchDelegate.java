@@ -37,10 +37,6 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
           String account = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID, "");
           String appId = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
 
-          if (account.equals("")) {
-            throw new IllegalStateException("account cannot be empty!"); // FIXME delete, dev time testing
-          }
-
           if (configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_WST_FLAG, false)) {
 
             start(project, account, appId);

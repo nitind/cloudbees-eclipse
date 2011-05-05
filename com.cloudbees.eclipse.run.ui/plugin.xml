@@ -33,21 +33,6 @@
 		</menuContribution>
 	</extension>
 	<extension point="org.eclipse.ui.popupMenus">
-		<objectContribution adaptable="true"
-			id="com.cloudbees.eclipse.run.ui.deploy" nameFilter="*"
-			objectClass="org.eclipse.core.resources.IProject">
-			<action class="com.cloudbees.eclipse.run.ui.popup.actions.DeployAction"
-				enablesFor="1" id="com.cloudbees.eclipse.run.ui.deploy.cloud" label="Deploy to RUN@cloud@"
-				menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup"></action>
-			<visibility>
-				<and>
-					<objectClass name="org.eclipse.core.resources.IProject">
-					</objectClass>
-					<objectState name="projectNature"
-						value="com.cloudbees.eclipse.core.cloudbeesNature"></objectState>
-				</and>
-			</visibility>
-		</objectContribution>
   <objectContribution
         adaptable="false"
         id="com.cloudbees.eclipse.run.ui.delete"
