@@ -198,9 +198,9 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     reg.put(CBImages.IMG_INSTANCE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/jenkins.png")));
 
     reg.put(CBImages.IMG_FOLDER_FORGE,
-        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_cloud.png")));
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_cb.png")));
     reg.put(CBImages.IMG_INSTANCE_FORGE,
-        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_orange.png ")));
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_orange.png")));
 
     reg.put(CBImages.IMG_VIEW,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_big.png")));
@@ -512,6 +512,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
               mess += repo.status + " " + repo.url + "\n\n";
               subMonitor.worked(step);
             }
+            subMonitor.subTask("");
           }
 
           // TODO persist new forge state
