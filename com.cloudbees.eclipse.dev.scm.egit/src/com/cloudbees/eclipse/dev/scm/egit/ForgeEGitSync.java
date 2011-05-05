@@ -51,8 +51,41 @@ import com.jcraft.jsch.KeyPair;
 public class ForgeEGitSync implements ForgeSync {
 
   @Override
-  public void sync(final ForgeInstance instance, final IProgressMonitor monitor)
-      throws CloudBeesException {
+  public void updateStatus(final ForgeInstance instance, final IProgressMonitor monitor) throws CloudBeesException {
+    if (!ForgeInstance.TYPE.GIT.equals(instance.type)) {
+      return;
+    }
+
+    final String url = instance.url;
+
+    if (url == null) {
+      throw new IllegalArgumentException("url not provided!");
+    }
+
+    try {
+      monitor.beginTask("Checking EGit repository '" + url + "'", 10);
+
+      PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+        @Override
+        public void run() {
+          monitor.subTask("Checking already cloned local repositories");
+          monitor.worked(2);
+
+          if (isAlreadyCloned(url)) {
+            monitor.worked(8);
+            instance.status = ForgeInstance.STATUS.SYNCED;
+          }
+        }
+      });
+
+    } finally {
+      monitor.worked(10);
+      monitor.done();
+    }
+  }
+
+  @Override
+  public void sync(final ForgeInstance instance, final IProgressMonitor monitor) throws CloudBeesException {
 
     if (!ForgeInstance.TYPE.GIT.equals(instance.type)) {
       return;
@@ -126,7 +159,7 @@ public class ForgeEGitSync implements ForgeSync {
           if (res == Window.OK) {
             instance.status = ForgeInstance.STATUS.SYNCED;
           } else {
-            instance.status = ForgeInstance.STATUS.CANCELLED;
+            instance.status = ForgeInstance.STATUS.SKIPPED;
           }
         }
       });

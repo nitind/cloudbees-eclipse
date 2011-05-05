@@ -43,6 +43,33 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 public class ForgeSubclipseSync implements ForgeSync {
 
   @Override
+  public void updateStatus(final ForgeInstance instance, final IProgressMonitor monitor) throws CloudBeesException {
+
+    if (!ForgeInstance.TYPE.SVN.equals(instance.type)) {
+      return;
+    }
+
+    if (instance.url == null) {
+      throw new IllegalArgumentException("url not provided!");
+    }
+
+    try {
+      monitor.beginTask("Validating SVN repository connection '" + instance.url + "'...", 10);
+      monitor.worked(1);
+
+      SVNRepositories repos = SVNProviderPlugin.getPlugin().getRepositories();
+      boolean exists = repos.isKnownRepository(instance.url, false);
+      if (exists) {
+        monitor.worked(9);
+        instance.status = ForgeInstance.STATUS.SYNCED;
+      }
+    } finally {
+      monitor.worked(10);
+      monitor.done();
+    }
+  }
+
+  @Override
   public void sync(final ForgeInstance instance, final IProgressMonitor monitor)
       throws CloudBeesException {
 

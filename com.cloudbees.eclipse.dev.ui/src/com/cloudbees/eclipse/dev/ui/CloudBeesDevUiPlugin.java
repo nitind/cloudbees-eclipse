@@ -1,5 +1,6 @@
 package com.cloudbees.eclipse.dev.ui;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -27,6 +29,7 @@ import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance.STATUS;
 import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
@@ -452,7 +455,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
     //      PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new IRunnableWithProgress() {
     //        public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Forge repositories") {
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Synchronizing Forge repositories") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
         if (!CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_FORGE)) {
@@ -461,20 +464,55 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
         }
 
         try {
-          monitor.beginTask("Loading Forge repositories", 1000);
+          monitor.beginTask("Checking Forge repositories", 10);
 
           List<ForgeInstance> forgeRepos = CloudBeesUIPlugin.getDefault().getForgeRepos(monitor);
-
-          String mess = new String();
           int step = 1000 / Math.max(forgeRepos.size(), 1);
+
+          IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 4);
+          subMonitor.beginTask("", 1000);
           for (ForgeInstance repo : forgeRepos) {
-            monitor.subTask("Syncing repository '" + repo.url + "'");
-            CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().sync(repo, monitor);
-            mess += repo.status + " " + repo.url + "\n\n";
-            monitor.worked(step);
+            subMonitor.subTask("Checking repository '" + repo.url + "'");
+            CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService()
+                .updateStatus(repo, subMonitor);
+            subMonitor.worked(step);
           }
 
-          monitor.worked(step);
+          subMonitor.subTask("");
+
+          final List<ForgeInstance> toSync = new ArrayList<ForgeInstance>();
+          for (ForgeInstance repo : forgeRepos) {
+            if (repo.status == STATUS.UNKNOWN || repo.status == STATUS.SKIPPED) {
+              toSync.add(repo);
+            }
+          }
+
+          PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+            @Override
+            public void run() {
+              // TODO open proper confirmation
+              boolean confirm = MessageDialog.openConfirm(CloudBeesDevUiPlugin.getDefault().getWorkbench().getDisplay()
+                  .getActiveShell(), "To sync", "To sync: " + toSync);
+              if (!confirm) {
+                toSync.clear();
+              }
+            }
+          });
+
+          if (toSync.isEmpty()) {
+            return Status.CANCEL_STATUS;
+          }
+
+          subMonitor = new SubProgressMonitor(monitor, 4);
+          String mess = new String();
+          subMonitor.beginTask("", 1000);
+          for (ForgeInstance repo : forgeRepos) {
+            subMonitor.subTask("Synchronizing repository '" + repo.url + "'");
+            CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().sync(repo, subMonitor);
+            mess += repo.status + " " + repo.url + "\n\n";
+            subMonitor.worked(step);
+          }
+
 
           // TODO persist new forge state
 
@@ -488,6 +526,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             JenkinsChangeListener listener = iterator.next();
             listener.forgeChanged(forgeRepos);
           }
+
+          monitor.worked(4);
 
           if (userAction) {
             final String msg = mess;

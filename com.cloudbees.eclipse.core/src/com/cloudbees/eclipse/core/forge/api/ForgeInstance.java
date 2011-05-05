@@ -1,5 +1,7 @@
 package com.cloudbees.eclipse.core.forge.api;
 
+import com.google.gson.annotations.Expose;
+
 public class ForgeInstance {
 
   public static enum TYPE {
@@ -7,7 +9,7 @@ public class ForgeInstance {
   }
 
   public static enum STATUS {
-    UNKNOWN("Unknown"), SYNCED("Synced"), SKIPPED("Skipped"), CANCELLED("Cancelled");
+    UNKNOWN("Unknown"), SYNCED("Synced"), SKIPPED("Skipped");
 
     private final String label;
 
@@ -23,7 +25,8 @@ public class ForgeInstance {
   public String url;
   public String user;
   public String account;
-  public String password;
+  @Expose(deserialize = false, serialize = false)
+  public transient String password;
   public TYPE type;
   public STATUS status = STATUS.UNKNOWN;
 
@@ -66,6 +69,11 @@ public class ForgeInstance {
       return false;
     }
     return true;
+  }
+
+  @Override
+  public String toString() {
+    return this.url + " (" + this.status.toString().toLowerCase() + ")";
   }
 
 }
