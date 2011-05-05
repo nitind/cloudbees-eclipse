@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -123,6 +124,11 @@ public class CBTreeView extends ViewPart {
     IActionBars bars = getViewSite().getActionBars();
     IMenuManager pullDownMenu = bars.getMenuManager();
     IToolBarManager toolbarMenu = bars.getToolBarManager();
+
+    popupMenu.add(new GroupMarker("open"));
+    popupMenu.add(new GroupMarker("tail"));
+    popupMenu.add(new GroupMarker("run"));
+    popupMenu.add(new GroupMarker("properties"));
 
     for (ICBTreeProvider provider : this.providers) {
       for (CBTreeAction action : provider.getActions()) {
