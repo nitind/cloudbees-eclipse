@@ -25,11 +25,17 @@ public class ForgeSyncService {
 
   private final List<ForgeSync> providers = new ArrayList<ForgeSync>();
 
+  private String password;
+
   public ForgeSyncService() {
   }
 
   public void addProvider(final ForgeSync provider) {
     this.providers.add(provider);
+  }
+
+  public void setPassword(final String password) {
+    this.password = password;
   }
 
   public static boolean bundleActive(final String bundleName) {
@@ -40,7 +46,7 @@ public class ForgeSyncService {
     return false;
   }
 
-  public String[] sync(final ForgeInstance instance, final String password, final IProgressMonitor monitor)
+  public String[] sync(final ForgeInstance instance, final IProgressMonitor monitor)
       throws CloudBeesException {
     int ticksPerProcess = 100 / Math.max(this.providers.size(), 1);
     if (ticksPerProcess <= 0) {
@@ -53,7 +59,7 @@ public class ForgeSyncService {
       }
 
       try {
-        provider.sync(instance, password, new SubProgressMonitor(monitor, ticksPerProcess));
+        provider.sync(instance, this.password, new SubProgressMonitor(monitor, ticksPerProcess));
       } catch (Exception e) {
         CloudBeesCorePlugin.getDefault().getLogger().error(e);
       }

@@ -117,7 +117,7 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
 
       if (CBWebAppWizardFinishOperation.this.isAddNewRepo) {
         GrandCentralService service = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-        service.addToRepository(this.project, this.repo, monitor);
+        service.getForgeSyncService().addToRepository(this.repo, this.project, monitor);
       }
     } catch (Exception e) {
       this.failiure.cause = e;

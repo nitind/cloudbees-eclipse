@@ -6,12 +6,10 @@ import java.util.List;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
-import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.gc.api.AccountNameRequest;
 import com.cloudbees.eclipse.core.gc.api.AccountNameResponse;
 import com.cloudbees.eclipse.core.gc.api.AccountNamesRequest;
@@ -21,8 +19,6 @@ import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
 import com.cloudbees.eclipse.core.gc.api.KeysUsingAuthRequest;
 import com.cloudbees.eclipse.core.gc.api.KeysUsingAuthResponse;
-import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.google.gson.Gson;
 
@@ -41,19 +37,26 @@ public class GrandCentralService {
   // "https://grandcentral.cloudbees.com/api/";
   private static final String BASE_URL = "https://grandcentral." + HOST + "/api/";
 
-  private final ForgeSyncService forgeSyncService = new ForgeSyncService();
+  private final ForgeSyncService forgeSyncService;
 
   private String email;
   private String password;
 
   public GrandCentralService(final String email, final String password) {
+    this.forgeSyncService = new ForgeSyncService();
     this.email = email;
     this.password = password;
+    this.forgeSyncService.setPassword(this.password);
+  }
+
+  public ForgeSyncService getForgeSyncService() {
+    return this.forgeSyncService;
   }
 
   public void setAuthInfo(final String email, final String password) {
     this.email = email;
     this.password = password;
+    this.forgeSyncService.setPassword(this.password);
   }
 
   /**
@@ -235,21 +238,6 @@ public class GrandCentralService {
     }
   }
 
-  public void addForgeSyncProvider(final ForgeSync provider) {
-    this.forgeSyncService.addProvider(provider);
-    System.out.println("adding: " + provider);
-  }
-
-  public void syncForge(final ForgeInstance forge, final IProgressMonitor monitor) throws CloudBeesException {
-    monitor.subTask("Syncing repository '" + forge.url + "'");
-    this.forgeSyncService.sync(forge, this.password, monitor);
-  }
-
-  public boolean openRemoteFile(final JenkinsScmConfig scmConfig, final ChangeSetPathItem item,
-      final IProgressMonitor monitor) throws CloudBeesException {
-    return this.forgeSyncService.openRemoteFile(scmConfig, item, monitor);
-  }
-
   public List<JenkinsInstance> loadDevAtCloudInstances(final IProgressMonitor monitor) throws CloudBeesException {
 
     if (!hasAuthInfo()) {
@@ -401,18 +389,5 @@ public class GrandCentralService {
     }
 
     return result;
-  }
-
-  public void addToRepository(final IProject project, final ForgeInstance forge, final IProgressMonitor monitor)
-      throws CloudBeesException {
-    this.forgeSyncService.addToRepository(forge, project, monitor);
-  }
-
-  public boolean isUnderSvnScm(final IProject project) {
-    return this.forgeSyncService.isUnderSvnScm(project);
-  }
-
-  public ForgeInstance getSvnRepo(final IProject project) {
-    return this.forgeSyncService.getSvnRepo(project);
   }
 }
