@@ -51,7 +51,7 @@ import com.jcraft.jsch.KeyPair;
 public class ForgeEGitSync implements ForgeSync {
 
   @Override
-  public void sync(final ForgeInstance instance, final String passwd, final IProgressMonitor monitor)
+  public void sync(final ForgeInstance instance, final IProgressMonitor monitor)
       throws CloudBeesException {
 
     if (!ForgeInstance.TYPE.GIT.equals(instance.type)) {

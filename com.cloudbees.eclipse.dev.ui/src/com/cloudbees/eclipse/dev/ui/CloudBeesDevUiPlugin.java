@@ -433,8 +433,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             throw new OperationCanceledException();
           }
 
-          boolean opened = CloudBeesCorePlugin.getDefault().getGrandCentralService()
-              .openRemoteFile(scmConfig, item, monitor);
+          boolean opened = CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().openRemoteFile(scmConfig, item, monitor);
 
           return opened ? Status.OK_STATUS : new Status(IStatus.INFO, PLUGIN_ID, "Can't open " + item.path);
         } catch (CloudBeesException e) {
@@ -469,7 +468,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
           String mess = new String();
           int step = 1000 / Math.max(forgeRepos.size(), 1);
           for (ForgeInstance repo : forgeRepos) {
-            CloudBeesCorePlugin.getDefault().getGrandCentralService().syncForge(repo, monitor);
+            monitor.subTask("Syncing repository '" + repo.url + "'");
+            CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().sync(repo, monitor);
             mess += repo.status + " " + repo.url + "\n\n";
             monitor.worked(step);
           }
