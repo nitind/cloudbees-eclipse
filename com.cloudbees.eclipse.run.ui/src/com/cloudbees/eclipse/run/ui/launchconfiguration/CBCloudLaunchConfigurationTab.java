@@ -132,4 +132,8 @@ public class CBCloudLaunchConfigurationTab extends CBLaunchConfigurationTab {
     return valid;
   }
 
+  @Override
+  public boolean isValid(ILaunchConfiguration launchConfig) {
+    return super.isValid(launchConfig) && this.accountSelector.validate().isOK();
+  }
 }
