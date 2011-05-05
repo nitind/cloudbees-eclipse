@@ -77,6 +77,6 @@ public class ForgeGroup implements ICBGroup {
 
   @Override
   public int getOrder() {
-    return 4;
+    return 5;
   }
 }

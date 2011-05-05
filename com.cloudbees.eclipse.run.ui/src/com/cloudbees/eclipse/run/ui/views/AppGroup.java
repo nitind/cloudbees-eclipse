@@ -12,7 +12,7 @@ public class AppGroup implements ICBGroup {
 
   @Override
   public int getOrder() {
-    return 5;
+    return 4;
   }
 
 }
