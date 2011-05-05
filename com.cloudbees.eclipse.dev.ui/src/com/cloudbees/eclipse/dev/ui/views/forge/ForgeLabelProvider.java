@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.dev.ui.views.instances;
+package com.cloudbees.eclipse.dev.ui.views.forge;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.IFontProvider;

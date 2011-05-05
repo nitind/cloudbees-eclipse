@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.dev.ui.views.instances;
+package com.cloudbees.eclipse.dev.ui.views.forge;
 
 import java.util.List;
 
