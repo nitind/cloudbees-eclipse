@@ -7,6 +7,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -81,9 +82,15 @@ public class CBRunUiActivator extends AbstractUIPlugin {
   }
 
   public static void logErrorAndShowDialog(Exception e) {
-    IStatus s = createStatus(e);
+    final IStatus s = createStatus(e);
     logStatus(s);
-    ErrorDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(), "An error occured", null, s);
+    Display.getDefault().syncExec(new Runnable() {
+
+      @Override
+      public void run() {
+        ErrorDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(), "An error occured", null, s);
+      }
+    });
   }
 
   @Override
