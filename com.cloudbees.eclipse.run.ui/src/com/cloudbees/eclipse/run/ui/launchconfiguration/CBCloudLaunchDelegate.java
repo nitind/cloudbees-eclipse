@@ -87,7 +87,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
         try {
           Object executableExtension = element.createExecutableExtension("actions");
           if (executableExtension instanceof ILaunchExtraAction) {
-            ((ILaunchExtraAction) executableExtension).action(configuration, project);
+            ((ILaunchExtraAction) executableExtension).action(configuration, project.getName(), false);
           }
         } catch (CoreException e) {
           CBRunUiActivator.logError(e);

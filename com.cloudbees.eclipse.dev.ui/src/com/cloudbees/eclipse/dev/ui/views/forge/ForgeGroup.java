@@ -1,11 +1,12 @@
-package com.cloudbees.eclipse.dev.ui.views.instances;
+package com.cloudbees.eclipse.dev.ui.views.forge;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
+import com.cloudbees.eclipse.ui.views.ICBGroup;
 
-public class ForgeGroup {
+public class ForgeGroup implements ICBGroup {
 
   private List<ForgeInstance> instances = new ArrayList<ForgeInstance>();
   private String name;
@@ -72,5 +73,10 @@ public class ForgeGroup {
       return false;
     }
     return true;
+  }
+
+  @Override
+  public int getOrder() {
+    return 4;
   }
 }

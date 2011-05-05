@@ -7,7 +7,10 @@ import java.net.URL;
 
 import org.eclipse.ant.internal.launching.launchConfigurations.AntLaunchDelegate;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -47,6 +50,8 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
     if (debug) {
       CBRunUtil.createTemporaryRemoteLaunchConfiguration(projectName).launch(mode, monitor);
     }
+
+    handleExtensions(configuration, projectName);
 
     if (configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_BROWSER, true)) {
       openBrowser("http://localhost:8335");
@@ -112,4 +117,24 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
       service.removeProcess(this.projectName);
     }
   }
+
+  private IExtension[] handleExtensions(ILaunchConfiguration configuration, String projectName) {
+    IExtension[] extensions = Platform.getExtensionRegistry()
+        .getExtensionPoint(CBRunUiActivator.PLUGIN_ID, "launchDelegateAditions").getExtensions();
+
+    for (IExtension extension : extensions) {
+      for (IConfigurationElement element : extension.getConfigurationElements()) {
+        try {
+          Object executableExtension = element.createExecutableExtension("actions");
+          if (executableExtension instanceof ILaunchExtraAction) {
+            ((ILaunchExtraAction) executableExtension).action(configuration, projectName, true);
+          }
+        } catch (CoreException e) {
+          CBRunUiActivator.logError(e);
+        }
+      }
+    }
+    return extensions;
+  }
+
 }

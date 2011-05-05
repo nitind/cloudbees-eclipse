@@ -5,8 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
+import com.cloudbees.eclipse.ui.views.ICBGroup;
 
-public class InstanceGroup {
+public class InstanceGroup implements ICBGroup {
 
   private List<JenkinsInstanceHolder> instances;
   private String name;
@@ -88,5 +89,10 @@ public class InstanceGroup {
       return false;
     }
     return true;
+  }
+
+  @Override
+  public int getOrder() {
+    return this.cloudHosted ? 2 : 3;
   }
 }
