@@ -436,7 +436,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             throw new OperationCanceledException();
           }
 
-          boolean opened = CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().openRemoteFile(scmConfig, item, monitor);
+          boolean opened = CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService()
+              .openRemoteFile(scmConfig, item, monitor);
 
           return opened ? Status.OK_STATUS : new Status(IStatus.INFO, PLUGIN_ID, "Can't open " + item.path);
         } catch (CloudBeesException e) {
@@ -487,32 +488,31 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             }
           }
 
-          PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-            @Override
-            public void run() {
-              // TODO open proper confirmation
-              boolean confirm = MessageDialog.openConfirm(CloudBeesDevUiPlugin.getDefault().getWorkbench().getDisplay()
-                  .getActiveShell(), "To sync", "To sync: " + toSync);
-              if (!confirm) {
-                toSync.clear();
+          if (!toSync.isEmpty()) {
+            PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+              @Override
+              public void run() {
+                // TODO open proper confirmation
+                boolean confirm = MessageDialog.openConfirm(CloudBeesDevUiPlugin.getDefault().getWorkbench()
+                    .getDisplay().getActiveShell(), "To sync", "To sync: " + toSync);
+                if (!confirm) {
+                  toSync.clear();
+                }
               }
-            }
-          });
-
-          if (toSync.isEmpty()) {
-            return Status.CANCEL_STATUS;
+            });
           }
 
-          subMonitor = new SubProgressMonitor(monitor, 4);
           String mess = new String();
-          subMonitor.beginTask("", 1000);
-          for (ForgeInstance repo : forgeRepos) {
-            subMonitor.subTask("Synchronizing repository '" + repo.url + "'");
-            CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().sync(repo, subMonitor);
-            mess += repo.status + " " + repo.url + "\n\n";
-            subMonitor.worked(step);
+          if (!toSync.isEmpty()) {
+            subMonitor = new SubProgressMonitor(monitor, 4);
+            subMonitor.beginTask("", 1000);
+            for (ForgeInstance repo : toSync) {
+              subMonitor.subTask("Synchronizing repository '" + repo.url + "'");
+              CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().sync(repo, subMonitor);
+              mess += repo.status + " " + repo.url + "\n\n";
+              subMonitor.worked(step);
+            }
           }
-
 
           // TODO persist new forge state
 
@@ -529,7 +529,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
           monitor.worked(4);
 
-          if (userAction) {
+          if (userAction && !toSync.isEmpty()) {
             final String msg = mess;
             PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
               @Override

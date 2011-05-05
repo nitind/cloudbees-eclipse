@@ -4,8 +4,10 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -65,8 +67,23 @@ public class CBRunUiActivator extends AbstractUIPlugin {
   }
 
   public static void logError(Throwable e) {
-    IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage());
+    IStatus status = createStatus(e);
+    logStatus(status);
+  }
+
+  private static void logStatus(IStatus status) {
     plugin.getLog().log(status);
+  }
+
+  private static IStatus createStatus(Throwable e) {
+    IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage());
+    return status;
+  }
+
+  public static void logErrorAndShowDialog(Exception e) {
+    IStatus s = createStatus(e);
+    logStatus(s);
+    ErrorDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(), "An error occured", null, s);
   }
 
   @Override
@@ -81,4 +98,5 @@ public class CBRunUiActivator extends AbstractUIPlugin {
   public static Image getImage(final String imgKey) {
     return CBRunUiActivator.getDefault().getImageRegistry().get(imgKey);
   }
+
 }

@@ -3,8 +3,6 @@ package com.cloudbees.eclipse.run.ui.popup.actions;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -40,30 +38,16 @@ public class StopAction implements IObjectActionDelegate {
         try {
           ApplicationInfo appInfo = (ApplicationInfo) firstElement;
 
-          // FIXME currently cannot match with server
-          //          IServer[] servers = ServerCore.getServers();
-          //          for (IServer iServer : servers) {
-          //            String attribute = iServer.getAttribute(CBLaunchConfigurationConstants.PROJECT, "");
-          //            String name = ((IProject) firstElement).getName();
-          //
-          //            if (appInfo.getId().equals(attribute)
-          //                && "com.cloudbees.eclipse.core.runcloud".equals(iServer.getServerType().getId())) {
-          //              ((Server) iServer).setServerState(IServer.STATE_STOPPED);
-          //            }
-          //          }
-
           String id = appInfo.getId();
           int i = id.indexOf("/");
           BeesSDK.stop(id.substring(0, i), id.substring(i + 1));
           monitor.done();
 
         } catch (Exception e) {
-          Status status = new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, e.getMessage());
-          CBRunUiActivator.getDefault().getLog().log(status);
+          CBRunUiActivator.logErrorAndShowDialog(e);
           monitor.done();
         }
       }
-
     }
   }
 

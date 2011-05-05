@@ -3,8 +3,6 @@ package com.cloudbees.eclipse.run.ui.popup.actions;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -38,8 +36,7 @@ public class DeleteAction implements IObjectActionDelegate {
       try {
         BeesSDK.delete(this.appInfo.getId());
       } catch (Exception e) {
-        Status status = new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, e.getMessage());
-        CBRunUiActivator.getDefault().getLog().log(status);
+        CBRunUiActivator.logErrorAndShowDialog(e);
       } finally {
         monitor.done();
       }
