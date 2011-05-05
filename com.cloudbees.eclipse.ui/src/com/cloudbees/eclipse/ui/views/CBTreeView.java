@@ -10,8 +10,6 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.OpenEvent;
@@ -27,12 +25,11 @@ import org.eclipse.ui.part.ViewPart;
 
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
-public class CBTreeView extends ViewPart implements IPropertyChangeListener {
+public class CBTreeView extends ViewPart {
 
   public static final String ID = "com.cloudbees.eclipse.ui.views";
 
   private TreeViewer viewer;
-  //private JenkinsChangeListener jenkinsChangeListener;
 
   private ICBTreeProvider[] providers;
 
@@ -40,12 +37,8 @@ public class CBTreeView extends ViewPart implements IPropertyChangeListener {
 
     @Override
     public int compare(final Viewer viewer, final Object e1, final Object e2) {
-      // small hack
-      if (e1.getClass().getSimpleName().startsWith("Favor")) {
-        return -1;
-      }
-      if (e2.getClass().getSimpleName().startsWith("Favor")) {
-        return +1;
+      if (e1 instanceof ICBGroup && e2 instanceof ICBGroup) {
+        return ((ICBGroup) e1).getOrder() - ((ICBGroup) e2).getOrder();
       }
 
       return super.compare(viewer, e1, e2);
@@ -73,8 +66,6 @@ public class CBTreeView extends ViewPart implements IPropertyChangeListener {
     }
 
     this.providers = prs.toArray(new ICBTreeProvider[prs.size()]);
-
-    CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
   }
 
   public ICBTreeProvider[] getProviders() {
@@ -125,7 +116,7 @@ public class CBTreeView extends ViewPart implements IPropertyChangeListener {
     MenuManager popupMenu = new MenuManager();
     popupMenu.setRemoveAllWhenShown(true);
     popupMenu.addMenuListener(new IMenuListener() {
-      public void menuAboutToShow(IMenuManager mgr) {
+      public void menuAboutToShow(final IMenuManager mgr) {
       }
     });
 
@@ -151,28 +142,6 @@ public class CBTreeView extends ViewPart implements IPropertyChangeListener {
     this.viewer.getTree().setMenu(menu);
     getSite().registerContextMenu(popupMenu, this.viewer);
 
-    //    this.jenkinsChangeListener = new JenkinsChangeListener() {
-    //      @Override
-    //      public void activeJobViewChanged(final JenkinsJobsResponse newView) {
-    //      }
-    //
-    //      @Override
-    //      public void activeJobHistoryChanged(final JenkinsJobAndBuildsResponse newView) {
-    //      }
-    //
-    //      @Override
-    //      public void jenkinsChanged(final List<JenkinsInstanceResponse> instances) {
-    //        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-    //          @Override
-    //          public void run() {
-    //            JenkinsTreeView.this.viewer.getContentProvider().inputChanged(JenkinsTreeView.this.viewer, null, instances);
-    //          }
-    //        });
-    //      }
-    //    };
-    //
-    //    CloudBeesUIPlugin.getDefault().addJenkinsChangeListener(this.jenkinsChangeListener);
-
     CloudBeesUIPlugin.getDefault().reloadAllJenkins(false);
   }
 
@@ -181,37 +150,12 @@ public class CBTreeView extends ViewPart implements IPropertyChangeListener {
     this.viewer.getControl().setFocus();
   }
 
-  public void propertyChange(final PropertyChangeEvent event) {
-    //    if (PreferenceConstants.P_ENABLE_FORGE.equals(event.getProperty())) {
-    //      boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-    //          .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
-    //      this.action3.setEnabled(forgeEnabled);
-    //    }
-    //
-    //    if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())) {
-    //      boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-    //          .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
-    //      this.action4.setEnabled(jaasEnabled);
-    //    }
-    //
-    //    if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())
-    //        || PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
-    //        || PreferenceConstants.P_EMAIL.equals(event.getProperty())
-    //        || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {
-    //      CloudBeesUIPlugin.getDefault().reloadAllJenkins(false);
-    //    }
-  }
-
   @Override
   public void dispose() {
     for (ICBTreeProvider provider : this.providers) {
       provider.dispose();
     }
     this.providers = null;
-
-    CloudBeesUIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
-    //    CloudBeesUIPlugin.getDefault().removeJenkinsChangeListener(this.jenkinsChangeListener);
-    //    this.jenkinsChangeListener = null;
 
     super.dispose();
   }

@@ -13,6 +13,9 @@ import com.cloudbees.api.ApplicationInfo;
 public class ApplicationInfoPropertySource implements IPropertySource {
 
   private static final String BASE = ApplicationInfoPropertySource.class.getSimpleName().toLowerCase();
+  private static final String PROPRTY_ID = BASE + ".id";
+  private static final String PROPRTY_TITLE = BASE + ".title";
+  private static final String PROPRTY_STATUS = BASE + ".status";
   private static final String PROPRTY_CREATED_DATE = BASE + ".created.date";
   private static final String PROPERTY_URL = BASE + ".url";
 
@@ -32,6 +35,12 @@ public class ApplicationInfoPropertySource implements IPropertySource {
   public IPropertyDescriptor[] getPropertyDescriptors() {
     if (this.propertyDescriptors == null) {
 
+      PropertyDescriptor idDescriptor = new PropertyDescriptor(PROPRTY_ID, "App ID");
+
+      PropertyDescriptor titleDescriptor = new PropertyDescriptor(PROPRTY_TITLE, "Title");
+
+      PropertyDescriptor statusDescriptor = new PropertyDescriptor(PROPRTY_STATUS, "Status");
+
       PropertyDescriptor createdDateDescriptor = new PropertyDescriptor(PROPRTY_CREATED_DATE, "Created Date");
       createdDateDescriptor.setLabelProvider(new LabelProvider() {
         @Override
@@ -43,18 +52,24 @@ public class ApplicationInfoPropertySource implements IPropertySource {
           }
         }
       });
-      //createdDateDescriptor.setCategory("Label");
 
       PropertyDescriptor urlDescriptor = new PropertyDescriptor(PROPERTY_URL, "URL");
       urlDescriptor.setLabelProvider(new LabelProvider() {
         @Override
         public String getText(Object element) {
-          return "http://" + element;
+          StringBuilder urls = new StringBuilder();
+          String http = "http://";
+          String separator = " , ";
+          for (String url : (String[]) element) {
+            urls.append(http).append(url).append(separator);
+          }
+          urls.delete(urls.length() - separator.length(), urls.length() - 1);
+          return urls.toString();
         }
       });
-      //urlDescriptor.setCategory("Label");
 
-      this.propertyDescriptors = new IPropertyDescriptor[] { createdDateDescriptor, urlDescriptor };
+      this.propertyDescriptors = new IPropertyDescriptor[] { idDescriptor, titleDescriptor, statusDescriptor,
+          createdDateDescriptor, urlDescriptor };
     }
 
     return this.propertyDescriptors;
@@ -62,11 +77,26 @@ public class ApplicationInfoPropertySource implements IPropertySource {
 
   @Override
   public Object getPropertyValue(Object id) {
+    if (id.equals(PROPRTY_ID)) {
+      return this.appInfo.getId();
+    }
+
+    if (id.equals(PROPRTY_TITLE)) {
+      return this.appInfo.getTitle();
+    }
+
+    if (id.equals(PROPRTY_STATUS)) {
+      return this.appInfo.getStatus();
+    }
+
     if (id.equals(PROPRTY_CREATED_DATE)) {
       return this.appInfo.getCreated();
-    } else if (id.equals(PROPERTY_URL)) {
-      return this.appInfo.getUrls()[0];
     }
+
+    if (id.equals(PROPERTY_URL)) {
+      return this.appInfo.getUrls();
+    }
+
     return null;
   }
 
@@ -81,7 +111,6 @@ public class ApplicationInfoPropertySource implements IPropertySource {
 
   @Override
   public void setPropertyValue(Object id, Object value) {
-    System.out.println("setting property value id=" + id + " value=" + value);
   }
 
 }

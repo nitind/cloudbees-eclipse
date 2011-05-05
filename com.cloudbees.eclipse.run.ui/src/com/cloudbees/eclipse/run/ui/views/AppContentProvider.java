@@ -8,6 +8,7 @@ import com.cloudbees.api.ApplicationListResponse;
 
 final class AppContentProvider implements ITreeContentProvider {
 
+  AppGroup appGroup = new AppGroup("RUN@cloud Tomcat apps");
   ApplicationListResponse data;
 
   @Override
@@ -31,9 +32,9 @@ final class AppContentProvider implements ITreeContentProvider {
   @Override
   public Object[] getChildren(final Object element) {
     if (element instanceof IViewSite) {
-      return new Object[] { "RUN@cloud Tomcat apps" };
+      return new Object[] { this.appGroup };
     }
-    if (this.data != null && element instanceof String && ((String) element).startsWith("RUN@")) {
+    if (this.data != null && element instanceof AppGroup) {
       return this.data.getApplications().toArray();
       //return getAdapters(this.data.getApplications());
     }

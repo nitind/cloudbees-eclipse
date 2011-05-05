@@ -15,16 +15,17 @@ public class WSTUtil {
   private final static IServerType cloud = ServerCore.findServerType("com.cloudbees.eclipse.core.runcloud");
   private final static IServerType local = ServerCore.findServerType("com.cloudbees.eclipse.core.runcloud.local");
 
-  public static IServerWorkingCopy getServer(String appId, String projectName) throws CoreException {
-    return findOrCreateServer(appId, projectName, cloud);
+  public static IServerWorkingCopy getServer(String appId, String accountName, String projectName) throws CoreException {
+    return findOrCreateServer(appId, accountName, projectName, cloud);
   }
 
-  public static IServerWorkingCopy getLocalServer(String appId, String projectName) throws CoreException {
-    return findOrCreateServer(appId, projectName, local);
-  }
-
-  private static IServerWorkingCopy findOrCreateServer(String appId, String projectName, IServerType st)
+  public static IServerWorkingCopy getLocalServer(String appId, String accountName, String projectName)
       throws CoreException {
+    return findOrCreateServer(appId, accountName, projectName, local);
+  }
+
+  private static IServerWorkingCopy findOrCreateServer(String appId, String accountName, String projectName,
+      IServerType st) throws CoreException {
     IServer[] servers = ServerCore.getServers();
 
     for (IServer iServer : servers) {
@@ -33,22 +34,24 @@ public class WSTUtil {
           projectName);
       boolean idEquals = iServer.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "")
           .equals(appId);
-
+      boolean accountEquals = iServer.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID, "")
+          .equals(accountName);
       boolean serverTypeCorrect = iServer.getServerType().equals(st);
 
-      if (nameEquals && idEquals && serverTypeCorrect) {
+      if (nameEquals && idEquals && serverTypeCorrect && accountEquals) {
         return iServer.createWorkingCopy();
       }
     }
 
-    IServerWorkingCopy wc = createServer(appId, projectName, st);
+    IServerWorkingCopy wc = createServer(appId, accountName, projectName, st);
     return wc;
   }
 
-  private static IServerWorkingCopy createServer(String appId, String projectName, IServerType st) throws CoreException {
+  private static IServerWorkingCopy createServer(String appId, String accountName, String projectName, IServerType st)
+      throws CoreException {
     IServerWorkingCopy wc = st.createServer(null, null, null);
 
-    String idString = "".equals(appId) ? "" : " (with AppId:" + appId + ")";
+    String idString = "".equals(appId) ? "" : " (with AppId:" + accountName + "/" + appId + ")";
 
     String sufix;
     if (cloud.equals(st)) {
@@ -61,6 +64,7 @@ public class WSTUtil {
 
     wc.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, projectName);
     wc.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, appId);
+    wc.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID, accountName);
     wc.save(true, null);
     return wc;
   }

@@ -17,8 +17,8 @@ final class AppLabelProvider extends LabelProvider implements IFontProvider {
 
   @Override
   public String getText(final Object element) {
-    if (element instanceof String) {
-      return (String) element;
+    if (element instanceof AppGroup) {
+      return ((AppGroup) element).name;
     }
 
     if (element instanceof ApplicationInfo) {
@@ -31,7 +31,7 @@ final class AppLabelProvider extends LabelProvider implements IFontProvider {
 
   @Override
   public Image getImage(final Object element) {
-    if (element instanceof String) {
+    if (element instanceof AppGroup) {
       return FOLDER;
     }
 

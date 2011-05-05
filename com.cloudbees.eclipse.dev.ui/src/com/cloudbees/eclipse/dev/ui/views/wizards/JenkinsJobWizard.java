@@ -79,7 +79,7 @@ public class JenkinsJobWizard extends Wizard {
       public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         try {
           GrandCentralService service = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-          service.addToRepository(project, repo, monitor);
+          service.getForgeSyncService().addToRepository(repo, project, monitor);
         } catch (CloudBeesException e) {
           failiure.cause = e;
         }

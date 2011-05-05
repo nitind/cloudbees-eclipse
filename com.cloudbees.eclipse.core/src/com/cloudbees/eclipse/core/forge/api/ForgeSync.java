@@ -9,7 +9,9 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 
 public interface ForgeSync {
 
-  void sync(ForgeInstance instance, String passwd, IProgressMonitor monitor) throws CloudBeesException;
+  void updateStatus(ForgeInstance instance, IProgressMonitor subProgressMonitor) throws CloudBeesException;
+
+  void sync(ForgeInstance instance, IProgressMonitor monitor) throws CloudBeesException;
 
   boolean openRemoteFile(JenkinsScmConfig scmConfig, ChangeSetPathItem item, IProgressMonitor monitor);
 
@@ -18,4 +20,5 @@ public interface ForgeSync {
   boolean isUnderSvnScm(IProject project);
 
   ForgeInstance getMainRepo(IProject project);
+
 }

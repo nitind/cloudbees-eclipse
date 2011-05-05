@@ -10,18 +10,19 @@ import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationC
 import com.cloudbees.eclipse.run.ui.launchconfiguration.ILaunchExtraAction;
 import com.cloudbees.eclipse.run.wst.WSTUtil;
 
+@SuppressWarnings("restriction")
 public class WSTExtraActions implements ILaunchExtraAction {
 
-  @SuppressWarnings("restriction")
   @Override
   public void action(ILaunchConfiguration configuration, String projectName, boolean local) throws CoreException {
     String id = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
 
     ServerWorkingCopy server;
     if (local) {
-      server = (ServerWorkingCopy) WSTUtil.getLocalServer(id, projectName);
+      server = (ServerWorkingCopy) WSTUtil.getLocalServer(id, "", projectName);
     } else {
-      server = (ServerWorkingCopy) WSTUtil.getServer(id, projectName);
+      server = (ServerWorkingCopy) WSTUtil.getServer(id,
+          configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID, ""), projectName);
     }
     server.setServerState(IServer.STATE_STARTING);
     ILaunchConfigurationWorkingCopy wc = configuration.getWorkingCopy();

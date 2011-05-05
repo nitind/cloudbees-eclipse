@@ -49,7 +49,7 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
 
     if (v != null) {
       v.refresh();
-      ((TreeViewer) v).expandToLevel(2);
+      ((TreeViewer) v).expandToLevel(1);
     }
   }
 

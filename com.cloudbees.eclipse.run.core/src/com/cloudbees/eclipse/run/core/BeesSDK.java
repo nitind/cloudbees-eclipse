@@ -33,23 +33,11 @@ public class BeesSDK {
     return client.applicationList();
   }
 
-  public static ApplicationInfo getServerState(final IProject project) throws Exception {
-    String id = project.getName();
-    return getServerState(id);
-  }
-
-  public static ApplicationInfo getServerState(final String id) throws CloudBeesException, Exception {
+  public static ApplicationInfo getServerState(final String accountName, final String id) throws CloudBeesException,
+      Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
-
-    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + id;//$NON-NLS-1$
-
-    return client.applicationInfo(appId);
-  }
-
-  public static ApplicationStatusResponse stop(final String id) throws CloudBeesException, Exception {
-    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    return stop(grandCentralService.getCachedPrimaryUser(false), id);
+    return client.applicationInfo(accountName + "/" + id);
   }
 
   public static ApplicationStatusResponse stop(final String accountName, final String id) throws CloudBeesException,
@@ -75,11 +63,6 @@ public class BeesSDK {
     }.start();
   }
 
-  public static ApplicationStatusResponse start(final String id) throws CloudBeesException, Exception {
-    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    return start(grandCentralService.getCachedPrimaryUser(false), id);
-  }
-
   public static ApplicationStatusResponse start(final String accountName, final String id) throws CloudBeesException,
       Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
@@ -89,16 +72,13 @@ public class BeesSDK {
     return applicationStart;
   }
 
-  public static ApplicationDeployArchiveResponse deploy(final IProject project, final boolean build) throws Exception {
-    return deploy(project, project.getName(), build);
-  }
+  public static ApplicationDeployArchiveResponse deploy(final IProject project, final String account, final String id,
+      final boolean build) throws CloudBeesException, CoreException, FileNotFoundException, Exception {
 
-  public static ApplicationDeployArchiveResponse deploy(final IProject project, final String id, final boolean build)
-      throws CloudBeesException, CoreException, FileNotFoundException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
 
-    String appId = grandCentralService.getCachedPrimaryUser(false) + "/" + id;//$NON-NLS-1$
+    String appId = account + "/" + id;//$NON-NLS-1$
 
     IPath workspacePath = project.getLocation().removeLastSegments(1);
     IPath buildPath = getWarFile(project, build).getFullPath();

@@ -1,6 +1,7 @@
 package com.cloudbees.eclipse.run.ui.launchconfiguration;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.swt.SWT;
@@ -21,6 +22,7 @@ public class CBCloudLaunchConfigurationTab extends CBLaunchConfigurationTab {
 
   private Text customIdText;
   private Button customId;
+  private AccountSelecionComposite accountSelector;
 
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
@@ -35,6 +37,9 @@ public class CBCloudLaunchConfigurationTab extends CBLaunchConfigurationTab {
         configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
       }
     }
+
+    configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID,
+        this.accountSelector.getAccountName());
   }
 
   @Override
@@ -46,6 +51,10 @@ public class CBCloudLaunchConfigurationTab extends CBLaunchConfigurationTab {
       this.customId.setSelection(!"".equals(id));
       this.customIdText.setEnabled(!"".equals(id));
       this.customIdText.setText(id);
+
+      String account = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID, "");
+      this.accountSelector.setAccountName(account);
+
       updateLaunchConfigurationDialog();
     } catch (CoreException e) {
       CBRunUiActivator.logError(e);
@@ -55,6 +64,14 @@ public class CBCloudLaunchConfigurationTab extends CBLaunchConfigurationTab {
   @Override
   public void createControl(Composite parent) {
     super.createControl(parent);
+
+    this.accountSelector = new AccountSelecionComposite(this.main) {
+      @Override
+      public void handleUpdate() {
+        validateConfigurationTab();
+      }
+    };
+    this.accountSelector.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
     this.customId = new Button(this.main, SWT.CHECK);
     this.customId.setSelection(false);
@@ -97,5 +114,26 @@ public class CBCloudLaunchConfigurationTab extends CBLaunchConfigurationTab {
 
       }
     });
+  }
+
+  @Override
+  protected boolean validateConfigurationTab() {
+    boolean valid = super.validateConfigurationTab();
+
+    if (valid) {
+      IStatus accountStatus = this.accountSelector.validate();
+      if (!accountStatus.isOK()) {
+        setErrorMessage(accountStatus.getMessage());
+        updateLaunchConfigurationDialog();
+        valid = false;
+      }
+    }
+
+    return valid;
+  }
+
+  @Override
+  public boolean isValid(ILaunchConfiguration launchConfig) {
+    return super.isValid(launchConfig) && this.accountSelector.validate().isOK();
   }
 }

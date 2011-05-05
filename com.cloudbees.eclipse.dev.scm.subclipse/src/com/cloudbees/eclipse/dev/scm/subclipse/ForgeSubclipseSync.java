@@ -43,7 +43,34 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 public class ForgeSubclipseSync implements ForgeSync {
 
   @Override
-  public void sync(final ForgeInstance instance, final String passwd, final IProgressMonitor monitor)
+  public void updateStatus(final ForgeInstance instance, final IProgressMonitor monitor) throws CloudBeesException {
+
+    if (!ForgeInstance.TYPE.SVN.equals(instance.type)) {
+      return;
+    }
+
+    if (instance.url == null) {
+      throw new IllegalArgumentException("url not provided!");
+    }
+
+    try {
+      monitor.beginTask("Validating SVN repository connection '" + instance.url + "'...", 10);
+      monitor.worked(1);
+
+      SVNRepositories repos = SVNProviderPlugin.getPlugin().getRepositories();
+      boolean exists = repos.isKnownRepository(instance.url, false);
+      if (exists) {
+        monitor.worked(9);
+        instance.status = ForgeInstance.STATUS.SYNCED;
+      }
+    } finally {
+      monitor.worked(10);
+      monitor.done();
+    }
+  }
+
+  @Override
+  public void sync(final ForgeInstance instance, final IProgressMonitor monitor)
       throws CloudBeesException {
 
     if (!ForgeInstance.TYPE.SVN.equals(instance.type)) {
@@ -68,7 +95,7 @@ public class ForgeSubclipseSync implements ForgeSync {
       Properties props = new Properties();
       props.setProperty("url", instance.url);
       props.setProperty("user", instance.user);
-      props.setProperty("password", passwd);
+      props.setProperty("password", instance.password);
       ISVNRepositoryLocation rep = SVNProviderPlugin.getPlugin().getRepositories().createRepository(props);
       monitor.worked(5);
 
@@ -220,7 +247,7 @@ public class ForgeSubclipseSync implements ForgeSync {
   public ForgeInstance getMainRepo(final IProject project) {
     try {
       LocalResourceStatus projectStatus = SVNWorkspaceRoot.peekResourceStatusFor(project);
-      ForgeInstance repo = new ForgeInstance(projectStatus.getUrlString(), null, ForgeInstance.TYPE.SVN);
+      ForgeInstance repo = new ForgeInstance(projectStatus.getUrlString(), null, null, ForgeInstance.TYPE.SVN);
       return repo;
     } catch (SVNException e) {
       e.printStackTrace(); // TODO log or report

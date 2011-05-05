@@ -40,26 +40,43 @@ public class ForgeSyncService {
     return false;
   }
 
-  public String[] sync(final ForgeInstance instance, final String password, final IProgressMonitor monitor)
-      throws CloudBeesException {
+  public void updateStatus(final ForgeInstance instance, final IProgressMonitor monitor) throws CloudBeesException {
     int ticksPerProcess = 100 / Math.max(this.providers.size(), 1);
     if (ticksPerProcess <= 0) {
       ticksPerProcess = 1;
     }
-    List<String> status = new ArrayList<String>();
+
     for (ForgeSync provider : this.providers) {
       if (monitor.isCanceled()) {
         throw new OperationCanceledException();
       }
 
       try {
-        provider.sync(instance, password, new SubProgressMonitor(monitor, ticksPerProcess));
+        provider.updateStatus(instance, new SubProgressMonitor(monitor, ticksPerProcess));
       } catch (Exception e) {
         CloudBeesCorePlugin.getDefault().getLogger().error(e);
       }
     }
+  }
 
-    return status.toArray(new String[status.size()]);
+  public void sync(final ForgeInstance instance, final IProgressMonitor monitor)
+      throws CloudBeesException {
+    int ticksPerProcess = 100 / Math.max(this.providers.size(), 1);
+    if (ticksPerProcess <= 0) {
+      ticksPerProcess = 1;
+    }
+
+    for (ForgeSync provider : this.providers) {
+      if (monitor.isCanceled()) {
+        throw new OperationCanceledException();
+      }
+
+      try {
+        provider.sync(instance, new SubProgressMonitor(monitor, ticksPerProcess));
+      } catch (Exception e) {
+        CloudBeesCorePlugin.getDefault().getLogger().error(e);
+      }
+    }
   }
 
   public boolean openRemoteFile(final JenkinsScmConfig scmConfig, final ChangeSetPathItem item,

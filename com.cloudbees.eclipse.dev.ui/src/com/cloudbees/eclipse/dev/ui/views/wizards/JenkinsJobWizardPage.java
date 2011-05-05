@@ -140,7 +140,7 @@ public class JenkinsJobWizardPage extends WizardPage {
       return this.repoComposite.getSelectedRepo();
     } else {
       try {
-        return CloudBeesCorePlugin.getDefault().getGrandCentralService().getSvnRepo(this.project);
+        return CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().getSvnRepo(this.project);
       } catch (CloudBeesException e) {
         e.printStackTrace();
       }
@@ -157,7 +157,7 @@ public class JenkinsJobWizardPage extends WizardPage {
 
   public boolean isUnderSCM() {
     try {
-      return CloudBeesCorePlugin.getDefault().getGrandCentralService().isUnderSvnScm(this.project);
+      return CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().isUnderSvnScm(this.project);
     } catch (Exception e) {
       e.printStackTrace();
       return false;

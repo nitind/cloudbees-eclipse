@@ -126,6 +126,10 @@ public abstract class AccountSelecionComposite extends Composite {
   public IStatus validate() {
     String currentText = this.accountNameText.getText();
 
+    if (currentText == null || currentText.length() == 0) {
+      return new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, "Please provide account name.");
+    }
+
     if (!this.accountNames.contains(currentText)) {
       String error = MessageFormat.format("Can''t find CloudBees account with name ''{0}''.", currentText);
       return new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, error);
@@ -163,5 +167,9 @@ public abstract class AccountSelecionComposite extends Composite {
     if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
       this.accountNameText.setText(dialog.getSelectedAccountName());
     }
+  }
+
+  public void setAccountName(String accountName) {
+    this.accountNameText.setText(accountName);
   }
 }
