@@ -43,10 +43,10 @@ public class ForgeLabelProvider extends LabelProvider implements IFontProvider {
   @Override
   public Image getImage(final Object obj) {
     if (obj instanceof ForgeGroup) {
-      return CloudBeesDevUiPlugin.getImage(CBImages.IMG_FOLDER_HOSTED);
+      return CloudBeesDevUiPlugin.getImage(CBImages.IMG_FOLDER_FORGE);
     }
     if (obj instanceof ForgeInstance) {
-      return CloudBeesDevUiPlugin.getImage(CBImages.IMG_INSTANCE);
+      return CloudBeesDevUiPlugin.getImage(CBImages.IMG_INSTANCE_FORGE);
     }
 
     return null;

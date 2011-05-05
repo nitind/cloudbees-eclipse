@@ -194,6 +194,11 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_run_plain.png")));
     reg.put(CBImages.IMG_INSTANCE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/jenkins.png")));
 
+    reg.put(CBImages.IMG_FOLDER_FORGE,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_cloud.png")));
+    reg.put(CBImages.IMG_INSTANCE_FORGE,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_orange.png ")));
+
     reg.put(CBImages.IMG_VIEW,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_big.png")));
     //reg.put(CBImages.IMG_VIEW, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/det_pane_hide.gif")));

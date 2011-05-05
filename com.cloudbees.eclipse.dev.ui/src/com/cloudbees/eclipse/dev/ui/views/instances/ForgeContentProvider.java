@@ -38,7 +38,7 @@ public class ForgeContentProvider implements IStructuredContentProvider, ITreeCo
 
     if (v != null) {
       v.refresh();
-      ((TreeViewer) v).expandToLevel(2);
+      ((TreeViewer) v).expandToLevel(1);
     }
   }
 
