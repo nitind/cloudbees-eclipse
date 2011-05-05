@@ -51,7 +51,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
         }
       }
     } catch (Exception e) {
-      CBRunUiActivator.logError(e);
+      CBRunUiActivator.logErrorAndShowDialog(e);
     }
 
   }

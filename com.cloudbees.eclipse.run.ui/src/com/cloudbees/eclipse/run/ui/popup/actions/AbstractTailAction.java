@@ -96,7 +96,7 @@ public abstract class AbstractTailAction implements IObjectActionDelegate {
         try {
           BeesSDK.tail(appInfo.getId(), logName, consoleOutputStream);
         } catch (Exception e) {
-          e.printStackTrace();
+          CBRunUiActivator.logErrorAndShowDialog(e);
         }
       }
     });

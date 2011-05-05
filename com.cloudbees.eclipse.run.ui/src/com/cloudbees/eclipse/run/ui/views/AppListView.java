@@ -57,7 +57,7 @@ public class AppListView extends ViewPart implements IPropertyChangeListener, IC
               AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, list);
               AppListView.this.viewer.refresh(true);
             } catch (Exception e1) {
-              CBRunUiActivator.logError(e1);
+              CBRunUiActivator.logErrorAndShowDialog(e1);
             }
           }
         });

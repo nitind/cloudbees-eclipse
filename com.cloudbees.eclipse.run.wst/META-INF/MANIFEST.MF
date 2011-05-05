@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: RUN@cloud WST components
 Bundle-SymbolicName: com.cloudbees.eclipse.run.wst;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: com.cloudbees.eclipse.run.wst.Activator
+Bundle-Activator: com.cloudbees.eclipse.run.wst.CBRunWstPlugin
 Bundle-Vendor: CLOUDBEES
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.wst.server.core;bundle-version="1.1.206",
