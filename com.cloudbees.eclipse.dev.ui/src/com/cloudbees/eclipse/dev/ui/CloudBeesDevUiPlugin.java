@@ -477,6 +477,13 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             mess = "Found no Forge repositories!";
           }
 
+          Iterator<JenkinsChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
+              .iterator();
+          while (iterator.hasNext()) {
+            JenkinsChangeListener listener = iterator.next();
+            listener.forgeChanged(forgeRepos);
+          }
+
           if (userAction) {
             final String msg = mess;
             PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {

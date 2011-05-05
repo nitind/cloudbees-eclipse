@@ -12,11 +12,8 @@ import com.cloudbees.eclipse.run.ui.Images;
 
 final class AppLabelProvider extends LabelProvider implements IFontProvider {
 
-  private static final Image FOLDER = CBRunUiActivator.imageDescriptorFromPlugin(CBRunUiActivator.PLUGIN_ID,
-      Images.CLOUDBEES_FOLDER_PATH).createImage();
-
-  private static final Image TOMCAT = CBRunUiActivator.imageDescriptorFromPlugin(CBRunUiActivator.PLUGIN_ID,
-      Images.CLOUDBEES_TOMCAT_ICON_PATH).createImage();
+  private static final Image FOLDER = CBRunUiActivator.getImage(Images.CLOUDBEES_FOLDER);
+  private static final Image TOMCAT = CBRunUiActivator.getImage(Images.CLOUDBEES_TOMCAT_ICON);
 
   @Override
   public String getText(final Object element) {

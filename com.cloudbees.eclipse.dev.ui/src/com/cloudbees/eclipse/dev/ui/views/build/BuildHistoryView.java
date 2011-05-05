@@ -39,6 +39,7 @@ import org.eclipse.ui.part.ViewPart;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsChangeListener;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
@@ -348,6 +349,9 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
       }
 
       public void jenkinsChanged(final List<JenkinsInstanceResponse> instances) {
+      }
+
+      public void forgeChanged(final List<ForgeInstance> instances) {
       }
     };
 
