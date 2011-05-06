@@ -16,7 +16,7 @@
             class="com.cloudbees.eclipse.ui.internal.preferences.JenkinsInstancesPreferencePage"
             id="com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage"
             category="com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage"
-            name="Jenkins">
+            name="On-premise Jenkins">
         </page>
     </extension>
     

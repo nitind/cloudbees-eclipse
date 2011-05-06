@@ -125,14 +125,14 @@ public class ForgeSyncConfirmation extends Dialog {
     });
     btnSelectAll.setText("Select &All");
 
-    Button btnUnselectAll = new Button(composite, SWT.NONE);
-    btnUnselectAll.addSelectionListener(new SelectionAdapter() {
+    Button btnDeselectAll = new Button(composite, SWT.NONE);
+    btnDeselectAll.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(final SelectionEvent e) {
         ForgeSyncConfirmation.this.checkboxTableViewer.setAllChecked(false);
       }
     });
-    btnUnselectAll.setText("&Unselect All");
+    btnDeselectAll.setText("&Deselect All");
 
     for (ForgeInstance repo : this.repos) {
       if (repo.status == STATUS.UNKNOWN) {
