@@ -36,7 +36,7 @@
   <objectContribution
         adaptable="false"
         id="com.cloudbees.eclipse.run.ui.refreshRunAtCloudApps"
-        objectClass="java.lang.String">
+        objectClass="com.cloudbees.eclipse.run.ui.views.AppGroup">
      <action
            class="com.cloudbees.eclipse.run.ui.popup.actions.RefreshAction"
            enablesFor="1"
