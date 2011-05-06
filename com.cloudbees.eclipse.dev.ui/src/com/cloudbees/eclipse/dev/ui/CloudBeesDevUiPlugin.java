@@ -526,7 +526,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             for (ForgeInstance repo : toSync) {
               subMonitor.subTask("Synchronizing repository '" + repo.url + "'");
               CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().sync(repo, subMonitor);
-              mess += repo.status + " " + repo.url + "\n\n"; // TODO show lastException somewhere here?
+              mess += repo.status.getLabel() + " " + repo.url + "\n\n"; // TODO show lastException somewhere here?
               subMonitor.worked(step);
             }
             subMonitor.subTask("");
