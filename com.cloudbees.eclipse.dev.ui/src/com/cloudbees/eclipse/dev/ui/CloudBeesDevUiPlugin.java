@@ -560,6 +560,12 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
           return Status.OK_STATUS; // new Status(Status.INFO, PLUGIN_ID, mess);
         } catch (Exception e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
+          Iterator<JenkinsChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
+              .iterator();
+          while (iterator.hasNext()) {
+            JenkinsChangeListener listener = iterator.next();
+            listener.forgeChanged(null);
+          }
           return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage(), e);
         } finally {
           monitor.done();
@@ -638,4 +644,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     }
   }
 
+  public static void logError(Exception e) {
+    IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage());
+    plugin.getLog().log(status);
+  }
 }

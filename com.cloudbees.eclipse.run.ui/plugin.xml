@@ -269,7 +269,7 @@
 		<launchConfigurationType
 			delegate="com.cloudbees.eclipse.run.ui.launchconfiguration.CBLaunchDelegate"
 			id="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType"
-			modes="run, debug" name="CloudBees Application">
+			modes="run, debug" name="CloudBees Application at Local">
 		</launchConfigurationType>
 		<launchConfigurationType
 			delegate="com.cloudbees.eclipse.run.ui.launchconfiguration.CBCloudLaunchDelegate"
