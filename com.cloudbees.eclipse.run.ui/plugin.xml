@@ -294,26 +294,6 @@
        </cbTreeProvider>
     </extension>
 
-	<extension point="org.eclipse.ui.perspectiveExtensions">
-		<perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
-			<view relative="org.eclipse.ui.views.ProblemView" relationship="stack"
-				id="com.cloudbees.eclipse.run.ui.views.AppListView">
-			</view>
-		</perspectiveExtension>
-		<perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
-			<view relative="org.eclipse.ui.views.TaskList" relationship="stack"
-				id="com.cloudbees.eclipse.run.ui.views.AppListView">
-			</view>
-		</perspectiveExtension>
-  <perspectiveExtension
-        targetID="com.cloudbees.eclipse.ui.CloudBeesPerspective">
-     <view
-           id="com.cloudbees.eclipse.run.ui.views.AppListView"
-           relationship="stack"
-           relative="org.eclipse.ui.views.ProblemView">
-     </view>
-  </perspectiveExtension>
-	</extension>
  <extension
        point="org.eclipse.core.runtime.adapters">
     <factory
