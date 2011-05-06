@@ -22,10 +22,10 @@ import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 
 public abstract class SelectRepositoryComposite extends Composite {
 
-  private static final String GROUP_LABEL = "Forge repository";
-  private static final String FORGE_REPO_CHECK_LABEL = "Host at Forge";
-  private static final String ERR_ADD_REPOS = "Please add repositories to your CloudBees DEV@cloud";
-  private static final String ERR_REPO_SELECTION = "Repository is not selected.";
+  private static final String GROUP_LABEL = "SVN Forge repository";
+  private static final String FORGE_REPO_CHECK_LABEL = "Host at Forge SVN";
+  private static final String ERR_ADD_REPOS = "Please add SVN repositories to your CloudBees DEV@cloud";
+  private static final String ERR_REPO_SELECTION = "SVN repository is not selected.";
 
   private ForgeInstance[] repos;
   private ForgeInstance selectedRepo;
