@@ -15,7 +15,7 @@ public class ForgeInstance {
   }
 
   public static enum STATUS {
-    UNKNOWN("Unknown"), SYNCED("Synced"), SKIPPED("Skipped");
+    UNKNOWN("Not Configured"), SYNCED("Synced"), SKIPPED("Skipped");
 
     private final String label;
 
@@ -85,7 +85,7 @@ public class ForgeInstance {
 
   @Override
   public String toString() {
-    return this.url + " (" + this.status.toString().toLowerCase() + ")";
+    return this.url + " (" + this.status.getLabel().toLowerCase() + ")";
   }
 
   /**
