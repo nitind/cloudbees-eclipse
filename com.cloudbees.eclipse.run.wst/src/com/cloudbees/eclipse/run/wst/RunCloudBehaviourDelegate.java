@@ -71,8 +71,7 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
   @Override
   public IStatus publish(int kind, IProgressMonitor monitor) {
     try {
-      if (getServer().getServerState() != IServer.STATE_STARTED || kind == IServer.PUBLISH_CLEAN
-          || kind == IServer.PUBLISH_AUTO) {
+      if (kind == IServer.PUBLISH_CLEAN || kind == IServer.PUBLISH_AUTO) {
         return null;
       }
 
