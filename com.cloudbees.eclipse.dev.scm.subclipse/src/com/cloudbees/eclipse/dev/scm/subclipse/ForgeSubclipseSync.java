@@ -37,7 +37,7 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 /**
  * Forge repo sync provider for Subclipse
- *
+ * 
  * @author ahtik
  */
 public class ForgeSubclipseSync implements ForgeSync {
@@ -70,8 +70,7 @@ public class ForgeSubclipseSync implements ForgeSync {
   }
 
   @Override
-  public void sync(final ForgeInstance instance, final IProgressMonitor monitor)
-      throws CloudBeesException {
+  public void sync(final ForgeInstance instance, final IProgressMonitor monitor) throws CloudBeesException {
 
     if (!ForgeInstance.TYPE.SVN.equals(instance.type)) {
       return;
@@ -212,18 +211,24 @@ public class ForgeSubclipseSync implements ForgeSync {
   @Override
   public void addToRepository(final ForgeInstance instance, final IProject project, final IProgressMonitor monitor)
       throws CloudBeesException {
+
+    monitor.beginTask("Adding project to SVN repository", 0);
+
     if (!ForgeInstance.TYPE.SVN.equals(instance.type)) {
       return;
     }
 
+    monitor.subTask("checking if project is already under SCM");
     if (isUnderSvnScm(project)) {
       throw new CloudBeesException("This project is already under source control management.");
     }
 
     try {
+      monitor.subTask("loading repository location");
       ISVNRepositoryLocation location = SVNProviderPlugin.getPlugin().getRepository(instance.url);
       SVNWorkspaceRoot
           .shareProject(location, project, project.getName(), "Create new repository folder", true, monitor);
+      monitor.subTask("finished sharing project");
     } catch (Exception e) {
       throw new CloudBeesException("Failed to share project", e);
     }

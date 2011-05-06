@@ -105,6 +105,9 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
   @Override
   public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
     try {
+
+      monitor.beginTask("Creating new project", 0);
+
       if (CBWebAppWizardFinishOperation.this.useDefaultLocation) {
         this.importOperation.setContext(CBWebAppWizardFinishOperation.this.wizard.getShell());
         this.importOperation.setCreateContainerStructure(false);
@@ -113,6 +116,7 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
         BuildPathsBlock.createProject(this.project, CBWebAppWizardFinishOperation.this.locationURI, monitor);
       }
 
+      monitor.subTask("adding CloudBees nature");
       NatureUtil.addNatures(this.project, new String[] { CloudBeesNature.NATURE_ID }, monitor);
 
       if (CBWebAppWizardFinishOperation.this.isAddNewRepo) {

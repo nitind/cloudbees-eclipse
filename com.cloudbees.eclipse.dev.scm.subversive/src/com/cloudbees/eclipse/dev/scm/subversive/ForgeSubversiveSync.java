@@ -64,8 +64,7 @@ public class ForgeSubversiveSync implements ForgeSync {
   }
 
   @Override
-  public void sync(final ForgeInstance instance, final IProgressMonitor monitor)
-      throws CloudBeesException {
+  public void sync(final ForgeInstance instance, final IProgressMonitor monitor) throws CloudBeesException {
 
     if (!ForgeInstance.TYPE.SVN.equals(instance.type)) {
       return;
@@ -191,12 +190,16 @@ public class ForgeSubversiveSync implements ForgeSync {
   public void addToRepository(final ForgeInstance instance, final IProject project, final IProgressMonitor monitor)
       throws CloudBeesException {
 
+    monitor.beginTask("Adding project to SVN repository", 0);
+
     if (!ForgeInstance.TYPE.SVN.equals(instance.type)) {
       return;
     }
 
     boolean endsWithSlash = instance.url.endsWith("/");
     IRepositoryLocation location = null;
+
+    monitor.subTask("loading repositories");
 
     for (IRepositoryLocation loc : SVNRemoteStorage.instance().getRepositoryLocations()) {
       String url = loc.getUrl();
@@ -215,6 +218,8 @@ public class ForgeSubversiveSync implements ForgeSync {
       throw new CloudBeesException("Could not find CloudBees SVN repository");
     }
 
+    monitor.subTask("preparing sharing operation");
+
     ShareProjectOperation.IFolderNameMapper mapper = new ShareProjectOperation.IFolderNameMapper() {
 
       @Override
@@ -226,6 +231,7 @@ public class ForgeSubversiveSync implements ForgeSync {
     ShareProjectOperation operation = new ShareProjectOperation(new IProject[] { project }, location, mapper, null, 1,
         false, "Create new repository folder");
 
+    monitor.subTask("sharing project");
     operation.run(monitor);
   }
 
