@@ -68,6 +68,18 @@
            menubarPath="&quot;run&quot;">
      </action>
   </objectContribution>
+  <objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.configure"
+        objectClass="com.cloudbees.api.ApplicationInfo">
+     <action
+           class="com.cloudbees.eclipse.run.ui.popup.actions.ConfigureAction"
+           enablesFor="1"
+           id="com.cloudbees.eclipse.run.ui.action.configure"
+           label="Configure in RUN@cloud@"
+           menubarPath="&quot;run&quot;">
+     </action>
+  </objectContribution>
 		<objectContribution
         adaptable="false"
         id="com.cloudbees.eclipse.run.ui.stop"
