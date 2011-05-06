@@ -312,10 +312,10 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
 
     popupMenu.add(this.actionOpenBuild);
     popupMenu.add(this.actionOpenLog);
-    popupMenu.add(new Separator());
+    popupMenu.add(new Separator("cloudActions"));
     popupMenu.add(this.actionOpenBuildInBrowser);
     popupMenu.add(this.actionInvokeBuild);
-    popupMenu.add(new Separator());
+    popupMenu.add(new Separator("reloadActions"));
     popupMenu.add(this.actionReloadJobs);
 
     Menu menu = popupMenu.createContextMenu(this.table.getTable());
@@ -437,7 +437,7 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
     //    manager.add(this.actionOpenLog);
     manager.add(this.actionOpenBuildInBrowser);
     manager.add(this.actionInvokeBuild);
-    manager.add(new Separator());
+    manager.add(new Separator("reloadJob"));
     manager.add(this.actionReloadJobs);
   }
 

@@ -413,11 +413,11 @@ public class BuildPart extends EditorPart {
 
     this.form.getToolBarManager().add(this.invokeBuild);
     this.form.getToolBarManager().add(this.deployWar);
-    this.form.getToolBarManager().add(new Separator());
+    this.form.getToolBarManager().add(new Separator("openActions"));
     this.form.getToolBarManager().add(this.openLogs);
     this.form.getToolBarManager().add(this.openBuildHistory);
     this.form.getToolBarManager().add(openInWeb);
-    this.form.getToolBarManager().add(new Separator());
+    this.form.getToolBarManager().add(new Separator("reloadAction"));
     this.form.getToolBarManager().add(reload);
 
     this.form.getToolBarManager().update(false);

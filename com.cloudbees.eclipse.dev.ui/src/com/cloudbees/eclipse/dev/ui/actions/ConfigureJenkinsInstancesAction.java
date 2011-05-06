@@ -9,7 +9,7 @@ public class ConfigureJenkinsInstancesAction extends CBTreeAction {
 
   public ConfigureJenkinsInstancesAction() {
     super();
-    setText("Attach Jenkins instances...");
+    setText("Attach On-premise Jenkins instances...");
     setToolTipText("Attach more Jenkins instances to monitor");
 
     /*    setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
