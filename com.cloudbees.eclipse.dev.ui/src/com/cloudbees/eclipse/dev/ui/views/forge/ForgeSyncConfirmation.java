@@ -95,7 +95,7 @@ public class ForgeSyncConfirmation extends Dialog {
     Composite container = (Composite) super.createDialogArea(parent);
 
     Label lblSelectForgeRepositories = new Label(container, SWT.NONE);
-    lblSelectForgeRepositories.setText("Forge repositories to configure for the Eclipse workspace:");
+    lblSelectForgeRepositories.setText("Configure Forge repositories for this Eclipse workspace:");
 
     this.checkboxTableViewer = CheckboxTableViewer.newCheckList(container, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL
         | SWT.BORDER | SWT.FULL_SELECTION);
