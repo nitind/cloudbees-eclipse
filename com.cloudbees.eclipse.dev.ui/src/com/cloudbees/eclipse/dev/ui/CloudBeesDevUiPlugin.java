@@ -638,4 +638,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     }
   }
 
+  public static void logError(Exception e) {
+    IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage());
+    plugin.getLog().log(status);
+  }
 }

@@ -98,7 +98,6 @@ public class AppListView implements IPropertyChangeListener, ICBTreeProvider {
         || PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
         || PreferenceConstants.P_EMAIL.equals(event.getProperty())
         || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {
-      //      CloudBeesUIPlugin.getDefault().reloadAppList(false);
       refresh();
     }
   }
