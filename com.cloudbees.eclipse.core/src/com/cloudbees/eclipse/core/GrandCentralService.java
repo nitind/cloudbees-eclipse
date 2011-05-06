@@ -24,7 +24,7 @@ import com.google.gson.Gson;
 
 /**
  * Central access to CloudBees Grand Central API
- *
+ * 
  * @author ahtik
  */
 public class GrandCentralService {
@@ -59,7 +59,7 @@ public class GrandCentralService {
 
   /**
    * Validates user credential against CloudBees SSO authentication server. TODO Refactor to json-based validation
-   *
+   * 
    * @param email
    * @param password
    * @param monitor
@@ -92,6 +92,7 @@ public class GrandCentralService {
     return authInfo;
   }
 
+  @Deprecated
   public String getCachedPrimaryUser(final boolean refresh) throws CloudBeesException {
     String user = null;
     if (refresh || user == null) {

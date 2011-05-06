@@ -81,7 +81,7 @@ public class BeesSDK {
     String appId = account + "/" + id;//$NON-NLS-1$
 
     IPath workspacePath = project.getLocation().removeLastSegments(1);
-    IPath buildPath = getWarFile(project, build).getFullPath();
+    IPath buildPath = getWarFile(project, build, appId).getFullPath();
 
     String warFile = workspacePath.toOSString() + buildPath.toOSString();
     ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, warFile,
@@ -130,15 +130,15 @@ public class BeesSDK {
     getBeesClient(grandCentralService).applicationDelete(appId);
   }
 
-  private static IFile getWarFile(final IProject project, final boolean build) throws CloudBeesException,
-      CoreException, FileNotFoundException {
+  private static IFile getWarFile(final IProject project, final boolean build, final String id)
+      throws CloudBeesException, CoreException, FileNotFoundException {
     if (build) {
-      runTargets(project, new String[] { "dist" });
+      runTargets(project, new String[] { "dist" }, id);
     }
-    IFile file = getBuildFolder(project).getFile("webapp.war");
+    IFile file = getBuildFolder(project, id).getFile("webapp.war");
 
     if (!file.exists()) {
-      runTargets(project, new String[] { "dist" });
+      runTargets(project, new String[] { "dist" }, id);
       file.refreshLocal(IFile.DEPTH_INFINITE, null);
 
       if (!file.exists()) {
@@ -149,12 +149,12 @@ public class BeesSDK {
     return file;
   }
 
-  private static IFolder getBuildFolder(final IProject project) throws CloudBeesException, CoreException,
-      FileNotFoundException {
+  private static IFolder getBuildFolder(final IProject project, final String id) throws CloudBeesException,
+      CoreException, FileNotFoundException {
 
     IFolder folder = project.getFolder("build");
     if (!folder.exists()) {
-      runTargets(project, new String[] { "dist" });
+      runTargets(project, new String[] { "dist" }, id);
       folder.refreshLocal(IFile.DEPTH_INFINITE, null);
 
       if (!folder.exists()) {
@@ -177,8 +177,8 @@ public class BeesSDK {
     return client;
   }
 
-  private static void runTargets(final IProject project, final String[] targets) throws CloudBeesException,
-      CoreException {
+  private static void runTargets(final IProject project, final String[] targets, final String id)
+      throws CloudBeesException, CoreException {
     AntRunner runner = new AntRunner();
 
     runner.setBuildFileLocation(getBuildXmlPath(project));
@@ -189,7 +189,7 @@ public class BeesSDK {
 
     String secretKey = "-Dbees.apiSecret=" + cachedAuthInfo.getAuth().secret_key;//$NON-NLS-1$
     String authKey = " -Dbees.apiKey=" + cachedAuthInfo.getAuth().api_key;//$NON-NLS-1$
-    String appId = " -Dbees.appid=" + grandCentralService.getCachedPrimaryUser(false) + "/" + project.getName();//$NON-NLS-1$
+    String appId = " -Dbees.appid=" + id;
     String beesHome = " -Dbees.home=" + CBSdkActivator.getDefault().getBeesHome();
     runner.setArguments(secretKey + authKey + appId + beesHome);
 
