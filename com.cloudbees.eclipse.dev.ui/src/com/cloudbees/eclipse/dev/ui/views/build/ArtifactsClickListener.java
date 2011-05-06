@@ -31,6 +31,7 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class ArtifactsClickListener implements IDoubleClickListener {
 
+  @Override
   public void doubleClick(final DoubleClickEvent event) {
     Object selection = ((TreeSelection) event.getSelection()).getFirstElement();
 
@@ -151,7 +152,9 @@ public class ArtifactsClickListener implements IDoubleClickListener {
             monitor.worked(50);
             ApplicationDeployArchiveResponse result = BeesSDK.deploy(app.getId(), tempWar.getCanonicalPath());
             monitor.worked(50);
-            newAppUrl[0] = result.getUrl();
+            if (result != null) {
+              newAppUrl[0] = result.getUrl();
+            }
           } catch (Exception e) {
             return new Status(IStatus.ERROR, CloudBeesDevUiPlugin.PLUGIN_ID, e.getMessage(), e);
           } finally {

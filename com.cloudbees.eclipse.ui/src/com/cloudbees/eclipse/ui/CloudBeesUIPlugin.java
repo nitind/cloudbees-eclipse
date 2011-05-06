@@ -437,7 +437,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     if (USE_SECURE_STORAGE) {
       SecurePreferencesFactory.getDefault().put(PreferenceConstants.P_PASSWORD, text, true);
     } else {
-      getPreferenceStore().putValue(PreferenceConstants.P_PASSWORD, text);
+      getPreferenceStore().setValue(PreferenceConstants.P_PASSWORD, text);
     }
     // Call programmatically as SecurePreferences does not provide change listeners
     CloudBeesUIPlugin.getDefault().fireSecureStorageChanged();
