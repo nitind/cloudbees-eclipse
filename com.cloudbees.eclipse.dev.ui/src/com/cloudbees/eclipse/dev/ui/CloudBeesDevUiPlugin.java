@@ -158,7 +158,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
   /**
    * Returns the shared instance
-   * 
+   *
    * @return the shared instance
    */
   public static CloudBeesDevUiPlugin getDefault() {
@@ -509,6 +509,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
                     if (repo.status != STATUS.SYNCED) {
                       if (!toSync.contains(repo)) {
                         repo.status = STATUS.SKIPPED;
+                      } else {
+                        repo.status = STATUS.UNKNOWN;
                       }
                     }
                   }
@@ -644,7 +646,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     }
   }
 
-  public static void logError(Exception e) {
+  public static void logError(final Exception e) {
     IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage());
     plugin.getLog().log(status);
   }
