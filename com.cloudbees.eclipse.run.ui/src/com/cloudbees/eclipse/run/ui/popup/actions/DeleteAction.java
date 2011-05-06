@@ -1,6 +1,8 @@
 package com.cloudbees.eclipse.run.ui.popup.actions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+import java.util.Iterator;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IAction;
@@ -24,17 +26,25 @@ public class DeleteAction implements IObjectActionDelegate {
 
   private class RunnableWithProgressImpl implements IRunnableWithProgress {
 
-    private final ApplicationInfo appInfo;
+    private final Iterator<ApplicationInfo> iterator;
+    private final int selectionCount;
 
-    public RunnableWithProgressImpl(ApplicationInfo appInfo) {
-      this.appInfo = appInfo;
+    public RunnableWithProgressImpl(Iterator<ApplicationInfo> iterator, int selectionCount) {
+      this.iterator = iterator;
+      this.selectionCount = selectionCount;
     }
 
     @Override
     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-      monitor.beginTask("Deleting project from RUN@cloud server", 1);
       try {
-        BeesSDK.delete(this.appInfo.getId());
+        monitor.beginTask("Deleting selected applications...", this.selectionCount);
+
+        while (this.iterator.hasNext()) {
+          ApplicationInfo applicationInfo = this.iterator.next();
+          monitor.subTask("Deleting " + applicationInfo.getId() + "...");
+          BeesSDK.delete(applicationInfo.getId());
+          monitor.worked(1);
+        }
       } catch (Exception e) {
         CBRunUiActivator.logErrorAndShowDialog(e);
       } finally {
@@ -51,20 +61,22 @@ public class DeleteAction implements IObjectActionDelegate {
 
       if (selection instanceof IStructuredSelection) {
         IStructuredSelection structSelection = (IStructuredSelection) selection;
-        Object element = structSelection.getFirstElement();
+        @SuppressWarnings("unchecked")
+        Iterator<ApplicationInfo> iterator = structSelection.iterator();
 
-        if (element instanceof ApplicationInfo) {
-          try {
-            boolean confirmed = MessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "Delete",
-                "Are you sure you want to delete this project from RUN@cloud?");
-            if (confirmed) {
-              ProgressMonitorDialog monitor = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
-              monitor.run(false, false, new RunnableWithProgressImpl((ApplicationInfo) element));
-              CloudBeesUIPlugin.getDefault().fireApplicationInfoChanged();
-            }
-          } catch (Exception e) {
-            CBRunUiActivator.logError(e);
+        try {
+          String target = structSelection.size() > 1 ? "projects" : "project";
+          String question = MessageFormat.format("Are you sure you want to delete the selected {0} from RUN@cloud?",
+              target);
+
+          boolean confirmed = MessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "Delete", question);
+          if (confirmed) {
+            ProgressMonitorDialog monitor = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
+            monitor.run(false, false, new RunnableWithProgressImpl(iterator, structSelection.size()));
+            CloudBeesUIPlugin.getDefault().fireApplicationInfoChanged();
           }
+        } catch (Exception e) {
+          CBRunUiActivator.logError(e);
         }
       }
     }

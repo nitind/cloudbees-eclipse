@@ -62,7 +62,7 @@
         objectClass="com.cloudbees.api.ApplicationInfo">
      <action
            class="com.cloudbees.eclipse.run.ui.popup.actions.DeleteAction"
-           enablesFor="1"
+           enablesFor="+"
            id="com.cloudbees.eclipse.run.ui.action.delete"
            label="Delete in RUN@cloud@"
            menubarPath="&quot;run&quot;">
