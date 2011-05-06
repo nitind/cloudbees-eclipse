@@ -7,7 +7,7 @@ public class ReloadJenkinsInstancesAction extends CBTreeAction {
 
   public ReloadJenkinsInstancesAction() {
     super();
-    setText("Reload DEV@cloud Jenkins instances");
+    setText("Reload DEV@cloud Jenkins instances@");
     setToolTipText("Reload DEV@cload Jenkins instances");
     /*    setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
             .getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
