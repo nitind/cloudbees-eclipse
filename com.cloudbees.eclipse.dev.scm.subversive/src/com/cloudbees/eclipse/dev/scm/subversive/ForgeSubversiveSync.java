@@ -51,12 +51,26 @@ public class ForgeSubversiveSync implements ForgeSync {
       Exception ex = SVNUtility.validateRepositoryLocation(loc);
       if (ex != null) {
         monitor.worked(8);
+        instance.lastException = ex;
         throw new CloudBeesException("Failed to validate SVN connection to " + url, ex);
       }
-      monitor.worked(1);
 
-      // TODO check existance
-      //instance.status = ForgeInstance.STATUS.SYNCED;
+      IRepositoryLocation[] reps = SVNRemoteStorage.instance().getRepositoryLocations();
+      boolean exists = false;
+      if (reps != null) {
+        for (IRepositoryLocation rep : reps) {
+          if (url.equals(rep.getUrl())) {
+            exists = true;
+            break;
+          }
+        }
+      }
+
+      if (exists) {
+        instance.status = ForgeInstance.STATUS.SYNCED;
+      }
+
+      monitor.worked(1);
     } finally {
       monitor.worked(10);
       monitor.done();
@@ -89,6 +103,7 @@ public class ForgeSubversiveSync implements ForgeSync {
       Exception ex = SVNUtility.validateRepositoryLocation(loc);
       if (ex != null) {
         monitor.worked(8);
+        instance.lastException = ex;
         throw new CloudBeesException("Failed to validate SVN connection to " + url, ex);
       }
       monitor.worked(1);
