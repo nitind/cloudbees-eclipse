@@ -79,7 +79,7 @@ public class GrandCentralService {
 
   }
 
-  private boolean hasAuthInfo() {
+  public boolean hasAuthInfo() {
     return this.email != null && this.email.trim().length() > 0 && this.password != null
         && this.password.trim().length() > 0;
   }
