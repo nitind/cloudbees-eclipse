@@ -158,7 +158,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
   /**
    * Returns the shared instance
-   *
+   * 
    * @return the shared instance
    */
   public static CloudBeesDevUiPlugin getDefault() {
@@ -201,8 +201,10 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
     reg.put(CBImages.IMG_FOLDER_FORGE,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_cb.png")));
-    reg.put(CBImages.IMG_INSTANCE_FORGE,
-        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_orange.png")));
+    reg.put(CBImages.IMG_INSTANCE_FORGE_GIT,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/scm_git.png")));
+    reg.put(CBImages.IMG_INSTANCE_FORGE_SVN,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/scm_svn.png")));
 
     reg.put(CBImages.IMG_VIEW,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_big.png")));
@@ -500,8 +502,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
                 toSync.clear();
                 if (result == Dialog.OK) {
-                  if (confDialog.getSelectedRepos() != null
-                    && !confDialog.getSelectedRepos().isEmpty()) {
+                  if (confDialog.getSelectedRepos() != null && !confDialog.getSelectedRepos().isEmpty()) {
                     toSync.addAll(confDialog.getSelectedRepos());
                   }
                   for (ForgeInstance repo : forgeRepos) {
