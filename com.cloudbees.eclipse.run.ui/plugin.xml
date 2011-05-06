@@ -118,12 +118,16 @@
          menubarPath="&quot;run&quot;">
 			</action>
    <visibility>
-      <and>
+      <or>
          <objectState
                name="status"
                value="stopped">
          </objectState>
-      </and>
+         <objectState
+               name="status"
+               value="hibernate">
+         </objectState>
+      </or>
    </visibility>
 		</objectContribution>
   <objectContribution
