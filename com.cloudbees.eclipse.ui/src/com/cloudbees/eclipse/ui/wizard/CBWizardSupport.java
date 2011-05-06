@@ -31,8 +31,11 @@ public class CBWizardSupport {
 
       public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         try {
+          monitor.beginTask("Fetching Jenkins instances", 0);
           CloudBeesUIPlugin plugin = CloudBeesUIPlugin.getDefault();
+          monitor.subTask("loading local Jenkins instances...");
           List<JenkinsInstance> manualInstances = plugin.loadManualJenkinsInstances();
+          monitor.subTask("loading DEV@cloud Jenkins instances...");
           List<JenkinsInstance> cloudInstances = plugin.loadDevAtCloudInstances(monitor);
           instances.addAll(manualInstances);
           instances.addAll(cloudInstances);
@@ -69,6 +72,7 @@ public class CBWizardSupport {
 
       public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         try {
+          monitor.beginTask("Fetching forge repositories", 0);
           List<ForgeInstance> forgeRepos = CloudBeesUIPlugin.getDefault().getForgeRepos(monitor);
           if (type == null) {
             repos.addAll(forgeRepos);
@@ -116,6 +120,7 @@ public class CBWizardSupport {
 
       public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         try {
+          monitor.beginTask("Creating new Jenkins job...", 0);
           jenkinsService.createJenkinsJob(jobName, configXML, monitor);
         } catch (CloudBeesException e) {
           failiure.cause = e;
