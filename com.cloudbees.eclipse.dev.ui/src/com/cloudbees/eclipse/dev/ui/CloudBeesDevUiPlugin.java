@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -41,6 +42,7 @@ import com.cloudbees.eclipse.dev.ui.utils.FavoritesUtils;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildEditorInput;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildHistoryView;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildPart;
+import com.cloudbees.eclipse.dev.ui.views.forge.ForgeSyncConfirmation;
 import com.cloudbees.eclipse.dev.ui.views.jobs.JobConsoleManager;
 import com.cloudbees.eclipse.dev.ui.views.jobs.JobsView;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -467,7 +469,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
         try {
           monitor.beginTask("Checking Forge repositories", 10);
 
-          List<ForgeInstance> forgeRepos = CloudBeesUIPlugin.getDefault().getForgeRepos(monitor);
+          final List<ForgeInstance> forgeRepos = CloudBeesUIPlugin.getDefault().getForgeRepos(monitor);
           int step = 1000 / Math.max(forgeRepos.size(), 1);
 
           IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 4);
@@ -478,12 +480,11 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
                 .updateStatus(repo, subMonitor);
             subMonitor.worked(step);
           }
-
           subMonitor.subTask("");
 
           final List<ForgeInstance> toSync = new ArrayList<ForgeInstance>();
           for (ForgeInstance repo : forgeRepos) {
-            if (repo.status == STATUS.UNKNOWN || repo.status == STATUS.SKIPPED) {
+            if (repo.status != STATUS.SYNCED) {
               toSync.add(repo);
             }
           }
@@ -492,11 +493,24 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
               @Override
               public void run() {
-                // TODO open proper confirmation
-                boolean confirm = MessageDialog.openConfirm(CloudBeesDevUiPlugin.getDefault().getWorkbench()
-                    .getDisplay().getActiveShell(), "To sync", "To sync: " + toSync);
-                if (!confirm) {
-                  toSync.clear();
+
+                ForgeSyncConfirmation confDialog = new ForgeSyncConfirmation(CloudBeesDevUiPlugin.getDefault()
+                    .getWorkbench().getDisplay().getActiveShell(), toSync);
+                int result = confDialog.open();
+
+                toSync.clear();
+                if (result == Dialog.OK) {
+                  if (confDialog.getSelectedRepos() != null
+                    && !confDialog.getSelectedRepos().isEmpty()) {
+                    toSync.addAll(confDialog.getSelectedRepos());
+                  }
+                  for (ForgeInstance repo : forgeRepos) {
+                    if (repo.status != STATUS.SYNCED) {
+                      if (!toSync.contains(repo)) {
+                        repo.status = STATUS.SKIPPED;
+                      }
+                    }
+                  }
                 }
               }
             });
@@ -509,13 +523,14 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             for (ForgeInstance repo : toSync) {
               subMonitor.subTask("Synchronizing repository '" + repo.url + "'");
               CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().sync(repo, subMonitor);
-              mess += repo.status + " " + repo.url + "\n\n";
+              mess += repo.status + " " + repo.url + "\n\n"; // TODO show lastException somewhere here?
               subMonitor.worked(step);
             }
             subMonitor.subTask("");
           }
 
-          // TODO persist new forge state
+          CloudBeesUIPlugin.getDefault().getPreferenceStore()
+              .setValue(PreferenceConstants.P_FORGE_INSTANCES, ForgeInstance.encode(forgeRepos));
 
           if (forgeRepos.isEmpty()) {
             mess = "Found no Forge repositories!";

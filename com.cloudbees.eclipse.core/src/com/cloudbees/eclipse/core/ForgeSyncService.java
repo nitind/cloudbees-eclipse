@@ -55,6 +55,7 @@ public class ForgeSyncService {
         provider.updateStatus(instance, new SubProgressMonitor(monitor, ticksPerProcess));
       } catch (Exception e) {
         CloudBeesCorePlugin.getDefault().getLogger().error(e);
+        instance.lastException = e;
       }
     }
   }
@@ -75,6 +76,7 @@ public class ForgeSyncService {
         provider.sync(instance, new SubProgressMonitor(monitor, ticksPerProcess));
       } catch (Exception e) {
         CloudBeesCorePlugin.getDefault().getLogger().error(e);
+        instance.lastException = e;
       }
     }
   }

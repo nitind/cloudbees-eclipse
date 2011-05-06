@@ -2,7 +2,7 @@ package com.cloudbees.eclipse.ui;
 
 /**
  * Constant definitions for plug-in preferences
- * 
+ *
  * @author ahtik
  */
 public class PreferenceConstants {
@@ -16,5 +16,6 @@ public class PreferenceConstants {
   public static final String P_JENKINS_REFRESH_ENABLED = "cloudbees.jenkins.refresh.enabled";
 
   public static final String P_JENKINS_INSTANCES = "cloudbees.jenkins.instances";
+  public static final String P_FORGE_INSTANCES = "cloudbees.forge.instances";
 
 }
