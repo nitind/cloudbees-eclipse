@@ -120,7 +120,7 @@ public class AppListView extends ViewPart implements IPropertyChangeListener, IC
   }
 
   @Override
-  public CBTreeAction[] getActions() {
+  public CBTreeAction[] getContributors() {
     return new CBTreeAction[0];
   }
 

@@ -18,11 +18,14 @@ import com.cloudbees.eclipse.dev.ui.actions.ReloadForgeReposAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 import com.cloudbees.eclipse.ui.views.CBTreeAction;
+import com.cloudbees.eclipse.ui.views.CBTreeContributor;
+import com.cloudbees.eclipse.ui.views.CBTreeSeparator;
+import com.cloudbees.eclipse.ui.views.CBTreeSeparator.SeparatorLocation;
 import com.cloudbees.eclipse.ui.views.ICBTreeProvider;
 
 /**
  * View showing both Jenkins offline installations and JaaS Nectar instances
- *
+ * 
  * @author ahtik
  */
 public class ForgeTreeView implements IPropertyChangeListener, ICBTreeProvider {
@@ -90,24 +93,28 @@ public class ForgeTreeView implements IPropertyChangeListener, ICBTreeProvider {
   }
 
   @Override
-  public CBTreeAction[] getActions() {
-    return new CBTreeAction[] { this.reloadForgeAction };
+  public CBTreeContributor[] getContributors() {
+    return new CBTreeContributor[] { new CBTreeSeparator(SeparatorLocation.PULL_DOWN), this.reloadForgeAction };
   }
 
+  @Override
   public ITreeContentProvider getContentProvider() {
     return this.contentProvider;
   }
 
+  @Override
   public ILabelProvider getLabelProvider() {
     return this.labelProvider;
   }
 
+  @Override
   public void setViewer(final TreeViewer viewer) {
     this.viewer = viewer;
 
     init();
   }
 
+  @Override
   public boolean open(final Object el) {
     return false;
   }

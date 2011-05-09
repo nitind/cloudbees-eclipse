@@ -3,7 +3,6 @@ package com.cloudbees.eclipse.dev.ui.views.instances;
 import java.util.List;
 
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -38,11 +37,14 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 import com.cloudbees.eclipse.ui.internal.action.ConfigureCloudBeesAction;
 import com.cloudbees.eclipse.ui.views.CBTreeAction;
+import com.cloudbees.eclipse.ui.views.CBTreeContributor;
+import com.cloudbees.eclipse.ui.views.CBTreeSeparator;
+import com.cloudbees.eclipse.ui.views.CBTreeSeparator.SeparatorLocation;
 import com.cloudbees.eclipse.ui.views.ICBTreeProvider;
 
 /**
  * View showing both Jenkins offline installations and JaaS Nectar instances
- *
+ * 
  * @author ahtik
  */
 public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener, ICBTreeProvider {
@@ -113,6 +115,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
         });
       }
 
+      @Override
       public void forgeChanged(final List<ForgeInstance> instances) {
       }
     };
@@ -158,7 +161,6 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
     manager.add(this.configureAccountAction);
     manager.add(this.attachJenkinsAction);
     manager.add(this.configureSshAction);
-    manager.add(new Separator());
     //    manager.add(this.reloadForgeAction);
     manager.add(this.reloadJenkinsAction);
   }
@@ -220,26 +222,29 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
   }
 
   @Override
-  public CBTreeAction[] getActions() {
-    return new CBTreeAction[] { this.configureAccountAction, this.attachJenkinsAction, /*this.reloadForgeAction,*/
-        this.reloadJenkinsAction,
-        this.configureSshAction };
+  public CBTreeContributor[] getContributors() {
+    return new CBTreeContributor[] { this.attachJenkinsAction, this.reloadJenkinsAction,
+        new CBTreeSeparator(SeparatorLocation.PULL_DOWN), this.configureAccountAction, this.configureSshAction };
   }
 
+  @Override
   public ITreeContentProvider getContentProvider() {
     return this.contentProvider;
   }
 
+  @Override
   public ILabelProvider getLabelProvider() {
     return this.labelProvider;
   }
 
+  @Override
   public void setViewer(final TreeViewer viewer) {
     this.viewer = viewer;
 
     init();
   }
 
+  @Override
   public boolean open(final Object el) {
     if (el instanceof BaseJenkinsResponse) {
       BaseJenkinsResponse resp = (BaseJenkinsResponse) el;

@@ -182,6 +182,37 @@
           </and>
       	</visibility>
     	</objectContribution>
+     <objectContribution
+           adaptable="false"
+           id="com.cloudbees.eclipse.dev.ui.reload"
+           objectClass="com.cloudbees.eclipse.dev.ui.views.instances.InstanceGroup$DevAtCloudJenkinsInstanceGroup">
+        <action
+              class="com.cloudbees.eclipse.dev.ui.actions.ReloadJenkinsInstancesAction"
+              enablesFor="1"
+              id="com.cloudbees.eclipse.dev.ui.action.reload"
+              label="Reload Jenkins instances">
+        </action>
+     </objectContribution>
+     <objectContribution
+           adaptable="false"
+           id="com.cloudbees.eclipse.dev.ui.attachJenkins"
+           objectClass="com.cloudbees.eclipse.dev.ui.views.instances.InstanceGroup$OnPremiseJenkinsInstanceGroup">
+        <action
+              class="com.cloudbees.eclipse.dev.ui.actions.ConfigureJenkinsInstancesAction"
+              id="com.cloudbees.eclipse.dev.ui.action.attachJenkins"
+              label="Attach Jenkins Instance">
+        </action>
+     </objectContribution>
+     <objectContribution
+           adaptable="false"
+           id="com.cloudbees.eclipse.dev.ui.reloadForge"
+           objectClass="com.cloudbees.eclipse.dev.ui.views.forge.ForgeGroup">
+        <action
+              class="com.cloudbees.eclipse.dev.ui.actions.ReloadForgeReposAction"
+              id="com.cloudbees.eclipse.dev.ui.action.reloadForge"
+              label="Reload Forge repositories">
+        </action>
+     </objectContribution>
  	</extension>
  	
     <extension

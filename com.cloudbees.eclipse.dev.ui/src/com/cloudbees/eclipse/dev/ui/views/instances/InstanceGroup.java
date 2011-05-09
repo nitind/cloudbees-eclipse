@@ -9,9 +9,9 @@ import com.cloudbees.eclipse.ui.views.ICBGroup;
 
 public class InstanceGroup implements ICBGroup {
 
-  private List<JenkinsInstanceHolder> instances;
-  private String name;
-  private boolean cloudHosted;
+  private final List<JenkinsInstanceHolder> instances;
+  private final String name;
+  private final boolean cloudHosted;
   private boolean loading;
 
   public InstanceGroup(final String name, final boolean cloudHosted) {
@@ -65,7 +65,7 @@ public class InstanceGroup implements ICBGroup {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
+    result = prime * result + (this.name == null ? 0 : this.name.hashCode());
     return result;
   }
 
@@ -94,5 +94,21 @@ public class InstanceGroup implements ICBGroup {
   @Override
   public int getOrder() {
     return this.cloudHosted ? 2 : 3;
+  }
+
+  public static class DevAtCloudJenkinsInstanceGroup extends InstanceGroup {
+
+    public DevAtCloudJenkinsInstanceGroup(String name, boolean cloudHosted) {
+      super(name, cloudHosted);
+    }
+
+  }
+
+  public static class OnPremiseJenkinsInstanceGroup extends InstanceGroup {
+
+    public OnPremiseJenkinsInstanceGroup(String name, boolean cloudHosted) {
+      super(name, cloudHosted);
+    }
+
   }
 }

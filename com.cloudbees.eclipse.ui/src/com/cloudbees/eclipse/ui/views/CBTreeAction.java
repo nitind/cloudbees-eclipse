@@ -1,13 +1,16 @@
 package com.cloudbees.eclipse.ui.views;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
 
-public abstract class CBTreeAction extends Action {
+public abstract class CBTreeAction extends Action implements CBTreeContributor {
 
-  public abstract boolean isPopup();
+  public void contributeTo(IMenuManager menuManager) {
+    menuManager.add(this);
+  }
 
-  public abstract boolean isPullDown();
-
-  public abstract boolean isToolbar();
-
+  public void contributeTo(IToolBarManager toolBarManager) {
+    toolBarManager.add(this);
+  }
 }

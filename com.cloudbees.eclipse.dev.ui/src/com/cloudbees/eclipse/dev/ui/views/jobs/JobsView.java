@@ -64,7 +64,7 @@ import com.cloudbees.eclipse.ui.PreferenceConstants;
 
 /**
  * View showing jobs for both Jenkins offline installations and JaaS Nectar instances
- *
+ * 
  * @author ahtik
  */
 public class JobsView extends ViewPart implements IPropertyChangeListener {
@@ -487,6 +487,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       public void jenkinsChanged(final List<JenkinsInstanceResponse> instances) {
       }
 
+      @Override
       public void forgeChanged(final List<ForgeInstance> instances) {
       }
     };
@@ -591,6 +592,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   private void fillLocalPullDown(final IMenuManager manager) {
     manager.add(this.actionOpenLastBuildDetails);
     manager.add(this.actionOpenLog);
+    manager.add(new Separator());
     manager.add(this.actionAddFavorite);
     manager.add(this.actionRemoveFavorite);
   }
