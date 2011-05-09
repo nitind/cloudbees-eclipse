@@ -108,7 +108,6 @@ public class BeesSDK {
 
   public static ApplicationDeployArchiveResponse deploy(final String appId, final String warPath)
       throws CloudBeesException, CoreException, FileNotFoundException, Exception {
-    System.out.println("AAAAAAAA: " + appId + " - " + warPath);
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
     if (client == null) {
