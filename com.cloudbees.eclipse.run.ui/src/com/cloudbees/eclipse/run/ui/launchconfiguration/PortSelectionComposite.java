@@ -7,6 +7,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -45,6 +46,17 @@ public abstract class PortSelectionComposite extends Composite {
     this.btnUseDefaultPort.setSelection(true);
     this.btnUseDefaultPort.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
     this.btnUseDefaultPort.setText("Use default port (" + DEFAULT_PORT + ")");
+    this.btnUseDefaultPort.addSelectionListener(new SelectionListener() {
+
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        handleChange();
+      }
+
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {
+      }
+    });
 
     this.lblPort = new Label(grpSelectPort, SWT.NONE);
     this.lblPort.setEnabled(false);
@@ -91,7 +103,7 @@ public abstract class PortSelectionComposite extends Composite {
   }
 
   public void setPort(String port) {
-    if (port == null || "".equals(port)) {
+    if (port == null || "".equals(port) || DEFAULT_PORT.equals(port)) {
       this.btnUseDefaultPort.setSelection(true);
     } else {
       this.btnUseDefaultPort.setSelection(false);
