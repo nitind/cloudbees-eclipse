@@ -4,10 +4,9 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 
-
 public interface ICBTreeProvider {
 
-  CBTreeAction[] getActions();
+  CBTreeContributor[] getContributors();
 
   ITreeContentProvider getContentProvider();
 

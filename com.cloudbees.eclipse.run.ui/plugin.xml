@@ -46,6 +46,46 @@
   </objectContribution>
   <objectContribution
         adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.marker.tail"
+        objectClass="null">
+     <action
+           class="org.eclipse.jface.action.GroupMarker"
+           id="com.cloudbees.eclipse.run.ui.action.marker.tail"
+           label="tail">
+     </action>
+  </objectContribution>
+  <objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.marker.run"
+        objectClass="null">
+     <action
+           class="org.eclipse.jface.action.GroupMarker"
+           id="com.cloudbees.eclipse.run.ui.action9"
+           label="run">
+     </action>
+  </objectContribution>
+  <objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.marker.properties"
+        objectClass="null">
+     <action
+           class="org.eclipse.jface.action.GroupMarker"
+           id="com.cloudbees.eclipse.run.ui.action.marker.properties"
+           label="properties">
+     </action>
+  </objectContribution>
+  <objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.marker.open"
+        objectClass="null">
+     <action
+           class="org.eclipse.jface.action.GroupMarker"
+           id="com.cloudbees.eclipse.run.ui.action.marker.open"
+           label="open">
+     </action>
+  </objectContribution>
+  <objectContribution
+        adaptable="false"
         id="com.cloudbees.eclipse.run.ui.openInBrowser"
         objectClass="com.cloudbees.api.ApplicationInfo">
      <action
@@ -53,7 +93,7 @@
            enablesFor="1"
            id="com.cloudbees.eclipse.run.ui.action.openInBrowser"
            label="Open In Browser"
-           menubarPath="&quot;open&quot;">
+           menubarPath="open">
      </action>
   </objectContribution>
   <objectContribution
@@ -65,7 +105,7 @@
            enablesFor="+"
            id="com.cloudbees.eclipse.run.ui.action.delete"
            label="Delete in RUN@cloud@"
-           menubarPath="&quot;run&quot;">
+           menubarPath="run">
      </action>
   </objectContribution>
   <objectContribution
@@ -77,7 +117,7 @@
            enablesFor="1"
            id="com.cloudbees.eclipse.run.ui.action.configure"
            label="Configure in RUN@cloud@"
-           menubarPath="&quot;run&quot;">
+           menubarPath="run">
      </action>
   </objectContribution>
 		<objectContribution
@@ -90,7 +130,7 @@
          enablesFor="1"
          id="com.cloudbees.eclipse.run.ui.deploy.cloud"
          label="Stop in RUN@cloud@"
-         menubarPath="&quot;run&quot;">
+         menubarPath="run">
 			</action>
    <visibility>
       <or>
@@ -115,7 +155,7 @@
          enablesFor="1"
          id="com.cloudbees.eclipse.run.ui.deploy.cloud"
          label="Start in RUN@cloud@"
-         menubarPath="&quot;run&quot;">
+         menubarPath="run">
 			</action>
    <visibility>
       <or>
@@ -139,7 +179,7 @@
            enablesFor="1"
            id="com.cloudbees.eclipse.run.ui.action.tail.error"
            label="Tail Error Log"
-           menubarPath="&quot;tail&quot;">
+           menubarPath="tail">
      </action>
   </objectContribution>
   <objectContribution
@@ -151,7 +191,7 @@
            enablesFor="1"
            id="com.cloudbees.eclipse.run.ui.action.tail.access"
            label="Tail Access Log"
-           menubarPath="&quot;tail&quot;">
+           menubarPath="tail">
      </action>
   </objectContribution>
   <objectContribution
@@ -163,7 +203,7 @@
            enablesFor="1"
            id="com.cloudbees.eclipse.run.ui.action.tail.server"
            label="Tail Server Log"
-           menubarPath="&quot;tail&quot;">
+           menubarPath="tail">
      </action>
   </objectContribution>
   <objectContribution
@@ -175,8 +215,32 @@
            enablesFor="1"
            id="com.cloudbees.eclipse.run.ui.action.showProperties"
            label="Properties"
-           menubarPath="&quot;properties&quot;">
+           menubarPath="properties">
      </action>
+  </objectContribution>
+  <objectContribution
+        adaptable="true"
+        id="com.cloudbees.eclipse.run.ui.deploy"
+        nameFilter="*"
+        objectClass="org.eclipse.core.resources.IProject">
+     <action
+           class="com.cloudbees.eclipse.run.ui.popup.actions.DeployAction"
+           enablesFor="1"
+           id="com.cloudbees.eclipse.run.ui.action.deploy"
+           label="Deploy to RUN@cloud@"
+           menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup">
+     </action>
+     <visibility>
+        <and>
+           <objectClass
+                 name="org.eclipse.core.resources.IProject">
+           </objectClass>
+           <objectState
+                 name="projectNature"
+                 value="com.cloudbees.eclipse.core.cloudbeesNature">
+           </objectState>
+        </and>
+     </visibility>
   </objectContribution>
 	</extension>
 

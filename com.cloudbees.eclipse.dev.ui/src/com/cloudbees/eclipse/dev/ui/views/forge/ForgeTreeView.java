@@ -20,6 +20,9 @@ import com.cloudbees.eclipse.dev.ui.actions.ReloadForgeReposAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 import com.cloudbees.eclipse.ui.views.CBTreeAction;
+import com.cloudbees.eclipse.ui.views.CBTreeContributor;
+import com.cloudbees.eclipse.ui.views.CBTreeSeparator;
+import com.cloudbees.eclipse.ui.views.CBTreeSeparator.SeparatorLocation;
 import com.cloudbees.eclipse.ui.views.ICBTreeProvider;
 
 /**
@@ -102,8 +105,8 @@ public class ForgeTreeView implements IPropertyChangeListener, ICBTreeProvider {
   }
 
   @Override
-  public CBTreeAction[] getActions() {
-    return new CBTreeAction[] { this.reloadForgeAction };
+  public CBTreeContributor[] getContributors() {
+    return new CBTreeContributor[] { new CBTreeSeparator(SeparatorLocation.PULL_DOWN), this.reloadForgeAction };
   }
 
   @Override

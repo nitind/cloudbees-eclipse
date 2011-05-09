@@ -28,17 +28,14 @@ public class ConfigureCloudBeesAction extends CBTreeAction {
     }
   }
 
-  @Override
   public boolean isPopup() {
     return false;
   }
 
-  @Override
   public boolean isPullDown() {
     return true;
   }
 
-  @Override
   public boolean isToolbar() {
     return false;
   }

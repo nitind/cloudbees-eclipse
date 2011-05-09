@@ -1,11 +1,15 @@
 package com.cloudbees.eclipse.dev.ui.actions;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IObjectActionDelegate;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import com.cloudbees.eclipse.ui.views.CBTreeAction;
 
-public class ConfigureJenkinsInstancesAction extends CBTreeAction {
+public class ConfigureJenkinsInstancesAction extends CBTreeAction implements IObjectActionDelegate {
 
   public ConfigureJenkinsInstancesAction() {
     super();
@@ -41,6 +45,19 @@ public class ConfigureJenkinsInstancesAction extends CBTreeAction {
   @Override
   public boolean isToolbar() {
     return false;
+  }
+
+  @Override
+  public void run(IAction action) {
+    run();
+  }
+
+  @Override
+  public void selectionChanged(IAction action, ISelection selection) {
+  }
+
+  @Override
+  public void setActivePart(IAction action, IWorkbenchPart targetPart) {
   }
 
 }

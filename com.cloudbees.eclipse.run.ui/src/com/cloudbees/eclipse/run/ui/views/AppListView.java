@@ -103,7 +103,7 @@ public class AppListView implements IPropertyChangeListener, ICBTreeProvider {
   }
 
   @Override
-  public CBTreeAction[] getActions() {
+  public CBTreeAction[] getContributors() {
     return new CBTreeAction[0];
   }
 

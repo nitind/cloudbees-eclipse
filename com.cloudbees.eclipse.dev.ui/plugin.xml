@@ -188,6 +188,48 @@
           </and>
       	</visibility>
     	</objectContribution>
+     <objectContribution
+           adaptable="false"
+           id="com.cloudbees.eclipse.dev.ui.reload"
+           objectClass="com.cloudbees.eclipse.dev.ui.views.instances.InstanceGroup$DevAtCloudJenkinsInstanceGroup">
+        <action
+              class="com.cloudbees.eclipse.dev.ui.actions.ReloadJenkinsInstancesAction"
+              enablesFor="1"
+              id="com.cloudbees.eclipse.dev.ui.action.reload"
+              label="Reload">
+        </action>
+     </objectContribution>
+     <objectContribution
+           adaptable="false"
+           id="com.cloudbees.eclipse.dev.ui.attachJenkins"
+           objectClass="com.cloudbees.eclipse.dev.ui.views.instances.InstanceGroup$OnPremiseJenkinsInstanceGroup">
+        <action
+              class="com.cloudbees.eclipse.dev.ui.actions.ConfigureJenkinsInstancesAction"
+              id="com.cloudbees.eclipse.dev.ui.action.attachJenkins"
+              label="Attach">
+        </action>
+     </objectContribution>
+     <objectContribution
+           adaptable="false"
+           id="com.cloudbees.eclipse.dev.ui.reloadForge"
+           objectClass="com.cloudbees.eclipse.dev.ui.views.forge.ForgeGroup">
+        <action
+              class="com.cloudbees.eclipse.dev.ui.actions.ReloadForgeReposAction"
+              id="com.cloudbees.eclipse.dev.ui.action.reloadForge"
+              label="Reload">
+        </action>
+     </objectContribution>
+     <objectContribution
+           adaptable="false"
+           id="com.cloudbees.eclipse.dev.ui.openBuildJob"
+           objectClass="com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse">
+        <action
+              class="com.cloudbees.eclipse.dev.ui.actions.OpenBuildJobsAction"
+              enablesFor="1"
+              id="com.cloudbees.eclipse.dev.ui.action.openJenkinsInstanceResponse"
+              label="Open">
+        </action>
+     </objectContribution>
  	</extension>
  	
     <extension
