@@ -76,7 +76,7 @@ public class ForgeSyncConfirmation extends Dialog {
 
   /**
    * Create the dialog.
-   * 
+   *
    * @param parentShell
    */
   public ForgeSyncConfirmation(final Shell parentShell, final List<ForgeInstance> repos) {
@@ -87,7 +87,7 @@ public class ForgeSyncConfirmation extends Dialog {
 
   /**
    * Create contents of the dialog.
-   * 
+   *
    * @param parent
    */
   @Override
@@ -101,7 +101,9 @@ public class ForgeSyncConfirmation extends Dialog {
         | SWT.BORDER | SWT.FULL_SELECTION);
     this.checkboxTableViewer.setSorter(new Sorter());
     this.table = this.checkboxTableViewer.getTable();
-    this.table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    GridData gd_table = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
+    gd_table.heightHint = 200;
+    this.table.setLayoutData(gd_table);
 
     TableColumn tblclmnForgeInstanceUrl = new TableColumn(this.table, SWT.LEFT);
     tblclmnForgeInstanceUrl.setWidth(200);
@@ -146,14 +148,14 @@ public class ForgeSyncConfirmation extends Dialog {
   }
 
   @Override
-  protected void configureShell(Shell shell) {
+  protected void configureShell(final Shell shell) {
     super.configureShell(shell);
     shell.setText("Access Forge repositories");
   }
 
   /**
    * Create contents of the button bar.
-   * 
+   *
    * @param parent
    */
   @Override
@@ -167,7 +169,7 @@ public class ForgeSyncConfirmation extends Dialog {
    */
   @Override
   protected Point getInitialSize() {
-    return new Point(450, 300);
+    return new Point(640, 480);
   }
 
   @Override
