@@ -196,7 +196,7 @@
               class="com.cloudbees.eclipse.dev.ui.actions.ReloadJenkinsInstancesAction"
               enablesFor="1"
               id="com.cloudbees.eclipse.dev.ui.action.reload"
-              label="Reload Jenkins instances">
+              label="Reload">
         </action>
      </objectContribution>
      <objectContribution
@@ -206,7 +206,7 @@
         <action
               class="com.cloudbees.eclipse.dev.ui.actions.ConfigureJenkinsInstancesAction"
               id="com.cloudbees.eclipse.dev.ui.action.attachJenkins"
-              label="Attach Jenkins Instance">
+              label="Attach">
         </action>
      </objectContribution>
      <objectContribution
@@ -216,7 +216,7 @@
         <action
               class="com.cloudbees.eclipse.dev.ui.actions.ReloadForgeReposAction"
               id="com.cloudbees.eclipse.dev.ui.action.reloadForge"
-              label="Reload Forge repositories">
+              label="Reload">
         </action>
      </objectContribution>
  	</extension>
