@@ -1,6 +1,6 @@
 package com.cloudbees.eclipse.dev.ui.views.instances;
 
-final class FavoritesInstanceGroup extends InstanceGroup {
+public final class FavoritesInstanceGroup extends InstanceGroup {
   FavoritesInstanceGroup(final String name, final boolean cloudHosted) {
     super(name, cloudHosted);
   }

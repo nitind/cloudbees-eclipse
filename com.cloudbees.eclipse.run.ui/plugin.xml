@@ -40,6 +40,7 @@
      <action
            class="com.cloudbees.eclipse.run.ui.popup.actions.RefreshAction"
            enablesFor="1"
+           icon="icons/16x16/refresh.png"
            id="com.cloudbees.eclipse.run.ui.action.refresh"
            label="Refresh">
      </action>
@@ -91,6 +92,7 @@
      <action
            class="com.cloudbees.eclipse.run.ui.popup.actions.OpenInBrowserAction"
            enablesFor="1"
+           icon="icons/16x16/external_browser.gif"
            id="com.cloudbees.eclipse.run.ui.action.openInBrowser"
            label="Open In Browser"
            menubarPath="open">
@@ -103,6 +105,7 @@
      <action
            class="com.cloudbees.eclipse.run.ui.popup.actions.DeleteAction"
            enablesFor="+"
+           icon="icons/16x16/delete.gif"
            id="com.cloudbees.eclipse.run.ui.action.delete"
            label="Delete in RUN@cloud@"
            menubarPath="run">
@@ -115,6 +118,7 @@
      <action
            class="com.cloudbees.eclipse.run.ui.popup.actions.ConfigureAction"
            enablesFor="1"
+           icon="icons/16x16/external_browser.gif"
            id="com.cloudbees.eclipse.run.ui.action.configure"
            label="Configure in RUN@cloud@"
            menubarPath="run">
@@ -128,6 +132,7 @@
 			<action
          class="com.cloudbees.eclipse.run.ui.popup.actions.StopAction"
          enablesFor="1"
+         icon="icons/16x16/stop.png"
          id="com.cloudbees.eclipse.run.ui.deploy.cloud"
          label="Stop in RUN@cloud@"
          menubarPath="run">
@@ -153,6 +158,7 @@
 			<action
          class="com.cloudbees.eclipse.run.ui.popup.actions.StartAction"
          enablesFor="1"
+         icon="icons/16x16/lrun_obj.png"
          id="com.cloudbees.eclipse.run.ui.deploy.cloud"
          label="Start in RUN@cloud@"
          menubarPath="run">
@@ -177,6 +183,7 @@
      <action
            class="com.cloudbees.eclipse.run.ui.popup.actions.AbstractTailAction$TailErrorLogAction"
            enablesFor="1"
+           icon="icons/16x16/monitor_obj.png"
            id="com.cloudbees.eclipse.run.ui.action.tail.error"
            label="Tail Error Log"
            menubarPath="tail">
@@ -189,6 +196,7 @@
      <action
            class="com.cloudbees.eclipse.run.ui.popup.actions.AbstractTailAction$TailAccessLogAction"
            enablesFor="1"
+           icon="icons/16x16/monitor_obj.png"
            id="com.cloudbees.eclipse.run.ui.action.tail.access"
            label="Tail Access Log"
            menubarPath="tail">
@@ -201,6 +209,7 @@
      <action
            class="com.cloudbees.eclipse.run.ui.popup.actions.AbstractTailAction$TailServerLogAction"
            enablesFor="1"
+           icon="icons/16x16/monitor_obj.png"
            id="com.cloudbees.eclipse.run.ui.action.tail.server"
            label="Tail Server Log"
            menubarPath="tail">

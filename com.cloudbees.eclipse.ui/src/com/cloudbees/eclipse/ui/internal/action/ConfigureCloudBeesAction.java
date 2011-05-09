@@ -9,7 +9,7 @@ public class ConfigureCloudBeesAction extends CBTreeAction {
 
   public ConfigureCloudBeesAction() {
     super();
-    setText("Configure CloudBees access...");
+    setText("CloudBees Account...");
     setToolTipText("Configure CloudBees account access");
     /*    action1.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
             .getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));

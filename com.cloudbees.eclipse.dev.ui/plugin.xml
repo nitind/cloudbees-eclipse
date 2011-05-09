@@ -190,33 +190,35 @@
     	</objectContribution>
      <objectContribution
            adaptable="false"
-           id="com.cloudbees.eclipse.dev.ui.reload"
+           id="com.cloudbees.eclipse.dev.ui.refreshJenkins"
            objectClass="com.cloudbees.eclipse.dev.ui.views.instances.InstanceGroup$DevAtCloudJenkinsInstanceGroup">
         <action
               class="com.cloudbees.eclipse.dev.ui.actions.ReloadJenkinsInstancesAction"
               enablesFor="1"
+              icon="icons/epl/refresh.png"
               id="com.cloudbees.eclipse.dev.ui.action.reload"
-              label="Reload">
+              label="Refresh">
         </action>
      </objectContribution>
      <objectContribution
            adaptable="false"
-           id="com.cloudbees.eclipse.dev.ui.attachJenkins"
+           id="com.cloudbees.eclipse.dev.ui.configureJenkins"
            objectClass="com.cloudbees.eclipse.dev.ui.views.instances.InstanceGroup$OnPremiseJenkinsInstanceGroup">
         <action
               class="com.cloudbees.eclipse.dev.ui.actions.ConfigureJenkinsInstancesAction"
               id="com.cloudbees.eclipse.dev.ui.action.attachJenkins"
-              label="Attach">
+              label="Configure...">
         </action>
      </objectContribution>
      <objectContribution
            adaptable="false"
-           id="com.cloudbees.eclipse.dev.ui.reloadForge"
+           id="com.cloudbees.eclipse.dev.ui.refreshForge"
            objectClass="com.cloudbees.eclipse.dev.ui.views.forge.ForgeGroup">
         <action
               class="com.cloudbees.eclipse.dev.ui.actions.ReloadForgeReposAction"
+              icon="icons/epl/refresh.png"
               id="com.cloudbees.eclipse.dev.ui.action.reloadForge"
-              label="Reload">
+              label="Refresh">
         </action>
      </objectContribution>
      <objectContribution
@@ -228,6 +230,17 @@
               enablesFor="1"
               id="com.cloudbees.eclipse.dev.ui.action.openJenkinsInstanceResponse"
               label="Open">
+        </action>
+     </objectContribution>
+     <objectContribution
+           adaptable="false"
+           id="com.cloudbees.eclipse.dev.ui.showFavourites"
+           objectClass="com.cloudbees.eclipse.dev.ui.views.instances.FavoritesInstanceGroup">
+        <action
+              class="com.cloudbees.eclipse.dev.ui.actions.OpenBuildJobsAction"
+              enablesFor="1"
+              id="com.cloudbees.eclipse.dev.ui.action6"
+              label="Show View">
         </action>
      </objectContribution>
  	</extension>

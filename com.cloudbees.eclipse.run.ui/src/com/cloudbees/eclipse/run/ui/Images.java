@@ -17,4 +17,6 @@ public interface Images {
   String CLOUDBEES_FOLDER = Images.class.getSimpleName() + ".cb_folder_cb.png";
   String CLOUDBEES_FOLDER_PATH = ICONS16 + "/cb_folder_cb.png";
 
+  String CLOUDBEES_REFRESH = Images.class.getSimpleName() + ".refresh.png";
+  String CLOUDBEES_REFRESH_PATH = ICONS16 + "/refresh.png";
 }

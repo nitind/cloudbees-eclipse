@@ -12,7 +12,7 @@ public class ConfigureSshKeysAction extends CBTreeAction {
 
   public ConfigureSshKeysAction() {
     super();
-    setText("Configure SSH keys...");
+    setText("SSH Key Setup...");
     setToolTipText("Configure SSH keys used to access the git or svn repositories");
 
     /*    setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()

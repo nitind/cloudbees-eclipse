@@ -15,6 +15,8 @@ import org.eclipse.ui.internal.ObjectPluginAction;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
+import com.cloudbees.eclipse.dev.ui.utils.FavoritesUtils;
+import com.cloudbees.eclipse.dev.ui.views.instances.FavoritesInstanceGroup;
 
 @SuppressWarnings("restriction")
 public class OpenBuildJobsAction implements IObjectActionDelegate {
@@ -34,13 +36,19 @@ public class OpenBuildJobsAction implements IObjectActionDelegate {
 
     IStructuredSelection structSelection = (IStructuredSelection) selection;
 
-    if (!(structSelection.getFirstElement() instanceof JenkinsInstanceResponse)) {
-      return;
+    String viewUrl = null;
+
+    if (structSelection.getFirstElement() instanceof FavoritesInstanceGroup) {
+      viewUrl = FavoritesUtils.FAVORITES;
     }
 
-    JenkinsInstanceResponse resp = (JenkinsInstanceResponse) structSelection.getFirstElement();
+    if (structSelection.getFirstElement() instanceof JenkinsInstanceResponse) {
+      JenkinsInstanceResponse resp = (JenkinsInstanceResponse) structSelection.getFirstElement();
+      viewUrl = resp.viewUrl;
+    }
+
     try {
-      CloudBeesDevUiPlugin.getDefault().showJobs(resp.viewUrl, true);
+      CloudBeesDevUiPlugin.getDefault().showJobs(viewUrl, true);
     } catch (CloudBeesException e) {
       Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
       Status status = new Status(IStatus.ERROR, CloudBeesDevUiPlugin.PLUGIN_ID,
