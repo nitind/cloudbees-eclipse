@@ -219,6 +219,17 @@
               label="Reload">
         </action>
      </objectContribution>
+     <objectContribution
+           adaptable="false"
+           id="com.cloudbees.eclipse.dev.ui.openBuildJob"
+           objectClass="com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse">
+        <action
+              class="com.cloudbees.eclipse.dev.ui.actions.OpenBuildJobsAction"
+              enablesFor="1"
+              id="com.cloudbees.eclipse.dev.ui.action.openJenkinsInstanceResponse"
+              label="Open">
+        </action>
+     </objectContribution>
  	</extension>
  	
     <extension
