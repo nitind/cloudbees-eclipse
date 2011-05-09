@@ -1,7 +1,11 @@
 package com.cloudbees.eclipse.run.ui.launchconfiguration;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
@@ -32,9 +36,10 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
   private Text customIdText;
   private Button customId;
   private AccountSelecionComposite accountSelector;
+  private WarSelecionComposite warSelector;
 
   @Override
-  public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+  public void performApply(final ILaunchConfigurationWorkingCopy configuration) {
     String projectName = this.projectSelector.getText();
     configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, projectName);
 
@@ -49,10 +54,16 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
 
     configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID,
         this.accountSelector.getAccountName());
+
+    if (this.warSelector.isVisible()) {
+      configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, this.warSelector.getWarPath());
+    } else {
+      configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, "");
+    }
   }
 
   @Override
-  public void initializeFrom(ILaunchConfiguration configuration) {
+  public void initializeFrom(final ILaunchConfiguration configuration) {
     try {
       String projectName = configuration
           .getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, new String());
@@ -69,6 +80,9 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
       String account = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID, "");
       this.accountSelector.setAccountName(account);
 
+      String warPath = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, "");
+      this.warSelector.setWarPath(warPath);
+
       updateLaunchConfigurationDialog();
     } catch (CoreException e) {
       CBRunUiActivator.logError(e);
@@ -76,7 +90,7 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
   }
 
   @Override
-  public void createControl(Composite parent) {
+  public void createControl(final Composite parent) {
     this.main = new Composite(parent, SWT.NONE);
     this.main.setLayout(new GridLayout(2, false));
 
@@ -98,6 +112,14 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
     };
     this.accountSelector.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
+    this.warSelector = new WarSelecionComposite(this.main) {
+      @Override
+      public void handleUpdate() {
+        validateConfigurationTab();
+      }
+    };
+    this.warSelector.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
     this.customId = new Button(this.main, SWT.CHECK);
     this.customId.setSelection(false);
     this.customId.setText("Use Custom App ID");
@@ -115,7 +137,7 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
     this.customIdText.addModifyListener(new ModifyListener() {
 
       @Override
-      public void modifyText(ModifyEvent e) {
+      public void modifyText(final ModifyEvent e) {
         updateLaunchConfigurationDialog();
       }
     });
@@ -127,7 +149,7 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
     this.customId.addSelectionListener(new SelectionListener() {
 
       @Override
-      public void widgetSelected(SelectionEvent e) {
+      public void widgetSelected(final SelectionEvent e) {
         boolean selection = CBCloudLaunchConfigurationTab.this.customId.getSelection();
         label.setEnabled(selection);
         CBCloudLaunchConfigurationTab.this.customIdText.setEnabled(selection);
@@ -135,7 +157,7 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
       }
 
       @Override
-      public void widgetDefaultSelected(SelectionEvent e) {
+      public void widgetDefaultSelected(final SelectionEvent e) {
 
       }
     });
@@ -160,11 +182,39 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
       return false;
     }
 
-    return true;
+    boolean valid = true;
+    if (this.warSelector != null) {
+      String projectName = this.projectSelector.getText();
+      if (!projectName.isEmpty()) {
+        IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(projectName + "/build.xml"));
+        boolean projectWithAnt = file.exists();
+        this.warSelector.setVisible(!projectWithAnt);
+        ((GridData) this.warSelector.getLayoutData()).exclude = projectWithAnt;
+      }
+
+      if (this.warSelector.isVisible()) {
+        IStatus warStatus = this.warSelector.validate();
+        if (!warStatus.isOK()) {
+          setErrorMessage(warStatus.getMessage());
+          updateLaunchConfigurationDialog();
+          valid = false;
+        }
+      }
+
+      this.warSelector.setProject(null);
+      for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+        if (project.getName().equals(projectName)) {
+          this.warSelector.setProject(project);
+          break;
+        }
+      }
+    }
+
+    return valid;
   }
 
   @Override
-  public boolean isValid(ILaunchConfiguration launchConfig) {
+  public boolean isValid(final ILaunchConfiguration launchConfig) {
     return this.projectSelector.validate().getSeverity() == IStatus.OK && this.accountSelector.validate().isOK();
   }
 
@@ -179,6 +229,6 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
   }
 
   @Override
-  public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
+  public void setDefaults(final ILaunchConfigurationWorkingCopy configuration) {
   }
 }
