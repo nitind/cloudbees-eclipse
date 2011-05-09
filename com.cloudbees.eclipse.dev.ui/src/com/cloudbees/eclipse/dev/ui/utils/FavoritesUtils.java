@@ -63,7 +63,7 @@ public class FavoritesUtils {
             filtered.add(j);
           }
         }
-      } catch (CloudBeesException e) {
+      } catch (Exception e) {
         for (String url : favorites.keySet()) {
           if (url.startsWith(instance)) {
             Job j = new Job();
@@ -83,7 +83,7 @@ public class FavoritesUtils {
     return jobs;
   }
 
-  private static HashMap<String, JenkinsService> getInstances(Set<String> set) {
+  private static HashMap<String, JenkinsService> getInstances(final Set<String> set) {
     HashMap<String, JenkinsService> instances = new HashMap<String, JenkinsService>();
 
     for (String string : set) {
@@ -96,7 +96,7 @@ public class FavoritesUtils {
     return instances;
   }
 
-  private static JenkinsService getService(String instance) {
+  private static JenkinsService getService(final String instance) {
     List<JenkinsService> allJenkinsServices = CloudBeesUIPlugin.getDefault().getAllJenkinsServices();
     for (JenkinsService jenkinsService : allJenkinsServices) {
 
@@ -131,7 +131,7 @@ public class FavoritesUtils {
     return favorites;
   }
 
-  private static void storeFavorites(HashMap<String, String> favorites) {
+  private static void storeFavorites(final HashMap<String, String> favorites) {
     String pref = "";
     if (favorites != null && !favorites.isEmpty()) {
       for (String string : favorites.keySet()) {
@@ -150,7 +150,7 @@ public class FavoritesUtils {
     }
   }
 
-  public static void removeFavorite(String favorite) {
+  public static void removeFavorite(final String favorite) {
     HashMap<String, String> fav = getFavorites();
     if (fav.containsKey(favorite)) {
       fav.remove(favorite);
@@ -158,7 +158,7 @@ public class FavoritesUtils {
     }
   }
 
-  public static void addFavorite(String favorite, String name) {
+  public static void addFavorite(final String favorite, final String name) {
     HashMap<String, String> fav = getFavorites();
     if (!fav.containsKey(favorite)) {
       fav.put(favorite, name);
@@ -166,7 +166,7 @@ public class FavoritesUtils {
     }
   }
 
-  public static boolean isFavorite(String favouite) {
+  public static boolean isFavorite(final String favouite) {
     return getFavorites().containsKey(favouite);
   }
 
@@ -182,7 +182,7 @@ public class FavoritesUtils {
       private Image oldImage;
 
       @Override
-      public void handleEvent(Event e) {
+      public void handleEvent(final Event e) {
         try {
           Rectangle rect = shell.getClientArea();
           Image newImage = new Image(Display.getDefault(), Math.max(1, rect.width), rect.height);
@@ -217,7 +217,7 @@ public class FavoritesUtils {
     shell.addMouseListener(new MouseAdapter() {
 
       @Override
-      public void mouseUp(MouseEvent e) {
+      public void mouseUp(final MouseEvent e) {
         shell.setVisible(false);
       }
     });
@@ -232,7 +232,7 @@ public class FavoritesUtils {
     label.addMouseListener(new MouseAdapter() {
 
       @Override
-      public void mouseUp(MouseEvent e) {
+      public void mouseUp(final MouseEvent e) {
         CloudBeesDevUiPlugin.getDefault().showBuildForJob(job);
         shell.setVisible(false);
       }

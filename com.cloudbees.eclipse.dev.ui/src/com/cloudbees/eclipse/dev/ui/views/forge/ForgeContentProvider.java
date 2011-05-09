@@ -21,6 +21,8 @@ public class ForgeContentProvider implements IStructuredContentProvider, ITreeCo
   public void inputChanged(final Viewer v, final Object oldInput, final Object newInput) {
     this.forgeGroup.clear();
 
+    this.forgeGroup.setLoading(false);
+
     if (newInput == null || !(newInput instanceof List)) {
       if (v != null) {
         v.refresh();
@@ -33,8 +35,6 @@ public class ForgeContentProvider implements IStructuredContentProvider, ITreeCo
         this.forgeGroup.addChild((ForgeInstance) instance);
       }
     }
-
-    this.forgeGroup.setLoading(false);
 
     if (v != null) {
       v.refresh();

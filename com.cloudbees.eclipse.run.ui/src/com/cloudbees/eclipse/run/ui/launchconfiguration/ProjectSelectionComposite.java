@@ -41,7 +41,7 @@ import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 public abstract class ProjectSelectionComposite extends Composite {
 
   private static final String PROJECT_MSG = "Choose project...";
-  private static final String GROUP_TITLE = "Project:";
+  private static final String GROUP_TITLE = "Project";
   private static final String BROWSE_PROJECT_LABEL = "Browse...";
   private static final String SELECTION_DIALOG_MESSAGE = "Select a CloudBees project to constrain your search.";
   private static final String SELECTION_DIALOG_TITLE = "Project Selection";
@@ -51,11 +51,11 @@ public abstract class ProjectSelectionComposite extends Composite {
 
   /**
    * Create the composite.
-   * 
+   *
    * @param parent
    * @param style
    */
-  public ProjectSelectionComposite(Composite parent, int style) {
+  public ProjectSelectionComposite(final Composite parent, final int style) {
     super(parent, style);
     setLayout(new FillLayout());
     Composite composite = new Composite(this, style);
@@ -71,7 +71,7 @@ public abstract class ProjectSelectionComposite extends Composite {
     this.projectName.addModifyListener(new ModifyListener() {
 
       @Override
-      public void modifyText(ModifyEvent e) {
+      public void modifyText(final ModifyEvent e) {
         handleUpdate();
       }
     });
@@ -85,12 +85,12 @@ public abstract class ProjectSelectionComposite extends Composite {
     this.projectBtn.addSelectionListener(new SelectionAdapter() {
 
       @Override
-      public void widgetSelected(SelectionEvent e) {
+      public void widgetSelected(final SelectionEvent e) {
         handleProjectNameChange();
       }
 
       @Override
-      public void widgetDefaultSelected(SelectionEvent e) {
+      public void widgetDefaultSelected(final SelectionEvent e) {
         handleProjectNameChange();
       }
 
@@ -153,11 +153,11 @@ public abstract class ProjectSelectionComposite extends Composite {
 
   public abstract void handleUpdate();
 
-  public void addModifyListener(ModifyListener modifyListener) {
+  public void addModifyListener(final ModifyListener modifyListener) {
     this.projectName.addModifyListener(modifyListener);
   }
 
-  public void setText(String attribute) {
+  public void setText(final String attribute) {
     this.projectName.setText(attribute);
   }
 

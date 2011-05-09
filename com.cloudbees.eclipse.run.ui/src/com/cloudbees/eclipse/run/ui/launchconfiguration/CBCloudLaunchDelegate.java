@@ -2,6 +2,7 @@ package com.cloudbees.eclipse.run.ui.launchconfiguration;
 
 import static com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 
 import org.eclipse.core.resources.IProject;
@@ -25,7 +26,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
   @SuppressWarnings("restriction")
   @Override
-  public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
+  public void launch(final ILaunchConfiguration configuration, final String mode, final ILaunch launch, final IProgressMonitor monitor)
       throws CoreException {
 
     monitor.beginTask("Deploying to RUN@cloud", 1);
@@ -36,14 +37,22 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
         if (project.getName().equals(projectName)) {
           String account = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID, "");
           String appId = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
+          String warPath = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, "");
 
-          if (configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_WST_FLAG, false)) {
-
-            start(project, account, appId);
-            removeWstFlag(configuration);
-
+          if (warPath != null && !warPath.isEmpty()) {
+            warPath = project.getLocation().toOSString() + File.separatorChar + warPath;
+            deployWar(project, account, appId, warPath);
           } else {
-            deploy(project, account, appId);
+
+            if (configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_WST_FLAG, false)) {
+
+              start(project, account, appId);
+              removeWstFlag(configuration);
+
+            } else {
+              deploy(project, account, appId);
+            }
+
           }
 
           handleExtensions(configuration, project);
@@ -57,24 +66,31 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
   }
 
-  private void deploy(IProject project, String account, String id) throws Exception, CloudBeesException, CoreException,
+  private void deploy(final IProject project, final String account, final String id) throws Exception, CloudBeesException, CoreException,
       FileNotFoundException {
     String appId = "".equals(id) ? project.getName() : id;
     BeesSDK.deploy(project, account, appId, true);
   }
 
-  private void start(IProject project, String account, String appId) throws Exception, CloudBeesException {
+  private void deployWar(final IProject project, final String account, final String id, final String warPath)
+      throws Exception,
+      CloudBeesException, CoreException, FileNotFoundException {
+    String appId = account + "/" + ("".equals(id) ? project.getName() : id);
+    BeesSDK.deploy(appId, warPath);
+  }
+
+  private void start(final IProject project, final String account, final String appId) throws Exception, CloudBeesException {
     BeesSDK.start(account, appId.equals("") ? project.getName() : appId);
   }
 
-  private ILaunchConfigurationWorkingCopy removeWstFlag(ILaunchConfiguration configuration) throws CoreException {
+  private ILaunchConfigurationWorkingCopy removeWstFlag(final ILaunchConfiguration configuration) throws CoreException {
     ILaunchConfigurationWorkingCopy workingCopy = configuration.getWorkingCopy();
     workingCopy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_WST_FLAG, false);
     workingCopy.doSave();
     return workingCopy;
   }
 
-  private IExtension[] handleExtensions(ILaunchConfiguration configuration, IProject project) {
+  private IExtension[] handleExtensions(final ILaunchConfiguration configuration, final IProject project) {
     IExtension[] extensions = Platform.getExtensionRegistry()
         .getExtensionPoint(CBRunUiActivator.PLUGIN_ID, "launchDelegateAditions").getExtensions();
 

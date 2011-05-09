@@ -43,20 +43,20 @@ public abstract class AccountSelecionComposite extends Composite {
   private GrandCentralService gcService;
   private List<String> accountNames;
 
-  public AccountSelecionComposite(Composite parent) {
+  public AccountSelecionComposite(final Composite parent) {
     super(parent, SWT.NONE);
     prepare(parent);
     createComponents(parent);
   }
 
-  private void prepare(Composite parent) {
+  private void prepare(final Composite parent) {
     try {
       this.gcService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
       this.accountNames = new ArrayList<String>();
 
       WorkbenchJob job = new WorkbenchJob("Loading account names") {
         @Override
-        public IStatus runInUIThread(IProgressMonitor monitor) {
+        public IStatus runInUIThread(final IProgressMonitor monitor) {
           try {
             String[] accounts = AccountSelecionComposite.this.gcService.getAccounts(monitor);
             for (String accountName : accounts) {
@@ -79,7 +79,7 @@ public abstract class AccountSelecionComposite extends Composite {
     }
   }
 
-  private void createComponents(Composite parent) {
+  private void createComponents(final Composite parent) {
     setLayout(new FillLayout());
 
     Composite content = new Composite(this, SWT.NONE);
@@ -94,7 +94,7 @@ public abstract class AccountSelecionComposite extends Composite {
     this.accountNameText = new Text(group, SWT.SINGLE | SWT.BORDER);
     this.accountNameText.addModifyListener(new ModifyListener() {
       @Override
-      public void modifyText(ModifyEvent e) {
+      public void modifyText(final ModifyEvent e) {
         handleUpdate();
       }
     });
@@ -109,12 +109,12 @@ public abstract class AccountSelecionComposite extends Composite {
     this.chooseAccountButton.addSelectionListener(new SelectionAdapter() {
 
       @Override
-      public void widgetSelected(SelectionEvent e) {
+      public void widgetSelected(final SelectionEvent e) {
         openAccountSelectionDialog();
       }
 
       @Override
-      public void widgetDefaultSelected(SelectionEvent e) {
+      public void widgetDefaultSelected(final SelectionEvent e) {
         openAccountSelectionDialog();
       }
 
@@ -146,15 +146,15 @@ public abstract class AccountSelecionComposite extends Composite {
     if (!this.accountNames.isEmpty()) {
       return this.accountNames.get(0);
     }
-    return null;
+    return "";
   }
 
-  private void handleException(String msg, Throwable t) {
+  private void handleException(final String msg, final Throwable t) {
     Status status = new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, msg, t);
     handleException(msg, status);
   }
 
-  private void handleException(String msg, IStatus status) {
+  private void handleException(final String msg, final IStatus status) {
     CBRunUiActivator.logError(status.getException());
     ErrorDialog.openError(getShell(), ERROR_TITLE, msg, status);
   }
@@ -169,7 +169,7 @@ public abstract class AccountSelecionComposite extends Composite {
     }
   }
 
-  public void setAccountName(String accountName) {
+  public void setAccountName(final String accountName) {
     this.accountNameText.setText(accountName);
   }
 }

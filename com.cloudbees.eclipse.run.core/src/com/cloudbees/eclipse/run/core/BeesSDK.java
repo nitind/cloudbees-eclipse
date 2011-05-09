@@ -106,7 +106,7 @@ public class BeesSDK {
     return applicationDeployWar;
   }
 
-  public static ApplicationDeployArchiveResponse deploy(final String appId, final String warUrl)
+  public static ApplicationDeployArchiveResponse deploy(final String appId, final String warPath)
       throws CloudBeesException, CoreException, FileNotFoundException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
@@ -114,7 +114,7 @@ public class BeesSDK {
       return null;
     }
 
-    ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, warUrl,
+    ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, warPath,
         null, null);
     update();
 
@@ -125,7 +125,7 @@ public class BeesSDK {
    * Establishes a persistent connection to an application log so that you can see new messages as they are written to
    * the logs. This is provides a "cloud-friendly" replacement for the ubiquitous "tail" command many developers use to
    * monitor/debug application log files.
-   * 
+   *
    * @param appId
    * @param logName
    *          valid options are "server", "access" or "error"
@@ -142,7 +142,7 @@ public class BeesSDK {
 
   /**
    * Delete an application
-   * 
+   *
    * @param appId
    * @throws Exception
    */
@@ -227,7 +227,7 @@ public class BeesSDK {
 
   /**
    * Construct full path for the build.xml
-   * 
+   *
    * @param project
    * @return
    */
