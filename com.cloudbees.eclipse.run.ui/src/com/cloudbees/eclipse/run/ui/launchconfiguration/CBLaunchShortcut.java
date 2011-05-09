@@ -33,7 +33,8 @@ public class CBLaunchShortcut implements ILaunchShortcut {
       }
 
       try {
-        List<ILaunchConfiguration> launchConfigurations = CBRunUtil.getOrCreateCloudBeesLaunchConfigurations(name);
+        List<ILaunchConfiguration> launchConfigurations = CBRunUtil
+            .getOrCreateCloudBeesLaunchConfigurations(name, null);
         ILaunchConfiguration configuration = launchConfigurations.get(launchConfigurations.size() - 1);
         DebugUITools.launch(configuration, mode);
       } catch (CoreException e) {

@@ -43,7 +43,7 @@ public class RunCloudLocalBehaviourDelegate extends ServerBehaviourDelegate {
       throws CoreException {
 
     String projectName = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, "");
-    CBRunUtil.addDefaultAttributes(workingCopy, projectName);
+    CBRunUtil.addDefaultAttributes(workingCopy, projectName, null);
 
   }
 }

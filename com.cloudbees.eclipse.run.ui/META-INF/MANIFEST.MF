@@ -20,7 +20,8 @@ Require-Bundle: com.cloudbees.eclipse.run.core,
  org.eclipse.ui.console,
  org.eclipse.core.runtime,
  org.eclipse.jface,
- org.eclipse.ui
+ org.eclipse.ui,
+ org.eclipse.ui.forms
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: com.cloudbees.eclipse.run.ui.launchconfiguration

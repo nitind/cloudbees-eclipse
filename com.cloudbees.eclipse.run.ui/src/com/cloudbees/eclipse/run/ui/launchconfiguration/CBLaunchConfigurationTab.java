@@ -23,6 +23,11 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
   protected ProjectSelectionComposite projectSelector;
   protected Composite main;
 
+  private PortSelectionComposite portSelectionComposite;
+
+  /**
+   * @wbp.parser.entryPoint
+   */
   @Override
   public void createControl(Composite parent) {
     this.main = new Composite(parent, SWT.NONE);
@@ -36,6 +41,8 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     };
     this.projectSelector.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
+    this.portSelectionComposite = new PortSelectionComposite(this.main, SWT.None);
+    this.portSelectionComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
     setControl(this.main);
   }
 
@@ -52,16 +59,20 @@ public class CBLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
         projectName = this.projectSelector.getDefaultSelection();
       }
       this.projectSelector.setText(projectName);
+
+      String port = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PORT, new String());
+      this.portSelectionComposite.setPort(port);
     } catch (CoreException e) {
       CBRunUiActivator.logError(e);
     }
+    scheduleUpdateJob();
   }
 
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
     String projectName = this.projectSelector.getText();
     try {
-      CBRunUtil.addDefaultAttributes(configuration, projectName);
+      CBRunUtil.addDefaultAttributes(configuration, projectName, this.portSelectionComposite.getPort());
     } catch (CoreException e) {
       CBRunUiActivator.logError(e);
     }
