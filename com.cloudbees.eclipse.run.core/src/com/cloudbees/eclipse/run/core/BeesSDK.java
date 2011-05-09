@@ -30,6 +30,9 @@ public class BeesSDK {
   public static ApplicationListResponse getList() throws Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
+    if (client == null) {
+      return new ApplicationListResponse();
+    }
     return client.applicationList();
   }
 
@@ -37,6 +40,9 @@ public class BeesSDK {
       Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
+    if (client == null) {
+      return null;
+    }
     return client.applicationInfo(accountName + "/" + id);
   }
 
@@ -44,6 +50,9 @@ public class BeesSDK {
       Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
+    if (client == null) {
+      return null;
+    }
     ApplicationStatusResponse applicationStop = client.applicationStop(accountName + "/" + id);
     update();
     return applicationStop;
@@ -67,6 +76,9 @@ public class BeesSDK {
       Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
+    if (client == null) {
+      return null;
+    }
     ApplicationStatusResponse applicationStart = client.applicationStart(accountName + "/" + id);
     update();
     return applicationStart;
@@ -77,6 +89,9 @@ public class BeesSDK {
 
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
+    if (client == null) {
+      return null;
+    }
 
     String appId = account + "/" + id;//$NON-NLS-1$
 
@@ -95,6 +110,9 @@ public class BeesSDK {
       throws CloudBeesException, CoreException, FileNotFoundException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
+    if (client == null) {
+      return null;
+    }
 
     ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, warUrl,
         null, null);
@@ -116,7 +134,10 @@ public class BeesSDK {
    */
   public static void tail(final String appId, final String logName, final OutputStream outputStream) throws Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    getBeesClient(grandCentralService).tailLog(appId, logName, outputStream);
+    BeesClient beesClient = getBeesClient(grandCentralService);
+    if (beesClient != null) {
+      beesClient.tailLog(appId, logName, outputStream);
+    }
   }
 
   /**
@@ -127,7 +148,10 @@ public class BeesSDK {
    */
   public static void delete(final String appId) throws Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    getBeesClient(grandCentralService).applicationDelete(appId);
+    BeesClient beesClient = getBeesClient(grandCentralService);
+    if (beesClient != null) {
+      beesClient.applicationDelete(appId);
+    }
   }
 
   private static IFile getWarFile(final IProject project, final boolean build, final String id)
@@ -167,14 +191,18 @@ public class BeesSDK {
   }
 
   private static BeesClient getBeesClient(final GrandCentralService grandCentralService) throws CloudBeesException {
-    AuthInfo cachedAuthInfo = grandCentralService.getCachedAuthInfo(false);
+    System.out.println();
+    if (grandCentralService.hasAuthInfo()) {
+      AuthInfo cachedAuthInfo = grandCentralService.getCachedAuthInfo(false);
 
-    String api_key = cachedAuthInfo.getAuth().api_key;
-    String secret_key = cachedAuthInfo.getAuth().secret_key;
+      String api_key = cachedAuthInfo.getAuth().api_key;
+      String secret_key = cachedAuthInfo.getAuth().secret_key;
 
-    BeesClientConfiguration conf = new BeesClientConfiguration(API_URL, api_key, secret_key, "xml", "1.0");
-    BeesClient client = new BeesClient(conf);
-    return client;
+      BeesClientConfiguration conf = new BeesClientConfiguration(API_URL, api_key, secret_key, "xml", "1.0");
+      return new BeesClient(conf);
+    } else {
+      return null;
+    }
   }
 
   private static void runTargets(final IProject project, final String[] targets, final String id)

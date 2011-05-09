@@ -6,11 +6,8 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ViewPart;
 
 import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.api.ApplicationListResponse;
@@ -20,6 +17,7 @@ import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.IStatusUpdater;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
+import com.cloudbees.eclipse.ui.PreferenceConstants;
 import com.cloudbees.eclipse.ui.views.CBTreeAction;
 import com.cloudbees.eclipse.ui.views.ICBTreeProvider;
 
@@ -28,7 +26,7 @@ import com.cloudbees.eclipse.ui.views.ICBTreeProvider;
  * 
  * @author ahtik
  */
-public class AppListView extends ViewPart implements IPropertyChangeListener, ICBTreeProvider {
+public class AppListView implements IPropertyChangeListener, ICBTreeProvider {
 
   public static final String ID = "com.cloudbees.eclipse.run.ui.views.AppListView";
 
@@ -52,13 +50,7 @@ public class AppListView extends ViewPart implements IPropertyChangeListener, IC
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
           @Override
           public void run() {
-            try {
-              ApplicationListResponse list = BeesSDK.getList();
-              AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, list);
-              AppListView.this.viewer.refresh(true);
-            } catch (Exception e1) {
-              CBRunUiActivator.logErrorAndShowDialog(e1);
-            }
+            refresh();
           }
         });
       }
@@ -98,25 +90,16 @@ public class AppListView extends ViewPart implements IPropertyChangeListener, IC
     this.contentProvider = null;
     this.labelProvider = null;
 
-    super.dispose();
-  }
-
-  @Override
-  public void createPartControl(final Composite parent) {
-    this.viewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION);
-    this.viewer.setContentProvider(this.contentProvider);
-    this.viewer.setLabelProvider(this.labelProvider);
-    getSite().setSelectionProvider(this.viewer);
-    init();
-  }
-
-  @Override
-  public void setFocus() {
-    this.viewer.getControl().setFocus();
   }
 
   @Override
   public void propertyChange(final PropertyChangeEvent event) {
+    if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())
+        || PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
+        || PreferenceConstants.P_EMAIL.equals(event.getProperty())
+        || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {
+      refresh();
+    }
   }
 
   @Override
@@ -143,6 +126,16 @@ public class AppListView extends ViewPart implements IPropertyChangeListener, IC
   public void setViewer(final TreeViewer viewer) {
     this.viewer = viewer;
     init();
+  }
+
+  private void refresh() {
+    try {
+      ApplicationListResponse list = BeesSDK.getList();
+      AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, list);
+    } catch (Exception e1) {
+      AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, null);
+      CBRunUiActivator.logErrorAndShowDialog(e1);
+    }
   }
 
 }

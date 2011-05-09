@@ -11,6 +11,7 @@ import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
+import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
@@ -51,7 +52,10 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
   protected void initialize(IProgressMonitor monitor) {
     try {
       String accountName = getServer().getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID, "");
-      setState(BeesSDK.getServerState(accountName, getAppId()).getStatus());
+      ApplicationInfo serverState = BeesSDK.getServerState(accountName, getAppId());
+      if (serverState != null) {
+        setState(serverState.getStatus());
+      }
     } catch (Exception e) {
       CBRunCoreActivator.logError(e);
       setServerState(IServer.STATE_UNKNOWN);
@@ -71,8 +75,7 @@ public class RunCloudBehaviourDelegate extends ServerBehaviourDelegate {
   @Override
   public IStatus publish(int kind, IProgressMonitor monitor) {
     try {
-      if (getServer().getServerState() != IServer.STATE_STARTED || kind == IServer.PUBLISH_CLEAN
-          || kind == IServer.PUBLISH_AUTO) {
+      if (kind == IServer.PUBLISH_CLEAN || kind == IServer.PUBLISH_AUTO) {
         return null;
       }
 

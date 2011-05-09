@@ -45,23 +45,28 @@ public class ForgeSyncConfirmation extends Dialog {
   }
 
   private class TableLabelProvider extends LabelProvider implements ITableLabelProvider {
+    @Override
     public Image getColumnImage(final Object element, final int columnIndex) {
       return null;
     }
 
+    @Override
     public String getColumnText(final Object element, final int columnIndex) {
       return ((ForgeInstance) element).url;
     }
   }
 
   private static class ContentProvider implements IStructuredContentProvider {
+    @Override
     public Object[] getElements(final Object inputElement) {
       return (ForgeInstance[]) inputElement;
     }
 
+    @Override
     public void dispose() {
     }
 
+    @Override
     public void inputChanged(final Viewer viewer, final Object oldInput, final Object newInput) {
     }
   }
@@ -71,17 +76,18 @@ public class ForgeSyncConfirmation extends Dialog {
 
   /**
    * Create the dialog.
-   *
+   * 
    * @param parentShell
    */
   public ForgeSyncConfirmation(final Shell parentShell, final List<ForgeInstance> repos) {
     super(parentShell);
+    setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
     this.repos = repos;
   }
 
   /**
    * Create contents of the dialog.
-   *
+   * 
    * @param parent
    */
   @Override
@@ -89,24 +95,26 @@ public class ForgeSyncConfirmation extends Dialog {
     Composite container = (Composite) super.createDialogArea(parent);
 
     Label lblSelectForgeRepositories = new Label(container, SWT.NONE);
-    lblSelectForgeRepositories.setText("Select Forge repositories to sync with Eclipse workspace:");
+    lblSelectForgeRepositories.setText("Configure Forge repositories for this Eclipse workspace:");
 
-    this.checkboxTableViewer = CheckboxTableViewer.newCheckList(container, SWT.BORDER | SWT.FULL_SELECTION
-        | SWT.V_SCROLL | SWT.H_SCROLL);
+    this.checkboxTableViewer = CheckboxTableViewer.newCheckList(container, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL
+        | SWT.BORDER | SWT.FULL_SELECTION);
     this.checkboxTableViewer.setSorter(new Sorter());
     this.table = this.checkboxTableViewer.getTable();
-    GridData gd_table = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
-    gd_table.heightHint = this.repos.size() > 5 ? 400 : 200;
-    this.table.setLayoutData(gd_table);
+    this.table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 
     TableColumn tblclmnForgeInstanceUrl = new TableColumn(this.table, SWT.LEFT);
-    tblclmnForgeInstanceUrl.setWidth(500);
+    tblclmnForgeInstanceUrl.setWidth(200);
     tblclmnForgeInstanceUrl.setText("Forge Instance Url");
     this.checkboxTableViewer.setLabelProvider(new TableLabelProvider());
     this.checkboxTableViewer.setContentProvider(new ContentProvider());
 
+    this.checkboxTableViewer.setInput(this.repos.toArray(new ForgeInstance[this.repos.size()]));
+    tblclmnForgeInstanceUrl.pack();
+
     Composite composite = new Composite(container, SWT.NONE);
-    composite.setLayout(new GridLayout(3, false));
+    composite.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+    composite.setLayout(new GridLayout(2, false));
 
     Button btnSelectAll = new Button(composite, SWT.NONE);
     btnSelectAll.addSelectionListener(new SelectionAdapter() {
@@ -115,19 +123,16 @@ public class ForgeSyncConfirmation extends Dialog {
         ForgeSyncConfirmation.this.checkboxTableViewer.setAllChecked(true);
       }
     });
-    btnSelectAll.setText("Select All");
+    btnSelectAll.setText("Select &All");
 
-    Button btnUnselectAll = new Button(composite, SWT.NONE);
-    btnUnselectAll.addSelectionListener(new SelectionAdapter() {
+    Button btnDeselectAll = new Button(composite, SWT.NONE);
+    btnDeselectAll.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(final SelectionEvent e) {
         ForgeSyncConfirmation.this.checkboxTableViewer.setAllChecked(false);
       }
     });
-    btnUnselectAll.setText("Unselect all");
-    new Label(composite, SWT.NONE);
-
-    this.checkboxTableViewer.setInput(this.repos.toArray(new ForgeInstance[this.repos.size()]));
+    btnDeselectAll.setText("&Deselect All");
 
     for (ForgeInstance repo : this.repos) {
       if (repo.status == STATUS.UNKNOWN) {
@@ -140,9 +145,15 @@ public class ForgeSyncConfirmation extends Dialog {
     return container;
   }
 
+  @Override
+  protected void configureShell(Shell shell) {
+    super.configureShell(shell);
+    shell.setText("Access Forge repositories");
+  }
+
   /**
    * Create contents of the button bar.
-   *
+   * 
    * @param parent
    */
   @Override
@@ -161,8 +172,7 @@ public class ForgeSyncConfirmation extends Dialog {
 
   @Override
   protected void okPressed() {
-    Object[] checkedElements = this.checkboxTableViewer
-        .getCheckedElements();
+    Object[] checkedElements = this.checkboxTableViewer.getCheckedElements();
     if (checkedElements != null) {
       this.selectedRepos = new ArrayList<ForgeInstance>(checkedElements.length);
       for (Object o : checkedElements) {

@@ -12,7 +12,6 @@ import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 
 public class ForgeLabelProvider extends LabelProvider implements IFontProvider {
 
-
   public ForgeLabelProvider() {
     super();
   }
@@ -21,7 +20,6 @@ public class ForgeLabelProvider extends LabelProvider implements IFontProvider {
   public void dispose() {
     super.dispose();
   }
-
 
   @Override
   public String getText(final Object obj) {
@@ -46,12 +44,17 @@ public class ForgeLabelProvider extends LabelProvider implements IFontProvider {
       return CloudBeesDevUiPlugin.getImage(CBImages.IMG_FOLDER_FORGE);
     }
     if (obj instanceof ForgeInstance) {
-      return CloudBeesDevUiPlugin.getImage(CBImages.IMG_INSTANCE_FORGE);
+      if (((ForgeInstance) obj).type.equals(ForgeInstance.TYPE.GIT)) {
+        return CloudBeesDevUiPlugin.getImage(CBImages.IMG_INSTANCE_FORGE_GIT);
+      } else {
+        return CloudBeesDevUiPlugin.getImage(CBImages.IMG_INSTANCE_FORGE_SVN);
+      }
     }
 
     return null;
   }
 
+  @Override
   public Font getFont(final Object obj) {
     if (obj instanceof ForgeGroup) {
       ForgeGroup gr = (ForgeGroup) obj;

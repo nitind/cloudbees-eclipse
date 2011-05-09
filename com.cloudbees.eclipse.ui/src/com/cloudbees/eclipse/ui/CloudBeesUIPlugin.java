@@ -45,7 +45,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobProperty;
 
 /**
  * CloudBees Eclipse Toolkit UI Plugin
- *
+ * 
  * @author ahtik
  */
 public class CloudBeesUIPlugin extends AbstractUIPlugin {
@@ -128,7 +128,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   /**
    * Returns the shared instance
-   *
+   * 
    * @return the shared instance
    */
   public static CloudBeesUIPlugin getDefault() {
@@ -412,7 +412,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   /**
    * As secure storage is not providing change listener functionality, we must call this programmatically.
-   *
+   * 
    * @throws CloudBeesException
    */
   public void fireSecureStorageChanged() throws CloudBeesException {
@@ -437,7 +437,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     if (USE_SECURE_STORAGE) {
       SecurePreferencesFactory.getDefault().put(PreferenceConstants.P_PASSWORD, text, true);
     } else {
-      getPreferenceStore().putValue(PreferenceConstants.P_PASSWORD, text);
+      getPreferenceStore().setValue(PreferenceConstants.P_PASSWORD, text);
     }
     // Call programmatically as SecurePreferences does not provide change listeners
     CloudBeesUIPlugin.getDefault().fireSecureStorageChanged();
@@ -475,8 +475,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
   }
 
-  synchronized
-  public List<ForgeInstance> getForgeRepos(final IProgressMonitor monitor) throws CloudBeesException {
+  synchronized public List<ForgeInstance> getForgeRepos(final IProgressMonitor monitor) throws CloudBeesException {
     List<ForgeInstance> cloudRepos = CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeRepos(monitor);
 
     if (this.forgeRegistry == null) {

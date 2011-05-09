@@ -93,7 +93,7 @@ public class InstanceGroup implements ICBGroup {
 
   @Override
   public int getOrder() {
-    return this.cloudHosted ? 2 : 3;
+    return this.cloudHosted ? 3 : 2;
   }
 
   public static class DevAtCloudJenkinsInstanceGroup extends InstanceGroup {

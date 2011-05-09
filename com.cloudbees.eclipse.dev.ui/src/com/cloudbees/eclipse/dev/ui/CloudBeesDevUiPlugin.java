@@ -201,8 +201,10 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
     reg.put(CBImages.IMG_FOLDER_FORGE,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_cb.png")));
-    reg.put(CBImages.IMG_INSTANCE_FORGE,
-        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_orange.png")));
+    reg.put(CBImages.IMG_INSTANCE_FORGE_GIT,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/scm_git.png")));
+    reg.put(CBImages.IMG_INSTANCE_FORGE_SVN,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/scm_svn.png")));
 
     reg.put(CBImages.IMG_VIEW,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_big.png")));
@@ -500,14 +502,15 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
                 toSync.clear();
                 if (result == Dialog.OK) {
-                  if (confDialog.getSelectedRepos() != null
-                    && !confDialog.getSelectedRepos().isEmpty()) {
+                  if (confDialog.getSelectedRepos() != null && !confDialog.getSelectedRepos().isEmpty()) {
                     toSync.addAll(confDialog.getSelectedRepos());
                   }
                   for (ForgeInstance repo : forgeRepos) {
                     if (repo.status != STATUS.SYNCED) {
                       if (!toSync.contains(repo)) {
                         repo.status = STATUS.SKIPPED;
+                      } else {
+                        repo.status = STATUS.UNKNOWN;
                       }
                     }
                   }
@@ -523,7 +526,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             for (ForgeInstance repo : toSync) {
               subMonitor.subTask("Synchronizing repository '" + repo.url + "'");
               CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().sync(repo, subMonitor);
-              mess += repo.status + " " + repo.url + "\n\n"; // TODO show lastException somewhere here?
+              mess += repo.status.getLabel() + " " + repo.url + "\n\n"; // TODO show lastException somewhere here?
               subMonitor.worked(step);
             }
             subMonitor.subTask("");
@@ -559,6 +562,12 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
           return Status.OK_STATUS; // new Status(Status.INFO, PLUGIN_ID, mess);
         } catch (Exception e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
+          Iterator<JenkinsChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
+              .iterator();
+          while (iterator.hasNext()) {
+            JenkinsChangeListener listener = iterator.next();
+            listener.forgeChanged(null);
+          }
           return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage(), e);
         } finally {
           monitor.done();
@@ -637,4 +646,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     }
   }
 
+  public static void logError(final Exception e) {
+    IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage());
+    plugin.getLog().log(status);
+  }
 }

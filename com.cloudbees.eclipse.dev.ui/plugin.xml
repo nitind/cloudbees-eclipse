@@ -31,6 +31,7 @@
             <view
                 relative="org.eclipse.ui.views.ProblemView"
                 relationship="stack"
+                visible="false"
                 id="com.cloudbees.eclipse.dev.ui.views.jobs.JobsView">
             </view>
         </perspectiveExtension>
@@ -38,6 +39,7 @@
             targetID="org.eclipse.ui.resourcePerspective">
             <view
                 relative="org.eclipse.ui.views.TaskList"
+                visible="false"
                 relationship="stack"
                 id="com.cloudbees.eclipse.dev.ui.views.jobs.JobsView">
             </view>
@@ -46,6 +48,7 @@
               targetID="com.cloudbees.eclipse.ui.CloudBeesPerspective">
            <view
                  id="com.cloudbees.eclipse.dev.ui.views.jobs.JobsView"
+                 visible="false"
                  relationship="stack"
                  relative="org.eclipse.ui.views.ProblemView">
            </view>
@@ -55,6 +58,7 @@
             <view
                 relative="org.eclipse.ui.views.ProblemView"
                 relationship="stack"
+                visible="false"
                 id="com.cloudbees.eclipse.dev.ui.views.build.BuildHistoryView">
             </view>
         </perspectiveExtension>
@@ -63,6 +67,7 @@
             <view
                 relative="org.eclipse.ui.views.TaskList"
                 relationship="stack"
+                visible="false"
                 id="com.cloudbees.eclipse.dev.ui.views.build.BuildHistoryView">
             </view>
         </perspectiveExtension>
@@ -70,6 +75,7 @@
               targetID="com.cloudbees.eclipse.ui.CloudBeesPerspective">
            <view
                  id="com.cloudbees.eclipse.dev.ui.views.build.BuildHistoryView"
+                 visible="false"
                  relationship="stack"
                  relative="org.eclipse.ui.views.ProblemView">
            </view>

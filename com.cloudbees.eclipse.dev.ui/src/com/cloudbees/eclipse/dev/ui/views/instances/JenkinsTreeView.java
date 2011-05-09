@@ -158,11 +158,10 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
   }
 
   private void fillLocalPullDown(final IMenuManager manager) {
-    manager.add(this.configureAccountAction);
     manager.add(this.attachJenkinsAction);
-    manager.add(this.configureSshAction);
-    //    manager.add(this.reloadForgeAction);
     manager.add(this.reloadJenkinsAction);
+    manager.add(this.configureAccountAction);
+    manager.add(this.configureSshAction);
   }
 
   private void makeActions() {

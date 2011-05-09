@@ -9,11 +9,13 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.PlatformUI;
 
+import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
+import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadForgeReposAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
@@ -80,6 +82,16 @@ public class ForgeTreeView implements IPropertyChangeListener, ICBTreeProvider {
       boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
           .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
       this.reloadForgeAction.setEnabled(forgeEnabled);
+    }
+    if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())
+        || PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
+        || PreferenceConstants.P_EMAIL.equals(event.getProperty())
+        || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {
+      try {
+        CloudBeesDevUiPlugin.getDefault().reloadForgeRepos(true);
+      } catch (CloudBeesException e) {
+        CloudBeesDevUiPlugin.logError(e);
+      }
     }
   }
 
