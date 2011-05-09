@@ -4,12 +4,15 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -17,8 +20,14 @@ import org.eclipse.swt.widgets.Text;
 
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
+import com.cloudbees.eclipse.run.ui.Images;
 
-public class CBCloudLaunchConfigurationTab extends CBLaunchConfigurationTab {
+public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
+
+  private static final String TAB_NAME = "CloudBees Application";
+
+  protected ProjectSelectionComposite projectSelector;
+  protected Composite main;
 
   private Text customIdText;
   private Button customId;
@@ -45,7 +54,12 @@ public class CBCloudLaunchConfigurationTab extends CBLaunchConfigurationTab {
   @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
     try {
-      super.initializeFrom(configuration);
+      String projectName = configuration
+          .getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, new String());
+      if (projectName == null || projectName.length() == 0) {
+        projectName = this.projectSelector.getDefaultSelection();
+      }
+      this.projectSelector.setText(projectName);
 
       String id = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
       this.customId.setSelection(!"".equals(id));
@@ -63,7 +77,18 @@ public class CBCloudLaunchConfigurationTab extends CBLaunchConfigurationTab {
 
   @Override
   public void createControl(Composite parent) {
-    super.createControl(parent);
+    this.main = new Composite(parent, SWT.NONE);
+    this.main.setLayout(new GridLayout(2, false));
+
+    this.projectSelector = new ProjectSelectionComposite(this.main, SWT.None) {
+      @Override
+      public void handleUpdate() {
+        validateConfigurationTab();
+      }
+    };
+    this.projectSelector.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
+    setControl(this.main);
 
     this.accountSelector = new AccountSelecionComposite(this.main) {
       @Override
@@ -116,24 +141,44 @@ public class CBCloudLaunchConfigurationTab extends CBLaunchConfigurationTab {
     });
   }
 
-  @Override
   protected boolean validateConfigurationTab() {
-    boolean valid = super.validateConfigurationTab();
-
-    if (valid) {
-      IStatus accountStatus = this.accountSelector.validate();
-      if (!accountStatus.isOK()) {
-        setErrorMessage(accountStatus.getMessage());
-        updateLaunchConfigurationDialog();
-        valid = false;
-      }
+    IStatus projectStatus = this.projectSelector.validate();
+    if (!projectStatus.isOK()) {
+      setErrorMessage(projectStatus.getMessage());
+      updateLaunchConfigurationDialog();
+      return false;
     }
 
-    return valid;
+    setErrorMessage(null);
+    setMessage("Run CloudBees application");
+    updateLaunchConfigurationDialog();
+
+    IStatus accountStatus = this.accountSelector.validate();
+    if (!accountStatus.isOK()) {
+      setErrorMessage(accountStatus.getMessage());
+      updateLaunchConfigurationDialog();
+      return false;
+    }
+
+    return true;
   }
 
   @Override
   public boolean isValid(ILaunchConfiguration launchConfig) {
-    return super.isValid(launchConfig) && this.accountSelector.validate().isOK();
+    return this.projectSelector.validate().getSeverity() == IStatus.OK && this.accountSelector.validate().isOK();
+  }
+
+  @Override
+  public String getName() {
+    return TAB_NAME;
+  }
+
+  @Override
+  public Image getImage() {
+    return CBRunUiActivator.getDefault().getImageRegistry().get(Images.CLOUDBEES_ICON_16x16);
+  }
+
+  @Override
+  public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
   }
 }

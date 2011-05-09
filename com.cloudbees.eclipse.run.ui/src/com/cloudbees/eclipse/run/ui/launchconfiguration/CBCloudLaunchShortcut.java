@@ -42,8 +42,8 @@ public class CBCloudLaunchShortcut implements ILaunchShortcut {
       }
 
       try {
-        List<ILaunchConfiguration> launchConfigurations = CBRunUtil
-            .getOrCreateCloudBeesLaunchConfigurations(name, true);
+        List<ILaunchConfiguration> launchConfigurations = CBRunUtil.getOrCreateCloudBeesLaunchConfigurations(name,
+            true, null);
         ILaunchConfiguration configuration = launchConfigurations.get(launchConfigurations.size() - 1);
 
         String accountName = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID, "");

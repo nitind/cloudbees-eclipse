@@ -74,10 +74,10 @@ public class CBRunUtil {
     return launchConfigurations;
   }
 
-  public static List<ILaunchConfiguration> getOrCreateCloudBeesLaunchConfigurations(String projectName, boolean cloud)
-      throws CoreException {
+  public static List<ILaunchConfiguration> getOrCreateCloudBeesLaunchConfigurations(String projectName, boolean cloud,
+      String port) throws CoreException {
     if (!cloud) {
-      return getOrCreateCloudBeesLaunchConfigurations(projectName);
+      return getOrCreateCloudBeesLaunchConfigurations(projectName, port);
     }
 
     List<ILaunchConfiguration> launchConfiguration = getLaunchConfigurations(projectName, cloud);
@@ -98,11 +98,12 @@ public class CBRunUtil {
 
   /**
    * @param projectName
+   * @param port
    * @return list of launch configurations associated with this project name, guaranteed to return at least 1
    *         configuration
    * @throws CoreException
    */
-  public static List<ILaunchConfiguration> getOrCreateCloudBeesLaunchConfigurations(String projectName)
+  public static List<ILaunchConfiguration> getOrCreateCloudBeesLaunchConfigurations(String projectName, String port)
       throws CoreException {
     List<ILaunchConfiguration> launchConfiguration = getLaunchConfigurations(projectName, false);
 
@@ -114,7 +115,7 @@ public class CBRunUtil {
       String name = projectName + " (local)";
 
       ILaunchConfigurationWorkingCopy copy = configType.newInstance(null, name);
-      addDefaultAttributes(copy, projectName);
+      addDefaultAttributes(copy, projectName, port);
 
       launchConfiguration.add(copy.doSave());
     }
@@ -125,16 +126,16 @@ public class CBRunUtil {
   /**
    * Adds attributes to this launch configuration working copy to enable launching as ant task on a separate JRE.
    * 
-   * @param copy
+   * @param conf
    * @param projectName
    * @return
    * @throws CoreException
    */
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public static ILaunchConfigurationWorkingCopy addDefaultAttributes(ILaunchConfigurationWorkingCopy copy,
-      String projectName) throws CoreException {
+  public static ILaunchConfigurationWorkingCopy addDefaultAttributes(ILaunchConfigurationWorkingCopy conf,
+      String projectName, String port) throws CoreException {
 
-    copy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, projectName);
+    conf.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, projectName);
 
     IStringVariableManager variableManager = VariablesPlugin.getDefault().getStringVariableManager();
     String workspaceVarName = "workspace_loc";
@@ -142,28 +143,35 @@ public class CBRunUtil {
     if (!projectName.isEmpty()) {
       IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(projectName + "/build.xml"));
       String location = variableManager.generateVariableExpression(workspaceVarName, file.getFullPath().toString());
-      copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", location);
+      conf.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", location);
     }
 
-    Map<String, String> map = copy.getAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", (Map) null);
+    Map<String, String> map = conf.getAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", (Map) null);
 
     if (map == null) {
       map = new HashMap<String, String>();
     }
 
     map.put("bees.home", CBSdkActivator.getDefault().getBeesHome());
-    copy.setAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", map);
+    if (port == null) {
+      map.remove("run.port");
+    } else {
+      map.put("run.port", port);
+    }
+    conf.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PORT, port);
+
+    conf.setAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", map);
 
     String directory = variableManager.generateVariableExpression(workspaceVarName, "/" + projectName);
-    copy.setAttribute("org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY", directory);
+    conf.setAttribute("org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY", directory);
 
-    copy.setAttribute("org.eclipse.jdt.launching.MAIN_TYPE", "org.eclipse.ant.internal.ui.antsupport.InternalAntRunner");
+    conf.setAttribute("org.eclipse.jdt.launching.MAIN_TYPE", "org.eclipse.ant.internal.ui.antsupport.InternalAntRunner");
 
-    copy.setAttribute("org.eclipse.ui.externaltools.ATTR_ANT_TARGETS", "run");
+    conf.setAttribute("org.eclipse.ui.externaltools.ATTR_ANT_TARGETS", "run");
 
-    copy.setAttribute("process_factory_id", "org.eclipse.ant.ui.remoteAntProcessFactory");
+    conf.setAttribute("process_factory_id", "org.eclipse.ant.ui.remoteAntProcessFactory");
 
-    return copy;
+    return conf;
   }
 
   public static ILaunchConfiguration createTemporaryRemoteLaunchConfiguration(String projectName) throws CoreException {
