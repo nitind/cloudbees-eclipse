@@ -222,8 +222,8 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
 
   @Override
   public CBTreeContributor[] getContributors() {
-    return new CBTreeContributor[] { this.attachJenkinsAction, this.reloadJenkinsAction,
-        new CBTreeSeparator(SeparatorLocation.PULL_DOWN), this.configureAccountAction, this.configureSshAction };
+    return new CBTreeContributor[] { this.configureAccountAction, this.configureSshAction,
+        new CBTreeSeparator(SeparatorLocation.PULL_DOWN), this.attachJenkinsAction, this.reloadJenkinsAction };
   }
 
   @Override
