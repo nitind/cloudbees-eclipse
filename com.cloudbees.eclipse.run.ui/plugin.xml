@@ -213,7 +213,7 @@
         id="com.cloudbees.eclipse.run.ui.showProperties"
         objectClass="com.cloudbees.api.ApplicationInfo">
      <action
-           class="com.cloudbees.eclipse.run.ui.popup.actions.ShowPropertiesAction"
+           class="com.cloudbees.eclipse.ui.internal.action.ShowPropertiesAction"
            enablesFor="1"
            id="com.cloudbees.eclipse.run.ui.action.showProperties"
            label="Properties"

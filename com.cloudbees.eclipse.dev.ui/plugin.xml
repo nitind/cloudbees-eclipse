@@ -164,6 +164,28 @@
     
     <extension
        point="org.eclipse.ui.popupMenus">
+     <objectContribution
+           adaptable="false"
+           id="com.cloudbees.eclipse.dev.ui.objectContribution.forge.properties"
+           objectClass="com.cloudbees.eclipse.core.forge.api.ForgeInstance">
+        <action
+              class="com.cloudbees.eclipse.ui.internal.action.ShowPropertiesAction"
+              enablesFor="1"
+              id="com.cloudbees.eclipse.dev.ui.action.forge.properties"
+              label="Properties">
+        </action>
+     </objectContribution>
+     <objectContribution
+           adaptable="false"
+           id="com.cloudbees.eclipse.dev.ui.objectContribution.jenkins.properties"
+           objectClass="com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse">
+        <action
+              class="com.cloudbees.eclipse.ui.internal.action.ShowPropertiesAction"
+              enablesFor="1"
+              id="com.cloudbees.eclipse.dev.ui.action.jenkins.properties"
+              label="Properties">
+        </action>
+     </objectContribution>
     	<objectContribution
           adaptable="true"
           id="com.cloudbees.eclipse.dev.ui.newJenkinsJob"
@@ -243,6 +265,17 @@
               label="Show View">
         </action>
      </objectContribution>
+     <objectContribution
+           adaptable="false"
+           id="com.cloudbees.eclipse.dev.ui.objectContribution.jenkins.view"
+           objectClass="com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse$View">
+        <action
+              class="com.cloudbees.eclipse.ui.internal.action.ShowPropertiesAction"
+              enablesFor="1"
+              id="com.cloudbees.eclipse.dev.ui.action.jenkins.view.properties"
+              label="Properties">
+        </action>
+     </objectContribution>
  	</extension>
  	
     <extension
@@ -257,6 +290,30 @@
        <cbTreeProvider
              class="com.cloudbees.eclipse.dev.ui.views.forge.ForgeTreeView">
        </cbTreeProvider>
+    </extension>
+    <extension
+          point="org.eclipse.core.runtime.adapters">
+       <factory
+             adaptableType="com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse"
+             class="com.cloudbees.eclipse.dev.ui.AdapterFactory">
+          <adapter
+                type="org.eclipse.ui.views.properties.IPropertySource">
+          </adapter>
+       </factory>
+       <factory
+             adaptableType="com.cloudbees.eclipse.core.forge.api.ForgeInstance"
+             class="com.cloudbees.eclipse.dev.ui.AdapterFactory">
+          <adapter
+                type="org.eclipse.ui.views.properties.IPropertySource">
+          </adapter>
+       </factory>
+       <factory
+             adaptableType="com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse$View"
+             class="com.cloudbees.eclipse.dev.ui.AdapterFactory">
+          <adapter
+                type="org.eclipse.ui.views.properties.IPropertySource">
+          </adapter>
+       </factory>
     </extension>
      
 </plugin>

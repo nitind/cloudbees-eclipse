@@ -2,8 +2,6 @@ package com.cloudbees.eclipse.core.jenkins.api;
 
 import com.google.gson.annotations.Expose;
 
-
-
 public class JenkinsInstanceResponse extends BaseJenkinsResponse {
 
   public String mode; // NORMAL
@@ -37,6 +35,7 @@ public class JenkinsInstanceResponse extends BaseJenkinsResponse {
   public static class View {
     public String name;
     public String url;
+    public String description;
 
     @Expose(deserialize = false, serialize = false)
     public boolean isPrimary;
