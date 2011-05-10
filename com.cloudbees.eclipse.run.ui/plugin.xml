@@ -3,34 +3,27 @@
 <plugin>
    <extension-point id="com.cloudbees.eclipse.run.ui.launchDelegateAditions" name="launchDelegateAditions" schema="schema/com.cloudbees.eclipse.run.ui.launchDelegateAditions.exsd"/>
 	<extension point="org.eclipse.ui.commands">
-		<category id="com.cloudbees.eclipse.run.ui.commands.category"
-			name="CloudBees RUN@cloud">
-		</category>
-		<command categoryId="com.cloudbees.eclipse.run.ui.commands.category"
+		<command categoryId="com.cloudbees.eclipse.ui.commands.category"
 			defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.CBSampleWebAppHandler"
 			id="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp" name="New CloudBees Project...">
-		</command>
-		<command categoryId="com.cloudbees.eclipse.run.ui.commands.category"
-			defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.ReferenceHandler"
-			id="com.cloudbees.eclipse.run.ui.commands.referenceToMenu" name="Reference To CloudBees Menus">
 		</command>
 	</extension>
 	<extension point="org.eclipse.ui.menus">
 		<menuContribution allPopups="false"
-			locationURI="toolbar:org.eclipse.ui.main.toolbar">
-			<toolbar id="com.cloudbees.eclipse.run.ui.toolbar" label="CloudBees">
-				<command commandId="com.cloudbees.eclipse.run.ui.commands.referenceToMenu"
-					icon="icons/16x16/cb_plain.png" label="CloudBees" style="pulldown">
-				</command>
-			</toolbar>
-		</menuContribution>
-		<menuContribution allPopups="false"
-			locationURI="menu:com.cloudbees.eclipse.run.ui.commands.referenceToMenu">
+			locationURI="menu:com.cloudbees.eclipse.ui.commands.referenceToMenu">
 			<command commandId="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp"
 				icon="icons/16x16/cb_new_proj_wiz_ico_16x16.png" label="New CloudBees Project..."
 				mnemonic="N" style="push" tooltip="Create a sample CloudBees project">
 			</command>
 		</menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="menu:com.cloudbees.eclipse.ui.commands.referenceToMenu">
+     <separator
+           name="com.cloudbees.eclipse.run.ui.separator"
+           visible="true">
+     </separator>
+  </menuContribution>
 	</extension>
 	<extension point="org.eclipse.ui.popupMenus">
   <objectContribution

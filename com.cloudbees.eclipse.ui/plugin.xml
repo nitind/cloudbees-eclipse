@@ -201,5 +201,70 @@
                  relative="org.eclipse.jdt.ui.PackageExplorer">
            </view>
         </perspectiveExtension>
-	</extension>	
+	</extension>
+    <extension
+          point="org.eclipse.ui.commands">
+       <category
+             id="com.cloudbees.eclipse.ui.commands.category"
+             name="CloudBees">
+       </category>
+       <command
+             categoryId="com.cloudbees.eclipse.ui.commands.category"
+             defaultHandler="com.cloudbees.eclipse.ui.internal.commands.ReferenceHandler"
+             id="com.cloudbees.eclipse.ui.commands.referenceToMenu"
+             name="Reference To CloudBees Menus">
+       </command>
+       <command
+             categoryId="com.cloudbees.eclipse.ui.commands.category"
+             defaultHandler="com.cloudbees.eclipse.ui.internal.commands.ConfigureAccountHandler"
+             id="com.cloudbees.eclipse.run.ui.commands.cloudBeesAccount"
+             name="Configure Account...">
+       </command>
+       <command
+             categoryId="com.cloudbees.eclipse.ui.commands.category"
+             defaultHandler="com.cloudbees.eclipse.ui.internal.commands.ShowCloudBeesViewHandler"
+             id="com.cloudbees.eclipse.ui.commands.showCloudBeesView"
+             name="CloudBees View">
+       </command>
+    </extension>
+    <extension
+          point="org.eclipse.ui.menus">
+       <menuContribution
+             allPopups="false"
+             locationURI="toolbar:org.eclipse.ui.main.toolbar">
+          <toolbar
+                id="com.cloudbees.eclipse.ui.toolbar"
+                label="CloudBees">
+             <command
+                   commandId="com.cloudbees.eclipse.ui.commands.referenceToMenu"
+                   icon="icons/16x16/cb_plain.png"
+                   label="CloudBees"
+                   style="pulldown">
+             </command>
+          </toolbar>
+       </menuContribution>
+       <menuContribution
+             allPopups="false"
+             locationURI="menu:com.cloudbees.eclipse.ui.commands.referenceToMenu">
+          <command
+                commandId="com.cloudbees.eclipse.run.ui.commands.cloudBeesAccount"
+                label="Configure Account..."
+                mnemonic="C"
+                style="push"
+                tooltip="Manage CloudBees Eclipse Toolkit settings">
+          </command>
+       </menuContribution>
+       <menuContribution
+             allPopups="false"
+             locationURI="menu:com.cloudbees.eclipse.ui.commands.referenceToMenu">
+          <command
+                commandId="com.cloudbees.eclipse.ui.commands.showCloudBeesView"
+                icon="icons/16x16/cb_plain.png"
+                label="CloudBees View"
+                mnemonic="V"
+                style="push"
+                tooltip="Open CloudBees View">
+          </command>
+       </menuContribution>
+    </extension>	
 </plugin>
