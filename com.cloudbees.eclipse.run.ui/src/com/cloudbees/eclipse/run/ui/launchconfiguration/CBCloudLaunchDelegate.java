@@ -16,6 +16,8 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.run.core.BeesSDK;
@@ -61,7 +63,21 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
         }
       }
     } catch (Exception e) {
-      CBRunUiActivator.logErrorAndShowDialog(e);
+      if (e.getMessage().contains("Target \"dist\" does not exist in the project")) {
+        Display.getDefault().syncExec(new Runnable() {
+
+          @Override
+          public void run() {
+
+            String message = "Please provide a valid CloudBees Project build.xml!";
+            MessageDialog.openError(Display.getDefault().getActiveShell(), "Incorrect build.xml", message);
+
+          }
+        });
+        CBRunUiActivator.logError(e);
+      } else {
+        CBRunUiActivator.logErrorAndShowDialog(e);
+      }
     }
 
   }
