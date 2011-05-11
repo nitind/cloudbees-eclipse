@@ -11,4 +11,9 @@ public class ForgeSubclipseSyncEnabler implements ForgeSyncEnabler {
     return enabled;
   }
 
+  @Override
+  public String getName() {
+    return "Subclipse";
+  }
+
 }

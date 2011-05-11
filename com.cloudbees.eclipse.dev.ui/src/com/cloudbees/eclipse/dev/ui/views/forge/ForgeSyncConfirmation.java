@@ -3,8 +3,12 @@ package com.cloudbees.eclipse.dev.ui.views.forge;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -28,8 +32,12 @@ import org.eclipse.swt.widgets.TableColumn;
 
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance.STATUS;
+import com.cloudbees.eclipse.core.forge.api.ForgeSyncEnabler;
+import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
+import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 
-public class ForgeSyncConfirmation extends Dialog {
+public class ForgeSyncConfirmation extends TitleAreaDialog {
 
   List<ForgeInstance> repos;
   List<ForgeInstance> selectedRepos;
@@ -76,7 +84,7 @@ public class ForgeSyncConfirmation extends Dialog {
 
   /**
    * Create the dialog.
-   *
+   * 
    * @param parentShell
    */
   public ForgeSyncConfirmation(final Shell parentShell, final List<ForgeInstance> repos) {
@@ -87,12 +95,24 @@ public class ForgeSyncConfirmation extends Dialog {
 
   /**
    * Create contents of the dialog.
-   *
+   * 
    * @param parent
    */
   @Override
   protected Control createDialogArea(final Composite parent) {
-    Composite container = (Composite) super.createDialogArea(parent);
+    Composite dialogArea = (Composite) super.createDialogArea(parent);
+
+    setTitle("Configure Forge Repositories");
+    setMessage("Please check repositories to synchronize");
+    setTitleImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_CB_ICON_LARGE_64x66));
+
+    Composite container = new Composite(dialogArea, SWT.NONE);
+    GridLayout layout = new GridLayout();
+    layout.numColumns = 1;
+    layout.marginHeight = 10;
+    layout.marginWidth = 10;
+    container.setLayout(layout);
+    container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
     Label lblSelectForgeRepositories = new Label(container, SWT.NONE);
     lblSelectForgeRepositories.setText("Configure Forge repositories for this Eclipse workspace:");
@@ -143,6 +163,7 @@ public class ForgeSyncConfirmation extends Dialog {
     }
 
     parent.layout(true);
+    checkForgeSyncEnablers();
 
     return container;
   }
@@ -155,7 +176,7 @@ public class ForgeSyncConfirmation extends Dialog {
 
   /**
    * Create contents of the button bar.
-   *
+   * 
    * @param parent
    */
   @Override
@@ -186,5 +207,50 @@ public class ForgeSyncConfirmation extends Dialog {
 
   public List<ForgeInstance> getSelectedRepos() {
     return this.selectedRepos;
+  }
+
+  private void checkForgeSyncEnablers() {
+    List<String> plugins = getEnabledSCMPlugins();
+
+    if (plugins.isEmpty()) {
+      setMessage("Did not find any SCM plugins.", IMessageProvider.WARNING);
+    } else {
+      StringBuilder info = new StringBuilder("Found following SCM plugins: ");
+
+      for (String name : plugins) {
+        info.append(name).append(", ");
+      }
+
+      info.delete(info.length() - 2, info.length());
+
+      setMessage(info.toString(), IMessageProvider.INFORMATION);
+    }
+  }
+
+  private List<String> getEnabledSCMPlugins() {
+    List<String> pluginNames = new ArrayList<String>();
+
+    IExtension[] extensions = Platform.getExtensionRegistry()
+        .getExtensionPoint(CloudBeesDevCorePlugin.PLUGIN_ID, "forgeSyncProvider").getExtensions();
+
+    for (IExtension extension : extensions) {
+      for (IConfigurationElement element : extension.getConfigurationElements()) {
+        try {
+          Object enabler = element.createExecutableExtension("enabler");
+          if (enabler == null || !(enabler instanceof ForgeSyncEnabler)) {
+            continue;
+          }
+
+          ForgeSyncEnabler syncEnabler = (ForgeSyncEnabler) enabler;
+          if (syncEnabler.isEnabled()) {
+            pluginNames.add(syncEnabler.getName());
+          }
+
+        } catch (Exception e) {
+        }
+      }
+    }
+
+    return pluginNames;
   }
 }

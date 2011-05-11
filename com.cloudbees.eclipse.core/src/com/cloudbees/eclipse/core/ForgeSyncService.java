@@ -18,7 +18,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 /**
  * Main service for syncing Forge repositories and Eclipse repository entries. Currently supported providers are EGit,
  * Sublclipse, Subversive
- *
+ * 
  * @author ahtik
  */
 public class ForgeSyncService {
@@ -60,8 +60,7 @@ public class ForgeSyncService {
     }
   }
 
-  public void sync(final ForgeInstance instance, final IProgressMonitor monitor)
-      throws CloudBeesException {
+  public void sync(final ForgeInstance instance, final IProgressMonitor monitor) throws CloudBeesException {
     int ticksPerProcess = 100 / Math.max(this.providers.size(), 1);
     if (ticksPerProcess <= 0) {
       ticksPerProcess = 1;

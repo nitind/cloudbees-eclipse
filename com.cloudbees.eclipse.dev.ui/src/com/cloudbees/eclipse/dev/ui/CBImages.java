@@ -58,4 +58,5 @@ public interface CBImages {
   String IMG_DELETE = "IMG_DELETE";
   String IMG_DELETE_DISABLED = "IMG_DELETE_DISABLED";
 
+  String IMG_CB_ICON_LARGE_64x66 = "IMG_CB_ICON_LARGE_64x66";
 }

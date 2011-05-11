@@ -11,4 +11,9 @@ public class ForgeSubversiveSyncEnabler implements ForgeSyncEnabler {
     return enabled;
   }
 
+  @Override
+  public String getName() {
+    return "Subversive";
+  }
+
 }

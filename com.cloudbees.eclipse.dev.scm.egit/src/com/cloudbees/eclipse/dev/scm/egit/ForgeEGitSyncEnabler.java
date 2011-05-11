@@ -12,4 +12,9 @@ public class ForgeEGitSyncEnabler implements ForgeSyncEnabler {
     return enabled;
   }
 
+  @Override
+  public String getName() {
+    return "EGit";
+  }
+
 }
