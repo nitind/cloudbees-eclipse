@@ -33,4 +33,5 @@ public final class Messages extends NLS {
   public static String pref_jenkins_refresh_interval;
   public static String pref_jenkins_refresh_enabled;
 
+  public static String git_access_reminder;
 }

@@ -10,6 +10,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -49,6 +50,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
   }
 
+  @Override
   public void createFieldEditors() {
 
     getFieldEditorParent().setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -78,6 +80,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
     addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_JAAS, Messages.pref_enable_jaas, groupInnerComp));
     addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_FORGE, Messages.pref_enable_forge, groupInnerComp));
 
+    createGitAccessLink(groupInnerComp);
   }
 
   private void createAllJenkins() {
@@ -96,21 +99,21 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
       @Override
       protected void valueChanged(boolean oldValue, boolean newValue) {
         super.valueChanged(oldValue, newValue);
-        intervRefresh.setEnabled(newValue, groupInnerComp);
+        GeneralPreferencePage.this.intervRefresh.setEnabled(newValue, groupInnerComp);
       }
     };
 
-    intervRefresh = new IntegerFieldEditor(PreferenceConstants.P_JENKINS_REFRESH_INTERVAL,
+    this.intervRefresh = new IntegerFieldEditor(PreferenceConstants.P_JENKINS_REFRESH_INTERVAL,
         Messages.pref_jenkins_refresh_interval, groupInnerComp);
 
     addField(intervEnable);
-    addField(intervRefresh);
+    addField(this.intervRefresh);
 
-    intervRefresh.setEnabled(getPreferenceStore().getBoolean(PreferenceConstants.P_JENKINS_REFRESH_ENABLED),
+    this.intervRefresh.setEnabled(getPreferenceStore().getBoolean(PreferenceConstants.P_JENKINS_REFRESH_ENABLED),
         groupInnerComp);
-    
+
     createAttachJenkinsLink(groupInnerComp);
-    
+
   }
 
   private void createCompositeLogin() {
@@ -142,12 +145,13 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
     final StringFieldEditor fieldPassword = new StringFieldEditor(PreferenceConstants.P_PASSWORD,
         Messages.pref_password, 30, groupInnerComp) {
 
+      @Override
       protected void doLoad() {
         try {
           if (getTextControl() != null) {
             String value = CloudBeesUIPlugin.getDefault().readP();
             getTextControl().setText(value);
-            oldValue = value;
+            this.oldValue = value;
           }
         } catch (StorageException e) {
           // Ignore StorageException, very likely just
@@ -155,6 +159,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
         }
       }
 
+      @Override
       protected void doStore() {
         try {
 
@@ -166,6 +171,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
         }
       }
 
+      @Override
       protected void doFillIntoGrid(Composite parent, int numColumns) {
         super.doFillIntoGrid(parent, numColumns);
         getTextControl().setEchoChar('*');
@@ -260,6 +266,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
     final Link link = new Link(parent, SWT.NONE);
     link.setText(Messages.pref_attach_jenkins);
     link.addSelectionListener(new SelectionAdapter() {
+      @Override
       public void widgetSelected(SelectionEvent e) {
         PreferencesUtil.createPreferenceDialogOn(link.getShell(),
             "com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage", null, null);
@@ -274,6 +281,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
     link.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     link.setText(Messages.pref_signup);
     link.addSelectionListener(new SelectionAdapter() {
+      @Override
       public void widgetSelected(SelectionEvent e) {
         openSignupPage();
       }
@@ -295,4 +303,23 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
   public void init(IWorkbench workbench) {
   }
 
+  private void createGitAccessLink(Composite parent) {
+    final Link link = new Link(parent, SWT.NONE);
+    link.setText(Messages.git_access_reminder);
+    link.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        if (e.text.equals("Eclipse SSH")) {
+          PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(CloudBeesUIPlugin.getActiveWindow()
+              .getShell(), "org.eclipse.jsch.ui.SSHPreferences", null, null);
+
+          if (pref != null) {
+            pref.open();
+          }
+        } else if (e.text.equals("CloudBees web")) {
+          CloudBeesUIPlugin.getDefault().openWithBrowser("https://grandcentral.cloudbees.com/account/edit");
+        }
+      }
+    });
+  }
 }

@@ -2,7 +2,7 @@ package com.cloudbees.eclipse.ui;
 
 /**
  * Constant definitions for plug-in preferences
- *
+ * 
  * @author ahtik
  */
 public class PreferenceConstants {
