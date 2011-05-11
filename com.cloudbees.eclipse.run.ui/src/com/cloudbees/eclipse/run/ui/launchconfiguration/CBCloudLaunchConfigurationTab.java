@@ -105,7 +105,7 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
               break;
             }
           }
-          CBCloudLaunchConfigurationTab.this.warSelector.setUseCustomWar(hasBuildXml(projectName));
+          CBCloudLaunchConfigurationTab.this.warSelector.setUseCustomWar(!hasBuildXml(projectName));
         }
         CBCloudLaunchConfigurationTab.this.warSelector.setProject(proj);
 

@@ -97,6 +97,17 @@ public class BeesSDK {
     IPath workspacePath = project.getLocation().removeLastSegments(1);
     IPath buildPath = getWarFile(project, build).getFullPath();
     String warFile = workspacePath.toOSString() + buildPath.toOSString();
+    String appId = getAppId(account, id, client, warFile);
+
+    ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, warFile,
+        null, null);
+    update();
+
+    return applicationDeployWar;
+  }
+
+  public static String getAppId(final String account, final String id, BeesClient client, String warFile)
+      throws Exception {
     String appId;
 
     if (id == null || "".equals(id)) {
@@ -106,12 +117,7 @@ public class BeesSDK {
     } else {
       appId = account + "/" + id;
     }
-
-    ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, warFile,
-        null, null);
-    update();
-
-    return applicationDeployWar;
+    return appId;
   }
 
   public static ApplicationDeployArchiveResponse deploy(final String appId, final String warPath)
@@ -129,11 +135,24 @@ public class BeesSDK {
     return applicationDeployWar;
   }
 
+  public static ApplicationDeployArchiveResponse deploy(final String account, final String id, final String warPath)
+      throws CloudBeesException, CoreException, FileNotFoundException, Exception {
+    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    BeesClient client = getBeesClient(grandCentralService);
+    if (client == null) {
+      return null;
+    }
+
+    String appId = getAppId(account, id, client, warPath);
+
+    return deploy(appId, warPath);
+  }
+
   /**
    * Establishes a persistent connection to an application log so that you can see new messages as they are written to
    * the logs. This is provides a "cloud-friendly" replacement for the ubiquitous "tail" command many developers use to
    * monitor/debug application log files.
-   * 
+   *
    * @param appId
    * @param logName
    *          valid options are "server", "access" or "error"
@@ -150,7 +169,7 @@ public class BeesSDK {
 
   /**
    * Delete an application
-   * 
+   *
    * @param appId
    * @throws Exception
    */
@@ -233,7 +252,7 @@ public class BeesSDK {
 
   /**
    * Construct full path for the build.xml
-   * 
+   *
    * @param project
    * @return
    */

@@ -58,7 +58,7 @@ public abstract class WarSelecionComposite extends Composite {
 
     this.project = project;
     if (this.project != null) {
-      this.warPaths = findWars();
+      this.warPaths = findWars(project);
     } else {
       this.warPaths = new ArrayList<String>();
     }
@@ -73,21 +73,21 @@ public abstract class WarSelecionComposite extends Composite {
   }
 
   private void prepare(final Composite parent) {
-    this.warPaths = findWars();
+    this.warPaths = findWars(this.project);
   }
 
-  public List<String> findWars() {
+  public static List<String> findWars(final IProject project) {
     final List<String> wars = new ArrayList<String>();
     WorkbenchJob job = new WorkbenchJob("Searching for war files") {
       @Override
       public IStatus runInUIThread(final IProgressMonitor monitor) {
 
-        if (WarSelecionComposite.this.project == null) {
+        if (project == null) {
           return Status.OK_STATUS;
         }
 
         try {
-          WarSelecionComposite.this.project.accept(new IResourceVisitor() {
+          project.accept(new IResourceVisitor() {
             @Override
             public boolean visit(final IResource resource) throws CoreException {
               if (resource.getType() == IResource.FILE && "war".equalsIgnoreCase(resource.getFileExtension())) {
@@ -160,7 +160,6 @@ public abstract class WarSelecionComposite extends Composite {
       @Override
       public void widgetSelected(final SelectionEvent e) {
         updateFields();
-        handleUpdate();
       }
 
       @Override
@@ -204,11 +203,11 @@ public abstract class WarSelecionComposite extends Composite {
     handleException(msg, status);
   }
 
-  private void handleException(final String msg, final IStatus status) {
+  private static void handleException(final String msg, final IStatus status) {
     if (status.getException() != null) {
       CBRunUiActivator.logError(status.getException());
     }
-    ErrorDialog.openError(getShell(), ERROR_TITLE, msg, status);
+    ErrorDialog.openError(CBRunUiActivator.getDefault().getWorkbench().getDisplay().getActiveShell(), ERROR_TITLE, msg, status);
   }
 
   private void openWarSelectionDialog() {
@@ -224,8 +223,8 @@ public abstract class WarSelecionComposite extends Composite {
     this.warPathText.setText(warPath);
     if (!this.useCustomWar.getSelection() && warPath != null && !warPath.isEmpty()) {
       this.useCustomWar.setSelection(true);
-      updateFields();
     }
+    updateFields();
   }
 
   public void updateFields() {
@@ -235,5 +234,6 @@ public abstract class WarSelecionComposite extends Composite {
     if (enable && this.warPathText.getText().isEmpty() && this.warPaths.size() == 1) {
       this.warPathText.setText(getDefaultWarPath());
     }
+    handleUpdate();
   }
 }
