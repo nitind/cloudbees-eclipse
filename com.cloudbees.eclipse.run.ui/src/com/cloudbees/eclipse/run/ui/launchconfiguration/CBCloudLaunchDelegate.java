@@ -93,7 +93,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
           @Override
           public void run() {
 
-            String message = "Please provide a valid CloudBees Project build.xml!";
+            String message = "Please provide a valid CloudBees Project build.xml or provide a war file location!";
             MessageDialog.openError(Display.getDefault().getActiveShell(), "Incorrect build.xml", message);
 
           }
