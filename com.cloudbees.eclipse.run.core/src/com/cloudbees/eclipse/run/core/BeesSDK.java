@@ -11,6 +11,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
+import com.cloudbees.api.ApplicationConfiguration;
 import com.cloudbees.api.ApplicationDeployArchiveResponse;
 import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.api.ApplicationListResponse;
@@ -93,12 +94,19 @@ public class BeesSDK {
       return null;
     }
 
-    String appId = account + "/" + id;//$NON-NLS-1$
-
     IPath workspacePath = project.getLocation().removeLastSegments(1);
-    IPath buildPath = getWarFile(project, build, appId).getFullPath();
-
+    IPath buildPath = getWarFile(project, build).getFullPath();
     String warFile = workspacePath.toOSString() + buildPath.toOSString();
+    String appId;
+
+    if (id == null || "".equals(id)) {
+      ApplicationConfiguration applicationConfiguration = client.getApplicationConfiguration(warFile, account,
+          new String[] {});
+      appId = applicationConfiguration.getApplicationId();
+    } else {
+      appId = account + "/" + id;
+    }
+
     ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, warFile,
         null, null);
     update();
@@ -125,7 +133,7 @@ public class BeesSDK {
    * Establishes a persistent connection to an application log so that you can see new messages as they are written to
    * the logs. This is provides a "cloud-friendly" replacement for the ubiquitous "tail" command many developers use to
    * monitor/debug application log files.
-   *
+   * 
    * @param appId
    * @param logName
    *          valid options are "server", "access" or "error"
@@ -142,7 +150,7 @@ public class BeesSDK {
 
   /**
    * Delete an application
-   *
+   * 
    * @param appId
    * @throws Exception
    */
@@ -154,15 +162,15 @@ public class BeesSDK {
     }
   }
 
-  private static IFile getWarFile(final IProject project, final boolean build, final String id)
-      throws CloudBeesException, CoreException, FileNotFoundException {
+  private static IFile getWarFile(final IProject project, final boolean build) throws CloudBeesException,
+      CoreException, FileNotFoundException {
     if (build) {
-      runTargets(project, new String[] { "dist" }, id);
+      runTargets(project, new String[] { "dist" });
     }
-    IFile file = getBuildFolder(project, id).getFile("webapp.war");
+    IFile file = getBuildFolder(project).getFile("webapp.war");
 
     if (!file.exists()) {
-      runTargets(project, new String[] { "dist" }, id);
+      runTargets(project, new String[] { "dist" });
       file.refreshLocal(IFile.DEPTH_INFINITE, null);
 
       if (!file.exists()) {
@@ -173,12 +181,12 @@ public class BeesSDK {
     return file;
   }
 
-  private static IFolder getBuildFolder(final IProject project, final String id) throws CloudBeesException,
-      CoreException, FileNotFoundException {
+  private static IFolder getBuildFolder(final IProject project) throws CloudBeesException, CoreException,
+      FileNotFoundException {
 
     IFolder folder = project.getFolder("build");
     if (!folder.exists()) {
-      runTargets(project, new String[] { "dist" }, id);
+      runTargets(project, new String[] { "dist" });
       folder.refreshLocal(IFile.DEPTH_INFINITE, null);
 
       if (!folder.exists()) {
@@ -191,7 +199,6 @@ public class BeesSDK {
   }
 
   private static BeesClient getBeesClient(final GrandCentralService grandCentralService) throws CloudBeesException {
-    System.out.println();
     if (grandCentralService.hasAuthInfo()) {
       AuthInfo cachedAuthInfo = grandCentralService.getCachedAuthInfo(false);
 
@@ -205,8 +212,8 @@ public class BeesSDK {
     }
   }
 
-  private static void runTargets(final IProject project, final String[] targets, final String id)
-      throws CloudBeesException, CoreException {
+  private static void runTargets(final IProject project, final String[] targets) throws CloudBeesException,
+      CoreException {
     AntRunner runner = new AntRunner();
 
     runner.setBuildFileLocation(getBuildXmlPath(project));
@@ -217,9 +224,8 @@ public class BeesSDK {
 
     String secretKey = "-Dbees.apiSecret=" + cachedAuthInfo.getAuth().secret_key;//$NON-NLS-1$
     String authKey = " -Dbees.apiKey=" + cachedAuthInfo.getAuth().api_key;//$NON-NLS-1$
-    String appId = " -Dbees.appid=" + id;
     String beesHome = " -Dbees.home=" + CBSdkActivator.getDefault().getBeesHome();
-    runner.setArguments(secretKey + authKey + appId + beesHome);
+    runner.setArguments(secretKey + authKey + beesHome);
 
     runner.addBuildLogger(TimestampedLogger.class.getName());
     runner.run();
@@ -227,7 +233,7 @@ public class BeesSDK {
 
   /**
    * Construct full path for the build.xml
-   *
+   * 
    * @param project
    * @return
    */

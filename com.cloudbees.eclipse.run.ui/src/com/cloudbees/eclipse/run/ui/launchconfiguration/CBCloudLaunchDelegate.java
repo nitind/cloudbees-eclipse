@@ -26,8 +26,8 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
   @SuppressWarnings("restriction")
   @Override
-  public void launch(final ILaunchConfiguration configuration, final String mode, final ILaunch launch, final IProgressMonitor monitor)
-      throws CoreException {
+  public void launch(final ILaunchConfiguration configuration, final String mode, final ILaunch launch,
+      final IProgressMonitor monitor) throws CoreException {
 
     monitor.beginTask("Deploying to RUN@cloud", 1);
     try {
@@ -66,20 +66,18 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
   }
 
-  private void deploy(final IProject project, final String account, final String id) throws Exception, CloudBeesException, CoreException,
-      FileNotFoundException {
-    String appId = "".equals(id) ? project.getName() : id;
-    BeesSDK.deploy(project, account, appId, true);
+  private void deploy(final IProject project, final String account, final String id) throws Exception,
+      CloudBeesException, CoreException, FileNotFoundException {
+    BeesSDK.deploy(project, account, id, true);
   }
 
   private void deployWar(final IProject project, final String account, final String id, final String warPath)
-      throws Exception,
-      CloudBeesException, CoreException, FileNotFoundException {
-    String appId = account + "/" + ("".equals(id) ? project.getName() : id);
-    BeesSDK.deploy(appId, warPath);
+      throws Exception, CloudBeesException, CoreException, FileNotFoundException {
+    BeesSDK.deploy(project, account, id, false);
   }
 
-  private void start(final IProject project, final String account, final String appId) throws Exception, CloudBeesException {
+  private void start(final IProject project, final String account, final String appId) throws Exception,
+      CloudBeesException {
     BeesSDK.start(account, appId.equals("") ? project.getName() : appId);
   }
 
