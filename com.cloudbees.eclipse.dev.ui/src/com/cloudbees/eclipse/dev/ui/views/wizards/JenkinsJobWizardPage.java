@@ -1,6 +1,8 @@
 package com.cloudbees.eclipse.dev.ui.views.wizards;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.WizardPage;
@@ -15,6 +17,8 @@ import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
 import com.cloudbees.eclipse.ui.wizard.CBWizardSupport;
 import com.cloudbees.eclipse.ui.wizard.NewJenkinsJobComposite;
 import com.cloudbees.eclipse.ui.wizard.SelectRepositoryComposite;
@@ -74,16 +78,43 @@ public class JenkinsJobWizardPage extends WizardPage {
       @Override
       protected void validate() {
         if (getJenkinsInstance() == null) {
-          updateErrorStatus("Please select Jenkins instance.");
+          updateErrorStatus(ERR_JENKINS_INSTANCE);
           return;
         }
 
-        if (getJobNameText() == null || getJobNameText().length() == 0) {
-          updateErrorStatus("Please specify Jenkins job name.");
+        String jobNameText = getJobNameText();
+
+        if (jobNameText == null || jobNameText.length() == 0) {
+          updateErrorStatus(ERR_JOB_NAME);
+          return;
+        }
+
+        List<Job> jobs = getInstanceJobs(getJenkinsInstance());
+        boolean existingJobWithSameName = false;
+
+        for (Job job : jobs) {
+          if (job.name.equals(jobNameText)) {
+            existingJobWithSameName = true;
+            break;
+          }
+        }
+
+        if (existingJobWithSameName) {
+          updateErrorStatus(ERR_DUPLICATE_JOB_NAME);
           return;
         }
 
         updateErrorStatus(null);
+      }
+
+      @Override
+      protected List<Job> loadJobs(JenkinsInstance instance) {
+        try {
+          return CBWizardSupport.getJenkinsJobs(getContainer(), instance);
+        } catch (Exception e) {
+          e.printStackTrace();
+          return new ArrayList<JenkinsJobsResponse.Job>();
+        }
       }
 
     };
@@ -157,7 +188,8 @@ public class JenkinsJobWizardPage extends WizardPage {
 
   public boolean isUnderSCM() {
     try {
-      return CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().isUnderSvnScm(this.project);
+      return CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService()
+          .isUnderSvnScm(this.project);
     } catch (Exception e) {
       e.printStackTrace();
       return false;

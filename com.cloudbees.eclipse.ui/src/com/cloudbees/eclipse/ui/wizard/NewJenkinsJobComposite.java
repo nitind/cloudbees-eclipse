@@ -1,5 +1,9 @@
 package com.cloudbees.eclipse.ui.wizard;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -22,6 +26,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
 
 public abstract class NewJenkinsJobComposite extends Composite {
 
@@ -32,9 +37,11 @@ public abstract class NewJenkinsJobComposite extends Composite {
 
   public static final String ERR_JOB_NAME = "Please provide a job name";
   public static final String ERR_JENKINS_INSTANCE = "Please provide a Jenkins instance";
+  public static final String ERR_DUPLICATE_JOB_NAME = "Please specify another job name to avoid overriding an existing job configuration";
 
   private JenkinsInstance[] jenkinsInstancesArray;
   private JenkinsInstance jenkinsInstance;
+  private final Map<String, List<Job>> jobs;
 
   private Button makeJobCheck;
   private Label jenkinsInstanceLabel;
@@ -46,6 +53,8 @@ public abstract class NewJenkinsJobComposite extends Composite {
 
   public NewJenkinsJobComposite(Composite parent) {
     super(parent, SWT.NONE);
+
+    this.jobs = new HashMap<String, List<Job>>();
 
     FillLayout layout = new FillLayout();
     layout.marginHeight = 0;
@@ -78,6 +87,13 @@ public abstract class NewJenkinsJobComposite extends Composite {
 
   public JenkinsInstance getJenkinsInstance() {
     return this.jenkinsInstance;
+  }
+
+  public List<Job> getInstanceJobs(JenkinsInstance instance) {
+    if (!this.jobs.containsKey(instance.id)) {
+      this.jobs.put(instance.id, loadJobs(instance));
+    }
+    return this.jobs.get(instance.id);
   }
 
   public void addJobCheckListener(SelectionListener listener) {
@@ -159,6 +175,8 @@ public abstract class NewJenkinsJobComposite extends Composite {
   protected abstract void validate();
 
   protected abstract JenkinsInstance[] loadJenkinsInstances();
+
+  protected abstract List<Job> loadJobs(JenkinsInstance instance);
 
   protected void addJenkinsInstancesToUI() {
     NewJenkinsJobComposite.this.jenkinsInstancesArray = loadJenkinsInstances();

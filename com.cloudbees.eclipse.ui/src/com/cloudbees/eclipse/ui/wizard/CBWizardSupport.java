@@ -1,7 +1,9 @@
 package com.cloudbees.eclipse.ui.wizard;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -17,6 +19,8 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class CBWizardSupport {
@@ -33,10 +37,13 @@ public class CBWizardSupport {
         try {
           monitor.beginTask("Fetching Jenkins instances", 0);
           CloudBeesUIPlugin plugin = CloudBeesUIPlugin.getDefault();
+
           monitor.subTask("loading local Jenkins instances...");
           List<JenkinsInstance> manualInstances = plugin.loadManualJenkinsInstances();
+
           monitor.subTask("loading DEV@cloud Jenkins instances...");
           List<JenkinsInstance> cloudInstances = plugin.loadDevAtCloudInstances(monitor);
+
           instances.addAll(manualInstances);
           instances.addAll(cloudInstances);
         } catch (CloudBeesException e) {
@@ -57,6 +64,51 @@ public class CBWizardSupport {
     }
 
     return result;
+  }
+
+  public static List<JenkinsJobsResponse.Job> getJenkinsJobs(final IWizardContainer container, final JenkinsInstance instance)
+      throws Exception {
+    final CloudBeesUIPlugin plugin = CloudBeesUIPlugin.getDefault();
+    final JenkinsService service = plugin.getJenkinsServiceForUrl(instance.url);
+    final List<JenkinsJobsResponse.Job> jobsList = new ArrayList<JenkinsJobsResponse.Job>();
+    final Failure<CloudBeesException> failiure = new Failure<CloudBeesException>();
+
+    IRunnableWithProgress operation = new IRunnableWithProgress() {
+
+      public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+        try {
+          String jobName = MessageFormat.format("Requesting {0} Jenkins jobs...", instance.username);
+          monitor.beginTask(jobName, 3);
+
+          monitor.subTask("Requesting Jenkins instance...");
+          JenkinsInstanceResponse response = service.getInstance(monitor);
+          monitor.worked(1);
+
+          monitor.subTask("Requesting Jenkins job list...");
+          JenkinsJobsResponse jobs = service.getJobs(response.viewUrl, monitor);
+          monitor.worked(1);
+
+          monitor.subTask("Processing jobs result");
+          jobsList.addAll(Arrays.asList(jobs.jobs));
+          monitor.worked(1);
+
+        } catch (CloudBeesException e) {
+          failiure.cause = e;
+        } finally {
+          monitor.done();
+        }
+      }
+    };
+
+    try {
+      container.run(true, false, operation);
+      return jobsList;
+    } catch (Exception e) {
+      if (failiure.cause != null) {
+        throw failiure.cause;
+      }
+      throw e;
+    }
   }
 
   public static ForgeInstance[] getRepos(final IWizardContainer container) throws Exception {

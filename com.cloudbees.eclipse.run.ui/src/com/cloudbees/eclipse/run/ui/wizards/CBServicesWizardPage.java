@@ -1,5 +1,8 @@
 package com.cloudbees.eclipse.run.ui.wizards;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -10,6 +13,8 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.ui.wizard.CBWizardPage;
 import com.cloudbees.eclipse.ui.wizard.CBWizardSupport;
@@ -73,6 +78,7 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
         }
 
         String jobName = getJobNameText();
+
         if (jobName == null || jobName.length() == 0) {
           updateErrorStatus(ERR_JOB_NAME);
           return;
@@ -83,7 +89,32 @@ public class CBServicesWizardPage extends WizardPage implements CBWizardPage {
           return;
         }
 
+        List<Job> jobs = getInstanceJobs(getJenkinsInstance());
+        boolean existingJobWithSameName = false;
+
+        for (Job job : jobs) {
+          if (job.name.equals(jobName)) {
+            existingJobWithSameName = true;
+            break;
+          }
+        }
+
+        if (existingJobWithSameName) {
+          updateErrorStatus(ERR_DUPLICATE_JOB_NAME);
+          return;
+        }
+
         updateErrorStatus(null);
+      }
+
+      @Override
+      protected List<Job> loadJobs(JenkinsInstance instance) {
+        try {
+          return CBWizardSupport.getJenkinsJobs(getContainer(), instance);
+        } catch (Exception e) {
+          e.printStackTrace();
+          return new ArrayList<JenkinsJobsResponse.Job>();
+        }
       }
 
     };
