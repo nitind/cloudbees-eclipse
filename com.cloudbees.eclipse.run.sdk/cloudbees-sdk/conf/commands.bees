@@ -6,6 +6,8 @@
     <command group="Project" name="clean" className="com.cloudbees.sdk.commands.AntTarget(clean)"/>
     <command group="Project" name="compile" className="com.cloudbees.sdk.commands.AntTarget(compile)"/>
     <command group="Project" name="package" className="com.cloudbees.sdk.commands.AntTarget(dist)"/>
+    <command group="Project" name="ant" className="com.cloudbees.sdk.commands.ProjectAntTarget" experimental="true" />
+    <command group="Project" name="getapp" className="com.cloudbees.sdk.commands.ApplicationGetSource" experimental="true" />
 
     <command group="Application" name="app:run" className="com.cloudbees.sdk.commands.ApplicationRun"/>
     <command group="Application" name="app:deploy" className="com.cloudbees.sdk.commands.ApplicationDeploy"/>
@@ -25,7 +27,7 @@
     <command group="SDK" name="init" description="Re-initialize the SDK config file" className="com.cloudbees.sdk.commands.Init"/>
 
     <!--# Internal command-->
-    <command name="call" className="com.cloudbees.sdk.commands.Call"/>
+    <command group="SDK" name="call" className="com.cloudbees.sdk.commands.Call" experimental="true" />
 </commands>
 
 

@@ -19,7 +19,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
@@ -34,7 +34,7 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
   protected Composite main;
 
   private Text customIdText;
-  private Button customId;
+  private Button useCustomId;
   private AccountSelecionComposite accountSelector;
   private WarSelecionComposite warSelector;
 
@@ -43,8 +43,8 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
     String projectName = this.projectSelector.getText();
     configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, projectName);
 
-    if (this.customId != null) {
-      if (this.customId.getSelection()) {
+    if (this.useCustomId != null) {
+      if (this.useCustomId.getSelection()) {
         configuration
             .setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, this.customIdText.getText());
       } else {
@@ -55,11 +55,7 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
     configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID,
         this.accountSelector.getAccountName());
 
-    if (this.warSelector.isVisible()) {
-      configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, this.warSelector.getWarPath());
-    } else {
-      configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, "");
-    }
+    configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, this.warSelector.getWarPath());
   }
 
   @Override
@@ -73,7 +69,7 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
       this.projectSelector.setText(projectName);
 
       String id = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
-      this.customId.setSelection(!"".equals(id));
+      this.useCustomId.setSelection(!"".equals(id));
       this.customIdText.setEnabled(!"".equals(id));
       this.customIdText.setText(id);
 
@@ -89,6 +85,9 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
     }
   }
 
+  /**
+   * @wbp.parser.entryPoint
+   */
   @Override
   public void createControl(final Composite parent) {
     this.main = new Composite(parent, SWT.NONE);
@@ -97,6 +96,19 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
     this.projectSelector = new ProjectSelectionComposite(this.main, SWT.None) {
       @Override
       public void handleUpdate() {
+        IProject proj = null;
+        String projectName = CBCloudLaunchConfigurationTab.this.projectSelector.getText();
+        if (projectName != null && !projectName.isEmpty()) {
+          for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+            if (project.getName().equals(projectName)) {
+              proj = project;
+              break;
+            }
+          }
+          CBCloudLaunchConfigurationTab.this.warSelector.setUseCustomWar(!hasBuildXml(projectName));
+        }
+        CBCloudLaunchConfigurationTab.this.warSelector.setProject(proj);
+
         validateConfigurationTab();
       }
     };
@@ -120,18 +132,28 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
     };
     this.warSelector.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-    this.customId = new Button(this.main, SWT.CHECK);
-    this.customId.setSelection(false);
-    this.customId.setText("Use Custom App ID");
+    Composite customIdComposite = new Composite(this.main, SWT.NONE);
+    customIdComposite.setLayout(new GridLayout());
+    customIdComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
+    Group customIdGroup = new Group(customIdComposite, SWT.NONE);
+    customIdGroup.setText("App ID");
+    customIdGroup.setLayout(new GridLayout(1, false));
+    customIdGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+    this.useCustomId = new Button(customIdGroup, SWT.CHECK);
+    this.useCustomId.setSelection(false);
+    this.useCustomId.setText("Use Custom App ID");
     GridData gridData = new GridData();
     gridData.grabExcessHorizontalSpace = true;
     gridData.horizontalSpan = 2;
-    this.customId.setLayoutData(gridData);
+    this.useCustomId.setLayoutData(gridData);
 
-    final Label label = new Label(this.main, SWT.NONE);
-    label.setEnabled(false);
-    label.setText("App ID");
-    this.customIdText = new Text(this.main, SWT.BORDER);
+    //    final Label label = new Label(this.main, SWT.NONE);
+    //    label.setEnabled(false);
+    //    label.setText("App ID");
+
+    this.customIdText = new Text(customIdGroup, SWT.SINGLE | SWT.BORDER);
     this.customIdText.setText("");
     this.customIdText.setEnabled(false);
     this.customIdText.addModifyListener(new ModifyListener() {
@@ -146,19 +168,19 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
     gridData.horizontalAlignment = SWT.FILL;
     this.customIdText.setLayoutData(gridData);
 
-    this.customId.addSelectionListener(new SelectionListener() {
+    this.useCustomId.addSelectionListener(new SelectionListener() {
 
       @Override
       public void widgetSelected(final SelectionEvent e) {
-        boolean selection = CBCloudLaunchConfigurationTab.this.customId.getSelection();
-        label.setEnabled(selection);
+        boolean selection = CBCloudLaunchConfigurationTab.this.useCustomId.getSelection();
+        //        label.setEnabled(selection);
         CBCloudLaunchConfigurationTab.this.customIdText.setEnabled(selection);
         updateLaunchConfigurationDialog();
       }
 
       @Override
       public void widgetDefaultSelected(final SelectionEvent e) {
-
+        widgetSelected(e);
       }
     });
   }
@@ -171,10 +193,6 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
       return false;
     }
 
-    setErrorMessage(null);
-    setMessage("Run CloudBees application");
-    updateLaunchConfigurationDialog();
-
     IStatus accountStatus = this.accountSelector.validate();
     if (!accountStatus.isOK()) {
       setErrorMessage(accountStatus.getMessage());
@@ -182,35 +200,24 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
       return false;
     }
 
-    boolean valid = true;
-    if (this.warSelector != null) {
-      String projectName = this.projectSelector.getText();
-      if (!projectName.isEmpty()) {
-        IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(projectName + "/build.xml"));
-        boolean projectWithAnt = file.exists();
-        this.warSelector.setVisible(!projectWithAnt);
-        ((GridData) this.warSelector.getLayoutData()).exclude = projectWithAnt;
-      }
-
-      if (this.warSelector.isVisible()) {
-        IStatus warStatus = this.warSelector.validate();
-        if (!warStatus.isOK()) {
-          setErrorMessage(warStatus.getMessage());
-          updateLaunchConfigurationDialog();
-          valid = false;
-        }
-      }
-
-      this.warSelector.setProject(null);
-      for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-        if (project.getName().equals(projectName)) {
-          this.warSelector.setProject(project);
-          break;
-        }
-      }
+    IStatus warStatus = this.warSelector.validate();
+    if (!warStatus.isOK()) {
+      setErrorMessage(warStatus.getMessage());
+      updateLaunchConfigurationDialog();
+      return false;
     }
 
-    return valid;
+    setErrorMessage(null);
+    setMessage("Run CloudBees application");
+    updateLaunchConfigurationDialog();
+
+    return true;
+  }
+
+  public static boolean hasBuildXml(final String projectName) {
+    IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(projectName + "/build.xml"));
+    boolean projectWithAnt = file.exists();
+    return projectWithAnt;
   }
 
   @Override

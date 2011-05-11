@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#CloudBees SDK
 if [ "$BEES_HOME" == "" ]
 then
  BEES_HOME=$STAX_HOME
@@ -11,6 +11,6 @@ then
 fi
 export STAX_HOME=$BEES_HOME
 
-export JAVA_OPTS="-Dbees.home=$BEES_HOME -Xmx256m"
+export JAVA_OPTS="-Dbees.home=$BEES_HOME -Xmx256m $BEES_OPTS"
 java $JAVA_OPTS -cp $BEES_HOME/lib/cloudbees-boot.jar com.cloudbees.sdk.boot.Launcher "$@"
 

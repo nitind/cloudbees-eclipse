@@ -3,14 +3,16 @@
     <dependencies>
         <dependency org="net.stax" name="stax-appgen" rev="1.0.20110131-SNAPSHOT" changing="true" />
         <dependency org="net.stax" name="stax-api-client" rev="1.0.20110131-SNAPSHOT" changing="true" />
+        <dependency org="com.cloudbees" name="cloudbees-api-client" rev="1.0.0-SNAPSHOT" changing="true" />
         <dependency org="net.stax" name="stax-logagent" rev="1.0-SNAPSHOT" changing="true" />
         <dependency org="net.stax" name="stax-appserver" rev="1.0.20110131-SNAPSHOT" changing="true" />
-        <dependency org="commons-httpclient" name="commons-httpclient" rev="3.1" />
-        <dependency org="commons-codec" name="commons-codec" rev="1.4" />
+        <dependency org="commons-httpclient" name="commons-httpclient" rev="3.1" conf="*->*,!sources,!javadoc"/>
+        <dependency org="commons-codec" name="commons-codec" rev="1.4" conf="*->*,!sources,!javadoc"/>
 
         <exclude org="javax.servlet" />
         <exclude org="javax.jms" />
         <exclude org="com.sun.jmx" />
         <exclude org="com.sun.jdmk" />
+        <exclude org="commons-daemon" />
     </dependencies>
 </ivy-module>
