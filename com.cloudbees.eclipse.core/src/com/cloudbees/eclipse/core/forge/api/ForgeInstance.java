@@ -8,7 +8,7 @@ import com.cloudbees.eclipse.core.util.Utils;
 import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
 
-public class ForgeInstance {
+public class ForgeInstance implements Comparable<ForgeInstance> {
 
   public static enum TYPE {
     SVN, GIT, CVS
@@ -126,6 +126,11 @@ public class ForgeInstance {
       return new ArrayList<ForgeInstance>();
     }
     return ret;
+  }
+
+  @Override
+  public int compareTo(final ForgeInstance o) {
+    return this.url.compareToIgnoreCase(o.url);
   }
 
 }

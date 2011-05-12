@@ -30,6 +30,7 @@ import org.tigris.subversion.svnclientadapter.SVNUrl;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance.STATUS;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
@@ -37,7 +38,7 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 /**
  * Forge repo sync provider for Subclipse
- * 
+ *
  * @author ahtik
  */
 public class ForgeSubclipseSync implements ForgeSync {
@@ -62,6 +63,12 @@ public class ForgeSubclipseSync implements ForgeSync {
       if (exists) {
         monitor.worked(9);
         instance.status = ForgeInstance.STATUS.SYNCED;
+      } else {
+        if (instance.status != STATUS.SKIPPED) { // user might have deleted it and need to sync again
+          instance.status = ForgeInstance.STATUS.UNKNOWN;
+        }
+
+        System.out.println("Repo is unknown for Subclipse: " + instance.url);
       }
     } finally {
       monitor.worked(10);
@@ -87,8 +94,8 @@ public class ForgeSubclipseSync implements ForgeSync {
       SVNRepositories repos = SVNProviderPlugin.getPlugin().getRepositories();
       boolean exists = repos.isKnownRepository(instance.url, false);
       if (exists) {
-        monitor.worked(9);
         instance.status = ForgeInstance.STATUS.SYNCED;
+        return;
       }
 
       Properties props = new Properties();

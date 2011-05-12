@@ -35,6 +35,7 @@ import org.eclipse.ui.PlatformUI;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance.STATUS;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
@@ -74,6 +75,12 @@ public class ForgeEGitSync implements ForgeSync {
           if (isAlreadyCloned(url)) {
             monitor.worked(8);
             instance.status = ForgeInstance.STATUS.SYNCED;
+          } else {
+            if (instance.status != STATUS.SKIPPED) { // user might have deleted it and need to sync again
+              instance.status = ForgeInstance.STATUS.UNKNOWN;
+            }
+
+            System.out.println("Repo is unknown for EGit: " + instance.url);
           }
         }
       });

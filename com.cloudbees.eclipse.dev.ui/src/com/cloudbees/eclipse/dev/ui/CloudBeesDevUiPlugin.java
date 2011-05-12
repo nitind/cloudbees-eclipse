@@ -158,7 +158,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
   /**
    * Returns the shared instance
-   * 
+   *
    * @return the shared instance
    */
   public static CloudBeesDevUiPlugin getDefault() {
@@ -486,14 +486,18 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
           }
           subMonitor.subTask("");
 
+          boolean needsToSync = false;
           final List<ForgeInstance> toSync = new ArrayList<ForgeInstance>();
           for (ForgeInstance repo : forgeRepos) {
             if (repo.status != STATUS.SYNCED) {
               toSync.add(repo);
+              if (userAction || repo.status == STATUS.UNKNOWN) { // automatically check only unknowns, which are either new or failed
+                needsToSync = true;
+              }
             }
           }
 
-          if (!toSync.isEmpty()) {
+          if (needsToSync) {
             PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
               @Override
               public void run() {
@@ -507,6 +511,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
                   if (confDialog.getSelectedRepos() != null && !confDialog.getSelectedRepos().isEmpty()) {
                     toSync.addAll(confDialog.getSelectedRepos());
                   }
+                  // set those which user has seen but not checked as SKIPPED, otherwise it is UNKNOWN and must be checked
                   for (ForgeInstance repo : forgeRepos) {
                     if (repo.status != STATUS.SYNCED) {
                       if (!toSync.contains(repo)) {
@@ -519,6 +524,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
                 }
               }
             });
+          } else {
+            toSync.clear();
           }
 
           String mess = new String();

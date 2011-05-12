@@ -20,6 +20,7 @@ import org.eclipse.team.svn.ui.operation.OpenRemoteFileOperation;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance.STATUS;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
@@ -48,26 +49,15 @@ public class ForgeSubversiveSync implements ForgeSync {
       loc.setPassword(instance.password);
       monitor.worked(1);
 
-      Exception ex = SVNUtility.validateRepositoryLocation(loc);
-      if (ex != null) {
-        monitor.worked(8);
-        instance.lastException = ex;
-        throw new CloudBeesException("Failed to validate SVN connection to " + url, ex);
-      }
-
-      IRepositoryLocation[] reps = SVNRemoteStorage.instance().getRepositoryLocations();
-      boolean exists = false;
-      if (reps != null) {
-        for (IRepositoryLocation rep : reps) {
-          if (url.equals(rep.getUrl())) {
-            exists = true;
-            break;
-          }
-        }
-      }
+      boolean exists = isExists(instance, loc);
 
       if (exists) {
         instance.status = ForgeInstance.STATUS.SYNCED;
+      } else {
+        if (instance.status != STATUS.SKIPPED) { // user might have deleted it and need to sync again
+          instance.status = ForgeInstance.STATUS.UNKNOWN;
+        }
+        System.out.println("Repo is unknown for Subversive: " + instance.url);
       }
 
       monitor.worked(1);
@@ -75,6 +65,28 @@ public class ForgeSubversiveSync implements ForgeSync {
       monitor.worked(10);
       monitor.done();
     }
+  }
+
+  public boolean isExists(final ForgeInstance instance, final IRepositoryLocation loc)
+      throws CloudBeesException {
+    Exception ex = SVNUtility.validateRepositoryLocation(loc);
+    if (ex != null) {
+      instance.lastException = ex;
+      throw new CloudBeesException("Failed to validate SVN connection to " + loc.getUrl(), ex);
+    }
+
+    IRepositoryLocation[] reps = SVNRemoteStorage.instance().getRepositoryLocations();
+    boolean exists = false;
+    if (reps != null) {
+      for (IRepositoryLocation rep : reps) {
+        System.out.println("Subversive repo: " + rep + " - " + rep.getUrl() + " - " + rep.getUrlAsIs());
+        if (loc.getUrl().equals(rep.getUrl())) {
+          exists = true;
+          break;
+        }
+      }
+    }
+    return exists;
   }
 
   @Override
@@ -100,12 +112,12 @@ public class ForgeSubversiveSync implements ForgeSync {
       loc.setPassword(instance.password);
       monitor.worked(1);
 
-      Exception ex = SVNUtility.validateRepositoryLocation(loc);
-      if (ex != null) {
-        monitor.worked(8);
-        instance.lastException = ex;
-        throw new CloudBeesException("Failed to validate SVN connection to " + url, ex);
+      boolean exists = isExists(instance, loc);
+      if (exists) {
+        instance.status = ForgeInstance.STATUS.SYNCED;
+        return;
       }
+
       monitor.worked(1);
 
       monitor.setTaskName("Adding repository...");
