@@ -124,7 +124,7 @@
                 enablesFor="1"
                 id="com.cloudbees.eclipse.ui.popup.addNatureAction"
                 label="%add.cloudbees.support.action.label"
-                menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup/cbSupport"
+                menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup"
                 tooltip="%add.cloudbees.support.action.tooltip">
             </action>
         </objectContribution>
