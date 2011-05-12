@@ -130,7 +130,19 @@ public class BeesSDK {
     return applicationDeployWar;
   }
 
-  public static String getAppId(final String account, final String id, BeesClient client, String warFile)
+  public static String getAppId(final String account, final String id, final String warPath) throws CloudBeesException,
+      Exception {
+    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    BeesClient client = getBeesClient(grandCentralService);
+    if (client == null) {
+      return null;
+    }
+
+    String appId = getAppId(account, id, client, warPath);
+    return appId;
+  }
+
+  public static String getAppId(final String account, final String id, final BeesClient client, final String warFile)
       throws Exception {
     String appId;
 
@@ -157,19 +169,6 @@ public class BeesSDK {
     update();
 
     return applicationDeployWar;
-  }
-
-  public static ApplicationDeployArchiveResponse deploy(final String account, final String id, final String warPath,
-      IProgressMonitor monitor) throws CloudBeesException, CoreException, FileNotFoundException, Exception {
-    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    BeesClient client = getBeesClient(grandCentralService);
-    if (client == null) {
-      return null;
-    }
-
-    String appId = getAppId(account, id, client, warPath);
-
-    return deploy(appId, warPath, monitor);
   }
 
   /**

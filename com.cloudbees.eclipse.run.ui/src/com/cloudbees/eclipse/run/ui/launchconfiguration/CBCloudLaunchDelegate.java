@@ -15,7 +15,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -53,7 +52,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
           if (warPath != null && !warPath.isEmpty()) {
             warPath = project.getLocation().toOSString() + File.separatorChar + warPath;
-            deployWar(account, appId, warPath);
+            deployWar(configuration, account, appId, warPath);
           } else {
 
             if (CBCloudLaunchConfigurationTab.hasBuildXml(projectName)) {
@@ -72,7 +71,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
                 deploy(project, account, appId);
               } else if (wars.size() == 1) {
                 warPath = project.getLocation().toOSString() + File.separatorChar + wars.get(0);
-                deployWar(account, appId, warPath);
+                deployWar(configuration, account, appId, warPath);
               } else {
                 ILaunchConfiguration newconf = openWarSelectionDialog(configuration,
                     wars.toArray(new String[wars.size()]));
@@ -80,7 +79,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
                 warPath = newconf.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, "");
                 if (warPath != null && !warPath.isEmpty()) {
                   warPath = project.getLocation().toOSString() + File.separatorChar + warPath;
-                  deployWar(account, appId, warPath);
+                  deployWar(configuration, account, appId, warPath);
                 }
               }
             }
@@ -148,12 +147,13 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
   private void deploy(final IProject project, final String account, final String id) throws Exception,
       CloudBeesException, CoreException, FileNotFoundException {
-    Job job = new Job("Deploying " + project + " to " + account + "/" + id) {
+    final String jobName = "Deploying " + project.getName() + " to " + account + "/" + id;
+    Job job = new Job(jobName) {
       @Override
       protected IStatus run(IProgressMonitor monitor) {
-        monitor.beginTask("Deploying " + project + " to " + account + "/" + id, WORK_AMOUNT);
+        monitor.beginTask(jobName, WORK_AMOUNT);
         try {
-          BeesSDK.deploy(project, account, id, true, new SubProgressMonitor(monitor, WORK_AMOUNT));
+          BeesSDK.deploy(project, account, id, true, monitor);
         } catch (Exception e) {
           handleException(e);
         }
@@ -162,26 +162,66 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
       }
     };
     job.schedule();
-
   }
 
-  private void deployWar(final String account, final String id, final String warPath) throws Exception,
-      CloudBeesException, CoreException, FileNotFoundException {
-    Job job = new Job("Deploying WAR file to " + account + "/" + id) {
-      @Override
-      protected IStatus run(IProgressMonitor monitor) {
-        monitor.beginTask("Deploying WAR file to " + account + "/" + id, WORK_AMOUNT);
-        try {
-          BeesSDK.deploy(account, id, warPath, new SubProgressMonitor(monitor, WORK_AMOUNT));
-        } catch (Exception e) {
-          handleException(e);
-        }
-        monitor.done();
-        return Status.OK_STATUS;
-      }
-    };
-    job.schedule();
+  private void deployWar(final ILaunchConfiguration configuration, final String account, final String id,
+      final String warPath) throws Exception, CloudBeesException, CoreException, FileNotFoundException {
+    final String[] appId = new String[1];
+    try {
+      appId[0] = BeesSDK.getAppId(account, id, warPath);
+    } catch (Exception e) {
+      // failed to detect
+    }
+    if (appId[0] == null || appId[0].isEmpty()) {
+      final ILaunchConfiguration[] conf = new ILaunchConfiguration[] { configuration };
 
+      Display.getDefault().syncExec(new Runnable() {
+
+        @Override
+        public void run() {
+          try {
+            Shell shell = Display.getDefault().getActiveShell();
+            CustomAppIdDialog dialog = new CustomAppIdDialog(shell);
+            dialog.open();
+
+            appId[0] = dialog.getAppId();
+
+            if (dialog.getReturnCode() != IDialogConstants.OK_ID || appId[0] == null || appId[0].isEmpty()) {
+              Status status = new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, "Custom App ID is not specified.");
+              ErrorDialog.openError(shell, "Error", "Launch error", status);
+              return;
+            }
+
+            ILaunchConfigurationWorkingCopy copy = conf[0].getWorkingCopy();
+            copy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, appId[0]);
+            copy.doSave();
+
+            if (appId[0].indexOf("/") < 0) {
+              appId[0] = account + "/" + appId[0];
+            }
+          } catch (CoreException e) {
+            CBRunUiActivator.logError(e);
+          }
+        }
+      });
+    }
+    if (appId[0] != null && !appId[0].isEmpty()) {
+      Job job = new Job("Deploying WAR file to " + account + "/" + id) {
+        @Override
+        protected IStatus run(IProgressMonitor monitor) {
+          monitor.beginTask("Deploying WAR file to " + account + "/" + id, WORK_AMOUNT);
+          try {
+            BeesSDK.deploy(appId[0], warPath, monitor);
+          } catch (Exception e) {
+            handleException(e);
+          }
+          monitor.done();
+          return Status.OK_STATUS;
+        }
+      };
+      job.schedule();
+
+    }
   }
 
   private void start(final IProject project, final String account, final String appId) throws Exception,

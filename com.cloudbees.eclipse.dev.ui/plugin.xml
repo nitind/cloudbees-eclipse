@@ -186,30 +186,6 @@
               label="Properties">
         </action>
      </objectContribution>
-    	<objectContribution
-          adaptable="true"
-          id="com.cloudbees.eclipse.dev.ui.newJenkinsJob"
-          nameFilter="*"
-          objectClass="org.eclipse.core.resources.IProject">
-       <action
-             class="com.cloudbees.eclipse.dev.ui.actions.NewJenkinsJobAction"
-             enablesFor="1"
-             id="com.cloudbees.eclipse.dev.ui.action.newJenkinsJob"
-             label="New Jenkins Job"
-             menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup">
-       </action>
-       <visibility>
-          <and>
-             <objectClass
-                   name="org.eclipse.core.resources.IProject">
-             </objectClass>
-             <objectState
-                   name="projectNature"
-                   value="com.cloudbees.eclipse.core.cloudbeesNature">
-             </objectState>
-          </and>
-      	</visibility>
-    	</objectContribution>
      <objectContribution
            adaptable="false"
            id="com.cloudbees.eclipse.dev.ui.refreshJenkins"
@@ -276,6 +252,31 @@
               label="Properties">
         </action>
      </objectContribution>
+    	<objectContribution
+          adaptable="true"
+          id="com.cloudbees.eclipse.dev.ui.newJenkinsJob"
+          nameFilter="*"
+          objectClass="org.eclipse.core.resources.IProject">
+       <action
+             class="com.cloudbees.eclipse.dev.ui.actions.NewJenkinsJobAction"
+             enablesFor="1"
+             icon="icons/16x16/jenkins.png"
+             id="com.cloudbees.eclipse.dev.ui.action.newJenkinsJob"
+             label="New Jenkins Job"
+             menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup?after=jenkins">
+       </action>
+       <visibility>
+          <and>
+             <objectClass
+                   name="org.eclipse.core.resources.IProject">
+             </objectClass>
+             <objectState
+                   name="projectNature"
+                   value="com.cloudbees.eclipse.core.cloudbeesNature">
+             </objectState>
+          </and>
+      	</visibility>
+    	</objectContribution>
  	</extension>
  	
     <extension

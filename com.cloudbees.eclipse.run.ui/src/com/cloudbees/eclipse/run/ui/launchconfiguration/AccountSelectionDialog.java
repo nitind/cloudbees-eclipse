@@ -55,6 +55,11 @@ public class AccountSelectionDialog extends TitleAreaDialog {
     setTitleImage(ICON);
     getShell().setSize(400, 400);
     getShell().setMinimumSize(250, 250);
+
+    if (this.accountNames == null || this.accountNames.length == 0) {
+      getButton(OK).setEnabled(false);
+    }
+
     return contents;
   }
 
