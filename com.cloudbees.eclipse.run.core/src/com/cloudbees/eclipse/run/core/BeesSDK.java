@@ -10,6 +10,8 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import com.cloudbees.api.ApplicationConfiguration;
 import com.cloudbees.api.ApplicationDeployArchiveResponse;
@@ -18,6 +20,7 @@ import com.cloudbees.api.ApplicationListResponse;
 import com.cloudbees.api.ApplicationStatusResponse;
 import com.cloudbees.api.BeesClient;
 import com.cloudbees.api.BeesClientConfiguration;
+import com.cloudbees.api.UploadProgress;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.GrandCentralService;
@@ -25,6 +28,26 @@ import com.cloudbees.eclipse.core.GrandCentralService.AuthInfo;
 import com.cloudbees.eclipse.run.sdk.CBSdkActivator;
 
 public class BeesSDK {
+
+  private static final class UploadProgressWithMonitor implements UploadProgress {
+    private static final String JOB_NAME = "Sent to RUN@cloud";
+    private SubMonitor subMonitor = null;
+    private final IProgressMonitor monitor;
+
+    public UploadProgressWithMonitor(final IProgressMonitor monitor) {
+      this.monitor = monitor;
+    }
+
+    @Override
+    public void handleBytesWritten(long deltaCount, long totalWritten, long totalToSend) {
+      if (this.subMonitor == null) {
+        this.subMonitor = SubMonitor.convert(this.monitor, (int) totalToSend);
+      }
+      this.subMonitor.worked((int) deltaCount);
+      this.monitor.setTaskName(JOB_NAME + " " + Math.min(totalWritten, totalToSend) + " bytes out of " + totalToSend
+          + " bytes");
+    }
+  }
 
   public static final String API_URL = "https://api.cloudbees.com/api";
 
@@ -86,7 +109,8 @@ public class BeesSDK {
   }
 
   public static ApplicationDeployArchiveResponse deploy(final IProject project, final String account, final String id,
-      final boolean build) throws CloudBeesException, CoreException, FileNotFoundException, Exception {
+      final boolean build, IProgressMonitor monitor) throws CloudBeesException, CoreException, FileNotFoundException,
+      Exception {
 
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
@@ -100,7 +124,7 @@ public class BeesSDK {
     String appId = getAppId(account, id, client, warFile);
 
     ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, warFile,
-        null, null);
+        null, new UploadProgressWithMonitor(monitor));
     update();
 
     return applicationDeployWar;
@@ -132,8 +156,8 @@ public class BeesSDK {
     return appId;
   }
 
-  public static ApplicationDeployArchiveResponse deploy(final String appId, final String warPath)
-      throws CloudBeesException, CoreException, FileNotFoundException, Exception {
+  public static ApplicationDeployArchiveResponse deploy(final String appId, final String warPath,
+      IProgressMonitor monitor) throws CloudBeesException, CoreException, FileNotFoundException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
     if (client == null) {
@@ -141,7 +165,7 @@ public class BeesSDK {
     }
 
     ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, warPath,
-        null, null);
+        null, new UploadProgressWithMonitor(monitor));
     update();
 
     return applicationDeployWar;
@@ -151,7 +175,7 @@ public class BeesSDK {
    * Establishes a persistent connection to an application log so that you can see new messages as they are written to
    * the logs. This is provides a "cloud-friendly" replacement for the ubiquitous "tail" command many developers use to
    * monitor/debug application log files.
-   *
+   * 
    * @param appId
    * @param logName
    *          valid options are "server", "access" or "error"
@@ -168,7 +192,7 @@ public class BeesSDK {
 
   /**
    * Delete an application
-   *
+   * 
    * @param appId
    * @throws Exception
    */
@@ -251,7 +275,7 @@ public class BeesSDK {
 
   /**
    * Construct full path for the build.xml
-   *
+   * 
    * @param project
    * @return
    */

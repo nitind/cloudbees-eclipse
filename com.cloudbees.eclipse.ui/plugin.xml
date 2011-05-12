@@ -89,6 +89,15 @@
                 id="com.cloudbees.eclipse.ui.popup.cloudbees">
                 <separator
                     name="cloudbeesGroup"></separator>
+                <groupMarker
+                      name="launch">
+                </groupMarker>
+                <groupMarker
+                      name="jenkins">
+                </groupMarker>
+                <groupMarker
+                      name="cbSupport">
+                </groupMarker>
             </menu>
         </objectContribution>
         
@@ -115,7 +124,7 @@
                 enablesFor="1"
                 id="com.cloudbees.eclipse.ui.popup.addNatureAction"
                 label="%add.cloudbees.support.action.label"
-                menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup"
+                menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup/cbSupport"
                 tooltip="%add.cloudbees.support.action.tooltip">
             </action>
         </objectContribution>
@@ -141,7 +150,7 @@
                 enablesFor="1"
                 id="com.cloudbees.eclipse.ui.popup.removeNatureAction"
                 label="%remove.cloudbees.support.action.label"
-                menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup"
+                menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup?after=cbSupport"
                 tooltip="%remove.cloudbees.support.action.tooltip">
             </action>
         </objectContribution>
