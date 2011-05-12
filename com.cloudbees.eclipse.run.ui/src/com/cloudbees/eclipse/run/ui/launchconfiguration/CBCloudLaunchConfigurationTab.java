@@ -83,6 +83,7 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
     } catch (CoreException e) {
       CBRunUiActivator.logError(e);
     }
+    scheduleUpdateJob();
   }
 
   /**
