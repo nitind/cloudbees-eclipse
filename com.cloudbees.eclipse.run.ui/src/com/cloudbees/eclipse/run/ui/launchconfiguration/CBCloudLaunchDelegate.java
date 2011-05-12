@@ -52,7 +52,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
           if (warPath != null && !warPath.isEmpty()) {
             warPath = project.getLocation().toOSString() + File.separatorChar + warPath;
-            deployWar(configuration, account, appId, warPath);
+            deployWar(configuration, account, appId, warPath, projectName);
           } else {
 
             if (CBCloudLaunchConfigurationTab.hasBuildXml(projectName)) {
@@ -71,7 +71,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
                 deploy(project, account, appId);
               } else if (wars.size() == 1) {
                 warPath = project.getLocation().toOSString() + File.separatorChar + wars.get(0);
-                deployWar(configuration, account, appId, warPath);
+                deployWar(configuration, account, appId, warPath, projectName);
               } else {
                 ILaunchConfiguration newconf = openWarSelectionDialog(configuration,
                     wars.toArray(new String[wars.size()]));
@@ -79,7 +79,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
                 warPath = newconf.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, "");
                 if (warPath != null && !warPath.isEmpty()) {
                   warPath = project.getLocation().toOSString() + File.separatorChar + warPath;
-                  deployWar(configuration, account, appId, warPath);
+                  deployWar(configuration, account, appId, warPath, projectName);
                 }
               }
             }
@@ -96,7 +96,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
     }
   }
 
-  private void handleException(Exception e) {
+  private void handleException(final Exception e) {
     if (e.getMessage() != null && e.getMessage().contains("Target \"dist\" does not exist in the project")) {
       Display.getDefault().syncExec(new Runnable() {
 
@@ -150,7 +150,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
     final String jobName = "Deploying " + project.getName() + " to " + account + "/" + id;
     Job job = new Job(jobName) {
       @Override
-      protected IStatus run(IProgressMonitor monitor) {
+      protected IStatus run(final IProgressMonitor monitor) {
         monitor.beginTask(jobName, WORK_AMOUNT);
         try {
           BeesSDK.deploy(project, account, id, true, monitor);
@@ -165,7 +165,8 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
   }
 
   private void deployWar(final ILaunchConfiguration configuration, final String account, final String id,
-      final String warPath) throws Exception, CloudBeesException, CoreException, FileNotFoundException {
+      final String warPath, final String projectName) throws Exception, CloudBeesException, CoreException,
+      FileNotFoundException {
     final String[] appId = new String[1];
     try {
       appId[0] = BeesSDK.getAppId(account, id, warPath);
@@ -181,7 +182,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
         public void run() {
           try {
             Shell shell = Display.getDefault().getActiveShell();
-            CustomAppIdDialog dialog = new CustomAppIdDialog(shell);
+            CustomAppIdDialog dialog = new CustomAppIdDialog(shell, projectName);
             dialog.open();
 
             appId[0] = dialog.getAppId();
@@ -208,7 +209,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
     if (appId[0] != null && !appId[0].isEmpty()) {
       Job job = new Job("Deploying WAR file to " + account + "/" + id) {
         @Override
-        protected IStatus run(IProgressMonitor monitor) {
+        protected IStatus run(final IProgressMonitor monitor) {
           monitor.beginTask("Deploying WAR file to " + account + "/" + id, WORK_AMOUNT);
           try {
             BeesSDK.deploy(appId[0], warPath, monitor);

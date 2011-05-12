@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 public class CustomAppIdDialog extends Dialog {
+  private String projectName;
   private Text textAppId;
   private String appId = null;
 
@@ -19,8 +20,9 @@ public class CustomAppIdDialog extends Dialog {
    * Create the dialog.
    * @param parentShell
    */
-  public CustomAppIdDialog(final Shell parentShell) {
+  public CustomAppIdDialog(final Shell parentShell, final String projectName) {
     super(parentShell);
+    this.projectName = projectName;
   }
 
   /**
@@ -42,8 +44,15 @@ public class CustomAppIdDialog extends Dialog {
 
     this.textAppId = new Text(container, SWT.BORDER);
     this.textAppId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+    this.textAppId.setText(this.projectName);
 
     return container;
+  }
+
+  @Override
+  protected void configureShell(final Shell newShell) {
+    newShell.setText("Custom App ID");
+    super.configureShell(newShell);
   }
 
   /**
