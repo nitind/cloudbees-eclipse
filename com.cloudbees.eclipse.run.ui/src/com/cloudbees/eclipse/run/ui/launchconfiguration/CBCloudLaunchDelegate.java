@@ -15,6 +15,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -31,6 +33,8 @@ import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationC
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
 public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
+
+  private static final int WORK_AMOUNT = 1000000;
 
   @SuppressWarnings("restriction")
   @Override
@@ -64,7 +68,9 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
             } else {
               // configured war and no build.xml - let's try to find wars
               List<String> wars = WarSelecionComposite.findWars(project);
-              if (wars.size() == 1) {
+              if (wars.size() == 0) {
+                deploy(project, account, appId);
+              } else if (wars.size() == 1) {
                 warPath = project.getLocation().toOSString() + File.separatorChar + wars.get(0);
                 deployWar(account, appId, warPath);
               } else {
@@ -87,21 +93,25 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
         }
       }
     } catch (Exception e) {
-      if (e.getMessage().contains("Target \"dist\" does not exist in the project")) {
-        Display.getDefault().syncExec(new Runnable() {
+      handleException(e);
+    }
+  }
 
-          @Override
-          public void run() {
+  private void handleException(Exception e) {
+    if (e.getMessage() != null && e.getMessage().contains("Target \"dist\" does not exist in the project")) {
+      Display.getDefault().syncExec(new Runnable() {
 
-            String message = "Please provide a valid CloudBees Project build.xml or provide a war file location!";
-            MessageDialog.openError(Display.getDefault().getActiveShell(), "Incorrect build.xml", message);
+        @Override
+        public void run() {
 
-          }
-        });
-        CBRunUiActivator.logError(e);
-      } else {
-        CBRunUiActivator.logErrorAndShowDialog(e);
-      }
+          String message = "Please provide a valid CloudBees Project build.xml or provide a war file location!";
+          MessageDialog.openError(Display.getDefault().getActiveShell(), "Incorrect build.xml", message);
+
+        }
+      });
+      CBRunUiActivator.logError(e);
+    } else {
+      CBRunUiActivator.logErrorAndShowDialog(e);
     }
   }
 
@@ -138,12 +148,40 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
   private void deploy(final IProject project, final String account, final String id) throws Exception,
       CloudBeesException, CoreException, FileNotFoundException {
-    BeesSDK.deploy(project, account, id, true);
+    Job job = new Job("Deploying " + project + " to " + account + "/" + id) {
+      @Override
+      protected IStatus run(IProgressMonitor monitor) {
+        monitor.beginTask("Deploying " + project + " to " + account + "/" + id, WORK_AMOUNT);
+        try {
+          BeesSDK.deploy(project, account, id, true, new SubProgressMonitor(monitor, WORK_AMOUNT));
+        } catch (Exception e) {
+          handleException(e);
+        }
+        monitor.done();
+        return Status.OK_STATUS;
+      }
+    };
+    job.schedule();
+
   }
 
-  private void deployWar(final String account, final String id, final String warPath)
-      throws Exception, CloudBeesException, CoreException, FileNotFoundException {
-    BeesSDK.deploy(account, id, warPath);
+  private void deployWar(final String account, final String id, final String warPath) throws Exception,
+      CloudBeesException, CoreException, FileNotFoundException {
+    Job job = new Job("Deploying WAR file to " + account + "/" + id) {
+      @Override
+      protected IStatus run(IProgressMonitor monitor) {
+        monitor.beginTask("Deploying WAR file to " + account + "/" + id, WORK_AMOUNT);
+        try {
+          BeesSDK.deploy(account, id, warPath, new SubProgressMonitor(monitor, WORK_AMOUNT));
+        } catch (Exception e) {
+          handleException(e);
+        }
+        monitor.done();
+        return Status.OK_STATUS;
+      }
+    };
+    job.schedule();
+
   }
 
   private void start(final IProject project, final String account, final String appId) throws Exception,

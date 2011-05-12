@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -133,13 +134,14 @@ public class ArtifactsClickListener implements IDoubleClickListener {
           final File tempWar = File.createTempFile(warName, null);
           tempWar.deleteOnExit();
 
-          monitor.beginTask("Downloading war file...", 100);
+          monitor.beginTask("Deploy war to RUN@cloud", 100);
+          SubMonitor subMonitor = SubMonitor.convert(monitor, "Downloading war file...", 50);
           OutputStream out = new BufferedOutputStream(new FileOutputStream(tempWar));
           byte[] buf = new byte[1 << 12];
           int len = 0;
           while ((len = in.read(buf)) >= 0) {
             out.write(buf, 0, len);
-            monitor.worked(1);
+            subMonitor.worked(1);
           }
 
           out.flush();
@@ -148,10 +150,10 @@ public class ArtifactsClickListener implements IDoubleClickListener {
 
           final String[] newAppUrl = new String[1];
           try {
-            monitor.beginTask("Deploying war file to RUN@cloud...", 100);
-            monitor.worked(50);
-            ApplicationDeployArchiveResponse result = BeesSDK.deploy(app.getId(), tempWar.getCanonicalPath());
-            monitor.worked(50);
+            subMonitor = SubMonitor.convert(monitor, "Deploying war file to RUN@cloud...", 50);
+            ApplicationDeployArchiveResponse result = BeesSDK.deploy(app.getId(), tempWar.getCanonicalPath(),
+                subMonitor);
+            subMonitor.worked(50);
             if (result != null) {
               newAppUrl[0] = result.getUrl();
             }
