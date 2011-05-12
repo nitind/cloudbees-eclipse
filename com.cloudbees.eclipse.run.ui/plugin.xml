@@ -221,6 +221,17 @@
      </action>
   </objectContribution>
   <objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.run.ui.marker.launch"
+        objectClass="null">
+     <action
+           class="org.eclipse.jface.action.GroupMarker"
+           id="com.cloudbees.eclipse.run.ui.action.marker.launch"
+           label="launch"
+           menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup">
+     </action>
+  </objectContribution>
+  <objectContribution
         adaptable="true"
         id="com.cloudbees.eclipse.run.ui.deploy"
         nameFilter="*"
@@ -228,9 +239,35 @@
      <action
            class="com.cloudbees.eclipse.run.ui.popup.actions.DeployAction"
            enablesFor="1"
+           icon="icons/16x16/cb_plain.png"
            id="com.cloudbees.eclipse.run.ui.action.deploy"
            label="Deploy to RUN@cloud@"
-           menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup">
+           menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup?after=launch">
+     </action>
+     <visibility>
+        <and>
+           <objectClass
+                 name="org.eclipse.core.resources.IProject">
+           </objectClass>
+           <objectState
+                 name="projectNature"
+                 value="com.cloudbees.eclipse.core.cloudbeesNature">
+           </objectState>
+        </and>
+     </visibility>
+  </objectContribution>
+  <objectContribution
+        adaptable="true"
+        id="com.cloudbees.eclipse.run.ui.runLocally"
+        nameFilter="*"
+        objectClass="org.eclipse.core.resources.IProject">
+     <action
+           class="com.cloudbees.eclipse.run.ui.popup.actions.RunLocallyAction"
+           enablesFor="1"
+           icon="icons/16x16/cb_plain.png"
+           id="com.cloudbees.eclipse.run.ui.action.runLocally"
+           label="Run Local"
+           menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup?after=launch">
      </action>
      <visibility>
         <and>

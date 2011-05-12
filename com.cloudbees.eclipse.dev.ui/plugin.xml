@@ -186,6 +186,17 @@
               label="Properties">
         </action>
      </objectContribution>
+     <objectContribution
+           adaptable="false"
+           id="com.cloudbees.eclipse.dev.ui.marker.jenkins"
+           objectClass="null">
+        <action
+              class="org.eclipse.jface.action.GroupMarker"
+              id="com.cloudbees.eclipse.dev.ui.action.marker.jenkins"
+              label="jenkins"
+              menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup">
+        </action>
+     </objectContribution>
     	<objectContribution
           adaptable="true"
           id="com.cloudbees.eclipse.dev.ui.newJenkinsJob"
@@ -194,9 +205,10 @@
        <action
              class="com.cloudbees.eclipse.dev.ui.actions.NewJenkinsJobAction"
              enablesFor="1"
+             icon="icons/16x16/jenkins.png"
              id="com.cloudbees.eclipse.dev.ui.action.newJenkinsJob"
              label="New Jenkins Job"
-             menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup">
+             menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup?after=jenkins">
        </action>
        <visibility>
           <and>
