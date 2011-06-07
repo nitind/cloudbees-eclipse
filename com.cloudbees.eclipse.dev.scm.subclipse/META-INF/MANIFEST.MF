@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CloudBees Scm Subclipse
 Bundle-SymbolicName: com.cloudbees.eclipse.dev.scm.subclipse;singleton:=true
-Bundle-Version: 1.0.2.qualifier
+Bundle-Version: 1.0.3.qualifier
 Bundle-Activator: com.cloudbees.eclipse.dev.scm.subclipse.CloudBeesScmSubclipsePlugin
 Bundle-Vendor: Cloud Bees, Inc
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -18,8 +18,8 @@ Require-Bundle: org.eclipse.core.runtime,
  com.cloudbees.eclipse.core,
  com.cloudbees.eclipse.ui,
  com.cloudbees.eclipse.dev.core,
- org.eclipse.team.core;resolution:=optional,
- org.tigris.subversion.subclipse.core;resolution:=optional,
- org.tigris.subversion.subclipse.ui;resolution:=optional
+ org.eclipse.team.core,
+ org.tigris.subversion.subclipse.core,
+ org.tigris.subversion.subclipse.ui
 Export-Package: com.cloudbees.eclipse.dev.scm.subclipse
  

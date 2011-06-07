@@ -15,8 +15,8 @@ public class ReloadForgeReposAction extends CBTreeAction implements IObjectActio
 
   public ReloadForgeReposAction() {
     super();
-    setText("Refresh Forge repositories");
-    setToolTipText("Refresh Forge repositories and create local entries");
+    setText("Configure Forge repos...");
+    setToolTipText("Configure Forge repositories locally");
     setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_REFRESH));
   }
 

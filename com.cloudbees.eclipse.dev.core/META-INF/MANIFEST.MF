@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CloudBees Dev Core
 Bundle-SymbolicName: com.cloudbees.eclipse.dev.core;singleton:=true
-Bundle-Version: 1.0.2.qualifier
+Bundle-Version: 1.0.3.qualifier
 Bundle-Activator: com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin
 Bundle-Vendor: Cloud Bees, Inc
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -13,8 +13,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.equinox.security,
  org.eclipse.jface,
  com.cloudbees.eclipse.core,
- org.eclipse.team.core;resolution:=optional,
- org.eclipse.team.ui;resolution:=optional,
+ org.eclipse.team.core,
  org.eclipse.jdt.junit;resolution:=optional,
  org.eclipse.jdt.junit.core;resolution:=optional
 Export-Package: com.cloudbees.eclipse.dev.core;uses:="org.eclipse.core.runtime,org.osgi.framework",

@@ -195,7 +195,7 @@
               enablesFor="1"
               icon="icons/epl/refresh.png"
               id="com.cloudbees.eclipse.dev.ui.action.reload"
-              label="Refresh">
+              label="Reload">
         </action>
      </objectContribution>
      <objectContribution
@@ -216,7 +216,7 @@
               class="com.cloudbees.eclipse.dev.ui.actions.ReloadForgeReposAction"
               icon="icons/epl/refresh.png"
               id="com.cloudbees.eclipse.dev.ui.action.reloadForge"
-              label="Refresh">
+              label="Configure Forge repos...">
         </action>
      </objectContribution>
      <objectContribution
