@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.cloudbees.eclipse.dev.scm.subclipse"
-      label="CloudBees Eclipse Toolkit Subclipse support (Optional)"
+      label="CloudBees Eclipse Toolkit SVN (Subclipse) Support"
       version="1.0.3.qualifier"
       provider-name="CloudBees, Inc">
 

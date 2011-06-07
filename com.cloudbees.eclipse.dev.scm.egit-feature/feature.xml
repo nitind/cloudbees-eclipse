@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.cloudbees.eclipse.dev.scm.egit"
-      label="CloudBees Eclipse Toolkit eGIT support (Optional)"
+      label="CloudBees Eclipse Toolkit eGIT Support"
       version="1.0.3.qualifier"
       provider-name="CloudBees, Inc">
 
@@ -50,26 +50,11 @@ Notwithstanding anything to the contrary contained herein, except for the limite
 6.13 Headings.  The headings in this Agreement are for purposes of reference only and will not in any way limit or affect the meaning or interpretation of any of the terms hereof.
    </license>
 
-
    <plugin
          id="com.cloudbees.eclipse.dev.scm.egit"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-<!--
-   <plugin
-         id="com.cloudbees.eclipse.dev.scm.subclipse"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 
-   <plugin
-         id="com.cloudbees.eclipse.dev.scm.subversive"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
--->
 </feature>
