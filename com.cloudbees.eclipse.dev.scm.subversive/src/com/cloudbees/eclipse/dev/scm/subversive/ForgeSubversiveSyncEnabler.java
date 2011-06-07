@@ -13,10 +13,15 @@ public class ForgeSubversiveSyncEnabler implements ForgeSyncEnabler {
 
   @Override
   public boolean isEnabled() {
-    boolean connectorEnabled = ForgeSyncService.bundleActive("org.polarion.eclipse.team.svn.connector");
-    boolean svnEnabled = ForgeSyncService.bundleActive("org.eclipse.team.svn.core");
+    //boolean connectorEnabled = ForgeSyncService.bundleActive("org.polarion.eclipse.team.svn.connector");
+    //boolean svnEnabled = ForgeSyncService.bundleActive("org.eclipse.team.svn.core");
+    
+    // We are not doing the automatic update site addition because adding just the update site won't help as the connector discovery algorithm expects that the connectors feature is already installed.
+    // Installing automatically connector at this stage would be too heavy.
+    // Instead, we'll dependency for the org.eclipse.team.svn.connector so integration can be installed only when it's installed
+    return ForgeSyncService.bundleActive("org.eclipse.team.svn.core");
 
-    if (svnEnabled && connectorEnabled) {
+/*    if (svnEnabled && connectorEnabled) {
       return true;
     }
     if (svnEnabled && !connectorEnabled) {
@@ -38,7 +43,7 @@ public class ForgeSubversiveSyncEnabler implements ForgeSyncEnabler {
     }
       
     return false;
-  }
+*/  }
 
   @Override
   public String getName() {

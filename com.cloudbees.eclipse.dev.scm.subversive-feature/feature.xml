@@ -50,6 +50,10 @@ Notwithstanding anything to the contrary contained herein, except for the limite
 6.13 Headings.  The headings in this Agreement are for purposes of reference only and will not in any way limit or affect the meaning or interpretation of any of the terms hereof.
    </license>
 
+   <requires>
+      <import feature="org.polarion.eclipse.team.svn.connector"/>
+   </requires>
+
    <plugin
          id="com.cloudbees.eclipse.dev.scm.subversive"
          download-size="0"
