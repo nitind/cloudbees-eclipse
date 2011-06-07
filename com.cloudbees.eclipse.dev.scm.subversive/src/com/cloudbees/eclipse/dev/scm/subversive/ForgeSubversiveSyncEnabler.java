@@ -30,9 +30,10 @@ public class ForgeSubversiveSyncEnabler implements ForgeSyncEnabler {
       //This validate also checks for duplicates
       if (tracker.validateRepositoryLocation(ui.getSession(), updateURI, false, new NullProgressMonitor()).isOK()) {
         tracker.addRepository(updateURI, "Polarion SVN Connectors", ui.getSession());
-        //tracker.refreshRepositories(new URI[]{updateURI}, ui.getSession(), new NullProgressMonitor());
-        return true; // enabled for now, hopefully connector selection dialog succeeds
+        tracker.refreshRepositories(new URI[]{updateURI}, ui.getSession(), new NullProgressMonitor());
       }
+
+      return true; // enabled for now, hopefully connector selection dialog succeeds
       
     }
       
