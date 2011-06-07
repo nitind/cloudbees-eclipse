@@ -26,6 +26,7 @@ public abstract class SelectRepositoryComposite extends Composite {
   private static final String FORGE_REPO_CHECK_LABEL = "Host at Forge SVN";
   private static final String ERR_ADD_REPOS = "Please add SVN repositories to your CloudBees DEV@cloud";
   private static final String ERR_REPO_SELECTION = "SVN repository is not selected.";
+  private static final String ERR_REPO_NOT_SYNCED = "SVN repository not locally configured!";
 
   private ForgeInstance[] repos;
   private ForgeInstance selectedRepo;
@@ -127,6 +128,11 @@ public abstract class SelectRepositoryComposite extends Composite {
       return;
     }
 
+    if (getSelectedRepo().status!=ForgeInstance.STATUS.SYNCED) {
+      updateErrorStatus(ERR_REPO_NOT_SYNCED);
+      return;      
+    }
+    
     updateErrorStatus(null);
   }
 
