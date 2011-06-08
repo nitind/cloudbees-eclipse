@@ -1,11 +1,5 @@
 package com.cloudbees.eclipse.dev.scm.subversive;
 
-import java.net.URI;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.equinox.p2.operations.RepositoryTracker;
-import org.eclipse.equinox.p2.ui.ProvisioningUI;
-
 import com.cloudbees.eclipse.core.ForgeSyncService;
 import com.cloudbees.eclipse.core.forge.api.ForgeSyncEnabler;
 

@@ -17,6 +17,4 @@ Require-Bundle: org.eclipse.core.runtime,
  com.cloudbees.eclipse.dev.core,
  org.eclipse.team.core,
  org.eclipse.team.svn.core,
- org.eclipse.team.svn.ui,
- org.eclipse.equinox.p2.ui,
- org.eclipse.equinox.p2.operations
+ org.eclipse.team.svn.ui
