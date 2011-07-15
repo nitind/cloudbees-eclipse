@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.cloudbees.eclipse.dev.scm.egit"
-      label="Forge eGIT Integration (Optional)"
+      label="Forge GIT Integration (**eGIT MUST BE INSTALLED!!**) (Optional)"
       version="1.0.3.qualifier"
       provider-name="CloudBees, Inc">
 
