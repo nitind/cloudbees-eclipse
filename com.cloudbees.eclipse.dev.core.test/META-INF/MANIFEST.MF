@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CloudBees Eclipse Dev Core Test
 Bundle-SymbolicName: com.cloudbees.eclipse.dev.core.test
-Bundle-Version: 1.0.3.qualifier
+Bundle-Version: 1.0.4.qualifier
 Bundle-Vendor: CloudBees Inc
 Fragment-Host: com.cloudbees.eclipse.dev.core;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
