@@ -29,6 +29,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
@@ -109,6 +110,8 @@ public class Utils {
     try {
       HttpClientParams.setCookiePolicy(httpclient.getParams(), CookiePolicy.BROWSER_COMPATIBILITY);
 
+      HttpProtocolParams.setUserAgent(httpclient.getParams(), "CloudBeesEclipseToolkit/"+CloudBeesCorePlugin.getDefault().getBundle().getVersion());
+      
       KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 
       CloudBeesCorePlugin plugin = CloudBeesCorePlugin.getDefault();
