@@ -3,6 +3,7 @@ package com.cloudbees.eclipse.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -319,15 +320,19 @@ public class JenkinsService {
     HttpPost post = new HttpPost(url);
     post.addHeader("Referer", refererUrl);
 
-    if (url.endsWith("usernamePasswordLogin.do")) {
-      List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-      nvps.add(new BasicNameValuePair("josso_username", this.jenkins.username));
-      nvps.add(new BasicNameValuePair("josso_password", this.jenkins.password));
-      nvps.add(new BasicNameValuePair("josso_cmd", "login"));
-      nvps.add(new BasicNameValuePair("josso_rememberme", "on"));
-      post.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
+    if (url.contains("/sso-gateway/signon/login.do")) {      
+     List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+     nvps.add(new BasicNameValuePair("josso_username", this.jenkins.username));
+     nvps.add(new BasicNameValuePair("josso_password", this.jenkins.password));
+     nvps.add(new BasicNameValuePair("josso_cmd", "login"));
+     nvps.add(new BasicNameValuePair("josso_rememberme", "on"));
+     String submitUrl = url.replace("/sso-gateway/signon/login.do", "/sso-gateway/signon/usernamePasswordLogin.do");
+     post.setURI(URI.create(submitUrl));
+     post.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
     }
 
+    
+    
     HttpResponse resp = httpClient.execute(post);
 
     Utils.getResponseBody(resp);
