@@ -8,6 +8,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.internal.ObjectPluginAction;
 
 import com.cloudbees.api.ApplicationInfo;
+import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 @SuppressWarnings("restriction")
@@ -25,7 +26,7 @@ public class ConfigureAction implements IObjectActionDelegate {
         String account = id.substring(0, i);
 
         CloudBeesUIPlugin.getDefault().openWithBrowser(
-            "https://run.cloudbees.com/a/" + account + "#app-manage/development:" + appInfo.getId());
+            "https://run."+GrandCentralService.HOST+"/a/" + account + "#app-manage/development:" + appInfo.getId());
       }
     }
   }

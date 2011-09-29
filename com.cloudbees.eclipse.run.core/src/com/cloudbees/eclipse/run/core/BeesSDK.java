@@ -49,7 +49,7 @@ public class BeesSDK {
     }
   }
 
-  public static final String API_URL = "https://api.cloudbees.com/api";
+  public static final String API_URL = "https://api."+GrandCentralService.HOST+"/api";
 
   public static ApplicationListResponse getList() throws Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();

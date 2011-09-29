@@ -291,7 +291,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
   }
 
   private void openSignupPage() {
-    CloudBeesUIPlugin.getDefault().openWithBrowser("https://grandcentral.cloudbees.com/account/signup");
+    CloudBeesUIPlugin.getDefault().openWithBrowser("https://grandcentral."+GrandCentralService.HOST+"/account/signup");
   }
 
   /*
@@ -317,7 +317,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
             pref.open();
           }
         } else if (e.text.equals("CloudBees web")) {
-          CloudBeesUIPlugin.getDefault().openWithBrowser("https://grandcentral.cloudbees.com/account/edit");
+          CloudBeesUIPlugin.getDefault().openWithBrowser("https://grandcentral."+GrandCentralService.HOST+"/account/edit");
         }
       }
     });

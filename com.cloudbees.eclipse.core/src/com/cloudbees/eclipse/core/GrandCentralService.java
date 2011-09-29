@@ -31,11 +31,13 @@ public class GrandCentralService {
 
   private static final String PK = "2bf5c815c8334b2";
 
-  private static final String HOST = System.getProperty("cloudbees.host", "cloudbees.com");
+  public static final String HOST = System.getProperty("cloudbees.host", "cloudbees.com");
 
   // private static final String BASE_URL =
   // "https://grandcentral.cloudbees.com/api/";
   private static final String BASE_URL = "https://grandcentral." + HOST + "/api/";
+  
+  public static final String GC_BASE_URL = "https://grandcentral." + HOST;
 
   private final ForgeSyncService forgeSyncService;
 

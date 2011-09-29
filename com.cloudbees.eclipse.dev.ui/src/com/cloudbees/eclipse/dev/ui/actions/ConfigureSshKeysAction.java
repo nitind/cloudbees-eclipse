@@ -5,6 +5,7 @@ import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
+import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.views.CBTreeAction;
 
@@ -39,7 +40,7 @@ public class ConfigureSshKeysAction extends CBTreeAction {
         "org.eclipse.jsch.ui.SSHPreferences", new String[] { "org.eclipse.ui.net.NetPreferences",
             "org.eclipse.jsch.ui.SSHPreferences" }, null);
 
-    CloudBeesUIPlugin.getDefault().openWithBrowser("https://grandcentral.cloudbees.com/account/edit");
+    CloudBeesUIPlugin.getDefault().openWithBrowser(GrandCentralService.GC_BASE_URL+"/account/edit");
 
     if (pref != null) {
       pref.open();
