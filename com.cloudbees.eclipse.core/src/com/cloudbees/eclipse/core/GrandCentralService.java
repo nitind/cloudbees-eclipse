@@ -378,14 +378,16 @@ public class GrandCentralService {
       AccountServiceStatusResponse services = loadAccountServices(acc);
       Repo[] repos = services.services.forge.repos;
       for (Repo forge : repos) {
-        ForgeInstance.TYPE type = ForgeInstance.TYPE.GIT;
+        ForgeInstance.TYPE type = null; //ForgeInstance.TYPE.GIT;
         for (ForgeInstance.TYPE t : ForgeInstance.TYPE.values()) {
           if (t.name().equalsIgnoreCase(forge.type)) {
             type = t;
             break;
           }
+        }        
+        if (type!=null) {
+          result.add(new ForgeInstance(forge.url, services.username, this.password, type));
         }
-        result.add(new ForgeInstance(forge.url, services.username, this.password, type));
       }
     }
 
