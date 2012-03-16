@@ -187,6 +187,30 @@ public class Utils {
     checkResponseCode(resp, false);
   }
 
+  public final static void checkResponseCode(final HttpResponse resp, final boolean expectCIRedirect, final boolean jenkinsAtCloud)
+      throws CloudBeesException {
+    int responseStatus = resp.getStatusLine().getStatusCode();
+
+    Header firstHeader = resp.getFirstHeader("Location");
+
+    if (expectCIRedirect && (responseStatus == 302 || responseStatus == 301) && firstHeader != null
+        && firstHeader.getValue() != null) {
+      //FIXME ugly way to detect a normal redirect within the site that does not redirect to signon but no good idea for better implementation
+      if (!jenkinsAtCloud || firstHeader.getValue().indexOf(".ci.") > 0) {
+        return;
+      }
+    }
+
+    if (responseStatus == 302 || responseStatus == 301) {
+      throw new CloudBeesException("Authentication required! Either wrong or no credentials were provided! Reason:"
+          + resp.getStatusLine().getReasonPhrase());
+    }
+    if (responseStatus != 200) {
+      throw new CloudBeesException("Unexpected response code:" + responseStatus + ". Message:"
+          + resp.getStatusLine().getReasonPhrase());
+    }
+  }
+
   public final static void checkResponseCode(final HttpResponse resp, final boolean expectCIRedirect)
       throws CloudBeesException {
     int responseStatus = resp.getStatusLine().getStatusCode();

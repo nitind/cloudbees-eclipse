@@ -70,10 +70,7 @@ public class JenkinsService {
    * @throws CloudBeesException
    */
   public JenkinsJobsResponse getJobs(final String viewUrl, final IProgressMonitor monitor) throws CloudBeesException {
-    if (viewUrl != null && !viewUrl.startsWith(this.jenkins.url)) {
-      throw new CloudBeesException("Unexpected view url provided! Service url: " + this.jenkins.url + "; view url: "
-          + viewUrl);
-    }
+    assertCorrectUrl(viewUrl);
 
     try {
       monitor.beginTask("Fetching Job list for '" + this.jenkins.label + "'...", 10);
@@ -123,6 +120,15 @@ public class JenkinsService {
 
   }
 
+  private void assertCorrectUrl(String viewUrl) throws CloudBeesException {
+    if (viewUrl != null && !viewUrl.startsWith(this.jenkins.url)) {
+      if (viewUrl != null && this.jenkins.alternativeUrl!=null && !viewUrl.startsWith(this.jenkins.alternativeUrl)) {
+        throw new CloudBeesException("Unexpected url provided! Service url: " + this.jenkins.url + "; view url: "
+          + viewUrl);
+      }
+    }
+  }
+
   public JenkinsInstanceResponse getInstance(final IProgressMonitor monitor) throws CloudBeesException {
     StringBuffer errMsg = new StringBuffer();
 
@@ -152,6 +158,8 @@ public class JenkinsService {
         response.viewUrl = this.jenkins.url;
         response.atCloud = this.jenkins.atCloud;
 
+        jenkins.alternativeUrl = response.primaryView.url; // Initializing jenkins instance alternativeUrl for lookups. Not perfectly nice solution in terms of reverse logic but looks like most feasible atm.
+        
         if (response.views != null) {
           for (int i = 0; i < response.views.length; i++) {
             response.views[i].response = response;
@@ -235,7 +243,7 @@ public class JenkinsService {
         tryToLogin = false;
       } else {
         // check final outcome if we got what we asked for
-        Utils.checkResponseCode(resp, expectRedirect);
+        Utils.checkResponseCode(resp, expectRedirect, jenkins.atCloud);
         break;
       }
 
@@ -353,6 +361,15 @@ public class JenkinsService {
     return this.jenkins.url;
   }
 
+  /**
+   * Returns url that was assigned by the JSON request by jenkins
+   * 
+   * @return
+   */
+  public String getAlternativeUrl() {
+    return this.jenkins.alternativeUrl;
+  }
+  
   @Override
   public String toString() {
     if (this.jenkins != null) {
@@ -365,11 +382,8 @@ public class JenkinsService {
       throws CloudBeesException {
     monitor.setTaskName("Fetching Job details...");
 
-    if (jobUrl != null && !jobUrl.startsWith(this.jenkins.url)) {
-      throw new CloudBeesException("Unexpected view url provided! Service url: " + this.jenkins.url + "; job url: "
-          + jobUrl);
-    }
-
+    assertCorrectUrl(jobUrl);
+    
     StringBuffer errMsg = new StringBuffer();
 
     String reqUrl = jobUrl;
@@ -444,10 +458,7 @@ public class JenkinsService {
       throws CloudBeesException {
     monitor.setTaskName("Fetching Job builds...");
 
-    if (jobUrl != null && !jobUrl.startsWith(this.jenkins.url)) {
-      throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; job url: "
-          + jobUrl);
-    }
+    assertCorrectUrl(jobUrl);
 
     StringBuffer errMsg = new StringBuffer();
 
@@ -490,10 +501,7 @@ public class JenkinsService {
       throws CloudBeesException {
     monitor.setTaskName("Fetching Job SCM config...");
 
-    if (jobUrl != null && !jobUrl.startsWith(this.jenkins.url)) {
-      throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; job url: "
-          + jobUrl);
-    }
+    assertCorrectUrl(jobUrl);
 
     StringBuffer errMsg = new StringBuffer();
 
@@ -527,10 +535,7 @@ public class JenkinsService {
       throws CloudBeesException {
     monitor.setTaskName("Invoking build request...");
 
-    if (jobUrl != null && !jobUrl.startsWith(this.jenkins.url)) {
-      throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; job url: "
-          + jobUrl);
-    }
+    assertCorrectUrl(jobUrl);
 
     StringBuffer errMsg = new StringBuffer();
 
@@ -585,10 +590,7 @@ public class JenkinsService {
   public InputStream getTestReport(final String url, final IProgressMonitor monitor) throws CloudBeesException {
     monitor.setTaskName("Fetching Jenkins build Test Report...");
 
-    if (url != null && !url.startsWith(this.jenkins.url)) {
-      throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; job url: "
-          + url);
-    }
+    assertCorrectUrl(url);
 
     StringBuffer errMsg = new StringBuffer();
 
@@ -666,10 +668,7 @@ public class JenkinsService {
     monitor.setTaskName("Fetching Job build log...");
 
     String url = request.viewUrl;
-    if (url != null && !url.startsWith(this.jenkins.url)) {
-      throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; job url: "
-          + url);
-    }
+    assertCorrectUrl(url);
 
     StringBuffer errMsg = new StringBuffer();
 
@@ -721,10 +720,7 @@ public class JenkinsService {
   public InputStream getArtifact(final String url, final IProgressMonitor monitor) throws CloudBeesException {
     monitor.setTaskName("Fetching Jenkins artifact...");
 
-    if (url != null && !url.startsWith(this.jenkins.url)) {
-      throw new CloudBeesException("Unexpected job url provided! Service url: " + this.jenkins.url + "; artifact url: "
-          + url);
-    }
+    assertCorrectUrl(url);
 
     StringBuffer errMsg = new StringBuffer();
 

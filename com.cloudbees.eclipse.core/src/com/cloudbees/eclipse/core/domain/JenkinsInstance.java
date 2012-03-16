@@ -18,6 +18,8 @@ public class JenkinsInstance implements Comparable<JenkinsInstance> {
   public String password;
   public boolean authenticate;
   public boolean atCloud;
+  
+  public String alternativeUrl; // url provided by the primary view url. Initialized lazily whenever views get loaded.
 
   public JenkinsInstance() {
   }
