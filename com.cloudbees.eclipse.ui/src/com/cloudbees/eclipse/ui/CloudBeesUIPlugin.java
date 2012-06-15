@@ -348,7 +348,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   public JenkinsService getJenkinsServiceForUrl(final String serviceOrViewOrJobUrl) {
-    System.err.println("LOOKUP FOR URL: "+serviceOrViewOrJobUrl);
     Iterator<JenkinsService> iter = new ArrayList<JenkinsService>(this.jenkinsRegistry).iterator();
     while (iter.hasNext()) {
       JenkinsService service = iter.next();
