@@ -285,7 +285,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
   public void showJobs(final String viewUrl, final boolean userAction) throws CloudBeesException {
     // CloudBeesUIPlugin.getDefault().getLogger().info("Show jobs: " + viewUrl);
-    System.out.println("Show jobs: " + viewUrl);
+    //System.out.println("Show jobs: " + viewUrl);
 
     if (viewUrl == null) {
       return; // no info
@@ -592,7 +592,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
   public void showBuildHistory(final String jobUrl, final boolean userAction) throws CloudBeesException {
     // CloudBeesUIPlugin.getDefault().getLogger().info("Show build history: " + jobUrl);
-    System.out.println("Show build history: " + jobUrl);
+    //System.out.println("Show build history: " + jobUrl);
 
     if (jobUrl == null) {
       return; // no info

@@ -62,12 +62,12 @@ public class CloudBeesDevCorePlugin extends Plugin {
           if (provider instanceof ForgeSync) {
             ForgeSync provider1 = ((ForgeSync) provider);
             CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().addProvider(provider1);
-            System.out.println("adding: " + provider1);
+            //System.out.println("adding: " + provider1);
           }
         } catch (CloudBeesException e) {
-          e.printStackTrace(); // FIXME
+          logger.error(e.getMessage(), e);
         } catch (CoreException e) {
-          e.printStackTrace(); // FIXME
+          logger.error(e.getMessage(), e);
         }
       }
     }

@@ -32,7 +32,7 @@ public class RecentChangesClickListener implements IDoubleClickListener {
       jobUrl = jobUrl.substring(0, pos);
     }
 
-    System.out.println("Clicked: " + event + " - " + jobUrl + " -> " + " - " + item.path);
+    //System.out.println("Clicked: " + event + " - " + jobUrl + " -> " + " - " + item.path);
 
     CloudBeesDevUiPlugin.getDefault().openRemoteFile(jobUrl, item);
   }

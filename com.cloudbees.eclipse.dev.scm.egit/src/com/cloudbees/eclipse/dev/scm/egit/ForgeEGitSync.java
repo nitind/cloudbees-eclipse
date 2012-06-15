@@ -80,7 +80,7 @@ public class ForgeEGitSync implements ForgeSync {
               instance.status = ForgeInstance.STATUS.UNKNOWN;
             }
 
-            System.out.println("Repo is unknown for EGit: " + instance.url);
+            //System.out.println("Repo is unknown for EGit: " + instance.url);
           }
         }
       });
@@ -190,7 +190,7 @@ public class ForgeEGitSync implements ForgeSync {
           for (RemoteConfig remo : allRemotes) {
             List<URIish> uris = remo.getURIs();
             for (URIish uri : uris) {
-              System.out.println("Checking URI: " + uri + " - " + proposal.equals(uri));
+              //System.out.println("Checking URI: " + uri + " - " + proposal.equals(uri));
               if (proposal.equals(uri)) {
                 return true;
               }

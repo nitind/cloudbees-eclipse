@@ -37,7 +37,7 @@ public class ReloadBuildHistoryAction extends Action {
 
   public void setViewUrl(final String viewUrl) {
     this.viewUrl = viewUrl;
-    System.out.println("reload view url: " + this.viewUrl);
+    //System.out.println("reload view url: " + this.viewUrl);
     super.setEnabled(this.viewUrl != null);
   }
 

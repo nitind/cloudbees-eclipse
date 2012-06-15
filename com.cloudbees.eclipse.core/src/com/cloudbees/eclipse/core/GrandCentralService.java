@@ -215,13 +215,13 @@ public class GrandCentralService {
 
       String url = BASE_URL + "account/service_status";
 
-      System.out.println("URL: " + url);
+      //System.out.println("URL: " + url);
       HttpPost post = Utils.jsonRequest(url, req);
 
       HttpResponse resp = httpclient.execute(post);
       String bodyResponse = Utils.getResponseBody(resp);
 
-      System.out.println("Received: " + bodyResponse);
+      //System.out.println("Received: " + bodyResponse);
       Gson g = Utils.createGson();
 
       AccountServiceStatusResponse services = g.fromJson(bodyResponse, AccountServiceStatusResponse.class);

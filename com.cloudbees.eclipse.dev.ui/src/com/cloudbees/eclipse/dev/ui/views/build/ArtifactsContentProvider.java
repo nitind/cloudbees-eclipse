@@ -62,7 +62,7 @@ public class ArtifactsContentProvider implements ITreeContentProvider {
     //      return ret.toArray(new String[ret.size()]);
     //    }
 
-    System.out.println("Unknown parent: " + parentElement);
+    //System.out.println("Unknown parent: " + parentElement);
 
     return null;
   }

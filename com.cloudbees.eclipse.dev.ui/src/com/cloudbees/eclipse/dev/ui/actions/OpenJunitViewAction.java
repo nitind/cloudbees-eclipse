@@ -49,7 +49,7 @@ public class OpenJunitViewAction extends BaseSelectionListenerAction {
     IStructuredSelection sel = getStructuredSelection();
     Object selection = sel.getFirstElement();
 
-    System.out.println("Show test results: " + selection);
+    //System.out.println("Show test results: " + selection);
 
     if (selection instanceof JenkinsBuildDetailsResponse) {
       final JenkinsBuildDetailsResponse build = (JenkinsBuildDetailsResponse) selection;

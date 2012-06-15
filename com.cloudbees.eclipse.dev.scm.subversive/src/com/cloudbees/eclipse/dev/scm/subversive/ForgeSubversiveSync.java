@@ -57,7 +57,7 @@ public class ForgeSubversiveSync implements ForgeSync {
         if (instance.status != STATUS.SKIPPED) { // user might have deleted it and need to sync again
           instance.status = ForgeInstance.STATUS.UNKNOWN;
         }
-        System.out.println("Repo is unknown for Subversive: " + instance.url);
+        //System.out.println("Repo is unknown for Subversive: " + instance.url);
       }
 
       monitor.worked(1);
@@ -79,7 +79,7 @@ public class ForgeSubversiveSync implements ForgeSync {
     boolean exists = false;
     if (reps != null) {
       for (IRepositoryLocation rep : reps) {
-        System.out.println("Subversive repo: " + rep + " - " + rep.getUrl() + " - " + rep.getUrlAsIs());
+        //System.out.println("Subversive repo: " + rep + " - " + rep.getUrl() + " - " + rep.getUrlAsIs());
         if (loc.getUrl().equals(rep.getUrl())) {
           exists = true;
           break;
@@ -173,23 +173,23 @@ public class ForgeSubversiveSync implements ForgeSync {
         }
       }
       String rootUrl = loc.getRepositoryRootUrl();
-      System.out.println("Root: " + rootUrl);
+      //System.out.println("Root: " + rootUrl);
       String filePath = rootUrl + item.path;
-      System.out.println("Filepath: " + filePath);
+      //System.out.println("Filepath: " + filePath);
       IRepositoryFile file = loc.asRepositoryFile(filePath, false);
       String dateS = item.parent.date; //2011-03-31T15:08:58.859428Z
-      System.out.println("commit date: " + dateS);
+      //System.out.println("commit date: " + dateS);
       dateS = dateS.replace("T", " ");
       if (dateS.endsWith("Z")) {
         dateS = dateS.substring(0, dateS.length() - 4);
       }
       SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-      System.out.println("Date1: " + format.parse(dateS));
+      //System.out.println("Date1: " + format.parse(dateS));
       format.setTimeZone(TimeZone.getTimeZone("GMT+0"));
       Date ts = format.parse(dateS);
-      System.out.println("Date2: " + ts);
+      //System.out.println("Date2: " + ts);
       long date = ts.getTime();
-      System.out.println("date: " + date);
+      //System.out.println("date: " + date);
       switch (item.type) {
       case ADDED:
         ++date;
@@ -202,7 +202,7 @@ public class ForgeSubversiveSync implements ForgeSync {
       file.setPegRevision(SVNRevision.fromDate(date));
       Calendar cal = GregorianCalendar.getInstance(TimeZone.getTimeZone("GMT+0"));
       cal.setTimeInMillis(date);
-      System.out.println("Cal: " + cal.getTime());
+      //System.out.println("Cal: " + cal.getTime());
 
       new OpenRemoteFileOperation(new IRepositoryFile[] { file }, OpenRemoteFileOperation.OPEN_DEFAULT).run(monitor);
 

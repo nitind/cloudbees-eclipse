@@ -68,7 +68,7 @@ public class ForgeSubclipseSync implements ForgeSync {
           instance.status = ForgeInstance.STATUS.UNKNOWN;
         }
 
-        System.out.println("Repo is unknown for Subclipse: " + instance.url);
+        //System.out.println("Repo is unknown for Subclipse: " + instance.url);
       }
     } finally {
       monitor.worked(10);
@@ -147,16 +147,16 @@ public class ForgeSubclipseSync implements ForgeSync {
       //      SVNProviderPlugin.getPlugin().getRepositories().addOrUpdateRepository(rep);
       SVNUrl svnurl = repository2.getRepositoryRoot().appendPath(item.path);
       String dateS = item.parent.date; //2011-03-31T15:08:58.859428Z
-      System.out.println("commit date: " + dateS);
+      //System.out.println("commit date: " + dateS);
       dateS = dateS.replace("T", " ");
       if (dateS.endsWith("Z")) {
         dateS = dateS.substring(0, dateS.length() - 4);
       }
       SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-      System.out.println("Date1: " + format.parse(dateS));
+      //System.out.println("Date1: " + format.parse(dateS));
       format.setTimeZone(TimeZone.getTimeZone("GMT+0"));
       Date ts = format.parse(dateS);
-      System.out.println("Date2: " + ts);
+      //System.out.println("Date2: " + ts);
       Calendar cal = Calendar.getInstance();
       cal.setTime(ts);
       switch (item.type) {

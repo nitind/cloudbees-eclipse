@@ -96,7 +96,7 @@ public class RecentChangesContentProvider implements ITreeContentProvider {
       return ret.toArray(new ChangeSetPathItem[ret.size()]);
     }
 
-    System.out.println("Unknown parent: " + parentElement);
+    //System.out.println("Unknown parent: " + parentElement);
 
     return null;
   }
