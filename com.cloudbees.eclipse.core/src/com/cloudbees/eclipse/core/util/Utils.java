@@ -110,7 +110,7 @@ public class Utils {
     try {
       HttpClientParams.setCookiePolicy(httpclient.getParams(), CookiePolicy.BROWSER_COMPATIBILITY);
 
-      HttpProtocolParams.setUserAgent(httpclient.getParams(), "CloudBeesEclipseToolkit/"+CloudBeesCorePlugin.getDefault().getBundle().getVersion());
+      HttpProtocolParams.setUserAgent(httpclient.getParams(), "CBEclipseToolkit/"+CloudBeesCorePlugin.getDefault().getBundle().getVersion());
       
       KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 
