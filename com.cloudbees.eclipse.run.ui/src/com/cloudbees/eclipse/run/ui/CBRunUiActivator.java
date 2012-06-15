@@ -13,6 +13,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 /**
@@ -26,6 +27,8 @@ public class CBRunUiActivator extends AbstractUIPlugin {
   // The shared instance
   private static CBRunUiActivator plugin;
   private final ProjectDeleteListener projectDeleteListener;
+  private Logger logger;
+  
 
   /**
    * The constructor
@@ -43,6 +46,7 @@ public class CBRunUiActivator extends AbstractUIPlugin {
     super.start(context);
     CloudBeesUIPlugin.getDefault(); // initialize this, so can use CloudBeesCore
     plugin = this;
+    this.logger = new Logger(getLog());
     // ResourcesPlugin.getWorkspace().addResourceChangeListener(projectDeleteListener);
     ResourcesPlugin.getWorkspace().addResourceChangeListener(this.projectDeleteListener,
         IResourceChangeEvent.PRE_DELETE);
@@ -56,6 +60,7 @@ public class CBRunUiActivator extends AbstractUIPlugin {
   public void stop(BundleContext context) throws Exception {
     ResourcesPlugin.getWorkspace().removeResourceChangeListener(this.projectDeleteListener);
     plugin = null;
+    logger = null;
     super.stop(context);
   }
 
@@ -112,4 +117,9 @@ public class CBRunUiActivator extends AbstractUIPlugin {
     CBRunUiActivator pl = CBRunUiActivator.getDefault();
     return pl != null ? pl.getImageRegistry().getDescriptor(imgKey) : null;
   }
+  
+  public Logger getLogger() {
+    return this.logger;
+  }
+  
 }

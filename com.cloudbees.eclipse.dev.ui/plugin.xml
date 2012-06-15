@@ -195,7 +195,7 @@
               enablesFor="1"
               icon="icons/epl/refresh.png"
               id="com.cloudbees.eclipse.dev.ui.action.reload"
-              label="Reload">
+              label="Reload DEV@cloud Jenkins instances@">
         </action>
      </objectContribution>
      <objectContribution

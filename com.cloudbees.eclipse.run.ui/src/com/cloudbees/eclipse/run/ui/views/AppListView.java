@@ -16,7 +16,7 @@ import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.IStatusUpdater;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
-import com.cloudbees.eclipse.run.ui.popup.actions.RefreshAction;
+import com.cloudbees.eclipse.run.ui.popup.actions.ReloadRunAtCloudAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 import com.cloudbees.eclipse.ui.views.CBTreeContributor;
@@ -107,7 +107,7 @@ public class AppListView implements IPropertyChangeListener, ICBTreeProvider {
 
   @Override
   public CBTreeContributor[] getContributors() {
-    return new CBTreeContributor[] { new CBTreeSeparator(SeparatorLocation.PULL_DOWN), new RefreshAction() };
+    return new CBTreeContributor[] { new CBTreeSeparator(SeparatorLocation.PULL_DOWN), new ReloadRunAtCloudAction() };
   }
 
   @Override

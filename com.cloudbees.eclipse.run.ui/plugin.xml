@@ -78,14 +78,14 @@
   </objectContribution>
   <objectContribution
         adaptable="false"
-        id="com.cloudbees.eclipse.run.ui.refreshRunAtCloudApps"
+        id="com.cloudbees.eclipse.run.ui.reloadRunAtCloudApps"
         objectClass="com.cloudbees.eclipse.run.ui.views.AppGroup">
      <action
-           class="com.cloudbees.eclipse.run.ui.popup.actions.RefreshAction"
+           class="com.cloudbees.eclipse.run.ui.popup.actions.ReloadRunAtCloudAction"
            enablesFor="1"
            icon="icons/16x16/refresh.png"
-           id="com.cloudbees.eclipse.run.ui.action.refresh"
-           label="Refresh">
+           id="com.cloudbees.eclipse.run.ui.action.reloadapps"
+           label="Reload RUN@cloud apps@">
      </action>
   </objectContribution>
   <objectContribution
@@ -163,7 +163,7 @@
            enablesFor="1"
            icon="icons/16x16/external_browser.gif"
            id="com.cloudbees.eclipse.run.ui.action.configure"
-           label="Configure in RUN@cloud@"
+           label="Configure in RUN@cloud@"                     
            menubarPath="run">
      </action>
   </objectContribution>

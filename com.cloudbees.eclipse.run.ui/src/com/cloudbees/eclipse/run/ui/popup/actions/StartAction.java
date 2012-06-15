@@ -1,8 +1,12 @@
 package com.cloudbees.eclipse.run.ui.popup.actions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -15,7 +19,12 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.internal.ObjectPluginAction;
 
 import com.cloudbees.api.ApplicationInfo;
+import com.cloudbees.api.BeesClient;
+import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
+import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.run.core.BeesSDK;
+import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
@@ -31,7 +40,8 @@ public class StartAction implements IObjectActionDelegate {
 
     @Override
     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-      monitor.beginTask("Starting RUN@cloud server", 1);
+      //monitor.beginTask("Starting RUN@cloud server", 1);
+           
       Object firstElement = ((StructuredSelection) this.selection).getFirstElement();
 
       if (firstElement instanceof ApplicationInfo) {
@@ -40,15 +50,53 @@ public class StartAction implements IObjectActionDelegate {
 
           String id = appInfo.getId();
           int i = id.indexOf("/");
-          BeesSDK.start(id.substring(0, i), id.substring(i + 1));
-          monitor.done();
+          String account = id.substring(0, i);
+          String idstr = id.substring(i + 1);
+          
+          jobStart(account, idstr);
+          
+          
+          //monitor.done();
 
         } catch (Exception e) {
           CBRunUiActivator.logErrorAndShowDialog(e);
-          monitor.done();
+          //monitor.done();
 
         }
       }
+    }
+
+    private void jobStart(final String account, final String idstr) {
+
+      org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Starting RUN@cloud app "+idstr+" at "+account) {
+        @Override
+        protected IStatus run(final IProgressMonitor monitor) {
+
+          monitor.beginTask("Starting RUN@cloud app "+idstr+" at "+account, 100);
+          try {
+            BeesSDK.start(account, idstr);
+            monitor.worked(75);
+            monitor.setTaskName("Loading RUN@cloud apps list");
+            CBRunCoreActivator.getPoller().fetchAndUpdate();
+            monitor.worked(25);
+
+            return Status.OK_STATUS;
+          } catch (Exception e) {
+            String msg = e.getLocalizedMessage();
+            if (e instanceof CloudBeesException) {
+              e = (Exception) e.getCause();
+            }
+            CBRunUiActivator.getDefault().getLogger().error(msg, e);
+            return new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, 0, msg, e);
+          } finally {
+            monitor.done();
+          }
+        }
+      };
+
+      job.setUser(true);
+      job.schedule();
+
     }
   }
 
