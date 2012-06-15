@@ -2,7 +2,7 @@
 <feature
       id="com.cloudbees.eclipse"
       label="CloudBees Eclipse Toolkit"
-      version="1.0.4.qualifier"
+      version="1.0.5.qualifier"
       provider-name="CloudBees, Inc">
 
    <description url="http://www.cloudbees.com">

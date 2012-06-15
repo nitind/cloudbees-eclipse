@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CloudBees UI
 Bundle-SymbolicName: com.cloudbees.eclipse.ui;singleton:=true
-Bundle-Version: 1.0.4.qualifier
+Bundle-Version: 1.0.5.qualifier
 Bundle-Activator: com.cloudbees.eclipse.ui.CloudBeesUIPlugin
 Bundle-Vendor: Cloud Bees, Inc
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

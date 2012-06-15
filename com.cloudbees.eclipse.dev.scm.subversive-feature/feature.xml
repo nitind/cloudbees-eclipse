@@ -2,7 +2,7 @@
 <feature
       id="com.cloudbees.eclipse.dev.scm.subversive"
       label="Forge SVN Integration (**SUBVERSIVE MUST BE INSTALLED!!**) (Optional)"
-      version="1.0.4.qualifier"
+      version="1.0.5.qualifier"
       provider-name="CloudBees, Inc">
 
    <description url="http://www.cloudbees.com">
