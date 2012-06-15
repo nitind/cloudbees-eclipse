@@ -12,6 +12,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -26,6 +27,7 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
+import com.cloudbees.eclipse.ui.UIUtils;
 
 public class AccountSelectionDialog extends TitleAreaDialog {
 
@@ -54,8 +56,13 @@ public class AccountSelectionDialog extends TitleAreaDialog {
     setMessage(DESCRIPTION);
     setTitleImage(ICON);
     getShell().setSize(400, 400);
-    getShell().setMinimumSize(250, 250);
+    getShell().setMinimumSize(400, 400);
+    getShell().setText(TITLE);
 
+    Point shellCenter = UIUtils.getCenterPoint();
+    getShell().setLocation(shellCenter.x - 400 / 2, shellCenter.y - 400 / 2);
+    
+    
     if (this.accountNames == null || this.accountNames.length == 0) {
       getButton(OK).setEnabled(false);
     }
@@ -161,4 +168,5 @@ public class AccountSelectionDialog extends TitleAreaDialog {
   public String getSelectedAccountName() {
     return this.selectedAccountName;
   }
+
 }

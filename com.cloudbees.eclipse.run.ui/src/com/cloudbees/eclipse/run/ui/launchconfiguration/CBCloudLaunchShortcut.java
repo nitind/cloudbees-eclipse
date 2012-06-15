@@ -63,10 +63,7 @@ public class CBCloudLaunchShortcut implements ILaunchShortcut {
                 String account = dialog.getSelectedAccountName();
 
                 if (dialog.getReturnCode() != IDialogConstants.OK_ID || account == null || account.length() == 0) {
-                  String errorMsg = MessageFormat.format("Account is not specified.", CBCloudLaunchShortcut.this.name);
-                  Status status = new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, errorMsg);
-                  ErrorDialog.openError(shell, "Error", "Launch error", status);
-                  CBCloudLaunchShortcut.this.cancelled = true;
+                	CBCloudLaunchShortcut.this.cancelled = true;
                   return;
                 }
                 CBCloudLaunchShortcut.this.cancelled = false;
