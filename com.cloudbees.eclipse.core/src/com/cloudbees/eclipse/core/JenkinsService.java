@@ -57,8 +57,6 @@ public class JenkinsService {
 
   private final Map<String, JenkinsScmConfig> scms = new HashMap<String, JenkinsScmConfig>();
 
-  private static String lastJossoSessionId = null;
-
   public JenkinsService(final JenkinsInstance jenkins) {
     this.jenkins = jenkins;
   }
@@ -190,16 +188,10 @@ public class JenkinsService {
       CloudBeesException, Exception {
     Object bodyResponse = null;
 
-    boolean tryToLogin = true; // false for BasicAuth, true for redirect login
-    do {
 
       if (this.jenkins.username != null && this.jenkins.username.trim().length() > 0 && this.jenkins.password != null
-          && this.jenkins.password.trim().length() > 0) {
-        if (this.jenkins.atCloud) {
-          //post.addHeader("Authorization", "Basic " + Utils.toB64(this.jenkins.username + ":" + this.jenkins.password));
-        } else if (this.jenkins.authenticate) {
-          post.addHeader("Authorization", "Basic " + Utils.toB64(this.jenkins.username + ":" + this.jenkins.password));
-        }
+          && this.jenkins.password.trim().length() > 0) {    	  
+    	  post.addHeader("Authorization", "Basic " + Utils.toB64(this.jenkins.username + ":" + this.jenkins.password));    	  
       }
 
       List<NameValuePair> nvps = new ArrayList<NameValuePair>();
@@ -207,11 +199,6 @@ public class JenkinsService {
         nvps.addAll(params);
       }
 
-      if (this.jenkins.atCloud && lastJossoSessionId != null) { // basic auth failed
-        nvps.add(new BasicNameValuePair("JOSSO_SESSIONID", lastJossoSessionId)); // 1
-        post.addHeader("Cookie", "JOSSO_SESSIONID=" + lastJossoSessionId); // 2
-        httpclient.getCookieStore().addCookie(new BasicClientCookie("JOSSO_SESSIONID", lastJossoSessionId)); // 3
-      }
       if (post instanceof HttpEntityEnclosingRequest) {
         if (((HttpEntityEnclosingRequest) post).getEntity() == null) {
           ((HttpEntityEnclosingRequest) post).setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
@@ -233,124 +220,9 @@ public class JenkinsService {
         break;
       }
 
-      if (this.jenkins.atCloud && this.jenkins.username != null && this.jenkins.username.trim().length() > 0
-          && this.jenkins.password != null && this.jenkins.password.trim().length() > 0
-          && (resp.getStatusLine().getStatusCode() == 302 || resp.getStatusLine().getStatusCode() == 301) && tryToLogin) { // redirect to login
-        bodyResponse = null;
-        login(httpclient, post.getURI().toASCIIString(), resp.getFirstHeader("Location").getValue(),
-            new SubProgressMonitor(monitor, 5));
-        //httpclient.getCookieStore().clear();
-        tryToLogin = false;
-      } else {
-        // check final outcome if we got what we asked for
-        Utils.checkResponseCode(resp, expectRedirect, jenkins.atCloud);
-        break;
-      }
-
-    } while (!tryToLogin);
+      Utils.checkResponseCode(resp, expectRedirect, jenkins.atCloud);
 
     return bodyResponse;
-  }
-
-  private void login(final DefaultHttpClient httpClient, final String referer, final String redirect,
-      final IProgressMonitor monitor) throws Exception {
-    try {
-      String name = "Logging in to '" + this.jenkins.label + "'...";
-      monitor.beginTask(name, 5);
-      monitor.setTaskName(name);
-
-      //    httpClient.getCookieStore().clear();
-      //    List<Cookie> oldCookies = new ArrayList<Cookie>(httpClient.getCookieStore().getCookies());
-
-      String nextUrl = redirect;
-      for (int i = 0; i < 20 && nextUrl != null; i++) {
-        if (monitor.isCanceled()) {
-          throw new OperationCanceledException();
-        }
-        HttpResponse lastResp = visitSite(httpClient, nextUrl, referer);
-
-        Header redir = lastResp.getFirstHeader("Location");
-        String redirUrl = redir == null ? null : redir.getValue();
-
-        // page with login form
-        if (redirUrl != null && nextUrl.lastIndexOf("josso_login") >= 0 && redirUrl.indexOf("login.do") >= 0) {
-          redirUrl = redirUrl.substring(0, redirUrl.indexOf("login.do")) + "usernamePasswordLogin.do";
-        }
-
-        // shortcut to josso_login
-        if (redirUrl != null && nextUrl.lastIndexOf("josso_security_check") >= 0 && nextUrl.indexOf("login.do") < 0) {
-          redirUrl = nextUrl.substring(0, nextUrl.indexOf("josso_security_check")) + "josso_login/";
-        }
-
-        nextUrl = redirUrl;
-
-        Header cookie = lastResp.getFirstHeader("Set-Cookie");
-        if (cookie == null) {
-          cookie = lastResp.getFirstHeader("SET-COOKIE");
-        }
-        if (cookie == null) {
-          cookie = lastResp.getFirstHeader("Set-Cookie2");
-        }
-        if (cookie == null) {
-          cookie = lastResp.getFirstHeader("SET-COOKIE2");
-        }
-
-        monitor.worked(1);
-
-        if (cookie != null) {
-          CloudBeesCorePlugin.getDefault().getLogger().info("Cookie: " + cookie);
-        }
-        if (cookie != null && cookie.getValue().startsWith("JOSSO_SESSIONID=")) {
-          break; // logged in ok
-        }
-
-      }
-
-      for (Cookie cook : httpClient.getCookieStore().getCookies()) {
-        if ("JOSSO_SESSIONID".equals(cook.getName())) {
-          lastJossoSessionId = cook.getValue();
-          //        break login; // ready
-        }
-      }
-
-    } finally {
-      monitor.done();
-    }
-
-    //CloudBeesCorePlugin.getDefault().getLogger().info("JOSSO_SESSIONID=" + lastJossoSessionId);
-  }
-
-  private HttpResponse visitSite(final DefaultHttpClient httpClient, final String url, final String refererUrl)
-      throws IOException, ClientProtocolException, CloudBeesException {
-
-    CloudBeesCorePlugin.getDefault().getLogger().info("Visiting: " + url);
-
-    HttpPost post = new HttpPost(url);
-    post.addHeader("Referer", refererUrl);
-
-    if (url.contains("/sso-gateway/signon/login.do")) {      
-     List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-     nvps.add(new BasicNameValuePair("josso_username", this.jenkins.username));
-     nvps.add(new BasicNameValuePair("josso_password", this.jenkins.password));
-     nvps.add(new BasicNameValuePair("josso_cmd", "login"));
-     nvps.add(new BasicNameValuePair("josso_rememberme", "on"));
-     String submitUrl = url.replace("/sso-gateway/signon/login.do", "/sso-gateway/signon/usernamePasswordLogin.do");
-     post.setURI(URI.create(submitUrl));
-     post.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
-    }
-
-    
-    
-    HttpResponse resp = httpClient.execute(post);
-
-    Utils.getResponseBody(resp);
-
-    Header redir = resp.getFirstHeader("Location");
-
-    CloudBeesCorePlugin.getDefault().getLogger()
-        .info("\t" + resp.getStatusLine() + (redir != null ? " -> " + redir.getValue() : ""));
-
-    return resp;
   }
 
   public String getLabel() {
