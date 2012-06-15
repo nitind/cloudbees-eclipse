@@ -97,14 +97,28 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
   }
 
   private void handleException(final Exception e) {
-    if (e.getMessage() != null && e.getMessage().contains("Target \"dist\" does not exist in the project")) {
-      Display.getDefault().syncExec(new Runnable() {
 
+    String errorTitle = null;
+    String errorMsg = null;
+
+    if (e.getMessage() != null && e.getMessage().contains("Target \"dist\" does not exist in the project")) {
+      errorTitle = "Project is not CloudBees-compatible";
+      errorMsg = "This is not a CloudBees-compatible project (no dist target) and does not contain a WAR-file artifact.";
+    }
+
+    if (e.getMessage() != null && e.getMessage().startsWith("Buildfile: ")
+        && e.getMessage().endsWith(" does not exist")) {
+      errorTitle = "Project is not CloudBees-compatible";
+      errorMsg = "This is not a CloudBees-compatible project (no buildfile) and does not contain a WAR-file artifact.";
+    }
+
+    if (errorTitle != null) {
+      final String msg = errorMsg;
+      final String title = errorTitle;
+      Display.getDefault().syncExec(new Runnable() {
         @Override
         public void run() {
-
-          String message = "Please provide a valid CloudBees Project build.xml or provide a war file location!";
-          MessageDialog.openError(Display.getDefault().getActiveShell(), "Incorrect build.xml", message);
+          MessageDialog.openError(Display.getDefault().getActiveShell(), title, msg);
 
         }
       });
