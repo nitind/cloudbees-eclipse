@@ -104,4 +104,11 @@ public class CloudBeesCorePlugin extends Plugin {
     Path path = new Path("scripts/scm_config.xml");
     return new File(FileLocator.toFileURL(FileLocator.find(bundle, path, null)).getFile());
   }
+
+  public static boolean validateRUNatCloudJRE() {
+    //1.6.0_29, 1.7.0_06-ea etc.
+    String prop = System.getProperty("java.version");    
+    return !(prop!=null && prop.contains("1.7"));
+  }
+  
 }

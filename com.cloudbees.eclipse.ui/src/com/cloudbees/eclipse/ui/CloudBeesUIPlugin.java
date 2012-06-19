@@ -22,6 +22,7 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -45,7 +46,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobProperty;
 
 /**
  * CloudBees Eclipse Toolkit UI Plugin
- *
+ * 
  * @author ahtik
  */
 public class CloudBeesUIPlugin extends AbstractUIPlugin {
@@ -88,6 +89,28 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     this.logger = new Logger(getLog());
     loadAccountCredentials();
     hookPrefChangeListener();
+
+    validateJREforRunAtCloud();
+
+  }
+
+  /**
+   * Validates JRE for run@cloud and if JRE is not compatible then warn user. RUN@cloud plugins will be disabled by themselves (look plugin#start()).
+   * Validation is just checking if the JRE is java se 7 or not.
+   */
+  private void validateJREforRunAtCloud() {
+    if (!CloudBeesCorePlugin.validateRUNatCloudJRE()) {
+      Display.getDefault().syncExec(new Runnable() {
+        public void run() {
+          IStatus s = new Status(
+              IStatus.WARNING,
+              PLUGIN_ID,
+              "CloudBees RUN@cloud does not support Java SE 7. Please start Eclipse with Java SE 6!\nRUN@cloud functionality disabled.");
+          ErrorDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+              "CloudBees RUN@cloud does not support Java SE 7!", null, s);
+        }
+      });
+    }
   }
 
   private void hookPrefChangeListener() {
@@ -128,7 +151,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   /**
    * Returns the shared instance
-   *
+   * 
    * @return the shared instance
    */
   public static CloudBeesUIPlugin getDefault() {
@@ -351,8 +374,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     Iterator<JenkinsService> iter = new ArrayList<JenkinsService>(this.jenkinsRegistry).iterator();
     while (iter.hasNext()) {
       JenkinsService service = iter.next();
-      if (serviceOrViewOrJobUrl.startsWith(service.getUrl()) ||
-          (service.getAlternativeUrl()!=null && serviceOrViewOrJobUrl.startsWith(service.getAlternativeUrl()))) {
+      if (serviceOrViewOrJobUrl.startsWith(service.getUrl())
+          || (service.getAlternativeUrl() != null && serviceOrViewOrJobUrl.startsWith(service.getAlternativeUrl()))) {
         return service;
       }
     }
@@ -413,7 +436,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   /**
    * As secure storage is not providing change listener functionality, we must call this programmatically.
-   *
+   * 
    * @throws CloudBeesException
    */
   public void fireSecureStorageChanged() throws CloudBeesException {

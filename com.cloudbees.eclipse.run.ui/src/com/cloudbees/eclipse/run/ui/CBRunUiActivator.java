@@ -13,7 +13,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.Logger;
+import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 /**
@@ -28,7 +30,6 @@ public class CBRunUiActivator extends AbstractUIPlugin {
   private static CBRunUiActivator plugin;
   private final ProjectDeleteListener projectDeleteListener;
   private Logger logger;
-  
 
   /**
    * The constructor
@@ -44,12 +45,20 @@ public class CBRunUiActivator extends AbstractUIPlugin {
   @Override
   public void start(BundleContext context) throws Exception {
     super.start(context);
+
+    if (!CloudBeesCorePlugin.validateRUNatCloudJRE()) {
+      // Throwing exception disables the plugin.
+      throw new Exception(
+          "Java SE 7 is not supported by CloudBees RUN@cloud. Disabling com.cloudbees.eclipse.run.ui functionality.");
+    }
+
     CloudBeesUIPlugin.getDefault(); // initialize this, so can use CloudBeesCore
     plugin = this;
     this.logger = new Logger(getLog());
     // ResourcesPlugin.getWorkspace().addResourceChangeListener(projectDeleteListener);
     ResourcesPlugin.getWorkspace().addResourceChangeListener(this.projectDeleteListener,
         IResourceChangeEvent.PRE_DELETE);
+
   }
 
   /*
@@ -117,9 +126,9 @@ public class CBRunUiActivator extends AbstractUIPlugin {
     CBRunUiActivator pl = CBRunUiActivator.getDefault();
     return pl != null ? pl.getImageRegistry().getDescriptor(imgKey) : null;
   }
-  
+
   public Logger getLogger() {
     return this.logger;
   }
-  
+
 }
