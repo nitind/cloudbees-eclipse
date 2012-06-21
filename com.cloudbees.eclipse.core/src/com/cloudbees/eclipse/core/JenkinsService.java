@@ -3,7 +3,6 @@ package com.cloudbees.eclipse.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,10 +18,8 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -73,8 +70,6 @@ public class JenkinsService {
     try {
       monitor.beginTask("Fetching Job list for '" + this.jenkins.label + "'...", 10);
 
-      DefaultHttpClient httpclient = Utils.getAPIClient();
-
       Gson g = Utils.createGson();
 
       String reqUrl = viewUrl; // != null ? viewUrl : jenkins.url;
@@ -84,10 +79,13 @@ public class JenkinsService {
       }
 
       String uri = reqUrl + "api/json?tree=" + JenkinsJobsResponse.QTREE;
+      
       HttpPost post = new HttpPost(uri);
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
       monitor.worked(1);
+
+      DefaultHttpClient httpclient = Utils.getAPIClient(uri);
 
       String bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 5));
 
@@ -137,12 +135,13 @@ public class JenkinsService {
     reqUrl += "api/json?tree=" + JenkinsInstanceResponse.QTREE;
 
     try {
-      DefaultHttpClient httpclient = Utils.getAPIClient();
       Gson g = Utils.createGson();
 
       HttpPost post = new HttpPost(reqUrl);
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
+
+      DefaultHttpClient httpclient = Utils.getAPIClient(reqUrl);
 
       String bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 10));
 
@@ -267,13 +266,14 @@ public class JenkinsService {
     String reqStr = reqUrl + "api/json?tree=" + JenkinsBuildDetailsResponse.QTREE;
 
     try {
-      DefaultHttpClient httpclient = Utils.getAPIClient();
 
       Gson g = Utils.createGson();
 
       HttpPost post = new HttpPost(reqStr);
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
+
+      DefaultHttpClient httpclient = Utils.getAPIClient(reqStr);
 
       String bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 10));
 
@@ -343,7 +343,6 @@ public class JenkinsService {
     String reqStr = reqUrl + "api/json?tree=" + JenkinsJobAndBuildsResponse.QTREE;
 
     try {
-      DefaultHttpClient httpclient = Utils.getAPIClient();
 
       Gson g = Utils.createGson();
 
@@ -351,6 +350,7 @@ public class JenkinsService {
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
 
+      DefaultHttpClient httpclient = Utils.getAPIClient(reqStr);
       String bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 10));
 
       JenkinsJobAndBuildsResponse details = g.fromJson(bodyResponse, JenkinsJobAndBuildsResponse.class);
@@ -386,7 +386,7 @@ public class JenkinsService {
     String reqStr = reqUrl + "config.xml";
     String bodyResponse = null;
     try {
-      DefaultHttpClient httpclient = Utils.getAPIClient();
+      DefaultHttpClient httpclient = Utils.getAPIClient(reqStr);
 
       HttpGet post = new HttpGet(reqStr);
       post.setHeader("Accept", "text/html,application/xhtml+xml,application/xml");
@@ -435,7 +435,7 @@ public class JenkinsService {
     }
 
     try {
-      DefaultHttpClient httpclient = Utils.getAPIClient();
+      DefaultHttpClient httpclient = Utils.getAPIClient(reqStr);
 
       HttpPost post = new HttpPost(reqStr);
 
@@ -476,7 +476,7 @@ public class JenkinsService {
 
     InputStream bodyResponse = null;
     try {
-      DefaultHttpClient httpclient = Utils.getAPIClient();
+      DefaultHttpClient httpclient = Utils.getAPIClient(reqStr);
 
       HttpGet post = new HttpGet(reqStr);
       post.setHeader("Accept", "text/html,application/xhtml+xml,application/xml");
@@ -501,11 +501,14 @@ public class JenkinsService {
       String encodedJobName = URLEncoder.encode(jobName, "UTF-8");
       String url = this.jenkins.url.endsWith("/") ? this.jenkins.url : this.jenkins.url + "/";
 
-      HttpPost post = new HttpPost(url + "createItem?name=" + encodedJobName);
+      String reqUrl = url + "createItem?name=" + encodedJobName;
+      
+      HttpPost post = new HttpPost(reqUrl);
       StringEntity strEntity = new StringEntity(configXML, "application/xml", "UTF-8");
       post.setEntity(strEntity);
 
-      DefaultHttpClient httpClient = Utils.getAPIClient();
+      DefaultHttpClient httpClient = Utils.getAPIClient(reqUrl);
+      
       monitor.setTaskName("Creating new Jenkins job...");
 
       retrieveWithLogin(httpClient, post, null, false, new SubProgressMonitor(monitor, 10));
@@ -521,11 +524,14 @@ public class JenkinsService {
 
       String url = joburl.endsWith("/") ? joburl : joburl + "/";
 
-      HttpPost post = new HttpPost(url + "doDelete");
+      String reqUrl = url + "doDelete";
+      
+      HttpPost post = new HttpPost(reqUrl);
 
       post.setEntity(new StringEntity(""));
 
-      DefaultHttpClient httpClient = Utils.getAPIClient();
+      DefaultHttpClient httpClient = Utils.getAPIClient(reqUrl);
+      
       monitor.setTaskName("Deleting Jenkins job...");
 
       retrieveWithLogin(httpClient, post, null, false, new SubProgressMonitor(monitor, 10));
@@ -553,7 +559,7 @@ public class JenkinsService {
     String reqStr = reqUrl + "logText/progressiveText?start=" + request.start;
 
     try {
-      DefaultHttpClient httpclient = Utils.getAPIClient();
+      DefaultHttpClient httpclient = Utils.getAPIClient(reqStr);
 
       HttpPost post = new HttpPost(reqStr);
       if (request.annotator != null) {
@@ -598,7 +604,7 @@ public class JenkinsService {
 
     InputStream bodyResponse = null;
     try {
-      DefaultHttpClient httpclient = Utils.getAPIClient();
+      DefaultHttpClient httpclient = Utils.getAPIClient(url);
 
       HttpGet post = new HttpGet(url);
 

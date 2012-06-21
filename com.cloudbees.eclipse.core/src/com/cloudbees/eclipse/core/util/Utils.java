@@ -11,17 +11,25 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.params.AuthPolicy;
 import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
@@ -30,6 +38,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+import org.eclipse.core.net.proxy.IProxyData;
+import org.eclipse.core.net.proxy.IProxyService;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
@@ -105,13 +115,21 @@ public class Utils {
     }
   }
 
-  public final static DefaultHttpClient getAPIClient() throws CloudBeesException {
+  /**
+   * @param url
+   *          url to connec. Required to determine proxy settings if available. If <code>null</code> then proxy is not
+   *          configured for the client returned.
+   * @return
+   * @throws CloudBeesException
+   */
+  public final static DefaultHttpClient getAPIClient(String url) throws CloudBeesException {
     DefaultHttpClient httpclient = new DefaultHttpClient();
     try {
       HttpClientParams.setCookiePolicy(httpclient.getParams(), CookiePolicy.BROWSER_COMPATIBILITY);
 
-      HttpProtocolParams.setUserAgent(httpclient.getParams(), "CBEclipseToolkit/"+CloudBeesCorePlugin.getDefault().getBundle().getVersion());
-      
+      HttpProtocolParams.setUserAgent(httpclient.getParams(), "CBEclipseToolkit/"
+          + CloudBeesCorePlugin.getDefault().getBundle().getVersion());
+
       KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 
       CloudBeesCorePlugin plugin = CloudBeesCorePlugin.getDefault();
@@ -153,6 +171,55 @@ public class Utils {
       HttpConnectionParams.setConnectionTimeout(params, 10000);
       HttpConnectionParams.setSoTimeout(params, 10000);
 
+      IProxyService ps = CloudBeesCorePlugin.getDefault().getProxyService();
+      if (ps.isProxiesEnabled()) {
+        
+        IProxyData[] pr = ps.select(new URI(url));
+        
+        //NOTE! For now we use just the first proxy settings with type HTTP or HTTPS to try out the connection. If configuration has more than 1 conf then for now this likely won't work!
+        if (pr != null) {
+          for (int i = 0; i < pr.length; i++) {
+        
+            IProxyData prd = pr[i];
+
+            if (IProxyData.HTTP_PROXY_TYPE.equals(prd.getType()) || IProxyData.HTTPS_PROXY_TYPE.equals(prd.getType())) {
+              
+              String proxyHost = prd.getHost();
+              int proxyPort = prd.getPort();
+              String proxyUser = prd.getUserId();
+              String proxyPass = prd.getPassword();
+
+              HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+              httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+
+              if (prd.isRequiresAuthentication()) {
+                List authpref = new ArrayList();
+                authpref.add(AuthPolicy.BASIC);
+                AuthScope authScope = new AuthScope(proxyHost, proxyPort);
+                httpclient.getCredentialsProvider().setCredentials(authScope,
+                    new UsernamePasswordCredentials(proxyUser, proxyPass));
+              }
+
+              break;
+
+            }
+
+          }
+        }
+      }
+
+      /*      httpclient.getHostConfiguration().setProxy(proxyHost,proxyPort);      
+            //if there are proxy credentials available, set those too
+            Credentials proxyCredentials = null;
+            String proxyUser = beesClientConfiguration.getProxyUser();
+            String proxyPassword = beesClientConfiguration.getProxyPassword();
+            if(proxyUser != null || proxyPassword != null)
+                proxyCredentials = new UsernamePasswordCredentials(proxyUser, proxyPassword);
+            if(proxyCredentials != null)
+                client.getState().setProxyCredentials(AuthScope.ANY, proxyCredentials);
+
+      */
+
       return httpclient;
 
     } catch (Exception e) {
@@ -187,8 +254,8 @@ public class Utils {
     checkResponseCode(resp, false);
   }
 
-  public final static void checkResponseCode(final HttpResponse resp, final boolean expectCIRedirect, final boolean jenkinsAtCloud)
-      throws CloudBeesException {
+  public final static void checkResponseCode(final HttpResponse resp, final boolean expectCIRedirect,
+      final boolean jenkinsAtCloud) throws CloudBeesException {
     int responseStatus = resp.getStatusLine().getStatusCode();
 
     Header firstHeader = resp.getFirstHeader("Location");

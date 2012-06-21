@@ -108,13 +108,13 @@ public class GrandCentralService {
     StringBuffer errMsg = new StringBuffer();
 
     try {
-      HttpClient httpclient = Utils.getAPIClient();
+      String url = BASE_URL + "user/keys_using_auth";
+
+      HttpClient httpclient = Utils.getAPIClient(url);
 
       KeysUsingAuthRequest req = new KeysUsingAuthRequest();
       req.email = this.email;
       req.password = this.password;
-
-      String url = BASE_URL + "user/keys_using_auth";
 
       HttpPost post = Utils.jsonRequest(url, req);
 
@@ -133,10 +133,19 @@ public class GrandCentralService {
       return new AuthInfo(services);
 
     } catch (Exception e) {
-      throw new CloudBeesException("Failed to get account services info"
-          + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
+      throw cbthrow(errMsg.toString(), e);
     }
 
+  }
+
+  private CloudBeesException cbthrow(String errMsg, Exception e) {
+    String extra = "";
+    if (e.getCause()!=null) {
+      extra = e.getCause().getMessage();
+    }
+    return new CloudBeesException("Failed to get account services info."
+        + (errMsg.length() > 0 ? "\n" + errMsg + "; "+extra : "\n"+extra), e);
+    
   }
 
   /*
@@ -205,15 +214,15 @@ public class GrandCentralService {
     StringBuffer errMsg = new StringBuffer();
 
     try {
-      HttpClient httpclient = Utils.getAPIClient();
+      String url = BASE_URL + "account/service_status";
+
+      HttpClient httpclient = Utils.getAPIClient(url);
 
       AccountServiceStatusRequest req = new AccountServiceStatusRequest();
       req.account = account;
       AuthInfo auth = getAuthInfo(null);
       req.uid = auth.getAuth().uid;
       req.partner_key = PK;
-
-      String url = BASE_URL + "account/service_status";
 
       //System.out.println("URL: " + url);
       HttpPost post = Utils.jsonRequest(url, req);
@@ -281,13 +290,13 @@ public class GrandCentralService {
 
     try {
 
-      HttpClient httpclient = Utils.getAPIClient();
+      String url = BASE_URL + "account/names";
+
+      HttpClient httpclient = Utils.getAPIClient(url);
 
       AccountNamesRequest req = new AccountNamesRequest();
       req.uid = auth.uid;
       req.partner_key = PK;
-
-      String url = BASE_URL + "account/names";
 
       HttpPost post = Utils.jsonRequest(url, req);
 
@@ -305,9 +314,8 @@ public class GrandCentralService {
 
       return services.accounts;
 
-    } catch (Exception e) {
-      throw new CloudBeesException("Failed to get account services info"
-          + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
+    } catch (Exception e) {      
+      throw cbthrow(errMsg.toString(), e);
     }
 
   }
@@ -324,13 +332,13 @@ public class GrandCentralService {
 
     try {
 
-      HttpClient httpclient = Utils.getAPIClient();
+      String url = BASE_URL + "account/name";
+
+      HttpClient httpclient = Utils.getAPIClient(url);
 
       AccountNameRequest req = new AccountNameRequest();
       req.uid = auth.uid;
       req.partner_key = PK;
-
-      String url = BASE_URL + "account/name";
 
       HttpPost post = Utils.jsonRequest(url, req);
 
@@ -349,8 +357,7 @@ public class GrandCentralService {
       return account.account;
 
     } catch (Exception e) {
-      throw new CloudBeesException("Failed to get account services info"
-          + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
+      throw cbthrow(errMsg.toString(), e);
     }
 
   }
