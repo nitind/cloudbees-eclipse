@@ -74,6 +74,9 @@ public class CloudBeesCorePlugin extends Plugin {
 
   private void updateCBProxyConfig() {
     IProxyService ps = getProxyService();
+
+    boolean proxySet = false;
+
     if (ps.isProxiesEnabled()) {
 
       //NOTE! For now we use just the first proxy settings with type HTTP to try out the connection. If configuration has more than 1 conf then for now this likely won't work!
@@ -95,6 +98,8 @@ public class CloudBeesCorePlugin extends Plugin {
               continue; // ignore empty proxy conf
             }
 
+            proxySet = true;
+
             System.setProperty("bees.api.proxy.host", proxyHost);
             System.setProperty("bees.api.proxy.port", proxyPort + "");
 
@@ -109,13 +114,13 @@ public class CloudBeesCorePlugin extends Plugin {
             if (prd.isRequiresAuthentication()) {
               System.setProperty("bees.api.proxy.user", proxyUser);
               System.setProperty("bees.api.proxy.password", proxyPass);
-              
+
               if (prd.getType().equals(IProxyData.HTTP_PROXY_TYPE)) {
                 System.setProperty("http.proxyUser", proxyUser);
-                System.setProperty("http.proxyPassword", proxyPass);              
-              } else if (prd.getType().equals(IProxyData.HTTPS_PROXY_TYPE)) {                
+                System.setProperty("http.proxyPassword", proxyPass);
+              } else if (prd.getType().equals(IProxyData.HTTPS_PROXY_TYPE)) {
                 System.setProperty("https.proxyUser", proxyUser);
-                System.setProperty("https.proxyPassword", proxyPass);                              
+                System.setProperty("https.proxyPassword", proxyPass);
               }
 
             }
@@ -128,6 +133,22 @@ public class CloudBeesCorePlugin extends Plugin {
 
         }
       }
+    }
+
+    // no proxy configured, clear from the props!
+    if (!proxySet) {
+      System.clearProperty("bees.api.proxy.host");
+      System.clearProperty("bees.api.proxy.port");
+
+      System.clearProperty("http.proxyHost");
+      System.clearProperty("http.proxyPort");
+      System.clearProperty("http.proxyUser");
+      System.clearProperty("http.proxyPassword");
+
+      System.clearProperty("https.proxyHost");
+      System.clearProperty("https.proxyPort");
+      System.clearProperty("https.proxyUser");
+      System.clearProperty("https.proxyPassword");
     }
 
   }
