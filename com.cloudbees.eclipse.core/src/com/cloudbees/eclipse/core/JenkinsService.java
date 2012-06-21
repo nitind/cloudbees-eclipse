@@ -534,7 +534,7 @@ public class JenkinsService {
       
       monitor.setTaskName("Deleting Jenkins job...");
 
-      retrieveWithLogin(httpClient, post, null, false, new SubProgressMonitor(monitor, 10));
+      retrieveWithLogin(httpClient, post, null, true, new SubProgressMonitor(monitor, 10));
 
     } catch (Exception e) {
       throw new CloudBeesException("Failed to delete Jenkins job", e);
