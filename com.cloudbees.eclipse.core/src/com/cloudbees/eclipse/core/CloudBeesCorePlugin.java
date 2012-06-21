@@ -94,7 +94,7 @@ public class CloudBeesCorePlugin extends Plugin {
             String proxyUser = prd.getUserId();
             String proxyPass = prd.getPassword();
 
-            if (proxyHost != null || proxyHost.length() == 0) {
+            if (proxyHost == null || proxyHost.length() == 0) {
               continue; // ignore empty proxy conf
             }
 
