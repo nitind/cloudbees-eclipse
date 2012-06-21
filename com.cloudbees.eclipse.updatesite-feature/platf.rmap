@@ -10,7 +10,7 @@
 		</provider>
 -->
 		<provider readerType="p2" componentTypes="osgi.bundle,eclipse.feature" mutable="false" source="false">
-			<uri format="http://download.eclipse.org/releases/helios?importType=binary"/>
+			<uri format="http://download.eclipse.org/releases/helios"/>
 		</provider>
 		
 	</searchPath>
