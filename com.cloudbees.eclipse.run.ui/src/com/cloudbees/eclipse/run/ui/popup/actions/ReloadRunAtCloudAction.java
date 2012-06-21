@@ -19,8 +19,8 @@ public class ReloadRunAtCloudAction extends CBTreeAction implements IObjectActio
 
   public ReloadRunAtCloudAction() {
     super();
-    setText("Reload RUN@cloud apps");
-    setToolTipText("Refresh RUN@cloud apps");
+    setText("Reload RUN@cloud apps@");
+    setToolTipText("Reload RUN@cloud apps");
     setImageDescriptor(CBRunUiActivator.getImageDescription(Images.CLOUDBEES_REFRESH));
   }
 
@@ -30,15 +30,14 @@ public class ReloadRunAtCloudAction extends CBTreeAction implements IObjectActio
   }
 
   private void reload() {
-    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job(
-        "Loading RUN@cloud apps") {
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading RUN@cloud apps") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
 
-          monitor.beginTask("Loading RUN@cloud apps", 100);
-          try {
-            CBRunCoreActivator.getPoller().fetchAndUpdate();
-            monitor.worked(75);
+        monitor.beginTask("Loading RUN@cloud apps", 100);
+        try {
+          CBRunCoreActivator.getPoller().fetchAndUpdate();
+          monitor.worked(75);
           CloudBeesUIPlugin.getDefault().fireApplicationInfoChanged();
           monitor.worked(25);
 
@@ -58,7 +57,7 @@ public class ReloadRunAtCloudAction extends CBTreeAction implements IObjectActio
 
     job.setUser(true);
     job.schedule();
-      
+
   }
 
   @Override
