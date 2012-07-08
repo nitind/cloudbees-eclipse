@@ -15,7 +15,6 @@ import org.osgi.framework.BundleContext;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.Logger;
-import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 /**

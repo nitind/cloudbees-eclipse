@@ -18,4 +18,7 @@ public interface ICBTreeProvider {
 
   void setViewer(TreeViewer viewer);
 
+  String getId();
+  
+  
 }

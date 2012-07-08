@@ -9,7 +9,7 @@ import org.eclipse.swt.graphics.Image;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse.View;
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
@@ -57,22 +57,20 @@ public class InstanceLabelProvider extends LabelProvider implements IFontProvide
 
   @Override
   public Image getImage(final Object obj) {
-    if (obj instanceof FavoritesInstanceGroup) {
-      return CloudBeesDevUiPlugin.getImage(CBImages.IMG_VIEW);
-    } else if (obj instanceof InstanceGroup) {
+    if (obj instanceof InstanceGroup) {
       //return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.);
       if (((InstanceGroup) obj).isCloudHosted()) {
-        return CloudBeesDevUiPlugin.getImage(CBImages.IMG_FOLDER_HOSTED);
+        return CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_FOLDER_HOSTED);
         //imgFolderHosted;
       }
-      return CloudBeesDevUiPlugin.getImage(CBImages.IMG_FOLDER_LOCAL);
+      return CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_FOLDER_LOCAL);
     }
 
     if (obj instanceof JenkinsInstanceResponse) {
-      return CloudBeesDevUiPlugin.getImage(CBImages.IMG_INSTANCE);
+      return CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_INSTANCE);
     }
     if (obj instanceof JenkinsInstanceResponse.View) {
-      return CloudBeesDevUiPlugin.getImage(CBImages.IMG_VIEW);
+      return CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_VIEW);
     }
 
     return null;

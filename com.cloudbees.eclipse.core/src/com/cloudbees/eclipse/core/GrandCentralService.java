@@ -1,12 +1,14 @@
 package com.cloudbees.eclipse.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
@@ -36,18 +38,22 @@ public class GrandCentralService {
   // private static final String BASE_URL =
   // "https://grandcentral.cloudbees.com/api/";
   private static final String BASE_URL = "https://grandcentral." + HOST + "/api/";
-  
+
   public static final String GC_BASE_URL = "https://grandcentral." + HOST;
 
   private final ForgeSyncService forgeSyncService;
 
-  private String email;
-  private String password;
+  private String email = null;
+  private String password = null;
 
-  public GrandCentralService(final String email, final String password) {
+  private String activeAccount = null;
+
+  private String[] accountsCache = null;
+
+  //private boolean accountSelectionActive = false;
+
+  public GrandCentralService() {
     this.forgeSyncService = new ForgeSyncService();
-    this.email = email;
-    this.password = password;
   }
 
   public ForgeSyncService getForgeSyncService() {
@@ -57,6 +63,8 @@ public class GrandCentralService {
   public void setAuthInfo(final String email, final String password) {
     this.email = email;
     this.password = password;
+    activeAccount = null;
+    accountsCache=null;
   }
 
   /**
@@ -95,7 +103,7 @@ public class GrandCentralService {
   }
 
   @Deprecated
-  public String getCachedPrimaryUser(final boolean refresh) throws CloudBeesException {
+  private String getCachedPrimaryUser(final boolean refresh) throws CloudBeesException {
     String user = null;
     if (refresh || user == null) {
       user = getPrimaryAccount(null);
@@ -140,12 +148,12 @@ public class GrandCentralService {
 
   private CloudBeesException cbthrow(String errMsg, Exception e) {
     String extra = "";
-    if (e.getCause()!=null) {
+    if (e.getCause() != null) {
       extra = e.getCause().getMessage();
     }
     return new CloudBeesException("Failed to get account services info."
-        + (errMsg.length() > 0 ? "\n" + errMsg + "; "+extra : "\n"+extra), e);
-    
+        + (errMsg.length() > 0 ? "\n" + errMsg + "; " + extra : "\n" + extra), e);
+
   }
 
   /*
@@ -257,19 +265,16 @@ public class GrandCentralService {
     StringBuffer errMsg = new StringBuffer();
 
     try {
-
-      String[] accounts = getAccounts(monitor);
-
-      List<JenkinsInstance> instances = new ArrayList<JenkinsInstance>();
-
-      for (String account : accounts) {
-
-        String url = "https://" + account + ".ci." + HOST;
-
-        JenkinsInstance inst = new JenkinsInstance(account, url, this.email, this.password, true, true);
-
-        instances.add(inst);
+      
+      String account = getActiveAccountName();
+      if (account==null) {
+        return new ArrayList<JenkinsInstance>();
       }
+      
+      List<JenkinsInstance> instances = new ArrayList<JenkinsInstance>();
+      String url = "https://" + account + ".ci." + HOST;
+      JenkinsInstance inst = new JenkinsInstance(account, url, this.email, this.password, true, true);
+      instances.add(inst);
 
       return instances;
 
@@ -279,6 +284,50 @@ public class GrandCentralService {
     }
   }
 
+  /**
+   * Returns currently active account. The contract is that if it returns <code>null</code> then it doesn't exist.
+   * 
+   * @param monitor
+   * @return
+   */
+  public String getActiveAccountName() {
+      return activeAccount;
+
+/*    if (accountSelectionActive) {
+      monitor.beginTask("Waiting for the account selection to finish", 1000);
+
+      long wait = 0;      
+      //Wait max for 10sec
+      while (!accountSelectionActive && wait <= 100) {
+        try {
+          Thread.currentThread().wait(100);
+        } catch (InterruptedException e) {
+          monitor.setCanceled(true);
+          break;
+        }
+        wait++;
+        monitor.worked(10);
+      }
+
+    }
+
+    if (activeAccount != null) {
+      return activeAccount;
+    }
+*/    
+    //throw new CloudBeesException("Active account not selected!");
+
+  }
+
+  /**
+   * Returns all accounts for the user. IMPORTANT! All user functionality should work only with the active/selected user
+   * account. Make sure UX does not depend on the whole list of accounts. To get the active account use
+   * #getActiveAccounName()
+   * 
+   * @param monitor
+   * @return
+   * @throws CloudBeesException
+   */
   public String[] getAccounts(final IProgressMonitor monitor) throws CloudBeesException {
 
     if (!hasAuthInfo()) {
@@ -312,16 +361,20 @@ public class GrandCentralService {
       }
       Utils.checkResponseCode(resp);
 
+      Arrays.sort(services.accounts);
+
+      accountsCache = services.accounts;
+      
       return services.accounts;
 
-    } catch (Exception e) {      
+    } catch (Exception e) {
       throw cbthrow(errMsg.toString(), e);
     }
 
   }
 
   @Deprecated
-  public String getPrimaryAccount(final IProgressMonitor monitor) throws CloudBeesException {
+  private String getPrimaryAccount(final IProgressMonitor monitor) throws CloudBeesException {
 
     if (!hasAuthInfo()) {
       return "";
@@ -379,26 +432,44 @@ public class GrandCentralService {
   public List<ForgeInstance> getForgeRepos(final IProgressMonitor monitor) throws CloudBeesException {
     List<ForgeInstance> result = new ArrayList<ForgeInstance>();
 
-    String[] accounts = getAccounts(monitor);
+    String acc = getActiveAccountName();
 
-    for (String acc : accounts) {
-      AccountServiceStatusResponse services = loadAccountServices(acc);
-      Repo[] repos = services.services.forge.repos;
-      for (Repo forge : repos) {
-        ForgeInstance.TYPE type = null; //ForgeInstance.TYPE.GIT;
-        for (ForgeInstance.TYPE t : ForgeInstance.TYPE.values()) {
-          if (t.name().equalsIgnoreCase(forge.type)) {
-            type = t;
-            break;
-          }
-        }        
-        if (type!=null) {
-          result.add(new ForgeInstance(forge.url, services.username, this.password, type));
+    if (acc==null) {
+      return result;
+    }
+    
+    AccountServiceStatusResponse services = loadAccountServices(acc);
+    Repo[] repos = services.services.forge.repos;
+    for (Repo forge : repos) {
+      ForgeInstance.TYPE type = null; //ForgeInstance.TYPE.GIT;
+      for (ForgeInstance.TYPE t : ForgeInstance.TYPE.values()) {
+        if (t.name().equalsIgnoreCase(forge.type)) {
+          type = t;
+          break;
         }
+      }
+      if (type != null) {
+        result.add(new ForgeInstance(forge.url, services.username, this.password, type));
       }
     }
 
     return result;
   }
 
+  public String getEmail() {
+    return email;
+  }
+
+  public void setActiveAccount(String newname) {
+    activeAccount = newname;
+  }
+
+  public String[] getCachedAccounts() {    
+    return accountsCache;
+  }
+
+/*  public void setAccountSelectionActive(boolean b) {
+    accountSelectionActive = b;
+  }
+*/
 }

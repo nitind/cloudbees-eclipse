@@ -7,7 +7,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 
-public interface JenkinsChangeListener {
+public interface CBRemoteChangeListener {
 
   void activeJobViewChanged(JenkinsJobsResponse newView);
 
@@ -16,4 +16,7 @@ public interface JenkinsChangeListener {
   void activeJobHistoryChanged(JenkinsJobAndBuildsResponse newView);
 
   void forgeChanged(List<ForgeInstance> instances);
+  
+  void activeAccountChanged(String email, String newAccountName);
+  
 }

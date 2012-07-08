@@ -13,12 +13,12 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 public class InstanceContentProvider implements IStructuredContentProvider, ITreeContentProvider {
   private InstanceGroup jenkinsGroup = new InstanceGroup.OnPremiseJenkinsInstanceGroup("On-premise Jenkins", false);
   private InstanceGroup cloudGroup = new InstanceGroup.DevAtCloudJenkinsInstanceGroup("DEV@cloud Jenkins", true);
-  private InstanceGroup favoritesGroup = new FavoritesInstanceGroup("Favorite Jenkins Jobs", false);
+  //private InstanceGroup favoritesGroup = new FavoritesInstanceGroup("Favorite Jenkins Jobs", false);
 
   public InstanceContentProvider() {
     this.jenkinsGroup.setLoading(true);
     this.cloudGroup.setLoading(true);
-    this.favoritesGroup.setLoading(false);
+    //this.favoritesGroup.setLoading(false);
   }
 
   @Override
@@ -57,7 +57,6 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
   public void dispose() {
     this.jenkinsGroup = null;
     this.cloudGroup = null;
-    this.favoritesGroup = null;
   }
 
   @Override
@@ -76,9 +75,16 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
   @Override
   public Object[] getChildren(final Object parent) {
     if (parent instanceof IViewSite) {
-      return new InstanceGroup[] { this.cloudGroup, this.jenkinsGroup, this.favoritesGroup };
+      return new InstanceGroup[] { this.cloudGroup, this.jenkinsGroup};
     } else if (parent instanceof InstanceGroup) {
-      return ((InstanceGroup) parent).getChildren();
+      InstanceGroup ig = ((InstanceGroup) parent);
+      JenkinsInstanceResponse[] ret = ig.getChildren();
+      if (ig.isCloudHosted() && ret!=null && ret.length==1) {
+        //if hosted at cloud then only one jenkins can be enabled at once
+        JenkinsInstanceResponse resp = (JenkinsInstanceResponse) ret[0];
+        return resp.views;
+      }
+      return ig.getChildren();
     } else if (parent instanceof JenkinsInstanceResponse) {
       JenkinsInstanceResponse resp = (JenkinsInstanceResponse) parent;
       return resp.views;

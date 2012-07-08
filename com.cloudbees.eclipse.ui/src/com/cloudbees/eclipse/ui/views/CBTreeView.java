@@ -1,6 +1,8 @@
 package com.cloudbees.eclipse.ui.views;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -19,20 +21,54 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.part.ViewPart;
 
+import com.cloudbees.eclipse.core.CBRemoteChangeAdapter;
+import com.cloudbees.eclipse.core.CBRemoteChangeListener;
+import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
+import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
+import com.cloudbees.eclipse.ui.internal.ActiveAccountContributionItem;
+import com.cloudbees.eclipse.ui.internal.ConfigureSshKeysAction;
+import com.cloudbees.eclipse.ui.internal.action.ConfigureCloudBeesAction;
+import com.cloudbees.eclipse.ui.views.CBTreeSeparator.SeparatorLocation;
 
 public class CBTreeView extends ViewPart {
 
-  public static final String ID = "com.cloudbees.eclipse.ui.views";
+  public static final String ID = "com.cloudbees.eclipse.ui.views.CBTreeView";
 
   private TreeViewer viewer;
 
   private ICBTreeProvider[] providers;
+  
+  private CBTreeAction configureSshAction = new ConfigureSshKeysAction();
+  //private CBTreeAction configureAccountAction = new ConfigureCloudBeesAction();
 
+  
+  private CBRemoteChangeListener changeListener = new CBRemoteChangeAdapter() {
+    public void activeAccountChanged(final String email, final String newAccountName) {
+      
+      Display.getDefault().asyncExec(new Runnable() {
+        public void run() {
+          if (email==null) {
+            CBTreeView.this.setContentDescription(" ");
+            return;
+          }
+          if (newAccountName!=null && newAccountName.length()>0) {
+            CBTreeView.this.setContentDescription(" "+email+" ("+newAccountName+")");
+            return;
+          }
+          CBTreeView.this.setContentDescription(" "+email);
+        }     
+      });
+      
+    }
+  };
+  
   class NameSorter extends ViewerSorter {
 
     @Override
@@ -47,7 +83,22 @@ public class CBTreeView extends ViewPart {
   }
 
   public CBTreeView() {
+    super();
 
+    GrandCentralService gcs;
+    try {
+      gcs = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+      String post ="";
+      if (gcs.getActiveAccountName()!=null) {
+        post=" ("+gcs.getActiveAccountName()+")";
+      }
+      
+      setContentDescription(" "+gcs.getEmail()+post);
+      
+    } catch (CloudBeesException e1) {
+      //Ignore for now
+    }
+        
     IExtension[] extensions = Platform.getExtensionRegistry()
         .getExtensionPoint(CloudBeesUIPlugin.PLUGIN_ID, "cbTreeProvider").getExtensions();
 
@@ -66,6 +117,14 @@ public class CBTreeView extends ViewPart {
     }
 
     this.providers = prs.toArray(new ICBTreeProvider[prs.size()]);
+    Arrays.sort(this.providers, new Comparator<ICBTreeProvider>() {
+
+      public int compare(ICBTreeProvider o1, ICBTreeProvider o2) {
+        return o1.getId().compareTo(o2.getId());
+      }});
+    
+    CloudBeesUIPlugin.getDefault().addCBRemoteChangeListener(changeListener);
+    
   }
 
   public ICBTreeProvider[] getProviders() {
@@ -137,12 +196,23 @@ public class CBTreeView extends ViewPart {
         }
       }
     }
+    
+    pullDownMenu.add(new CBTreeSeparator(SeparatorLocation.PULL_DOWN));
+    pullDownMenu.add(this.configureSshAction);
+    pullDownMenu.add(new CBTreeSeparator(SeparatorLocation.PULL_DOWN));
+    pullDownMenu.add(new ActiveAccountContributionItem(true));
+    //pullDownMenu.add(this.configureAccountAction);
+    
+    
+    
 
     Menu menu = popupMenu.createContextMenu(this.viewer.getTree());
     this.viewer.getTree().setMenu(menu);
     getSite().registerContextMenu(popupMenu, this.viewer);
 
-    CloudBeesUIPlugin.getDefault().reloadAllJenkins(false);
+    //Not loading here anymore as there is now improved loading workflow
+    //CloudBeesUIPlugin.getDefault().reloadAllJenkins(false);
+    
   }
 
   @Override
@@ -157,7 +227,10 @@ public class CBTreeView extends ViewPart {
     }
     this.providers = null;
 
+    CloudBeesUIPlugin.getDefault().removeCBRemoteChangeListener(changeListener);
+    
     super.dispose();
   }
+
 
 }

@@ -35,7 +35,6 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
 
   private Text customIdText;
   private Button useCustomId;
-  private AccountSelecionComposite accountSelector;
   private WarSelecionComposite warSelector;
 
   @Override
@@ -51,9 +50,6 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
         configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
       }
     }
-
-    configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID,
-        this.accountSelector.getAccountName());
 
     configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, this.warSelector.getWarPath());
   }
@@ -72,9 +68,6 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
       this.useCustomId.setSelection(!"".equals(id));
       this.customIdText.setEnabled(!"".equals(id));
       this.customIdText.setText(id);
-
-      String account = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID, "");
-      this.accountSelector.setAccountName(account);
 
       String warPath = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, "");
       this.warSelector.setWarPath(warPath);
@@ -116,14 +109,6 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
     this.projectSelector.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
     setControl(this.main);
-
-    this.accountSelector = new AccountSelecionComposite(this.main) {
-      @Override
-      public void handleUpdate() {
-        validateConfigurationTab();
-      }
-    };
-    this.accountSelector.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
     this.warSelector = new WarSelecionComposite(this.main) {
       @Override
@@ -194,13 +179,6 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
       return false;
     }
 
-    IStatus accountStatus = this.accountSelector.validate();
-    if (!accountStatus.isOK()) {
-      setErrorMessage(accountStatus.getMessage());
-      updateLaunchConfigurationDialog();
-      return false;
-    }
-
     IStatus warStatus = this.warSelector.validate();
     if (!warStatus.isOK()) {
       setErrorMessage(warStatus.getMessage());
@@ -223,7 +201,7 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
 
   @Override
   public boolean isValid(final ILaunchConfiguration launchConfig) {
-    return this.projectSelector.validate().getSeverity() == IStatus.OK && this.accountSelector.validate().isOK();
+    return this.projectSelector.validate().getSeverity() == IStatus.OK;
   }
 
   @Override

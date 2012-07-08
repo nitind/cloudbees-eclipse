@@ -34,7 +34,7 @@ import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance.STATUS;
 import com.cloudbees.eclipse.core.forge.api.ForgeSyncEnabler;
 import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 
 public class ForgeSyncConfirmation extends TitleAreaDialog {
@@ -104,7 +104,7 @@ public class ForgeSyncConfirmation extends TitleAreaDialog {
 
     setTitle("Configure Forge Repositories");
     setMessage("Please check repositories to synchronize");
-    setTitleImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_CB_ICON_LARGE_64x66));
+    setTitleImage(CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_CB_ICON_LARGE_64x66));
 
     Composite container = new Composite(dialogArea, SWT.NONE);
     GridLayout layout = new GridLayout();

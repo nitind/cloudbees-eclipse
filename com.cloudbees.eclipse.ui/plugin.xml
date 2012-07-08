@@ -229,15 +229,18 @@
              id="com.cloudbees.eclipse.run.ui.commands.cloudBeesAccount"
              name="Configure Account...">
        </command>
+       
        <command
              categoryId="com.cloudbees.eclipse.ui.commands.category"
              defaultHandler="com.cloudbees.eclipse.ui.internal.commands.ShowCloudBeesViewHandler"
-             id="com.cloudbees.eclipse.ui.commands.showCloudBeesView"
+             id="com.cloudbees.eclipse.ui.commands.showCloudBeesView"             
              name="CloudBees View">
        </command>
+
     </extension>
     <extension
           point="org.eclipse.ui.menus">
+       
        <menuContribution
              allPopups="false"
              locationURI="toolbar:org.eclipse.ui.main.toolbar">
@@ -252,28 +255,12 @@
              </command>
           </toolbar>
        </menuContribution>
-       <menuContribution
-             allPopups="false"
-             locationURI="menu:com.cloudbees.eclipse.ui.commands.referenceToMenu">
-          <command
-                commandId="com.cloudbees.eclipse.run.ui.commands.cloudBeesAccount"
-                label="Configure Account..."
-                mnemonic="C"
-                style="push"
-                tooltip="Manage CloudBees Eclipse Toolkit settings">
-          </command>
-       </menuContribution>
-       <menuContribution
-             allPopups="false"
-             locationURI="menu:com.cloudbees.eclipse.ui.commands.referenceToMenu">
-          <command
-                commandId="com.cloudbees.eclipse.ui.commands.showCloudBeesView"
-                icon="icons/16x16/cb_plain.png"
-                label="CloudBees View"
-                mnemonic="V"
-                style="push"
-                tooltip="Open CloudBees View">
-          </command>
-       </menuContribution>
+    
+   		<menuContribution locationURI="menu:com.cloudbees.eclipse.ui.commands.referenceToMenu">
+   		<dynamic
+           id="com.cloudbees.eclipse.ui.activeAccount" class="com.cloudbees.eclipse.ui.internal.ActiveAccountContributionItem">           
+   		</dynamic>
+		</menuContribution>       
+       
     </extension>	
 </plugin>

@@ -4,7 +4,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.swt.SWT;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
@@ -18,12 +18,12 @@ public class ReloadBuildHistoryAction extends Action {
     if (reload) {
       setText("Reload build history");
       setToolTipText("Reload build history");
-      setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_REFRESH));
+      setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_REFRESH));
       setAccelerator(SWT.F5);
     } else {
       setText("Open build history");
       setToolTipText("Open build history");
-      setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_BUILD_HISTORY));
+      setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_BUILD_HISTORY));
     }
 
     super.setEnabled(false);

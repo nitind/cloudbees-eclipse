@@ -19,7 +19,7 @@ import org.eclipse.ui.statushandlers.StatusManager;
 
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
 import com.cloudbees.eclipse.dev.core.junit.JUnitReportSupport;
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
@@ -29,8 +29,8 @@ public class OpenJunitViewAction extends BaseSelectionListenerAction {
     super("Show Test Results");
     setToolTipText("Show Test Results in JUnit View");
     if (CloudBeesDevUiPlugin.getDefault() != null && CloudBeesDevUiPlugin.getDefault().getImageRegistry() != null
-        && CBImages.IMG_JUNIT != null) {
-      setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_JUNIT));
+        && CBDEVImages.IMG_JUNIT != null) {
+      setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_JUNIT));
     }
   }
 

@@ -5,7 +5,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.views.CBTreeAction;
@@ -14,9 +14,9 @@ public class ReloadJenkinsInstancesAction extends CBTreeAction implements IObjec
 
   public ReloadJenkinsInstancesAction() {
     super();
-    setText("Refresh DEV@cloud Jenkins instances@");
-    setToolTipText("Refresh DEV@cloud Jenkins instances");
-    setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_REFRESH));
+    setText("Reload DEV@cloud Jenkins instances@");
+    setToolTipText("Reload DEV@cloud Jenkins instances");
+    setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_REFRESH));
   }
 
   @Override

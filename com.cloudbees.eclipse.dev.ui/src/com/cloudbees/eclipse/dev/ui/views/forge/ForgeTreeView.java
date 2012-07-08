@@ -9,36 +9,32 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.PlatformUI;
 
+import com.cloudbees.eclipse.core.CBRemoteChangeAdapter;
+import com.cloudbees.eclipse.core.CBRemoteChangeListener;
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadForgeReposAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 import com.cloudbees.eclipse.ui.views.CBTreeAction;
 import com.cloudbees.eclipse.ui.views.CBTreeContributor;
-import com.cloudbees.eclipse.ui.views.CBTreeSeparator;
-import com.cloudbees.eclipse.ui.views.CBTreeSeparator.SeparatorLocation;
-import com.cloudbees.eclipse.ui.views.ICBTreeProvider;
+import com.cloudbees.eclipse.ui.views.CBTreeProvider;
 
 /**
  * View showing both Jenkins offline installations and JaaS Nectar instances
  * 
  * @author ahtik
  */
-public class ForgeTreeView implements IPropertyChangeListener, ICBTreeProvider {
+public class ForgeTreeView  extends CBTreeProvider implements IPropertyChangeListener {
 
-  public static final String ID = "com.cloudbees.eclipse.ui.views.instances.JenkinsTreeView";
+  public static final String ID = "zcom.cloudbees.eclipse.ui.views.instances.ForgeTreeView";
 
   protected ITreeContentProvider contentProvider = new ForgeContentProvider();
   protected ILabelProvider labelProvider = new ForgeLabelProvider();
 
   private TreeViewer viewer;
-  private JenkinsChangeListener jenkinsChangeListener;
+  private CBRemoteChangeListener jenkinsChangeListener;
 
   private CBTreeAction reloadForgeAction = new ReloadForgeReposAction();
 
@@ -48,15 +44,7 @@ public class ForgeTreeView implements IPropertyChangeListener, ICBTreeProvider {
     this.reloadForgeAction = new ReloadForgeReposAction();
     this.reloadForgeAction.setEnabled(forgeEnabled);
 
-    this.jenkinsChangeListener = new JenkinsChangeListener() {
-      @Override
-      public void activeJobViewChanged(final JenkinsJobsResponse newView) {
-      }
-
-      @Override
-      public void activeJobHistoryChanged(final JenkinsJobAndBuildsResponse newView) {
-      }
-
+    this.jenkinsChangeListener = new CBRemoteChangeAdapter() {
       @Override
       public void forgeChanged(final List<ForgeInstance> instances) {
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
@@ -66,13 +54,9 @@ public class ForgeTreeView implements IPropertyChangeListener, ICBTreeProvider {
           }
         });
       }
-
-      @Override
-      public void jenkinsChanged(final List<JenkinsInstanceResponse> instances) {
-      }
     };
 
-    CloudBeesUIPlugin.getDefault().addJenkinsChangeListener(this.jenkinsChangeListener);
+    CloudBeesUIPlugin.getDefault().addCBRemoteChangeListener(this.jenkinsChangeListener);
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
   }
 
@@ -98,7 +82,7 @@ public class ForgeTreeView implements IPropertyChangeListener, ICBTreeProvider {
   @Override
   public void dispose() {
     CloudBeesUIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
-    CloudBeesUIPlugin.getDefault().removeJenkinsChangeListener(this.jenkinsChangeListener);
+    CloudBeesUIPlugin.getDefault().removeCBRemoteChangeListener(this.jenkinsChangeListener);
     this.jenkinsChangeListener = null;
     this.contentProvider = null;
     this.labelProvider = null;
@@ -106,7 +90,7 @@ public class ForgeTreeView implements IPropertyChangeListener, ICBTreeProvider {
 
   @Override
   public CBTreeContributor[] getContributors() {
-    return new CBTreeContributor[] { new CBTreeSeparator(SeparatorLocation.PULL_DOWN), this.reloadForgeAction };
+    return new CBTreeContributor[] {  this.reloadForgeAction };
   }
 
   @Override
@@ -129,6 +113,11 @@ public class ForgeTreeView implements IPropertyChangeListener, ICBTreeProvider {
   @Override
   public boolean open(final Object el) {
     return false;
+  }
+
+  @Override
+  public String getId() {
+    return ID;
   }
 
 }

@@ -1,14 +1,22 @@
 package com.cloudbees.eclipse.run.ui.views;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IViewSite;
 
+import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.api.ApplicationListResponse;
+import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 final class AppContentProvider implements ITreeContentProvider {
 
-  AppGroup appGroup = new AppGroup("RUN@cloud Tomcat apps");
+  AppGroup appGroup = new AppGroup("RUN@cloud applications");
   ApplicationListResponse data;
 
   @Override
@@ -35,7 +43,25 @@ final class AppContentProvider implements ITreeContentProvider {
       return new Object[] { this.appGroup };
     }
     if (this.data != null && element instanceof AppGroup) {
-      return this.data.getApplications().toArray();
+      String activeAccount = null;
+      try {
+        activeAccount = CloudBeesUIPlugin.getDefault().getActiveAccountName(new NullProgressMonitor());
+      } catch (CloudBeesException e) {
+      }
+      if (activeAccount==null || activeAccount.length()==0) {
+        return new ApplicationInfo[0];
+      }
+      List<ApplicationInfo> arr = this.data.getApplications();
+      Iterator<ApplicationInfo> it = arr.iterator();
+      List<ApplicationInfo> resList = new ArrayList<ApplicationInfo>();
+      while (it.hasNext()) {
+        ApplicationInfo applicationInfo = (ApplicationInfo) it.next();
+        String id = applicationInfo.getId();
+        if (id!=null && id.startsWith(activeAccount+"/")) {
+          resList.add(applicationInfo);
+        }
+      }
+      return resList.toArray(new ApplicationInfo[0]);
       //return getAdapters(this.data.getApplications());
     }
 

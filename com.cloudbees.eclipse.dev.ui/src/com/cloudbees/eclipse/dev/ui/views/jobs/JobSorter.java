@@ -8,6 +8,8 @@ import com.cloudbees.eclipse.core.jenkins.api.HealthReport;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.JobViewGeneric;
+import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.View;
 
 public class JobSorter extends ViewerSorter {
 
@@ -30,8 +32,8 @@ public class JobSorter extends ViewerSorter {
   @Override
   public int compare(final Viewer viewer, final Object e1, final Object e2) {
 
-    JenkinsJobsResponse.Job j1 = (JenkinsJobsResponse.Job) e1;
-    JenkinsJobsResponse.Job j2 = (JenkinsJobsResponse.Job) e2;
+    JenkinsJobsResponse.JobViewGeneric j1 = (JenkinsJobsResponse.JobViewGeneric) e1;
+    JenkinsJobsResponse.JobViewGeneric j2 = (JenkinsJobsResponse.JobViewGeneric) e2;
 
     switch (this.sortCol) {
     case STATE:
@@ -41,16 +43,56 @@ public class JobSorter extends ViewerSorter {
       return rev() * compJob(j1, j2);
 
     case LAST_BUILD:
-      return rev() * compareBuildTimestamps(j1.lastBuild, j2.lastBuild);
+      if (j1 instanceof View && j2 instanceof View) {
+        return rev() * (j1.getName().compareTo(j2.getName()));
+      }
+      if (j1 instanceof View) {
+        return rev() * 1;
+      }
+      if (j2 instanceof View) {
+        return rev() * -1;
+      }
+
+      return rev() * compareBuildTimestamps(((Job)j1).lastBuild, ((Job)j2).lastBuild);
 
     case LAST_SUCCESS:
-      return rev() * compareBuildTimestamps(j1.lastSuccessfulBuild, j2.lastSuccessfulBuild);
+      if (j1 instanceof View && j2 instanceof View) {
+        return rev() * (j1.getName().compareTo(j2.getName()));
+      }
+      if (j1 instanceof View) {
+        return rev() * 1;
+      }
+      if (j2 instanceof View) {
+        return rev() * -1;
+      }
+
+      return rev() * compareBuildTimestamps(((Job)j1).lastSuccessfulBuild, ((Job)j2).lastSuccessfulBuild);
 
     case LAST_FAILURE:
-      return rev() * compareBuildTimestamps(j1.lastFailedBuild, j2.lastFailedBuild);
+      if (j1 instanceof View && j2 instanceof View) {
+        return rev() * (j1.getName().compareTo(j2.getName()));
+      }
+      if (j1 instanceof View) {
+        return rev() * 1;
+      }
+      if (j2 instanceof View) {
+        return rev() * -1;
+      }
+
+      return rev() * compareBuildTimestamps(((Job)j1).lastFailedBuild, ((Job)j2).lastFailedBuild);
 
     case BUILD_STABILITY:
-      return rev() * compareBuildStability(j1.healthReport, j2.healthReport);
+      if (j1 instanceof View && j2 instanceof View) {
+        return rev() * (j1.getName().compareTo(j2.getName()));
+      }
+      if (j1 instanceof View) {
+        return rev() * 1;
+      }
+      if (j2 instanceof View) {
+        return rev() * -1;
+      }
+
+      return rev() * compareBuildStability(((Job)j1).healthReport, ((Job)j2).healthReport);
     default:
       break;
     }
@@ -133,17 +175,17 @@ public class JobSorter extends ViewerSorter {
     return -1 * b1.timestamp.compareTo(b2.timestamp);
   }
 
-  private int compJob(final Job j1, final Job j2) {
+  private int compJob(final JobViewGeneric j1, final JobViewGeneric j2) {
     try {
-      return j1.getDisplayName().compareToIgnoreCase(j2.getDisplayName());
+      return j1.getName().compareToIgnoreCase(j2.getName());
     } catch (Exception e) {
       e.printStackTrace(); // TODO handle better
       return 0;
     }
   }
 
-  private int compState(final Job j1, final Job j2) {
-    int res = j1.color.compareTo(j2.color);
+  private int compState(final JobViewGeneric j1, final JobViewGeneric j2) {
+    int res = j1.getState().compareTo(j2.getState());
     if (res == 0) {
       return compJob(j1, j2);
     }

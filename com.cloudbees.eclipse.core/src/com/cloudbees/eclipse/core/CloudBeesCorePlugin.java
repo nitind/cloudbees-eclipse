@@ -48,7 +48,7 @@ public class CloudBeesCorePlugin extends Plugin {
   public void start(final BundleContext context) throws Exception {
     super.start(context);
     plugin = this;
-    this.gcService = new GrandCentralService(null, null);
+    this.gcService = new GrandCentralService();
     this.gcService.start();
 
     this.proxyServiceTracker = new ServiceTracker(getBundle().getBundleContext(), IProxyService.class.getName(), null);

@@ -65,7 +65,6 @@ public class JenkinsJobWizardPage extends WizardPage {
       protected void createComponents() {
         createInstanceChooser();
         createJobText();
-        addJenkinsInstancesToUI();
       }
 
       @Override

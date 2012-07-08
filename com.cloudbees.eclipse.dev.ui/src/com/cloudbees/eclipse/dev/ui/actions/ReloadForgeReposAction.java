@@ -6,7 +6,7 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.views.CBTreeAction;
@@ -15,9 +15,9 @@ public class ReloadForgeReposAction extends CBTreeAction implements IObjectActio
 
   public ReloadForgeReposAction() {
     super();
-    setText("Configure Forge repos...");
-    setToolTipText("Configure Forge repositories locally");
-    setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_REFRESH));
+    setText("Reload Forge repos...");
+    setToolTipText("Reload Forge repositories");
+    setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_REFRESH));
   }
 
   @Override

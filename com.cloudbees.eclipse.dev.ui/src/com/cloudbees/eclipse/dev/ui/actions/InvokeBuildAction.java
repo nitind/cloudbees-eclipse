@@ -13,7 +13,7 @@ import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
@@ -24,7 +24,7 @@ public class InvokeBuildAction extends Action {
   public InvokeBuildAction() {
     super("Run a new build", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS); //$NON-NLS-1$
     setToolTipText("Run a new build for this job"); //TODO i18n
-    setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_RUN));
+    setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_RUN));
     super.setEnabled(false);
   }
 

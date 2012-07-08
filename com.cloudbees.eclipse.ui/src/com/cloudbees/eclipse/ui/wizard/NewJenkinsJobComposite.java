@@ -1,15 +1,11 @@
 package com.cloudbees.eclipse.ui.wizard;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -19,12 +15,13 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
+import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
 
@@ -32,24 +29,21 @@ public abstract class NewJenkinsJobComposite extends Composite {
 
   private static final String GROUP_LABEL = "Jenkins";
   private static final String JENKINS_JOB_CHECK_LABEL = "New Jenkins job";
-  private static final String JENKINS_INSTANCE_LABEL = "Jenkins instance:";
   private static final String JOB_NAME_LABEL = "Job Name:";
 
   public static final String ERR_JOB_NAME = "Please provide a job name";
-  public static final String ERR_JENKINS_INSTANCE = "Please provide a Jenkins instance";
+  public static final String ERR_JENKINS_INSTANCE = "Jenkins service not enabled for this account.";
   public static final String ERR_DUPLICATE_JOB_NAME = "Please specify another job name to avoid overriding an existing job configuration";
 
-  private JenkinsInstance[] jenkinsInstancesArray;
-  private JenkinsInstance jenkinsInstance;
+  //private JenkinsInstance jenkinsInstance;
   private final Map<String, List<Job>> jobs;
 
   private Button makeJobCheck;
   private Label jenkinsInstanceLabel;
-  private Combo jenkinsInstancesCombo;
-  private ComboViewer jenkinsComboViewer;
   private Label jobNameLabel;
   private Text jobNameText;
   private final Group group;
+  private JenkinsInstance jenkinsInstance;
 
   public NewJenkinsJobComposite(Composite parent) {
     super(parent, SWT.NONE);
@@ -86,6 +80,20 @@ public abstract class NewJenkinsJobComposite extends Composite {
   }
 
   public JenkinsInstance getJenkinsInstance() {
+    if (jenkinsInstance == null) {
+      try {
+        List<JenkinsInstance> instances = CloudBeesCorePlugin.getDefault().getGrandCentralService()
+            .loadDevAtCloudInstances(new NullProgressMonitor());
+        if (instances != null) {
+          Iterator<JenkinsInstance> it = instances.iterator();
+          if (it.hasNext()) {
+            jenkinsInstance = it.next();
+          }
+        }
+      } catch (CloudBeesException e) {
+        // safetoignore
+      }
+    }
     return this.jenkinsInstance;
   }
 
@@ -119,31 +127,10 @@ public abstract class NewJenkinsJobComposite extends Composite {
     GridData data = new GridData();
     data.verticalAlignment = SWT.CENTER;
 
-    this.jenkinsInstanceLabel = new Label(this.group, SWT.NULL);
-    this.jenkinsInstanceLabel.setLayoutData(data);
-    this.jenkinsInstanceLabel.setText(JENKINS_INSTANCE_LABEL);
-    this.jenkinsInstanceLabel.setEnabled(this.makeJobCheck == null);
-
     data = new GridData();
     data.grabExcessHorizontalSpace = true;
     data.horizontalAlignment = SWT.FILL;
 
-    this.jenkinsInstancesCombo = new Combo(this.group, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
-    this.jenkinsInstancesCombo.setLayoutData(data);
-    this.jenkinsInstancesCombo.setEnabled(this.makeJobCheck == null);
-    this.jenkinsComboViewer = new ComboViewer(this.jenkinsInstancesCombo);
-    this.jenkinsComboViewer.setLabelProvider(new JenkinsInstanceLabelProvider());
-    this.jenkinsComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-
-      public void selectionChanged(SelectionChangedEvent event) {
-        ISelection selection = NewJenkinsJobComposite.this.jenkinsComboViewer.getSelection();
-        if (selection instanceof StructuredSelection) {
-          StructuredSelection structSelection = (StructuredSelection) selection;
-          NewJenkinsJobComposite.this.jenkinsInstance = (JenkinsInstance) structSelection.getFirstElement();
-        }
-        validate();
-      }
-    });
   }
 
   protected void createJobText() {
@@ -178,11 +165,6 @@ public abstract class NewJenkinsJobComposite extends Composite {
 
   protected abstract List<Job> loadJobs(JenkinsInstance instance);
 
-  protected void addJenkinsInstancesToUI() {
-    NewJenkinsJobComposite.this.jenkinsInstancesArray = loadJenkinsInstances();
-    NewJenkinsJobComposite.this.jenkinsComboViewer.add(NewJenkinsJobComposite.this.jenkinsInstancesArray);
-  }
-
   private class MakeJenkinsJobSelectionListener implements SelectionListener {
 
     public void widgetSelected(SelectionEvent e) {
@@ -195,33 +177,11 @@ public abstract class NewJenkinsJobComposite extends Composite {
 
     private void handleEvent() {
       boolean selected = isMakeNewJob();
-      if (selected && NewJenkinsJobComposite.this.jenkinsInstancesArray == null) {
-        addJenkinsInstancesToUI();
-      }
       NewJenkinsJobComposite.this.jobNameText.setEnabled(selected);
-      NewJenkinsJobComposite.this.jenkinsInstancesCombo.setEnabled(selected);
       NewJenkinsJobComposite.this.jenkinsInstanceLabel.setEnabled(selected);
       NewJenkinsJobComposite.this.jobNameLabel.setEnabled(selected);
       validate();
     }
   }
 
-  private class JenkinsInstanceLabelProvider extends LabelProvider {
-
-    @Override
-    public String getText(Object element) {
-      if (element instanceof JenkinsInstance) {
-        JenkinsInstance instance = (JenkinsInstance) element;
-
-        if (instance.label != null && instance.label.length() > 0) {
-          return instance.label;
-        }
-
-        return instance.url;
-      }
-
-      return super.getText(element);
-    }
-
-  }
 }

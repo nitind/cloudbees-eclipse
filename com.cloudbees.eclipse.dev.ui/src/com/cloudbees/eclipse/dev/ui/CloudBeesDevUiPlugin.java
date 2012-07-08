@@ -23,9 +23,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import com.cloudbees.eclipse.core.CBRemoteChangeAdapter;
+import com.cloudbees.eclipse.core.CBRemoteChangeListener;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
@@ -37,8 +38,6 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
-import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
-import com.cloudbees.eclipse.dev.ui.utils.FavoritesUtils;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildEditorInput;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildHistoryView;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildPart;
@@ -53,62 +52,16 @@ import com.cloudbees.eclipse.ui.PreferenceConstants;
  */
 public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
-  private final class FavoritesTracker extends Thread {
-    private static final int POLL_DELAY = 60 * 1000;
-    JenkinsJobsResponse previous = null;
-    private boolean halted = false;
+  private CBRemoteChangeListener remoteChangeListener = new CBRemoteChangeAdapter() {
 
-    public FavoritesTracker() {
-      super("Favorites Tracker");
-    }
-
-    @Override
-    public void run() {
-      while (!this.halted) {
-        try {
-          Thread.sleep(POLL_DELAY);
-          JenkinsJobsResponse favoritesResponse = FavoritesUtils.getFavoritesResponse(new NullProgressMonitor());
-
-          if (this.previous != null) {
-            for (Job j : this.previous.jobs) {
-              checkJobsForNewBuild(j, favoritesResponse.jobs);
-            }
-          }
-
-          this.previous = favoritesResponse;
-
-        } catch (CloudBeesException e) {
-          CloudBeesDevUiPlugin.this.logger.error(e);
-        } catch (InterruptedException e) {
-          this.halted = true;
-        }
+    public void activeAccountChanged(String email, String newAccountName) {
+      try {
+        CloudBeesDevUiPlugin.this.reloadForgeRepos(false);
+      } catch (CloudBeesException e) {
+        // safe to ignore.
       }
     }
-
-    private void checkJobsForNewBuild(final Job j, final Job[] newJobs) {
-      for (final Job q : newJobs) {
-        if (q.url.equals(j.url)) {
-          showAlertIfHasNewBuild(j, q);
-        }
-      }
-    }
-
-    private void showAlertIfHasNewBuild(final Job j, final Job q) {
-      if (q.lastBuild != null && (j.lastBuild == null || q.lastBuild.number > j.lastBuild.number)) {
-        Display.getDefault().syncExec(new Runnable() {
-
-          @Override
-          public void run() {
-            FavoritesUtils.showNotification(q);
-          }
-        });
-      }
-    }
-
-    public void halt() {
-      this.halted = true;
-    }
-  }
+  };
 
   public static final String PLUGIN_ID = "com.cloudbees.eclipse.dev.ui"; //$NON-NLS-1$
   private static CloudBeesDevUiPlugin plugin;
@@ -116,14 +69,12 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
   private JobConsoleManager jobConsoleManager;
 
   private Logger logger;
-  private FavoritesTracker favoritesTracker;
 
   /**
    * The constructor
    */
   public CloudBeesDevUiPlugin() {
-    CloudBeesUIPlugin.getDefault().getAllJenkinsServices()
-        .add(new JenkinsService(new JenkinsInstance("Favorite jobs", FavoritesUtils.FAVORITES)));
+
   }
 
   /*
@@ -136,8 +87,9 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     CloudBeesDevUiPlugin.plugin = this;
     this.logger = new Logger(getLog());
     reloadForgeRepos(false);
-    this.favoritesTracker = new FavoritesTracker();
-    this.favoritesTracker.start();
+
+    CloudBeesUIPlugin.getDefault().addCBRemoteChangeListener(this.remoteChangeListener);
+
   }
 
   /*
@@ -152,13 +104,15 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
       this.jobConsoleManager.unregister();
       this.jobConsoleManager = null;
     }
-    this.favoritesTracker.halt();
+
+    CloudBeesUIPlugin.getDefault().removeCBRemoteChangeListener(this.remoteChangeListener);
+
     super.stop(context);
   }
 
   /**
    * Returns the shared instance
-   *
+   * 
    * @return the shared instance
    */
   public static CloudBeesDevUiPlugin getDefault() {
@@ -181,96 +135,99 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
   protected void initializeImageRegistry(final ImageRegistry reg) {
     super.initializeImageRegistry(reg);
 
-    reg.put(CBImages.IMG_CONSOLE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/monitor_obj.png")));
-    reg.put(CBImages.IMG_REFRESH, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/refresh.png")));
+    reg.put(CBDEVImages.IMG_CONSOLE,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/monitor_obj.png")));
+    reg.put(CBDEVImages.IMG_REFRESH, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/refresh.png")));
 
-    reg.put(CBImages.IMG_BROWSER,
+    reg.put(CBDEVImages.IMG_BROWSER,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/internal_browser.gif")));
 
-    reg.put(CBImages.IMG_RUN, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/lrun_obj.png")));
-    reg.put(CBImages.IMG_BUILD_HISTORY,
+    reg.put(CBDEVImages.IMG_RUN, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/lrun_obj.png")));
+    reg.put(CBDEVImages.IMG_BUILD_HISTORY,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/history_view.gif")));
-    reg.put(CBImages.IMG_DEPLOY,
+    reg.put(CBDEVImages.IMG_DEPLOY,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/clock.gif")));
 
-    reg.put(CBImages.IMG_FOLDER_HOSTED,
+    reg.put(CBDEVImages.IMG_FOLDER_HOSTED,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_cb.png")));
-    reg.put(CBImages.IMG_FOLDER_LOCAL,
+    reg.put(CBDEVImages.IMG_FOLDER_LOCAL,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_run_plain.png")));
-    reg.put(CBImages.IMG_INSTANCE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/jenkins.png")));
+    reg.put(CBDEVImages.IMG_INSTANCE,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/jenkins.png")));
 
-    reg.put(CBImages.IMG_FOLDER_FORGE,
+    reg.put(CBDEVImages.IMG_FOLDER_FORGE,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_cb.png")));
-    reg.put(CBImages.IMG_INSTANCE_FORGE_GIT,
+    reg.put(CBDEVImages.IMG_INSTANCE_FORGE_GIT,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/scm_git.png")));
-    reg.put(CBImages.IMG_INSTANCE_FORGE_SVN,
+    reg.put(CBDEVImages.IMG_INSTANCE_FORGE_SVN,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/scm_svn.png")));
 
-    reg.put(CBImages.IMG_VIEW,
+    reg.put(CBDEVImages.IMG_VIEW,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_big.png")));
     //reg.put(CBImages.IMG_VIEW, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/det_pane_hide.gif")));
 
-    reg.put(CBImages.IMG_FILE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/file_obj.gif")));
+    reg.put(CBDEVImages.IMG_FILE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/file_obj.gif")));
 
-    reg.put(CBImages.IMG_FILE_ADDED, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/add_stat.gif")));
-    reg.put(CBImages.IMG_FILE_MODIFIED,
+    reg.put(CBDEVImages.IMG_FILE_ADDED,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/add_stat.gif")));
+    reg.put(CBDEVImages.IMG_FILE_MODIFIED,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/mod_stat.gif")));
-    reg.put(CBImages.IMG_FILE_DELETED,
+    reg.put(CBDEVImages.IMG_FILE_DELETED,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/del_stat.gif")));
 
-    reg.put(CBImages.IMG_JUNIT, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/junit.gif")));
+    reg.put(CBDEVImages.IMG_JUNIT, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/junit.gif")));
 
-    reg.put(CBImages.IMG_BUILD_DETAILS,
+    reg.put(CBDEVImages.IMG_BUILD_DETAILS,
         ImageDescriptor.createFromURL(getBundle().getResource("icons/epl/debugt_obj.png")));
 
-    reg.put(CBImages.IMG_DELETE, ImageDescriptor.createFromURL(getBundle().getResource("icons/epl/delete.gif")));
+    reg.put(CBDEVImages.IMG_DELETE, ImageDescriptor.createFromURL(getBundle().getResource("icons/epl/delete.gif")));
 
-    reg.put(CBImages.IMG_DELETE_DISABLED,
+    reg.put(CBDEVImages.IMG_DELETE_DISABLED,
         ImageDescriptor.createFromURL(getBundle().getResource("icons/epl/d/delete.gif")));
 
-    reg.put(CBImages.IMG_COLOR_16_GREY,
+    reg.put(CBDEVImages.IMG_COLOR_16_GREY,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/grey.gif")));
 
-    reg.put(CBImages.IMG_COLOR_16_RED,
+    reg.put(CBDEVImages.IMG_COLOR_16_RED,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/red.gif")));
 
-    reg.put(CBImages.IMG_COLOR_16_BLUE,
+    reg.put(CBDEVImages.IMG_COLOR_16_BLUE,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/blue.gif")));
 
-    reg.put(CBImages.IMG_COLOR_16_YELLOW,
+    reg.put(CBDEVImages.IMG_COLOR_16_YELLOW,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/yellow.gif")));
 
-    reg.put(CBImages.IMG_COLOR_24_RED,
+    reg.put(CBDEVImages.IMG_COLOR_24_RED,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/24x24/red.gif")));
 
-    reg.put(CBImages.IMG_COLOR_24_BLUE,
+    reg.put(CBDEVImages.IMG_COLOR_24_BLUE,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/24x24/blue.gif")));
 
     // HEALTH 16px
-    reg.put(CBImages.IMG_HEALTH_16_00_to_19,
+    reg.put(CBDEVImages.IMG_HEALTH_16_00_to_19,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/health-00to19.gif")));
-    reg.put(CBImages.IMG_HEALTH_16_20_to_39,
+    reg.put(CBDEVImages.IMG_HEALTH_16_20_to_39,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/health-20to39.gif")));
-    reg.put(CBImages.IMG_HEALTH_16_40_to_59,
+    reg.put(CBDEVImages.IMG_HEALTH_16_40_to_59,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/health-40to59.gif")));
-    reg.put(CBImages.IMG_HEALTH_16_60_to_79,
+    reg.put(CBDEVImages.IMG_HEALTH_16_60_to_79,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/health-60to79.gif")));
-    reg.put(CBImages.IMG_HEALTH_16_80PLUS,
+    reg.put(CBDEVImages.IMG_HEALTH_16_80PLUS,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/16x16/health-80plus.gif")));
 
     // HEALTH 24px
-    reg.put(CBImages.IMG_HEALTH_24_00_to_19,
+    reg.put(CBDEVImages.IMG_HEALTH_24_00_to_19,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/24x24/health-00to19.gif")));
-    reg.put(CBImages.IMG_HEALTH_24_20_to_39,
+    reg.put(CBDEVImages.IMG_HEALTH_24_20_to_39,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/24x24/health-20to39.gif")));
-    reg.put(CBImages.IMG_HEALTH_24_40_to_59,
+    reg.put(CBDEVImages.IMG_HEALTH_24_40_to_59,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/24x24/health-40to59.gif")));
-    reg.put(CBImages.IMG_HEALTH_24_60_to_79,
+    reg.put(CBDEVImages.IMG_HEALTH_24_60_to_79,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/24x24/health-60to79.gif")));
-    reg.put(CBImages.IMG_HEALTH_24_80PLUS,
+    reg.put(CBDEVImages.IMG_HEALTH_24_80PLUS,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/jenkins-icons/24x24/health-80plus.gif")));
 
-    reg.put(CBImages.IMG_CB_ICON_LARGE_64x66,
+    reg.put(CBDEVImages.IMG_CB_ICON_LARGE_64x66,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/cb_wiz_icon.png")));
   }
 
@@ -303,15 +260,10 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             @Override
             public void run() {
               try {
-                boolean isFavorites = FavoritesUtils.FAVORITES.equals(viewUrl);
                 IWorkbenchPage activePage = CloudBeesUIPlugin.getActiveWindow().getActivePage();
 
                 int hashCode;
-                if (isFavorites) {
-                  hashCode = viewUrl.hashCode();
-                } else {
-                  hashCode = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getUrl().hashCode();
-                }
+                hashCode = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getUrl().hashCode();
 
                 String urlHash = Long.toString(hashCode);
 
@@ -329,20 +281,16 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             throw new OperationCanceledException();
           }
 
-          JenkinsJobsResponse jobs;
-          if (FavoritesUtils.FAVORITES.equals(viewUrl)) {
-            jobs = FavoritesUtils.getFavoritesResponse(monitor);
-          } else {
-            jobs = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getJobs(viewUrl, monitor);
-          }
-          if (monitor.isCanceled()) {
+          JenkinsJobsResponse jobs = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getJobs(viewUrl, monitor);
+
+            if (monitor.isCanceled()) {
             throw new OperationCanceledException();
           }
 
-          Iterator<JenkinsChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
+          Iterator<CBRemoteChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
               .iterator();
           while (iterator.hasNext()) {
-            JenkinsChangeListener listener = iterator.next();
+            CBRemoteChangeListener listener = iterator.next();
             listener.activeJobViewChanged(jobs);
           }
 
@@ -458,7 +406,6 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
   }
 
   public void reloadForgeRepos(final boolean userAction) throws CloudBeesException {
-    CloudBeesDevCorePlugin.getDefault();
 
     //      PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new IRunnableWithProgress() {
     //        public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -548,10 +495,10 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             mess = "Found no Forge repositories!";
           }
 
-          Iterator<JenkinsChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
+          Iterator<CBRemoteChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
               .iterator();
           while (iterator.hasNext()) {
-            JenkinsChangeListener listener = iterator.next();
+            CBRemoteChangeListener listener = iterator.next();
             listener.forgeChanged(forgeRepos);
           }
 
@@ -571,10 +518,10 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
           return Status.OK_STATUS; // new Status(Status.INFO, PLUGIN_ID, mess);
         } catch (Exception e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
-          Iterator<JenkinsChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
+          Iterator<CBRemoteChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
               .iterator();
           while (iterator.hasNext()) {
-            JenkinsChangeListener listener = iterator.next();
+            CBRemoteChangeListener listener = iterator.next();
             listener.forgeChanged(null);
           }
           return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage(), e);
@@ -634,10 +581,10 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             throw new OperationCanceledException();
           }
 
-          Iterator<JenkinsChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
+          Iterator<CBRemoteChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
               .iterator();
           while (iterator.hasNext()) {
-            JenkinsChangeListener listener = iterator.next();
+            CBRemoteChangeListener listener = iterator.next();
             listener.activeJobHistoryChanged(builds);
           }
 

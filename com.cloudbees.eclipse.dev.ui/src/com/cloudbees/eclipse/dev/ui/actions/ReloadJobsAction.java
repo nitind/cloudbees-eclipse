@@ -5,7 +5,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
@@ -18,7 +18,7 @@ public class ReloadJobsAction extends Action {
 
     setText("Reload Jenkins jobs");
     setToolTipText("Reload Jenkins jobs");
-    setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_REFRESH));
+    setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_REFRESH));
 
     setAccelerator(SWT.F5);
 

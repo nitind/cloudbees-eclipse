@@ -20,26 +20,19 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
+import com.cloudbees.eclipse.core.CBRemoteChangeAdapter;
+import com.cloudbees.eclipse.core.CBRemoteChangeListener;
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.core.JenkinsChangeListener;
-import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.jenkins.api.BaseJenkinsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse.View;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.dev.ui.actions.ConfigureJenkinsInstancesAction;
-import com.cloudbees.eclipse.dev.ui.actions.ConfigureSshKeysAction;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadJenkinsInstancesAction;
-import com.cloudbees.eclipse.dev.ui.utils.FavoritesUtils;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
-import com.cloudbees.eclipse.ui.internal.action.ConfigureCloudBeesAction;
 import com.cloudbees.eclipse.ui.views.CBTreeAction;
 import com.cloudbees.eclipse.ui.views.CBTreeContributor;
-import com.cloudbees.eclipse.ui.views.CBTreeSeparator;
-import com.cloudbees.eclipse.ui.views.CBTreeSeparator.SeparatorLocation;
 import com.cloudbees.eclipse.ui.views.ICBTreeProvider;
 
 /**
@@ -49,31 +42,22 @@ import com.cloudbees.eclipse.ui.views.ICBTreeProvider;
  */
 public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener, ICBTreeProvider {
 
-  public static final String ID = "com.cloudbees.eclipse.ui.views.instances.JenkinsTreeView";
+  public static final String ID = "acom.cloudbees.eclipse.ui.views.instances.JenkinsTreeView";
 
   protected ITreeContentProvider contentProvider = new InstanceContentProvider();
   protected ILabelProvider labelProvider = new InstanceLabelProvider();
 
   private TreeViewer viewer;
-  private JenkinsChangeListener jenkinsChangeListener;
+  private CBRemoteChangeListener jenkinsChangeListener;
 
-  private CBTreeAction configureAccountAction = new ConfigureCloudBeesAction();
   private CBTreeAction attachJenkinsAction = new ConfigureJenkinsInstancesAction();
   //  private CBTreeAction reloadForgeAction = new ReloadForgeReposAction();
   private CBTreeAction reloadJenkinsAction = new ReloadJenkinsInstancesAction();
-  private CBTreeAction configureSshAction = new ConfigureSshKeysAction();
 
   class NameSorter extends ViewerSorter {
 
     @Override
     public int compare(final Viewer viewer, final Object e1, final Object e2) {
-      if (e1 instanceof FavoritesInstanceGroup) {
-        return -1;
-      }
-      if (e2 instanceof FavoritesInstanceGroup) {
-        return +1;
-      }
-
       if (e1 instanceof JenkinsInstanceResponse.View && e2 instanceof JenkinsInstanceResponse.View) {
         JenkinsInstanceResponse.View v1 = (View) e1;
         JenkinsInstanceResponse.View v2 = (View) e2;
@@ -96,16 +80,8 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
         .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
     this.reloadJenkinsAction.setEnabled(jaasEnabled);
 
-    this.jenkinsChangeListener = new JenkinsChangeListener() {
-      @Override
-      public void activeJobViewChanged(final JenkinsJobsResponse newView) {
-      }
+    this.jenkinsChangeListener = new CBRemoteChangeAdapter() {
 
-      @Override
-      public void activeJobHistoryChanged(final JenkinsJobAndBuildsResponse newView) {
-      }
-
-      @Override
       public void jenkinsChanged(final List<JenkinsInstanceResponse> instances) {
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
           @Override
@@ -115,12 +91,9 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
         });
       }
 
-      @Override
-      public void forgeChanged(final List<ForgeInstance> instances) {
-      }
     };
 
-    CloudBeesUIPlugin.getDefault().addJenkinsChangeListener(this.jenkinsChangeListener);
+    CloudBeesUIPlugin.getDefault().addCBRemoteChangeListener(this.jenkinsChangeListener);
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 
     CloudBeesUIPlugin.getDefault().reloadAllJenkins(false);
@@ -160,11 +133,9 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
   private void fillLocalPullDown(final IMenuManager manager) {
     manager.add(this.attachJenkinsAction);
     manager.add(this.reloadJenkinsAction);
-    manager.add(this.configureAccountAction);
-    manager.add(this.configureSshAction);
   }
 
-  private void makeActions() {
+/*  private void makeActions() {
     this.configureAccountAction = new ConfigureCloudBeesAction();
     this.attachJenkinsAction = new ConfigureJenkinsInstancesAction();
     //    this.reloadForgeAction = new ReloadForgeReposAction();
@@ -180,7 +151,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
     this.reloadJenkinsAction.setEnabled(jaasEnabled);
 
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
-  }
+  }*/
 
   @Override
   public void setFocus() {
@@ -212,7 +183,7 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
   @Override
   public void dispose() {
     CloudBeesUIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
-    CloudBeesUIPlugin.getDefault().removeJenkinsChangeListener(this.jenkinsChangeListener);
+    CloudBeesUIPlugin.getDefault().removeCBRemoteChangeListener(this.jenkinsChangeListener);
     this.jenkinsChangeListener = null;
     this.contentProvider = null;
     this.labelProvider = null;
@@ -222,8 +193,8 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
 
   @Override
   public CBTreeContributor[] getContributors() {
-    return new CBTreeContributor[] { this.configureAccountAction, this.configureSshAction,
-        new CBTreeSeparator(SeparatorLocation.PULL_DOWN), this.attachJenkinsAction, this.reloadJenkinsAction };
+    return new CBTreeContributor[] { 
+         this.attachJenkinsAction, this.reloadJenkinsAction};
   }
 
   @Override
@@ -260,13 +231,6 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
         CloudBeesUIPlugin.getDefault().getLogger().error(e);
       }
       return true;
-    } else if (el instanceof FavoritesInstanceGroup) {
-      try {
-        CloudBeesDevUiPlugin.getDefault().showJobs(FavoritesUtils.FAVORITES, true);
-      } catch (CloudBeesException e) {
-        CloudBeesUIPlugin.getDefault().getLogger().error(e);
-      }
-      return true;
     } else if (el instanceof InstanceGroup) {
       boolean exp = JenkinsTreeView.this.viewer.getExpandedState(el);
       if (exp) {
@@ -278,6 +242,10 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
     }
 
     return false;
+  }
+
+  public String getId() {
+    return ID;
   }
 
 }

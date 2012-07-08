@@ -24,6 +24,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
     store.setDefault(PreferenceConstants.P_ENABLE_JAAS, true);
     store.setDefault(PreferenceConstants.P_JENKINS_REFRESH_ENABLED, true);
     store.setDefault(PreferenceConstants.P_JENKINS_REFRESH_INTERVAL, 60);
+    //store.setDefault(PreferenceConstants.P_ACTIVE_ACCOUNT, "");
   }
 
 }

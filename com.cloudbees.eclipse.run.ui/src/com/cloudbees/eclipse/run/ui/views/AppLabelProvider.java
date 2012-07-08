@@ -23,7 +23,7 @@ final class AppLabelProvider extends LabelProvider implements IFontProvider {
 
     if (element instanceof ApplicationInfo) {
       ApplicationInfo elem = (ApplicationInfo) element;
-      return elem.getId() + " (" + elem.getStatus() + ")";
+      return elem.getId().substring(elem.getId().indexOf("/")+1) + " (" + elem.getStatus() + ")";
     }
 
     return null;

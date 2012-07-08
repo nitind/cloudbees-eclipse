@@ -7,7 +7,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 
 public class ForgeLabelProvider extends LabelProvider implements IFontProvider {
@@ -32,7 +32,7 @@ public class ForgeLabelProvider extends LabelProvider implements IFontProvider {
     if (obj instanceof ForgeInstance) {
       ForgeInstance inst = (ForgeInstance) obj;
 
-      return inst.url + " (" + inst.status.name().toLowerCase() + ")";
+      return inst.url + " (" + inst.status.getLabel().toLowerCase()+")";
     }
 
     return null;
@@ -41,13 +41,13 @@ public class ForgeLabelProvider extends LabelProvider implements IFontProvider {
   @Override
   public Image getImage(final Object obj) {
     if (obj instanceof ForgeGroup) {
-      return CloudBeesDevUiPlugin.getImage(CBImages.IMG_FOLDER_FORGE);
+      return CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_FOLDER_FORGE);
     }
     if (obj instanceof ForgeInstance) {
       if (((ForgeInstance) obj).type.equals(ForgeInstance.TYPE.GIT)) {
-        return CloudBeesDevUiPlugin.getImage(CBImages.IMG_INSTANCE_FORGE_GIT);
+        return CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_INSTANCE_FORGE_GIT);
       } else {
-        return CloudBeesDevUiPlugin.getImage(CBImages.IMG_INSTANCE_FORGE_SVN);
+        return CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_INSTANCE_FORGE_SVN);
       }
     }
 

@@ -4,7 +4,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
 import com.cloudbees.eclipse.core.jenkins.api.ArtifactPathItem;
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 
 public class ArtifactsLabelProvider extends LabelProvider {
@@ -27,9 +27,9 @@ public class ArtifactsLabelProvider extends LabelProvider {
   public Image getImage(final Object element) {
     if (element instanceof ArtifactPathItem) {
       if (((ArtifactPathItem) element).item.relativePath.endsWith(".war")) {
-        return CloudBeesDevUiPlugin.getImage(CBImages.IMG_DEPLOY);
+        return CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_DEPLOY);
       }
-      return CloudBeesDevUiPlugin.getImage(CBImages.IMG_FILE);
+      return CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_FILE);
     }
 
     return super.getImage(element);

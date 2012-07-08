@@ -7,7 +7,7 @@ import org.eclipse.swt.SWT;
 
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Artifact;
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.dev.ui.views.build.ArtifactsClickListener;
 
@@ -18,7 +18,7 @@ public class DeployWarAction extends Action {
   public DeployWarAction() {
     super("Deploy war", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS); //$NON-NLS-1$
     setToolTipText("Deploy war to specific RUN@cloud application"); //TODO i18n
-    setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_DEPLOY));
+    setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_DEPLOY));
     super.setEnabled(false);
   }
 

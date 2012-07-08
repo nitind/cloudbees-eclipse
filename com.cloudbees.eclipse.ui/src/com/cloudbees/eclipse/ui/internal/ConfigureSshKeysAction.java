@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.dev.ui.actions;
+package com.cloudbees.eclipse.ui.internal;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -13,7 +13,7 @@ public class ConfigureSshKeysAction extends CBTreeAction {
 
   public ConfigureSshKeysAction() {
     super();
-    setText("SSH Key Setup...");
+    setText("SSH Key Setup Help");
     setToolTipText("Configure SSH keys used to access the git or svn repositories");
 
     /*    setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
@@ -24,7 +24,7 @@ public class ConfigureSshKeysAction extends CBTreeAction {
   @Override
   public void run() {
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override
+
       public void run() {
         MessageDialog
             .openInformation(
@@ -47,17 +47,14 @@ public class ConfigureSshKeysAction extends CBTreeAction {
     }
   }
 
-  @Override
   public boolean isPopup() {
     return false;
   }
 
-  @Override
   public boolean isPullDown() {
     return true;
   }
 
-  @Override
   public boolean isToolbar() {
     return false;
   }

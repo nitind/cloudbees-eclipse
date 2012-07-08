@@ -1,5 +1,8 @@
 package com.cloudbees.eclipse.run.ui.views;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -7,12 +10,14 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IPageLayout;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.api.ApplicationListResponse;
 import com.cloudbees.eclipse.core.ApplicationInfoChangeListener;
-import com.cloudbees.eclipse.core.JenkinsChangeListener;
+import com.cloudbees.eclipse.core.CBRemoteChangeListener;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.IStatusUpdater;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
@@ -20,6 +25,7 @@ import com.cloudbees.eclipse.run.ui.popup.actions.ReloadRunAtCloudAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 import com.cloudbees.eclipse.ui.views.CBTreeContributor;
+import com.cloudbees.eclipse.ui.views.CBTreeProvider;
 import com.cloudbees.eclipse.ui.views.CBTreeSeparator;
 import com.cloudbees.eclipse.ui.views.CBTreeSeparator.SeparatorLocation;
 import com.cloudbees.eclipse.ui.views.ICBTreeProvider;
@@ -29,7 +35,7 @@ import com.cloudbees.eclipse.ui.views.ICBTreeProvider;
  * 
  * @author ahtik
  */
-public class AppListView implements IPropertyChangeListener, ICBTreeProvider {
+public class AppListView extends CBTreeProvider implements IPropertyChangeListener, ICBTreeProvider {
 
   public static final String ID = "com.cloudbees.eclipse.run.ui.views.AppListView";
 
@@ -38,7 +44,7 @@ public class AppListView implements IPropertyChangeListener, ICBTreeProvider {
   protected ITreeContentProvider contentProvider = new AppContentProvider();
   protected LabelProvider labelProvider = new AppLabelProvider();
 
-  protected JenkinsChangeListener jenkinsChangeListener;
+  protected CBRemoteChangeListener jenkinsChangeListener;
 
   protected ApplicationInfoChangeListener applicationChangeListener;
 
@@ -53,7 +59,7 @@ public class AppListView implements IPropertyChangeListener, ICBTreeProvider {
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
           @Override
           public void run() {
-            refresh();
+            refresh(false);
           }
         });
       }
@@ -88,7 +94,7 @@ public class AppListView implements IPropertyChangeListener, ICBTreeProvider {
   public void dispose() {
     AppStatusUpdater.removeListener(this.statusUpdater);
     CloudBeesUIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
-    CloudBeesUIPlugin.getDefault().removeJenkinsChangeListener(this.jenkinsChangeListener);
+    CloudBeesUIPlugin.getDefault().removeCBRemoteChangeListener(this.jenkinsChangeListener);
     this.jenkinsChangeListener = null;
     this.contentProvider = null;
     this.labelProvider = null;
@@ -100,14 +106,15 @@ public class AppListView implements IPropertyChangeListener, ICBTreeProvider {
     if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())
         || PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
         || PreferenceConstants.P_EMAIL.equals(event.getProperty())
+        || PreferenceConstants.P_ACTIVE_ACCOUNT.equals(event.getProperty())
         || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {
-      refresh();
+      refresh(false);
     }
   }
 
   @Override
   public CBTreeContributor[] getContributors() {
-    return new CBTreeContributor[] { new CBTreeSeparator(SeparatorLocation.PULL_DOWN), new ReloadRunAtCloudAction() };
+    return new CBTreeContributor[] { new ReloadRunAtCloudAction() };
   }
 
   @Override
@@ -122,7 +129,12 @@ public class AppListView implements IPropertyChangeListener, ICBTreeProvider {
 
   @Override
   public boolean open(final Object object) {
-    return false;
+    try {
+      PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(IPageLayout.ID_PROP_SHEET);
+    } catch (PartInitException e) {
+      return false;
+    }
+    return true;
   }
 
   @Override
@@ -131,14 +143,29 @@ public class AppListView implements IPropertyChangeListener, ICBTreeProvider {
     init();
   }
 
-  private void refresh() {
-    try {
-      ApplicationListResponse list = BeesSDK.getList();
-      AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, list);
-    } catch (Exception e1) {
-      AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, null);
-      CBRunUiActivator.logErrorAndShowDialog(e1);
-    }
+  private void refresh(boolean userAction) {
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading RUN@cloud applications list") {
+
+      protected IStatus run(final IProgressMonitor monitor) {
+        try {      
+          ApplicationListResponse list = BeesSDK.getList();
+          AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, list);
+        } catch (Exception e1) {
+          AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, null);
+          CBRunUiActivator.logErrorAndShowDialog(e1);
+        }
+        return Status.OK_STATUS;
+        }
+    };
+    
+    job.setUser(userAction);
+    job.schedule();
+    
+  }
+
+  @Override
+  public String getId() {
+    return ID;
   }
 
 }

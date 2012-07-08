@@ -20,8 +20,11 @@ import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
@@ -34,9 +37,9 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import com.cloudbees.eclipse.core.ApplicationInfoChangeListener;
+import com.cloudbees.eclipse.core.CBRemoteChangeListener;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.core.JenkinsChangeListener;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
@@ -63,7 +66,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   private final List<JenkinsService> jenkinsRegistry = new ArrayList<JenkinsService>();
 
-  private final List<JenkinsChangeListener> jenkinsChangeListeners = new ArrayList<JenkinsChangeListener>();
+  private final List<CBRemoteChangeListener> cbRemoteChangeListeners = new ArrayList<CBRemoteChangeListener>();
 
   private final List<ApplicationInfoChangeListener> applicationInfoChangeListeners = new ArrayList<ApplicationInfoChangeListener>();
 
@@ -89,14 +92,12 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     this.logger = new Logger(getLog());
     loadAccountCredentials();
     hookPrefChangeListener();
-
     validateJREforRunAtCloud();
-
   }
 
   /**
-   * Validates JRE for run@cloud and if JRE is not compatible then warn user. RUN@cloud plugins will be disabled by themselves (look plugin#start()).
-   * Validation is just checking if the JRE is java se 7 or not.
+   * Validates JRE for run@cloud and if JRE is not compatible then warn user. RUN@cloud plugins will be disabled by
+   * themselves (look plugin#start()). Validation is just checking if the JRE is java se 7 or not.
    */
   private void validateJREforRunAtCloud() {
     if (!CloudBeesCorePlugin.validateRUNatCloudJRE()) {
@@ -121,7 +122,10 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         if (PreferenceConstants.P_PASSWORD.equalsIgnoreCase(event.getProperty())
             || PreferenceConstants.P_EMAIL.equalsIgnoreCase(event.getProperty())) {
           try {
+            
+            CloudBeesUIPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.P_ACTIVE_ACCOUNT, "");            
             loadAccountCredentials();
+            
           } catch (CloudBeesException e) {
             CloudBeesUIPlugin.getDefault().getLogger().error(e);
           }
@@ -281,9 +285,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
           List<JenkinsInstanceResponse> resp = pollInstances(instances, new SubProgressMonitor(monitor, 740));
 
-          Iterator<JenkinsChangeListener> iterator = CloudBeesUIPlugin.this.jenkinsChangeListeners.iterator();
+          Iterator<CBRemoteChangeListener> iterator = CloudBeesUIPlugin.this.cbRemoteChangeListeners.iterator();
           while (iterator.hasNext()) {
-            JenkinsChangeListener listener = iterator.next();
+            CBRemoteChangeListener listener = iterator.next();
             listener.jenkinsChanged(resp);
           }
           monitor.worked(10);
@@ -358,16 +362,16 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return service;
   }
 
-  public void addJenkinsChangeListener(final JenkinsChangeListener listener) {
-    this.jenkinsChangeListeners.add(listener);
+  public void addCBRemoteChangeListener(final CBRemoteChangeListener listener) {
+    this.cbRemoteChangeListeners.add(listener);
   }
 
-  public void removeJenkinsChangeListener(final JenkinsChangeListener listener) {
-    this.jenkinsChangeListeners.remove(listener);
+  public void removeCBRemoteChangeListener(final CBRemoteChangeListener listener) {
+    this.cbRemoteChangeListeners.remove(listener);
   }
 
-  public List<JenkinsChangeListener> getJenkinsChangeListeners() {
-    return this.jenkinsChangeListeners;
+  public List<CBRemoteChangeListener> getJenkinsChangeListeners() {
+    return this.cbRemoteChangeListeners;
   }
 
   public JenkinsService getJenkinsServiceForUrl(final String serviceOrViewOrJobUrl) {
@@ -422,7 +426,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return window;
   }
 
-  public void loadAccountCredentials() throws CloudBeesException {
+  private void loadAccountCredentials() throws CloudBeesException {
+
     String password;
     try {
       password = readP();
@@ -432,6 +437,19 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
     String email = getPreferenceStore().getString(PreferenceConstants.P_EMAIL);
     CloudBeesCorePlugin.getDefault().getGrandCentralService().setAuthInfo(email, password);
+
+    if (email != null && email.length() > 0) {      
+      MultiAccountUtils.selectActiveAccount();
+    }
+
+  }
+
+  public String getActiveAccountName(IProgressMonitor monitor) throws CloudBeesException {
+    String active = CloudBeesCorePlugin.getDefault().getGrandCentralService().getActiveAccountName();
+    if (active == null || active.length() == 0) {
+      MultiAccountUtils.selectActiveAccount();
+    }
+    return active;
   }
 
   /**
@@ -522,6 +540,71 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     this.forgeRegistry.addAll(cloudRepos);
 
     return cloudRepos;
+  }
+
+  @Override
+  protected void initializeImageRegistry(ImageRegistry reg) {
+    super.initializeImageRegistry(reg);
+    reg.put(CBImages.ICON_16X16_CB_PLAIN,
+        ImageDescriptor.createFromURL(getBundle().getResource("icons/16x16/cb_plain.png")));
+
+    reg.put(CBImages.ICON_16X16_NEW_CB_PROJ_WIZ,
+        ImageDescriptor.createFromURL(getBundle().getResource("icons/16x16/cb_new_proj_wiz_ico_16x16.png")));
+
+    reg.put(CBImages.ICON_CB_WIZARD, ImageDescriptor.createFromURL(getBundle().getResource("icons/cb_wiz_icon.png")));
+
+  }
+
+  public static Image getImage(final String imgKey) {
+    return CloudBeesUIPlugin.getDefault().getImageRegistry().get(imgKey);
+  }
+
+  public static ImageDescriptor getImageDescription(final String imgKey) {
+    CloudBeesUIPlugin pl = CloudBeesUIPlugin.getDefault();
+    return pl != null ? pl.getImageRegistry().getDescriptor(imgKey) : null;
+  }
+
+  public static void logError(Throwable e) {
+    IStatus status = createStatus(e);
+    logStatus(status);
+  }
+
+  private static void logStatus(IStatus status) {
+    plugin.getLog().log(status);
+  }
+
+  private static IStatus createStatus(Throwable e) {
+    IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage());
+    return status;
+  }
+
+  public static void logErrorAndShowDialog(Exception e) {
+    final IStatus s = createStatus(e);
+    logStatus(s);
+    Display.getDefault().syncExec(new Runnable() {
+      public void run() {
+        ErrorDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(), "An error occured", null, s);
+      }
+    });
+  }
+
+  public void fireActiveAccountChanged(String newEmail, String newAccountName) {
+    reloadAllJenkins(false);    
+    fireApplicationInfoChanged();
+    fireAccountNameChange(newEmail, newAccountName);
+  }
+
+  
+  void fireAccountNameChange(String newEmail, String newAccountName) {
+    Iterator<CBRemoteChangeListener> iterator = CloudBeesUIPlugin.this.cbRemoteChangeListeners.iterator();
+    while (iterator.hasNext()) {
+      CBRemoteChangeListener listener = iterator.next();
+      listener.activeAccountChanged(newEmail, newAccountName);
+    }
+  }
+
+  public void setActiveAccountName(String accountName) throws CloudBeesException {
+    MultiAccountUtils.activateAccountName(accountName);
   }
 
 }

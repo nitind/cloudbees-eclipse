@@ -8,23 +8,7 @@
 			id="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp" name="New CloudBees Project...">
 		</command>
 	</extension>
-	<extension point="org.eclipse.ui.menus">
-		<menuContribution allPopups="false"
-			locationURI="menu:com.cloudbees.eclipse.ui.commands.referenceToMenu">
-			<command commandId="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp"
-				icon="icons/16x16/cb_new_proj_wiz_ico_16x16.png" label="New CloudBees Project..."
-				mnemonic="N" style="push" tooltip="Create a sample CloudBees project">
-			</command>
-		</menuContribution>
-  <menuContribution
-        allPopups="false"
-        locationURI="menu:com.cloudbees.eclipse.ui.commands.referenceToMenu">
-     <separator
-           name="com.cloudbees.eclipse.run.ui.separator"
-           visible="true">
-     </separator>
-  </menuContribution>
-	</extension>
+
 	<extension point="org.eclipse.ui.popupMenus">
   <objectContribution
         adaptable="true"

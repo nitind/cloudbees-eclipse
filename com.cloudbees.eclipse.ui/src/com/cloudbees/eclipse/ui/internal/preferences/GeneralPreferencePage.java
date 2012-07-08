@@ -216,10 +216,12 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
                 monitor.subTask("Connecting...");//TODO i18n
                 monitor.worked(10);
-                GrandCentralService gcs = new GrandCentralService(email, password);
+                GrandCentralService gcs = new GrandCentralService();
+                gcs.setAuthInfo(email, password);
                 monitor.worked(20);
 
                 monitor.subTask("Validating...");//TODO i18n
+                
                 final boolean loginValid = gcs.validateUser(monitor);
                 monitor.worked(50);
 

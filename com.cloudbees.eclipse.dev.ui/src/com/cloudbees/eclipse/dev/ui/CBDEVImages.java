@@ -1,6 +1,6 @@
 package com.cloudbees.eclipse.dev.ui;
 
-public interface CBImages {
+public interface CBDEVImages {
 
   String IMG_REFRESH = "IMG_REFRESH";
   String IMG_GLOBE = "IMG_GLOBE";

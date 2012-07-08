@@ -13,6 +13,8 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
 
   public Job[] jobs;
 
+  //public Job[] views;
+  
   public String name;
 
   @Override
@@ -52,7 +54,25 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
   @Expose(deserialize = false, serialize = false)
   public final static String QTREE = QTreeFactory.create(JenkinsJobsResponse.class);
 
-  public static class Job {
+  public static class View implements JobViewGeneric {
+    public String name;
+    public String url;
+    public String description;
+    
+    public String getName() {
+      return name;
+    }
+    
+    public String getUrl() {
+      return url;
+    }
+
+    public String getState() {
+      return "v";
+    }
+  }
+  
+  public static class Job implements JobViewGeneric {
     public HealthReport[] healthReport;
 
     public String name;
@@ -74,6 +94,14 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
 
     public JenkinsJobProperty[] property;
 
+    public String getName() {
+      return name;
+    }
+    
+    public String getUrl() {
+      return url;
+    }
+    
     public String getDisplayName() {
       if (this.displayName != null) {
         return this.displayName;
@@ -112,6 +140,16 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
       return true;
     }
       public String result;
+
+      public String getState() {
+        return color;
+      }
   }
 
+  public interface JobViewGeneric {
+    public String getName();
+    public String getUrl();
+    public String getState();
+  }
+  
 }

@@ -17,8 +17,9 @@ public class GCServiceTest {
 
   @Test
   public void testAccountNamesRetrieval() throws CloudBeesException {
-    GrandCentralService gcs = new GrandCentralService("ahti@codehoop.com", "xxx");
-
+    GrandCentralService gcs = new GrandCentralService();
+    gcs.setAuthInfo("ahti@codehoop.com", "xxx");
+    
     assertTrue(gcs.validateUser(null));
 
     List<JenkinsInstance> instances = gcs.loadDevAtCloudInstances(null);

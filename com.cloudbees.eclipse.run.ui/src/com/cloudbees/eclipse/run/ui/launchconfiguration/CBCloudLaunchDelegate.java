@@ -30,6 +30,7 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
+import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
@@ -46,7 +47,9 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
       for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
         if (project.getName().equals(projectName)) {
-          String account = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_ACCOUNT_ID, "");
+          
+          String account = CloudBeesUIPlugin.getDefault().getActiveAccountName(monitor);
+          
           String appId = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
           String warPath = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, "");
 

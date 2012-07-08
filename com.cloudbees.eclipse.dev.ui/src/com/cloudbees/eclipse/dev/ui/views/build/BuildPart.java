@@ -46,7 +46,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Action
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet.ChangeSetItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.util.Utils;
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.dev.ui.actions.DeployWarAction;
 import com.cloudbees.eclipse.dev.ui.actions.InvokeBuildAction;
@@ -217,7 +217,7 @@ public class BuildPart extends EditorPart {
     compTests.setLayout(gl_compTests);
 
     Label label = this.formToolkit.createLabel(compTests, "");
-    label.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_JUNIT));
+    label.setImage(CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_JUNIT));
     label.setText("");
 
     this.contentJUnitTests = this.formToolkit.createLabel(compTests, "n/a", SWT.NONE);
@@ -361,7 +361,7 @@ public class BuildPart extends EditorPart {
       }
     };
     reload.setToolTipText("Reload"); //TODO i18n
-    reload.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_REFRESH));
+    reload.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_REFRESH));
 
     Action openInWeb = new Action("", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       @Override
@@ -370,7 +370,7 @@ public class BuildPart extends EditorPart {
       }
     };
     openInWeb.setToolTipText("Open with Browser"); //TODO i18n
-    openInWeb.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_BROWSER));
+    openInWeb.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_BROWSER));
 
     this.openLogs = new OpenLogAction();
     this.openLogs.setBuild(this.dataBuildDetail);
@@ -409,7 +409,7 @@ public class BuildPart extends EditorPart {
       }
     };
     this.openBuildHistory.setToolTipText("Open build history for this job"); //TODO i18n
-    this.openBuildHistory.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_BUILD_HISTORY));
+    this.openBuildHistory.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_BUILD_HISTORY));
 
     this.form.getToolBarManager().add(this.invokeBuild);
     this.form.getToolBarManager().add(this.deployWar);
@@ -601,11 +601,11 @@ public class BuildPart extends EditorPart {
             */
           BuildPart.this.textTopSummary.setText(topStr);
           if ("SUCCESS".equalsIgnoreCase(BuildPart.this.dataBuildDetail.result)) {
-            BuildPart.this.statusIcon.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_COLOR_16_BLUE));
+            BuildPart.this.statusIcon.setImage(CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_COLOR_16_BLUE));
           } else if ("FAILURE".equalsIgnoreCase(BuildPart.this.dataBuildDetail.result)) {
-            BuildPart.this.statusIcon.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_COLOR_16_RED));
+            BuildPart.this.statusIcon.setImage(CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_COLOR_16_RED));
           } else if ("UNSTABLE".equalsIgnoreCase(BuildPart.this.dataBuildDetail.result)) {
-            BuildPart.this.statusIcon.setImage(CloudBeesDevUiPlugin.getImage(CBImages.IMG_COLOR_16_YELLOW));
+            BuildPart.this.statusIcon.setImage(CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_COLOR_16_YELLOW));
           } else {
             BuildPart.this.statusIcon.setImage(null);
           }
@@ -669,11 +669,11 @@ public class BuildPart extends EditorPart {
 
       Image image = null;
       if ("success".equalsIgnoreCase(b.result)) {
-        image = CloudBeesDevUiPlugin.getImage(CBImages.IMG_COLOR_16_BLUE);
+        image = CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_COLOR_16_BLUE);
       } else if ("failure".equalsIgnoreCase(b.result)) {
-        image = CloudBeesDevUiPlugin.getImage(CBImages.IMG_COLOR_16_RED);
+        image = CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_COLOR_16_RED);
       } else {
-        image = CloudBeesDevUiPlugin.getImage(CBImages.IMG_COLOR_16_GREY);
+        image = CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_COLOR_16_GREY);
       }
 
       Composite comp;
@@ -768,13 +768,13 @@ public class BuildPart extends EditorPart {
           String testMatch = "Test Result: ";
           if (rep.description.startsWith(testMatch)) {
             this.healthTest = createImageLabel(this.compBuildSummary, rep.description.substring(testMatch.length()),
-                CloudBeesDevUiPlugin.getImage(CBImages.IMG_HEALTH_PREFIX + CBImages.IMG_24 + rep.iconUrl));
+                CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_HEALTH_PREFIX + CBDEVImages.IMG_24 + rep.iconUrl));
           } else {
             String buildMatch = "Build stability: ";
             if (rep.description.startsWith(buildMatch)) {
               this.healthBuild = createImageLabel(this.compBuildSummary,
                   rep.description.substring(buildMatch.length()),
-                  CloudBeesDevUiPlugin.getImage(CBImages.IMG_HEALTH_PREFIX + CBImages.IMG_24 + rep.iconUrl));
+                  CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_HEALTH_PREFIX + CBDEVImages.IMG_24 + rep.iconUrl));
             }
           }
         }

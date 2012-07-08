@@ -16,7 +16,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsConsoleLogResponse;
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
@@ -43,7 +43,7 @@ public class JobConsole {
     MessageConsole console = null;
     if (this.stream == null) {
       console = new MessageConsole(NLS.bind("Output for Build \"{0}\"", this.name), CONSOLE_TYPE,
-          CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_CONSOLE), true);
+          CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_CONSOLE), true);
       this.consoleManager.addConsoles(new IConsole[] { console });
       console.setAttribute(ATTRIBUTE_URL, this.url);
 

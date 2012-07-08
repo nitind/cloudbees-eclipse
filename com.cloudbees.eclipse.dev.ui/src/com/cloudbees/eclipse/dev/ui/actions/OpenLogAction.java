@@ -5,7 +5,7 @@ import org.eclipse.swt.SWT;
 
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse;
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 
 /**
@@ -18,7 +18,7 @@ public class OpenLogAction extends Action {
   public OpenLogAction() {
     super("Open console log", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS); //TODO i18n
     setToolTipText("Open console log"); //TODO i18n
-    setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_CONSOLE));
+    setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_CONSOLE));
     super.setEnabled(false);
   }
 

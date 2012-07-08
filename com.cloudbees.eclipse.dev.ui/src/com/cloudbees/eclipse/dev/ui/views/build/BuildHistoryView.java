@@ -3,7 +3,6 @@ package com.cloudbees.eclipse.dev.ui.views.build;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jface.action.Action;
@@ -37,15 +36,13 @@ import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
+import com.cloudbees.eclipse.core.CBRemoteChangeAdapter;
+import com.cloudbees.eclipse.core.CBRemoteChangeListener;
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.core.JenkinsChangeListener;
-import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.util.Utils;
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.dev.ui.actions.InvokeBuildAction;
 import com.cloudbees.eclipse.dev.ui.actions.OpenBuildAction;
@@ -68,7 +65,7 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
 
   private final Map<String, Image> stateIcons = new HashMap<String, Image>();
 
-  private JenkinsChangeListener jenkinsChangeListener;
+  private CBRemoteChangeListener jenkinsChangeListener;
 
   private BuildHistoryContentProvider contentProvider;
 
@@ -336,9 +333,7 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
       }
     });
 
-    this.jenkinsChangeListener = new JenkinsChangeListener() {
-      public void activeJobViewChanged(final JenkinsJobsResponse newView) {
-      }
+    this.jenkinsChangeListener = new CBRemoteChangeAdapter() {
 
       public void activeJobHistoryChanged(final JenkinsJobAndBuildsResponse newView) {
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
@@ -348,14 +343,9 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
         });
       }
 
-      public void jenkinsChanged(final List<JenkinsInstanceResponse> instances) {
-      }
-
-      public void forgeChanged(final List<ForgeInstance> instances) {
-      }
     };
 
-    CloudBeesUIPlugin.getDefault().addJenkinsChangeListener(this.jenkinsChangeListener);
+    CloudBeesUIPlugin.getDefault().addCBRemoteChangeListener(this.jenkinsChangeListener);
   }
 
   private void initImages() {
@@ -473,7 +463,7 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
     };
 
     this.actionOpenBuildInBrowser.setToolTipText("Open with Browser"); //TODO i18n
-    this.actionOpenBuildInBrowser.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_BROWSER));
+    this.actionOpenBuildInBrowser.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_BROWSER));
     this.actionOpenBuildInBrowser.setEnabled(false);
 
     this.actionInvokeBuild = new InvokeBuildAction();
@@ -524,7 +514,7 @@ public class BuildHistoryView extends ViewPart implements IPropertyChangeListene
   @Override
   public void dispose() {
     CloudBeesUIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
-    CloudBeesUIPlugin.getDefault().removeJenkinsChangeListener(this.jenkinsChangeListener);
+    CloudBeesUIPlugin.getDefault().removeCBRemoteChangeListener(this.jenkinsChangeListener);
     this.jenkinsChangeListener = null;
     //    stopRefresher();
 

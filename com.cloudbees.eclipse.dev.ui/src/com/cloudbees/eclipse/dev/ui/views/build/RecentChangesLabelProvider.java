@@ -11,7 +11,7 @@ import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem.TYPE;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.Author;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuildDetailsResponse.ChangeSet.ChangeSetItem;
-import com.cloudbees.eclipse.dev.ui.CBImages;
+import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 
 public class RecentChangesLabelProvider extends LabelProvider {
@@ -25,12 +25,12 @@ public class RecentChangesLabelProvider extends LabelProvider {
 
   public RecentChangesLabelProvider() {
     super();
-    this.imgAdded = new DecorationOverlayIcon(CloudBeesDevUiPlugin.getImage(CBImages.IMG_FILE),
-        CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_FILE_ADDED), IDecoration.BOTTOM_RIGHT).createImage();
-    this.imgDeleted = new DecorationOverlayIcon(CloudBeesDevUiPlugin.getImage(CBImages.IMG_FILE),
-        CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_FILE_DELETED), IDecoration.BOTTOM_RIGHT).createImage();
-    this.imgModified = new DecorationOverlayIcon(CloudBeesDevUiPlugin.getImage(CBImages.IMG_FILE),
-        CloudBeesDevUiPlugin.getImageDescription(CBImages.IMG_FILE_MODIFIED), IDecoration.BOTTOM_RIGHT).createImage();
+    this.imgAdded = new DecorationOverlayIcon(CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_FILE),
+        CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_FILE_ADDED), IDecoration.BOTTOM_RIGHT).createImage();
+    this.imgDeleted = new DecorationOverlayIcon(CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_FILE),
+        CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_FILE_DELETED), IDecoration.BOTTOM_RIGHT).createImage();
+    this.imgModified = new DecorationOverlayIcon(CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_FILE),
+        CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_FILE_MODIFIED), IDecoration.BOTTOM_RIGHT).createImage();
     this.imgChangeSet = this.IMG_DESC_CHANGESET.createImage();
 
   }
@@ -77,7 +77,7 @@ public class RecentChangesLabelProvider extends LabelProvider {
       if (type == TYPE.DELETED) {
         return this.imgDeleted;
       }
-      return CloudBeesDevUiPlugin.getImage(CBImages.IMG_FILE);
+      return CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_FILE);
     }
 
     return super.getImage(element);
