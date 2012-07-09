@@ -13,7 +13,9 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
 
   public Job[] jobs;
 
-  //public Job[] views;
+  public View[] views;
+  
+  public PrimaryView primaryView;
   
   public String name;
 
@@ -151,5 +153,10 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
     public String getUrl();
     public String getState();
   }
-  
+
+  public static class PrimaryView {
+    public String name;
+    public String url;
+  }
+
 }

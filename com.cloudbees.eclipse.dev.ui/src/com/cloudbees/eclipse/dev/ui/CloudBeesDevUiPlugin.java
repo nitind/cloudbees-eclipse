@@ -29,7 +29,6 @@ import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
-import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance.STATUS;
 import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
@@ -164,6 +163,10 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
     reg.put(CBDEVImages.IMG_VIEW,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_big.png")));
+    
+    reg.put(CBDEVImages.IMG_VIEWR2,
+        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_bigr2.png")));
+    
     //reg.put(CBImages.IMG_VIEW, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/det_pane_hide.gif")));
 
     reg.put(CBDEVImages.IMG_FILE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/file_obj.gif")));
@@ -240,7 +243,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     return pl != null ? pl.getImageRegistry().getDescriptor(imgKey) : null;
   }
 
-  public void showJobs(final String viewUrl, final boolean userAction) throws CloudBeesException {
+  private void showJobsForHash(final String viewUrl, final boolean userAction, final String hash) throws CloudBeesException {
     // CloudBeesUIPlugin.getDefault().getLogger().info("Show jobs: " + viewUrl);
     //System.out.println("Show jobs: " + viewUrl);
 
@@ -262,14 +265,11 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
               try {
                 IWorkbenchPage activePage = CloudBeesUIPlugin.getActiveWindow().getActivePage();
 
-                int hashCode;
-                hashCode = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getUrl().hashCode();
-
-                String urlHash = Long.toString(hashCode);
+                //hashCode = viewUrl.hashCode();
 
                 int mode = userAction ? IWorkbenchPage.VIEW_ACTIVATE : IWorkbenchPage.VIEW_CREATE;
 
-                IViewPart view = activePage.showView(JobsView.ID, urlHash, mode);
+                IViewPart view = activePage.showView(JobsView.ID, hash, mode);
 
               } catch (PartInitException e) {
                 CloudBeesUIPlugin.showError("Failed to show Jobs view", e);
@@ -307,6 +307,12 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     if (CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
       job.schedule();
     }
+}
+  
+  public void showJobs(final String viewUrl, final boolean userAction) throws CloudBeesException {
+    String urlHash = Long.toString(CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getUrl().hashCode());
+
+    showJobsForHash(viewUrl, userAction, urlHash);
   }
 
   public void showView(final String viewId) {

@@ -177,6 +177,12 @@ public class JobSorter extends ViewerSorter {
 
   private int compJob(final JobViewGeneric j1, final JobViewGeneric j2) {
     try {
+      if (j1 instanceof Job && j2 instanceof View) {
+        return 1;
+      }
+      if (j2 instanceof Job && j1 instanceof View) {
+        return -1;
+      }
       return j1.getName().compareToIgnoreCase(j2.getName());
     } catch (Exception e) {
       e.printStackTrace(); // TODO handle better
