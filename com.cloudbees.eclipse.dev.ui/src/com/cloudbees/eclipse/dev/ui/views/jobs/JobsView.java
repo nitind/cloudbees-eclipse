@@ -17,15 +17,17 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -36,6 +38,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PlatformUI;
@@ -71,7 +75,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
   public static final String ID = "com.cloudbees.eclipse.dev.ui.views.jobs.JobsView";
 
-  private TableViewer table;
+  private TreeViewer table;
 
   protected ReloadJobsAction actionReloadJobs;
   private InvokeBuildAction actionInvokeBuild;
@@ -94,6 +98,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
   protected Object selectedJob;
 
+  private Tree jobsTree;
+
   public JobsView() {
     super();
   }
@@ -109,12 +115,14 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     this.actionOpenLastBuildDetails.setBuild(this.selectedJob instanceof Job ? ((Job) this.selectedJob).lastBuild
         : null);
     this.actionOpenLog.setBuild(this.selectedJob instanceof Job ? ((Job) this.selectedJob).lastBuild : null);
-    this.actionDeleteJob.setEnabled(this.selectedJob instanceof Job && ((Job)this.selectedJob).color!=null);
+    this.actionDeleteJob.setEnabled(this.selectedJob instanceof Job && ((Job) this.selectedJob).color != null);
     this.actionOpenJobInBrowser.setEnabled(enable);
-    this.actionOpenBuildHistory.setViewUrl(this.selectedJob instanceof Job && ((Job)this.selectedJob).color!=null? ((Job) this.selectedJob).url : null);
-    
+    this.actionOpenBuildHistory
+        .setViewUrl(this.selectedJob instanceof Job && ((Job) this.selectedJob).color != null ? ((Job) this.selectedJob).url
+            : null);
+
     //FIXME color!=null is currently the only known way to know if this job is not a folder. 
-    this.actionOpenBuildHistory.setEnabled(this.selectedJob instanceof Job && ((Job)this.selectedJob).color!=null);
+    this.actionOpenBuildHistory.setEnabled(this.selectedJob instanceof Job && ((Job) this.selectedJob).color != null);
 
   }
 
@@ -145,29 +153,29 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       String label = ss.getLabel();
 
       String viewInfo = "";
-      String post="";
+      String post = "";
       if (newView.name != null && newView.name.length() > 0 && label != null && !newView.name.equals(label)) {
         viewInfo = newView.name + " [";
-        post="#"+newView.name;
+        post = "#" + newView.name;
       }
       setContentDescription(viewInfo + label + (viewInfo.length() > 0 ? "]" : "") + " (" + new Date() + ")");
-      setPartName("Build Jobs [" + label +post+ "]");
+      setPartName("Build Jobs [" + label + post + "]");
 
       List<JenkinsJobsResponse.JobViewGeneric> reslist = new ArrayList<JobViewGeneric>();
 
       // Also add views if it's not the main url
-      if (!newView.viewUrl.equals(ss.getUrl()+"/") && newView.views!=null){
-        
+      if (!newView.viewUrl.equals(ss.getUrl() + "/") && newView.views != null) {
+
         for (View view : newView.views) {
-          if (view.url!=null && (newView.primaryView==null || !view.url.equals(newView.primaryView.url))){ 
-            reslist.add(view);  
+          if (view.url != null && (newView.primaryView == null || !view.url.equals(newView.primaryView.url))) {
+            reslist.add(view);
           }
         }
-        
+
       }
 
-      if (newView.jobs!=null) {
-      reslist.addAll(Arrays.asList(newView.jobs));
+      if (newView.jobs != null) {
+        reslist.addAll(Arrays.asList(newView.jobs));
       }
       this.contentProvider.inputChanged(this.table, null, reslist);
 
@@ -271,121 +279,33 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     initImages();
 
-    this.table = new TableViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION
+    jobsTree = new Tree(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION);
+    jobsTree.setHeaderVisible(true);
+
+    this.table = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION
     /*SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL*/);
     //Tree tree = viewer.getTree();
     //tree.setHeaderVisible(true);
 
-    //table.getTable().setLinesVisible(true);
-    this.table.getTable().setHeaderVisible(true);
+    //jobsTree.setLinesVisible(true);
+    //this.jobsTree.setHeaderVisible(true);
+    table.setLabelProvider(new TableLabelProvider());
 
-    TableViewerColumn statusCol = createColumn("S", 22, JobSorter.STATE, new CellLabelProvider() {
-      @Override
-      public void update(final ViewerCell cell) {
+    TreeColumn statusCol = createColumn("S", 22, JobSorter.STATE);
+    statusCol.setToolTipText("Status");
+    TreeColumn namecol = createColumn("Job", 250, JobSorter.JOB);
+    createColumn("Build stability", 250, JobSorter.BUILD_STABILITY);
+    createColumn("Last build", 150, JobSorter.LAST_BUILD);    
+    createColumn("Last success", 150, JobSorter.LAST_SUCCESS);
+    createColumn("Last failure", 150, JobSorter.LAST_FAILURE);
 
-        Object elem = cell.getViewerRow().getElement();
-        if (elem instanceof Job) {
-          JenkinsJobsResponse.Job job = (Job) elem;
-
-          String key = job.color;
-
-          /*        ImageData[] imageDatas = new ImageLoader().load(new FileInputStream("myAnimated.gif"));
-                  Image[] images = new Image[imageDatas.length];
-                  for (int n = 0; n < imageDatas.length; n++) {
-                    // images[n] = new Image(myTable.getDislay(), imageDatas[n]);
-                  }
-           */
-          if (job.color != null && job.color.contains("_")) {
-            key = job.color.substring(0, job.color.indexOf("_"));
+    /*    createColumn("Comment", 100, new CellLabelProvider() {
+          public void update(ViewerCell cell) {
+            JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
+            cell.setText("n/a");
           }
-
-          if (key == null || key.length() == 0) {
-            // assume it's folder as it's the only way to know
-            key = "folder";
-          }
-
-          Image img = JobsView.this.stateIcons.get(key);
-
-          if (img != null) {
-            cell.setText("");
-            cell.setImage(img);
-          } else {
-            cell.setImage(null);
-            cell.setText(job.color);
-          }
-
-        } else if (elem instanceof View) {
-          cell.setText("");
-          cell.setImage(CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_VIEWR2));
-        }
-      }
-
-      @Override
-      public String getToolTipText(final Object element) {
-        if (element instanceof Job) {
-          JenkinsJobsResponse.Job job = (Job) element;
-          return job.color;
-        }
-        return "";
-      }
-
-    });
-    statusCol.getColumn().setToolTipText("Status");
-
-    //TODO i18n
-    TableViewerColumn namecol = createColumn("Job", 250, JobSorter.JOB, new CellLabelProvider() {
-      @Override
-      public void update(final ViewerCell cell) {
-        Object elem = cell.getViewerRow().getElement();
-        if (elem instanceof Job) {
-          JenkinsJobsResponse.Job job = (Job) elem;
-          String val = job.getDisplayName();
-          if (job.inQueue != null && job.inQueue) {
-            val = val + " (in queue)";
-          } else if (job.color != null && job.color.indexOf('_') > 0) {
-            val = val + " (running)";
-          }
-          cell.setText(val);
-        } else if (elem instanceof View) {
-          String txt = ((View) elem).name;
-          if (txt != null) {
-            cell.setText(txt);
-          }
-        }
-      }
-    });
-
-    createColumn("Build stability", 250, JobSorter.BUILD_STABILITY, new CellLabelProvider() {
-      @Override
-      public void update(final ViewerCell cell) {
-
-        Object elem = cell.getViewerRow().getElement();
-        if (elem instanceof Job) {
-          JenkinsJobsResponse.Job job = (Job) elem;
-
-          cell.setText("");
-          cell.setImage(null);
-
-          try {
-            if (job.healthReport != null) {
-              for (int h = 0; h < job.healthReport.length; h++) {
-                String icon = job.healthReport[h].iconUrl;
-                String desc = job.healthReport[h].description;
-                String matchStr = "Build stability: ";
-                if (desc != null && desc.startsWith(matchStr)) {
-                  cell.setText(" " + desc.substring(matchStr.length()));
-                  cell.setImage(CloudBeesDevUiPlugin
-                      .getImage(CBDEVImages.IMG_HEALTH_PREFIX + CBDEVImages.IMG_16 + icon));
-                }
-              }
-            }
-          } catch (Throwable t) {
-            t.printStackTrace();
-          }
-        }
-
-      }
-    });
+        });
+     */
 
     /*    createColumn("Last build result", 100, new CellLabelProvider() {
           public void update(ViewerCell cell) {
@@ -401,58 +321,6 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
           }
         });
      */
-    createColumn("Last build", 150, JobSorter.LAST_BUILD, new CellLabelProvider() {
-      @Override
-      public void update(final ViewerCell cell) {
-        Object elem = cell.getViewerRow().getElement();
-        if (elem instanceof Job) {
-          JenkinsJobsResponse.Job job = (Job) elem;
-        try {
-          cell.setText(JobsView.this.formatBuildInfo(job.lastBuild));
-        } catch (Throwable t) {
-          cell.setText("");
-        }
-      }
-      }
-    });
-    createColumn("Last success", 150, JobSorter.LAST_SUCCESS, new CellLabelProvider() {
-      @Override
-      public void update(final ViewerCell cell) {
-        Object elem = cell.getViewerRow().getElement();
-        if (elem instanceof Job) {
-          JenkinsJobsResponse.Job job = (Job) elem;
-
-        try {
-          cell.setText(JobsView.this.formatBuildInfo(job.lastSuccessfulBuild));
-        } catch (Throwable t) {
-          cell.setText("");
-        }
-      }}
-    });
-    createColumn("Last failure", 150, JobSorter.LAST_FAILURE, new CellLabelProvider() {
-      @Override
-      public void update(final ViewerCell cell) {
-        Object elem = cell.getViewerRow().getElement();
-        if (elem instanceof Job) {
-          JenkinsJobsResponse.Job job = (Job) elem;
-
-        try {
-          cell.setText(JobsView.this.formatBuildInfo(job.lastFailedBuild));
-        } catch (Throwable t) {
-          cell.setText("");
-        }
-        }
-      }
-    });
-
-    /*    createColumn("Comment", 100, new CellLabelProvider() {
-          public void update(ViewerCell cell) {
-            JenkinsJobsResponse.Job job = (Job) cell.getViewerRow().getElement();
-            cell.setText("n/a");
-          }
-        });
-     */
-
     this.contentProvider = new JobsContentProvider();
 
     this.table.setContentProvider(this.contentProvider);
@@ -485,7 +353,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
             //assuming it's a folder..
             if (job.color == null || job.color.length() == 0) {
               try {
-                String hash = job.url.hashCode()+"";
+                String hash = job.url.hashCode() + "";
                 CloudBeesDevUiPlugin.getDefault().showJobs(job.url, false);
               } catch (CloudBeesException e) {
                 //ignore for now
@@ -497,12 +365,12 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
           } else if (el instanceof View) {
             try {
-              String hash = ((View) el).getUrl().hashCode()+"";
+              String hash = ((View) el).getUrl().hashCode() + "";
               CloudBeesDevUiPlugin.getDefault().showJobs(((View) el).getUrl(), false);
             } catch (CloudBeesException e) {
               //ignore for now
               CloudBeesDevUiPlugin.logError(e);
-            }           
+            }
           }
         }
 
@@ -510,8 +378,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     });
 
-    this.table.getTable().setSortColumn(namecol.getColumn());
-    this.table.getTable().setSortDirection(SWT.DOWN);
+    this.jobsTree.setSortColumn(namecol);
+    this.jobsTree.setSortDirection(SWT.DOWN);
 
     makeActions();
     contributeToActionBars();
@@ -529,8 +397,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     popupMenu.add(new Separator());
     popupMenu.add(this.actionReloadJobs);
 
-    Menu menu = popupMenu.createContextMenu(this.table.getTable());
-    this.table.getTable().setMenu(menu);
+    Menu menu = popupMenu.createContextMenu(this.jobsTree);
+    this.jobsTree.setMenu(menu);
 
     this.table.addPostSelectionChangedListener(new ISelectionChangedListener() {
 
@@ -599,15 +467,12 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
             .createImage());
   }
 
-  private TableViewerColumn createColumn(final String colName, final int width,
-      final CellLabelProvider cellLabelProvider) {
-    return createColumn(colName, width, -1, cellLabelProvider);
+  private TreeColumn createColumn(final String colName, final int width) {
+    return createColumn(colName, width, -1);
   }
 
-  private TableViewerColumn createColumn(final String colName, final int width, final int sortCol,
-      final CellLabelProvider cellLabelProvider) {
-    final TableViewerColumn treeViewerColumn = new TableViewerColumn(this.table, SWT.NONE);
-    TableColumn col = treeViewerColumn.getColumn();
+  private TreeColumn createColumn(final String colName, final int width, final int sortCol) {
+    final TreeColumn col = new TreeColumn(jobsTree, SWT.NONE);
 
     if (width > 0) {
       col.setWidth(width);
@@ -616,30 +481,28 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     col.setText(colName);
     col.setMoveable(true);
 
-    treeViewerColumn.setLabelProvider(cellLabelProvider);
-
     if (sortCol >= 0) {
 
-      treeViewerColumn.getColumn().addSelectionListener(new SelectionAdapter() {
+      col.addSelectionListener(new SelectionAdapter() {
         @Override
         public void widgetSelected(final SelectionEvent e) {
 
           int newOrder = SWT.DOWN;
 
-          if (JobsView.this.table.getTable().getSortColumn().equals(treeViewerColumn.getColumn())
-              && JobsView.this.table.getTable().getSortDirection() == SWT.DOWN) {
+          if (JobsView.this.jobsTree.getSortColumn().equals(col)
+              && JobsView.this.jobsTree.getSortDirection() == SWT.DOWN) {
             newOrder = SWT.UP;
           }
 
-          JobsView.this.table.getTable().setSortColumn(treeViewerColumn.getColumn());
-          JobsView.this.table.getTable().setSortDirection(newOrder);
+          JobsView.this.jobsTree.setSortColumn(col);
+          JobsView.this.jobsTree.setSortDirection(newOrder);
           JobSorter newSorter = new JobSorter(sortCol);
           newSorter.setDirection(newOrder);
           JobsView.this.table.setSorter(newSorter);
         }
       });
     }
-    return treeViewerColumn;
+    return col;
   }
 
   private void contributeToActionBars() {
@@ -752,6 +615,212 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       img.dispose();
     }
     this.stateIcons.clear();
+  }
+
+  class TableLabelProvider implements ITableLabelProvider {
+
+    @Override
+    public void addListener(ILabelProviderListener listener) {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void dispose() {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public boolean isLabelProperty(Object element, String property) {
+      // TODO Auto-generated method stub
+      return false;
+    }
+
+    @Override
+    public void removeListener(ILabelProviderListener listener) {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public Image getColumnImage(Object elem, int columnIndex) {
+      switch (columnIndex) {
+      case 0:
+        return getColStateImg(elem);
+      case 2:
+        return getColStabilityImg(elem);
+      }
+      return null;
+    }
+
+    /*status, job, stability, last b, s, f*/
+    public String getColumnText(Object elem, int columnIndex) {
+      switch (columnIndex) {
+      case 0:
+        return getColStateText(elem);
+      case 1:
+        return getColJobText(elem);
+      case 2:
+        return getColStabilityText(elem);
+      case 3:
+        return getColLastBuildText(elem);
+      case 4:
+        return getColLastSuccessText(elem);
+      case 5:
+        return getColLastFailText(elem);
+      }
+      return null;
+    }
+
+  }
+
+  private String getColStateText(Object elem) {
+    if (elem instanceof Job) {
+      JenkinsJobsResponse.Job job = (Job) elem;
+
+      String key = job.color;
+      if (job.color != null && job.color.contains("_")) {
+        key = job.color.substring(0, job.color.indexOf("_"));
+      }
+
+      if (key == null || key.length() == 0) {
+        // assume it's folder as it's the only way to know
+        key = "folder";
+      }
+
+      Image img = JobsView.this.stateIcons.get(key);
+
+      if (img != null) {
+        return "";
+      } else {
+        return job.color;
+      }
+
+    } else if (elem instanceof View) {
+      return "";
+    }
+    return "";
+  }
+
+  private Image getColStateImg(Object elem) {
+    if (elem instanceof Job) {
+      JenkinsJobsResponse.Job job = (Job) elem;
+
+      String key = job.color;
+      if (job.color != null && job.color.contains("_")) {
+        key = job.color.substring(0, job.color.indexOf("_"));
+      }
+
+      if (key == null || key.length() == 0) {
+        // assume it's folder as it's the only way to know
+        key = "folder";
+      }
+
+      Image img = JobsView.this.stateIcons.get(key);
+
+      return img;
+
+    } else if (elem instanceof View) {
+      return CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_VIEWR2);
+    }
+    return null;
+  }
+
+  private String getColJobText(Object elem) {
+    if (elem instanceof Job) {
+      JenkinsJobsResponse.Job job = (Job) elem;
+      String val = job.getDisplayName();
+      if (job.inQueue != null && job.inQueue) {
+        val = val + " (in queue)";
+      } else if (job.color != null && job.color.indexOf('_') > 0) {
+        val = val + " (running)";
+      }
+      return val;
+    } else if (elem instanceof View) {
+      String txt = ((View) elem).name;
+      if (txt != null) {
+        return txt;
+      }
+    }
+
+    return "";
+  }
+
+  private String getColStabilityText(Object elem) {
+    if (elem instanceof Job) {
+      JenkinsJobsResponse.Job job = (Job) elem;
+
+      try {
+        if (job.healthReport != null) {
+          for (int h = 0; h < job.healthReport.length; h++) {
+            String desc = job.healthReport[h].description;
+            String matchStr = "Build stability: ";
+            if (desc != null && desc.startsWith(matchStr)) {
+              return " " + desc.substring(matchStr.length());
+            }
+          }
+        }
+      } catch (Throwable t) {
+        t.printStackTrace();
+      }
+
+    }
+    return "";
+  }
+
+  private Image getColStabilityImg(Object elem) {
+    if (elem instanceof Job) {
+      JenkinsJobsResponse.Job job = (Job) elem;
+
+      try {
+        if (job.healthReport != null) {
+          for (int h = 0; h < job.healthReport.length; h++) {
+            String icon = job.healthReport[h].iconUrl;
+            String desc = job.healthReport[h].description;
+            String matchStr = "Build stability: ";
+            if (desc != null && desc.startsWith(matchStr)) {
+              return CloudBeesDevUiPlugin.getImage(CBDEVImages.IMG_HEALTH_PREFIX + CBDEVImages.IMG_16 + icon);
+            }
+          }
+        }
+      } catch (Throwable t) {
+        t.printStackTrace();
+      }
+    }
+    return null;
+  }
+  
+  private String getColLastBuildText(Object elem) {
+    if (elem instanceof Job) {
+      JenkinsJobsResponse.Job job = (Job) elem;
+      try {
+        return JobsView.this.formatBuildInfo(job.lastBuild);
+      } catch (Throwable t) {
+      }      
+    }
+    return "";
+  }
+  
+  private String getColLastSuccessText(Object elem) {
+    if (elem instanceof Job) {
+      JenkinsJobsResponse.Job job = (Job) elem;
+      try {
+        return JobsView.this.formatBuildInfo(job.lastSuccessfulBuild);
+      } catch (Throwable t) {
+      }      
+    }
+    return "";
+  }
+  private String getColLastFailText(Object elem) {
+    if (elem instanceof Job) {
+      JenkinsJobsResponse.Job job = (Job) elem;
+      try {
+        return JobsView.this.formatBuildInfo(job.lastFailedBuild);
+      } catch (Throwable t) {
+      }      
+    }
+    return "";
   }
 
 }
