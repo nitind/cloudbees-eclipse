@@ -72,6 +72,36 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
     public String getState() {
       return "v";
     }
+    
+    @Override
+    public int hashCode() {
+      final int prime = 311;
+      int result = 1;
+      result = prime * result + (this.url == null ? 0 : this.url.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (!(obj instanceof View)) {
+        return false;
+      }
+      View other = (View) obj;
+      if (this.url == null) {
+        if (other.url != null) {
+          return false;
+        }
+      } else if (!this.url.equals(other.url)) {
+        return false;
+      }
+      return true;
+    }
   }
   
   public static class Job implements JobViewGeneric {

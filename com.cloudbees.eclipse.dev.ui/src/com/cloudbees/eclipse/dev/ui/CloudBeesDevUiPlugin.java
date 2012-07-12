@@ -243,12 +243,12 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     return pl != null ? pl.getImageRegistry().getDescriptor(imgKey) : null;
   }
 
-  private void showJobsForHash(final String viewUrl, final boolean userAction, final String hash) throws CloudBeesException {
+  private org.eclipse.core.runtime.jobs.Job showJobsForHash(final String viewUrl, final boolean userAction, final String hash) throws CloudBeesException {
     // CloudBeesUIPlugin.getDefault().getLogger().info("Show jobs: " + viewUrl);
     //System.out.println("Show jobs: " + viewUrl);
 
     if (viewUrl == null) {
-      return; // no info
+      return null; // no info
     }
 
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Jenkins jobs") {
@@ -307,12 +307,15 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     if (CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
       job.schedule();
     }
+    
+    return job;
+    
 }
   
-  public void showJobs(final String viewUrl, final boolean userAction) throws CloudBeesException {
+  public org.eclipse.core.runtime.jobs.Job showJobs(final String viewUrl, final boolean userAction) throws CloudBeesException {
     String urlHash = Long.toString(CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getUrl().hashCode());
 
-    showJobsForHash(viewUrl, userAction, urlHash);
+    return showJobsForHash(viewUrl, userAction, urlHash);
   }
 
   public void showView(final String viewId) {
