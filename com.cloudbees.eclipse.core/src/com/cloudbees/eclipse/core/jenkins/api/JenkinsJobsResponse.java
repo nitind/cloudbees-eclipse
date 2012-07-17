@@ -15,7 +15,7 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
 
   public View[] views;
   
-  public PrimaryView primaryView;
+  public View primaryView;
   
   public String name;
 
@@ -59,7 +59,15 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
   public static class View implements JobViewGeneric {
     public String name;
     public String url;
-    public String description;
+    
+    public Job[] jobs;
+    
+    //public String description;
+    
+    @Override
+    public String toString() {
+      return "View["+name+"]";
+    }
     
     public String getName() {
       return name;
@@ -126,6 +134,11 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
 
     public JenkinsJobProperty[] property;
 
+    @Override
+    public String toString() {
+      return "Job["+name+"]";
+    }
+    
     public String getName() {
       return name;
     }
@@ -184,9 +197,9 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
     public String getState();
   }
 
-  public static class PrimaryView {
+/*  public static class PrimaryView {
     public String name;
     public String url;
   }
-
+*/
 }

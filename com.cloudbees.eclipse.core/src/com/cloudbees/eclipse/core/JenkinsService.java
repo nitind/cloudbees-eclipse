@@ -78,7 +78,7 @@ public class JenkinsService {
         reqUrl += "/";
       }
 
-      String uri = reqUrl + "api/json?tree=" + JenkinsJobsResponse.QTREE;
+      String uri = reqUrl + "api/json?tree=" + JenkinsJobsResponse.QTREE/*+"&depth=1"*/;
       
       HttpPost post = new HttpPost(uri);
       post.setHeader("Accept", "application/json");
@@ -104,6 +104,10 @@ public class JenkinsService {
         views.viewUrl = viewUrl;
       }
 
+      if (views.jobs==null && views.primaryView.jobs!=null) {
+        views.jobs = views.primaryView.jobs;
+      }
+      
       monitor.worked(4);
 
       return views;
