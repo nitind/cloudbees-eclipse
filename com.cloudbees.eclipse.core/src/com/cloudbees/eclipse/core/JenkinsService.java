@@ -78,11 +78,16 @@ public class JenkinsService {
         reqUrl += "/";
       }
 
-      String uri = reqUrl + "api/json?tree=" + JenkinsJobsResponse.QTREE/*+"&depth=1"*/;
+      String uri = reqUrl + "api/json";
       
       HttpPost post = new HttpPost(uri);
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
+      
+      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+      nameValuePairs.add(new BasicNameValuePair("tree", JenkinsJobsResponse.QTREE));
+      post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+      
       monitor.worked(1);
 
       DefaultHttpClient httpclient = Utils.getAPIClient(uri);
@@ -136,7 +141,7 @@ public class JenkinsService {
     if (!reqUrl.endsWith("/")) {
       reqUrl += "/";
     }
-    reqUrl += "api/json?tree=" + JenkinsInstanceResponse.QTREE;
+    reqUrl += "api/json";
 
     try {
       Gson g = Utils.createGson();
@@ -144,6 +149,10 @@ public class JenkinsService {
       HttpPost post = new HttpPost(reqUrl);
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
+
+      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+      nameValuePairs.add(new BasicNameValuePair("tree", JenkinsInstanceResponse.QTREE));
+      post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
       DefaultHttpClient httpclient = Utils.getAPIClient(reqUrl);
 
@@ -267,7 +276,7 @@ public class JenkinsService {
       reqUrl = reqUrl + "/";
     }
 
-    String reqStr = reqUrl + "api/json?tree=" + JenkinsBuildDetailsResponse.QTREE;
+    String reqStr = reqUrl + "api/json";
 
     try {
 
@@ -276,6 +285,9 @@ public class JenkinsService {
       HttpPost post = new HttpPost(reqStr);
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
+      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+      nameValuePairs.add(new BasicNameValuePair("tree", JenkinsBuildDetailsResponse.QTREE));
+      post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
       DefaultHttpClient httpclient = Utils.getAPIClient(reqStr);
 
@@ -344,7 +356,7 @@ public class JenkinsService {
       reqUrl = reqUrl + "/";
     }
 
-    String reqStr = reqUrl + "api/json?tree=" + JenkinsJobAndBuildsResponse.QTREE;
+    String reqStr = reqUrl + "api/json";
 
     try {
 
@@ -353,7 +365,10 @@ public class JenkinsService {
       HttpPost post = new HttpPost(reqStr);
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
-
+      List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+      nameValuePairs.add(new BasicNameValuePair("tree", JenkinsJobAndBuildsResponse.QTREE));
+      post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+      
       DefaultHttpClient httpclient = Utils.getAPIClient(reqStr);
       String bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 10));
 
