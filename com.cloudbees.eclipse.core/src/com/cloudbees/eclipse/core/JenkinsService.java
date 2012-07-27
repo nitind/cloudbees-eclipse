@@ -2,12 +2,14 @@ package com.cloudbees.eclipse.core;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -39,7 +41,7 @@ import com.google.gson.Gson;
 
 /**
  * Service to access Jenkins instances
- *
+ * 
  * @author ahti
  */
 public class JenkinsService {
@@ -79,15 +81,15 @@ public class JenkinsService {
       }
 
       String uri = reqUrl + "api/json";
-      
+
       HttpPost post = new HttpPost(uri);
       post.setHeader("Accept", "application/json");
       post.setHeader("Content-type", "application/json");
-      
+
       List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
       nameValuePairs.add(new BasicNameValuePair("tree", JenkinsJobsResponse.QTREE));
       post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-      
+
       monitor.worked(1);
 
       DefaultHttpClient httpclient = Utils.getAPIClient(uri);
@@ -109,10 +111,10 @@ public class JenkinsService {
         views.viewUrl = viewUrl;
       }
 
-      if (views.jobs==null && views.primaryView.jobs!=null) {
+      if (views.jobs == null && views.primaryView.jobs != null) {
         views.jobs = views.primaryView.jobs;
       }
-      
+
       monitor.worked(4);
 
       return views;
@@ -127,9 +129,9 @@ public class JenkinsService {
 
   private void assertCorrectUrl(String viewUrl) throws CloudBeesException {
     if (viewUrl != null && !viewUrl.startsWith(this.jenkins.url)) {
-      if (viewUrl != null && this.jenkins.alternativeUrl!=null && !viewUrl.startsWith(this.jenkins.alternativeUrl)) {
+      if (viewUrl != null && this.jenkins.alternativeUrl != null && !viewUrl.startsWith(this.jenkins.alternativeUrl)) {
         throw new CloudBeesException("Unexpected url provided! Service url: " + this.jenkins.url + "; view url: "
-          + viewUrl);
+            + viewUrl);
       }
     }
   }
@@ -169,7 +171,7 @@ public class JenkinsService {
         response.atCloud = this.jenkins.atCloud;
 
         jenkins.alternativeUrl = response.primaryView.url; // Initializing jenkins instance alternativeUrl for lookups. Not perfectly nice solution in terms of reverse logic but looks like most feasible atm.
-        
+
         if (response.views != null) {
           for (int i = 0; i < response.views.length; i++) {
             response.views[i].response = response;
@@ -200,39 +202,51 @@ public class JenkinsService {
       CloudBeesException, Exception {
     Object bodyResponse = null;
 
+    if (this.jenkins.username != null && this.jenkins.username.trim().length() > 0 && this.jenkins.password != null
+        && this.jenkins.password.trim().length() > 0) {
+      post.addHeader("Authorization", "Basic " + Utils.toB64(this.jenkins.username + ":" + this.jenkins.password));
+    }
 
-      if (this.jenkins.username != null && this.jenkins.username.trim().length() > 0 && this.jenkins.password != null
-          && this.jenkins.password.trim().length() > 0) {    	  
-    	  post.addHeader("Authorization", "Basic " + Utils.toB64(this.jenkins.username + ":" + this.jenkins.password));    	  
+    List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+    if (params != null) {
+      nvps.addAll(params);
+    }
+
+    if (post instanceof HttpEntityEnclosingRequest) {
+      if (((HttpEntityEnclosingRequest) post).getEntity() == null) {
+        ((HttpEntityEnclosingRequest) post).setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
       }
+    }
 
-      List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-      if (params != null) {
-        nvps.addAll(params);
+    CloudBeesCorePlugin.getDefault().getLogger().info("Jenkins request: " + post.getURI());
+
+    if (post instanceof HttpPost) {
+      HttpPost pp = (HttpPost) post;
+
+      String s;
+      try {        
+        s = new Scanner(pp.getEntity().getContent()).useDelimiter("\\A").next();
+      } catch (java.util.NoSuchElementException e) {
+        s = "";
       }
+      CloudBeesCorePlugin.getDefault().getLogger().info("Jenkins request post params: " + s);
+      
+    }
 
-      if (post instanceof HttpEntityEnclosingRequest) {
-        if (((HttpEntityEnclosingRequest) post).getEntity() == null) {
-          ((HttpEntityEnclosingRequest) post).setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
-        }
-      }
+    HttpResponse resp = httpclient.execute(post);
+    switch (responseType) {
+    case STRING:
+      bodyResponse = Utils.getResponseBody(resp);
+      break;
+    case STREAM:
+      bodyResponse = resp.getEntity().getContent();
+      break;
+    case HTTP:
+      bodyResponse = resp;
+      break;
+    }
 
-      CloudBeesCorePlugin.getDefault().getLogger().info("Retrieve: " + post.getURI());
-
-      HttpResponse resp = httpclient.execute(post);
-      switch (responseType) {
-      case STRING:
-        bodyResponse = Utils.getResponseBody(resp);
-        break;
-      case STREAM:
-        bodyResponse = resp.getEntity().getContent();
-        break;
-      case HTTP:
-        bodyResponse = resp;
-        break;
-      }
-
-      Utils.checkResponseCode(resp, expectRedirect, jenkins.atCloud);
+    Utils.checkResponseCode(resp, expectRedirect, jenkins.atCloud);
 
     return bodyResponse;
   }
@@ -253,7 +267,7 @@ public class JenkinsService {
   public String getAlternativeUrl() {
     return this.jenkins.alternativeUrl;
   }
-  
+
   @Override
   public String toString() {
     if (this.jenkins != null) {
@@ -267,7 +281,7 @@ public class JenkinsService {
     monitor.setTaskName("Fetching Job details...");
 
     assertCorrectUrl(jobUrl);
-    
+
     StringBuffer errMsg = new StringBuffer();
 
     String reqUrl = jobUrl;
@@ -368,7 +382,7 @@ public class JenkinsService {
       List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
       nameValuePairs.add(new BasicNameValuePair("tree", JenkinsJobAndBuildsResponse.QTREE));
       post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-      
+
       DefaultHttpClient httpclient = Utils.getAPIClient(reqStr);
       String bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 10));
 
@@ -521,13 +535,13 @@ public class JenkinsService {
       String url = this.jenkins.url.endsWith("/") ? this.jenkins.url : this.jenkins.url + "/";
 
       String reqUrl = url + "createItem?name=" + encodedJobName;
-      
+
       HttpPost post = new HttpPost(reqUrl);
       StringEntity strEntity = new StringEntity(configXML, "application/xml", "UTF-8");
       post.setEntity(strEntity);
 
       DefaultHttpClient httpClient = Utils.getAPIClient(reqUrl);
-      
+
       monitor.setTaskName("Creating new Jenkins job...");
 
       retrieveWithLogin(httpClient, post, null, false, new SubProgressMonitor(monitor, 10));
@@ -544,13 +558,13 @@ public class JenkinsService {
       String url = joburl.endsWith("/") ? joburl : joburl + "/";
 
       String reqUrl = url + "doDelete";
-      
+
       HttpPost post = new HttpPost(reqUrl);
 
       post.setEntity(new StringEntity(""));
 
       DefaultHttpClient httpClient = Utils.getAPIClient(reqUrl);
-      
+
       monitor.setTaskName("Deleting Jenkins job...");
 
       retrieveWithLogin(httpClient, post, null, true, new SubProgressMonitor(monitor, 10));
