@@ -285,11 +285,13 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
           List<JenkinsInstanceResponse> resp = pollInstances(instances, new SubProgressMonitor(monitor, 740));
 
-          Iterator<CBRemoteChangeListener> iterator = CloudBeesUIPlugin.this.cbRemoteChangeListeners.iterator();
+          //unmodifiableList to avoid ConcurrentModificationException for multithread access
+          Iterator<CBRemoteChangeListener> iterator = Collections.unmodifiableList(CloudBeesUIPlugin.this.cbRemoteChangeListeners).iterator();
           while (iterator.hasNext()) {
             CBRemoteChangeListener listener = iterator.next();
             listener.jenkinsChanged(resp);
           }
+          
           monitor.worked(10);
 
           if (toReport != null) {
@@ -510,7 +512,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   public void fireApplicationInfoChanged() {
-    Iterator<ApplicationInfoChangeListener> iterator = this.applicationInfoChangeListeners.iterator();
+    Iterator<ApplicationInfoChangeListener> iterator = getApplicationInfoChangeListeners().iterator();
     while (iterator.hasNext()) {
       ApplicationInfoChangeListener listener = iterator.next();
       listener.applicationInfoChanged();
