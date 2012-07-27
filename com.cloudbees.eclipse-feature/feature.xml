@@ -50,6 +50,10 @@ Notwithstanding anything to the contrary contained herein, except for the limite
 6.13 Headings.  The headings in this Agreement are for purposes of reference only and will not in any way limit or affect the meaning or interpretation of any of the terms hereof.
    </license>
 
+   <url>
+      <update label="CloudBees Eclipse Toolkit" url="http://eclipse.cloudbees.com"/>
+   </url>
+
    <plugin
          id="com.cloudbees.eclipse.core"
          download-size="0"
@@ -62,7 +66,6 @@ Notwithstanding anything to the contrary contained herein, except for the limite
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
 
    <plugin
          id="com.cloudbees.eclipse.dev.core"
@@ -77,7 +80,7 @@ Notwithstanding anything to the contrary contained herein, except for the limite
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="com.cloudbees.eclipse.run.core"
          download-size="0"
