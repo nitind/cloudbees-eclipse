@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.cloudbees.eclipse.dev.scm.subversive"
-      label="CloudBees Forge SVN Integration (**SUBVERSIVE MUST BE INSTALLED!!**) (Optional)"
+      label="CloudBees Eclipse Toolkit SVN Support (**SUBVERSIVE MUST BE INSTALLED!!**) (Optional)"
       version="1.1.0.qualifier"
       provider-name="CloudBees, Inc">
 
