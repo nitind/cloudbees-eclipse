@@ -60,6 +60,7 @@ import com.cloudbees.eclipse.dev.ui.actions.OpenBuildAction;
 import com.cloudbees.eclipse.dev.ui.actions.OpenLogAction;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadBuildHistoryAction;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadJobsAction;
+import com.cloudbees.eclipse.dev.ui.views.forge.ForgeTreeView;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 
@@ -297,12 +298,19 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
             //assuming it's a folder..
             if (job.color == null || job.color.length() == 0) {
+              JobsView.this.toggle(el);
               return; // do nothing
             } else {
               CloudBeesDevUiPlugin.getDefault().showBuildForJob(job);
             }
 
           }
+          
+          if (el instanceof JenkinsJobsResponse.View) {
+            JobsView.this.toggle(el);
+            return; // do nothing
+          }
+          
         }
 
       }
@@ -349,6 +357,15 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     };
 
     CloudBeesUIPlugin.getDefault().addCBRemoteChangeListener(this.jenkinsChangeListener);
+  }
+
+  protected void toggle(Object el) {
+    boolean exp = treeViewer.getExpandedState(el);
+    if (exp) {
+      treeViewer.collapseToLevel(el, 1);
+    } else {
+      treeViewer.expandToLevel(el, 1);
+    }
   }
 
   protected String formatBuildInfo(final JenkinsBuild build) {

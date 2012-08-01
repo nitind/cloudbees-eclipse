@@ -9,7 +9,6 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 
-@SuppressWarnings("restriction")
 public class OpenBuildAction extends Action {
 
   private Object build;

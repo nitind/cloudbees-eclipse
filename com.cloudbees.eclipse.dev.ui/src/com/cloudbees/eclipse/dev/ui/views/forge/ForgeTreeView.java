@@ -7,8 +7,11 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.ui.IPageLayout;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
+import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.eclipse.core.CBRemoteChangeAdapter;
 import com.cloudbees.eclipse.core.CBRemoteChangeListener;
 import com.cloudbees.eclipse.core.CloudBeesException;
@@ -112,6 +115,26 @@ public class ForgeTreeView  extends CBTreeProvider implements IPropertyChangeLis
 
   @Override
   public boolean open(final Object el) {
+    
+    if (el instanceof ForgeGroup) {
+      boolean exp = ForgeTreeView.this.viewer.getExpandedState(el);
+      if (exp) {
+        ForgeTreeView.this.viewer.collapseToLevel(el, 1);
+      } else {
+        ForgeTreeView.this.viewer.expandToLevel(el, 1);
+      }
+      return true;
+    }
+
+    if (el instanceof ForgeInstance) {
+      try {
+        PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(IPageLayout.ID_PROP_SHEET);
+        return true;
+      } catch (PartInitException e) {
+        return false;
+      }
+    }
+
     return false;
   }
 

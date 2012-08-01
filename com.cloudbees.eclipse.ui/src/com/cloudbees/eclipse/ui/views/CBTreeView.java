@@ -34,7 +34,6 @@ import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.internal.ActiveAccountContributionItem;
 import com.cloudbees.eclipse.ui.internal.ConfigureSshKeysAction;
-import com.cloudbees.eclipse.ui.internal.action.ConfigureCloudBeesAction;
 import com.cloudbees.eclipse.ui.views.CBTreeSeparator.SeparatorLocation;
 
 public class CBTreeView extends ViewPart {
@@ -152,15 +151,14 @@ public class CBTreeView extends ViewPart {
 
           Object el = ((TreeSelection) sel).getFirstElement();
 
-          boolean opened = false;
+          //boolean opened = false;
           for (ICBTreeProvider provider : CBTreeView.this.providers) {
-            opened |= provider.open(el);
-            if (opened) {
+            //opened |= ;
+            if (provider.open(el)) {
               break;
             }
           }
-
-          if (!opened) {
+/*          if (!opened) {
             boolean exp = CBTreeView.this.viewer.getExpandedState(el);
             if (exp) {
               CBTreeView.this.viewer.collapseToLevel(el, 1);
@@ -168,7 +166,7 @@ public class CBTreeView extends ViewPart {
               CBTreeView.this.viewer.expandToLevel(el, 1);
             }
           }
-        }
+*/        }
       }
     });
 

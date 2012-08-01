@@ -26,8 +26,6 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 import com.cloudbees.eclipse.ui.views.CBTreeContributor;
 import com.cloudbees.eclipse.ui.views.CBTreeProvider;
-import com.cloudbees.eclipse.ui.views.CBTreeSeparator;
-import com.cloudbees.eclipse.ui.views.CBTreeSeparator.SeparatorLocation;
 import com.cloudbees.eclipse.ui.views.ICBTreeProvider;
 
 /**
@@ -128,13 +126,28 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
   }
 
   @Override
-  public boolean open(final Object object) {
-    try {
-      PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(IPageLayout.ID_PROP_SHEET);
-    } catch (PartInitException e) {
-      return false;
+  public boolean open(final Object el) {
+
+    if (el instanceof AppGroup) {
+      boolean exp = AppListView.this.viewer.getExpandedState(el);
+      if (exp) {
+        AppListView.this.viewer.collapseToLevel(el, 1);
+      } else {
+        AppListView.this.viewer.expandToLevel(el, 1);
+      }
+      return true;
     }
-    return true;
+
+    if (el instanceof ApplicationInfo) {
+      try {
+        PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(IPageLayout.ID_PROP_SHEET);
+        return true;
+      } catch (PartInitException e) {
+        return false;
+      }
+    }
+
+    return false;
   }
 
   @Override
@@ -147,7 +160,7 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading RUN@cloud applications list") {
 
       protected IStatus run(final IProgressMonitor monitor) {
-        try {      
+        try {
           ApplicationListResponse list = BeesSDK.getList();
           AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, list);
         } catch (Exception e1) {
@@ -155,12 +168,12 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
           CBRunUiActivator.logErrorAndShowDialog(e1);
         }
         return Status.OK_STATUS;
-        }
+      }
     };
-    
+
     job.setUser(userAction);
     job.schedule();
-    
+
   }
 
   @Override

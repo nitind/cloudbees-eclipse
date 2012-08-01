@@ -12,6 +12,10 @@ public interface ICBTreeProvider {
 
   ILabelProvider getLabelProvider();
 
+  /**
+   * @param object
+   * @return true if this provider handled the request and no further handling is required
+   */
   boolean open(Object object);
 
   void dispose();
