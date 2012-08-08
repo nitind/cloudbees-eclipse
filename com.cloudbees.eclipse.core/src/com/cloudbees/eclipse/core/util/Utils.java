@@ -127,8 +127,13 @@ public class Utils {
     try {
       HttpClientParams.setCookiePolicy(httpclient.getParams(), CookiePolicy.BROWSER_COMPATIBILITY);
 
-      HttpProtocolParams.setUserAgent(httpclient.getParams(), "CBEclipseToolkit/"
-          + CloudBeesCorePlugin.getDefault().getBundle().getVersion());
+      String version = null;
+      if (CloudBeesCorePlugin.getDefault() != null) {
+        version = CloudBeesCorePlugin.getDefault().getBundle().getVersion().toString();
+      } else {
+        version = "n/a";
+      }
+      HttpProtocolParams.setUserAgent(httpclient.getParams(), "CBEclipseToolkit/" + version);
 
       KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 
@@ -171,39 +176,41 @@ public class Utils {
       HttpConnectionParams.setConnectionTimeout(params, 10000);
       HttpConnectionParams.setSoTimeout(params, 10000);
 
-      IProxyService ps = CloudBeesCorePlugin.getDefault().getProxyService();
-      if (ps.isProxiesEnabled()) {
-        
-        IProxyData[] pr = ps.select(new URI(url));
-        
-        //NOTE! For now we use just the first proxy settings with type HTTP or HTTPS to try out the connection. If configuration has more than 1 conf then for now this likely won't work!
-        if (pr != null) {
-          for (int i = 0; i < pr.length; i++) {
-        
-            IProxyData prd = pr[i];
+      if (CloudBeesCorePlugin.getDefault() != null) { // exclude proxy support when running outside eclipse
+        IProxyService ps = CloudBeesCorePlugin.getDefault().getProxyService();
+        if (ps.isProxiesEnabled()) {
 
-            if (IProxyData.HTTP_PROXY_TYPE.equals(prd.getType()) || IProxyData.HTTPS_PROXY_TYPE.equals(prd.getType())) {
-              
-              String proxyHost = prd.getHost();
-              int proxyPort = prd.getPort();
-              String proxyUser = prd.getUserId();
-              String proxyPass = prd.getPassword();
+          IProxyData[] pr = ps.select(new URI(url));
 
-              HttpHost proxy = new HttpHost(proxyHost, proxyPort);
-              httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+          //NOTE! For now we use just the first proxy settings with type HTTP or HTTPS to try out the connection. If configuration has more than 1 conf then for now this likely won't work!
+          if (pr != null) {
+            for (int i = 0; i < pr.length; i++) {
 
-              if (prd.isRequiresAuthentication()) {
-                List authpref = new ArrayList();
-                authpref.add(AuthPolicy.BASIC);
-                AuthScope authScope = new AuthScope(proxyHost, proxyPort);
-                httpclient.getCredentialsProvider().setCredentials(authScope,
-                    new UsernamePasswordCredentials(proxyUser, proxyPass));
+              IProxyData prd = pr[i];
+
+              if (IProxyData.HTTP_PROXY_TYPE.equals(prd.getType()) || IProxyData.HTTPS_PROXY_TYPE.equals(prd.getType())) {
+
+                String proxyHost = prd.getHost();
+                int proxyPort = prd.getPort();
+                String proxyUser = prd.getUserId();
+                String proxyPass = prd.getPassword();
+
+                HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+                httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+
+                if (prd.isRequiresAuthentication()) {
+                  List authpref = new ArrayList();
+                  authpref.add(AuthPolicy.BASIC);
+                  AuthScope authScope = new AuthScope(proxyHost, proxyPort);
+                  httpclient.getCredentialsProvider().setCredentials(authScope,
+                      new UsernamePasswordCredentials(proxyUser, proxyPass));
+                }
+
+                break;
+
               }
 
-              break;
-
             }
-
           }
         }
       }
