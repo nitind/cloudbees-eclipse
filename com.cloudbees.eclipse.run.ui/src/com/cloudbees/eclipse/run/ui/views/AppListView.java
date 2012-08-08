@@ -48,6 +48,8 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
 
   private IStatusUpdater statusUpdater;
 
+  protected boolean loadfinished = true;
+
   public void init() {
 
     this.applicationChangeListener = new ApplicationInfoChangeListener() {
@@ -157,6 +159,10 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
   }
 
   private void refresh(boolean userAction) {
+    if (loadfinished==false) {
+      return;
+    }
+    
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading RUN@cloud applications list") {
 
       protected IStatus run(final IProgressMonitor monitor) {
@@ -166,12 +172,15 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
         } catch (Exception e1) {
           AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, null);
           CBRunUiActivator.logErrorAndShowDialog(e1);
+        } finally {
+          AppListView.this.loadfinished = true;
         }
         return Status.OK_STATUS;
       }
     };
 
     job.setUser(userAction);
+    AppListView.this.loadfinished = false;
     job.schedule();
 
   }
