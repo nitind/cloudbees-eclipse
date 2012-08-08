@@ -2,7 +2,6 @@ package com.cloudbees.eclipse.core;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -83,12 +82,15 @@ public class JenkinsService {
       String uri = reqUrl + "api/json";
 
       HttpPost post = new HttpPost(uri);
-      post.setHeader("Accept", "application/json");
-      post.setHeader("Content-type", "application/json");
+      //post.setHeader("Accept", "application/json");
+      post.setHeader("Content-type", "application/x-www-form-urlencoded");
 
       List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
       nameValuePairs.add(new BasicNameValuePair("tree", JenkinsJobsResponse.QTREE));
-      post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+      //StringEntity se = new StringEntity("tree="+JenkinsJobsResponse.QTREE, "UTF-8");
+      //post.setEntity(se);
+      post.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
 
       monitor.worked(1);
 
@@ -149,12 +151,12 @@ public class JenkinsService {
       Gson g = Utils.createGson();
 
       HttpPost post = new HttpPost(reqUrl);
-      post.setHeader("Accept", "application/json");
-      post.setHeader("Content-type", "application/json");
+      //post.setHeader("Accept", "application/json");
+      post.setHeader("Content-type", "application/x-www-form-urlencoded");
 
       List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
       nameValuePairs.add(new BasicNameValuePair("tree", JenkinsInstanceResponse.QTREE));
-      post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+      post.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
 
       DefaultHttpClient httpclient = Utils.getAPIClient(reqUrl);
 
@@ -297,11 +299,13 @@ public class JenkinsService {
       Gson g = Utils.createGson();
 
       HttpPost post = new HttpPost(reqStr);
-      post.setHeader("Accept", "application/json");
-      post.setHeader("Content-type", "application/json");
+      
+      //post.setHeader("Accept", "application/json");
+      post.setHeader("Content-type", "application/x-www-form-urlencoded");
+      
       List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
       nameValuePairs.add(new BasicNameValuePair("tree", JenkinsBuildDetailsResponse.QTREE));
-      post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+      post.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
 
       DefaultHttpClient httpclient = Utils.getAPIClient(reqStr);
 
@@ -377,11 +381,12 @@ public class JenkinsService {
       Gson g = Utils.createGson();
 
       HttpPost post = new HttpPost(reqStr);
-      post.setHeader("Accept", "application/json");
-      post.setHeader("Content-type", "application/json");
+      //post.setHeader("Accept", "application/json");
+      post.setHeader("Content-type", "application/x-www-form-urlencoded");
+      
       List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
       nameValuePairs.add(new BasicNameValuePair("tree", JenkinsJobAndBuildsResponse.QTREE));
-      post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+      post.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
 
       DefaultHttpClient httpclient = Utils.getAPIClient(reqStr);
       String bodyResponse = retrieveWithLogin(httpclient, post, null, false, new SubProgressMonitor(monitor, 10));
