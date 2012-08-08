@@ -44,7 +44,7 @@ import com.google.gson.Gson;
  * @author ahti
  */
 public class JenkinsService {
-
+  
   enum ResponseType {
     STRING, STREAM, HTTP
   }
@@ -220,7 +220,7 @@ public class JenkinsService {
       }
     }
 
-    CloudBeesCorePlugin.getDefault().getLogger().info("Jenkins request: " + post.getURI());
+    //CloudBeesCorePlugin.getDefault().getLogger().info("Jenkins request: " + post.getURI());
 
     if (post instanceof HttpPost) {
       HttpPost pp = (HttpPost) post;
@@ -231,7 +231,8 @@ public class JenkinsService {
       } catch (java.util.NoSuchElementException e) {
         s = "";
       }
-      CloudBeesCorePlugin.getDefault().getLogger().info("Jenkins request post params: " + s);
+      
+      //CloudBeesCorePlugin.getDefault().getLogger().info("Jenkins request post params: " + s);
       
     }
 

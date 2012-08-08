@@ -2,35 +2,104 @@ package com.cloudbees.eclipse.dev.ui.views.jobs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.model.BaseWorkbenchContentProvider;
+import org.eclipse.ui.progress.DeferredTreeContentManager;
+import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
 
-import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.JobViewGeneric;
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.View;
-import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
-import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
+public class JobsContentProvider extends BaseWorkbenchContentProvider {
+  private List<JobHolder> root;
 
-public class JobsContentProvider implements ITreeContentProvider {
-  private List<JenkinsJobsResponse.JobViewGeneric> root;
+  private List<Object> expList = new ArrayList<Object>();
 
-  public JobsContentProvider() {
+  private DeferredTreeContentManager manager;
+
+  private final static Object[] EMPTY_ARRAY = new Object[0];
+
+  private IViewSite viewSite;
+
+  public JobsContentProvider(IViewSite viewSite) {
+    super();
+    this.viewSite = viewSite;
   }
 
-  public void inputChanged(Viewer v, Object oldInput, Object newInput) {
-    if (newInput instanceof List && (((List) newInput).isEmpty() || ((List) newInput).get(0) instanceof JobViewGeneric)) {
-      root = (List<JobViewGeneric>) newInput;
+  public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+    if (newInput instanceof List && (((List) newInput).isEmpty() || ((List) newInput).get(0) instanceof JobHolder)) {
+      root = (List<JobHolder>) newInput;
     } else {
       root = null; // reset
     }
+
+    if (viewer instanceof AbstractTreeViewer) {
+      manager = new DeferredTreeContentManager((AbstractTreeViewer) viewer, viewSite) {
+        @Override
+        protected IDeferredWorkbenchAdapter getAdapter(Object element) {
+          IDeferredWorkbenchAdapter ret = super.getAdapter(element);
+          if (ret != null) {
+            return ret;
+          }
+
+          if (element instanceof JobHolder) {
+            if (((JobHolder) element).job.isFolderOrView()) {
+              return new DeferWrapper((JobHolder) element);
+            }
+          }
+
+          return null;
+        }
+
+      };
+
+      final AbstractTreeViewer treeViewer = ((AbstractTreeViewer) viewer);
+
+      Object[] expelems = ((AbstractTreeViewer) viewer).getVisibleExpandedElements();
+      expList.clear();
+      expList.addAll(Arrays.asList(expelems));
+
+      IJobChangeListener listener = new JobChangeAdapter() {
+        @Override
+        public void done(IJobChangeEvent event) {
+          if (event.getResult().isOK()) {
+            // try to expand the state again
+            PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+              public void run() {
+
+                if (expList.size() == 0) {
+                  // all good, managed to expand all previous nodes
+                  return;
+                }
+
+                for (Object o : expList) {
+                  treeViewer.setExpandedState(o, true);
+                }
+
+                List<Object> toremove = new ArrayList<Object>();
+                for (Object o : expList) {
+                  if (treeViewer.getExpandedState(o)) {
+                    toremove.add(o);
+                  }
+                }
+                expList.removeAll(toremove);
+
+              }
+            });
+          }
+        }
+      };
+
+      manager.addUpdateCompleteListener(listener);
+
+    }
+
   }
 
   public void dispose() {
@@ -42,79 +111,50 @@ public class JobsContentProvider implements ITreeContentProvider {
 
   @Override
   public Object[] getChildren(final Object parent) {
+
     if (parent instanceof IViewSite) {
       if (root == null) {
-        return new JenkinsJobsResponse.JobViewGeneric[0];
+        return new JobHolder[0];
       } else {
-        return root.toArray(new JenkinsJobsResponse.JobViewGeneric[root.size()]);
+        return root.toArray(new JobHolder[root.size()]);
       }
     }
-    if ((parent instanceof JenkinsJobsResponse.Job && ((JenkinsJobsResponse.Job) parent).color == null)
-        || (parent instanceof JenkinsJobsResponse.View)) {
-      // This is a folder job or a view so we can use the url to fetch the children
 
-      final List<JobViewGeneric>[] toRet = new ArrayList[1];
-
-      Job job = new Job("Fetching jobs for the folder or view") {
-        @Override
-        protected IStatus run(IProgressMonitor monitor) {
-          try {
-            String url = ((JenkinsJobsResponse.JobViewGeneric) parent).getUrl();
-            JenkinsJobsResponse jobs = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(url)
-                .getJobs(url, monitor);
-
-            List<JenkinsJobsResponse.JobViewGeneric> reslist = new ArrayList<JenkinsJobsResponse.JobViewGeneric>();
-            
-            if (jobs.views!=null)
-            for (View view : jobs.views) {
-              if (view.url != null && (jobs.primaryView == null || !view.url.equals(jobs.primaryView.url))) {
-                reslist.add(view);
-              }
-            }
-            
-            if (jobs.jobs != null) {
-              reslist.addAll(Arrays.asList(jobs.jobs));
-            }
-
-            toRet[0] = reslist;
-
-          } catch (CloudBeesException e) {
-            e.printStackTrace();
-            CloudBeesDevUiPlugin.logError(e);
-            return Status.OK_STATUS; // Is It Ok?
-          }
-          return Status.OK_STATUS;
-
-        }
-      };
-      job.schedule();
-      try {
-        job.join();
-        if (toRet[0] != null) {
-          return toRet[0].toArray(new JobViewGeneric[0]);
-        }
-      } catch (InterruptedException e) {
-        e.printStackTrace();
+    if (manager != null) {
+      Object[] children = manager.getChildren(parent);
+      if (children != null) {
+        return children;
       }
     }
-    return null;
+
+    return EMPTY_ARRAY;
   }
 
-  @Override
   public Object getParent(Object element) {
-    // TODO Auto-generated method stub
+    // not used for now so we won't track it
     return null;
   }
 
   @Override
   public boolean hasChildren(Object element) {
-    // for folders and views assume there are children to suggest lazy loading later.
-    if ((element instanceof JenkinsJobsResponse.Job && ((JenkinsJobsResponse.Job) element).color == null)
-        || (element instanceof JenkinsJobsResponse.View)) {
-      return true;
+
+    if (manager != null) {
+      if (manager.isDeferredAdapter(element))
+        return manager.mayHaveChildren(element);
     }
-    Object[] e = getChildren(element);
-    return e != null && e.length > 0;
+
+    // only views or folders coming from the deferred manager can have children
+
+    return false;
+  }
+
+  public void removeDeferredExpanders(Object element) {
+    Iterator<Object> it = expList.iterator();
+    List<Object> toremove = new ArrayList<Object>();
+    while (it.hasNext()) {
+      toremove.add(it.next());
+    }
+    expList.removeAll(toremove);
   }
 
 }

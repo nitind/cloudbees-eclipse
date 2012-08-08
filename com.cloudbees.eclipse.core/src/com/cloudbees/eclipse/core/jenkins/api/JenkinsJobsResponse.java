@@ -14,9 +14,9 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
   public Job[] jobs;
 
   public View[] views;
-  
+
   public View primaryView;
-  
+
   public String name;
 
   @Override
@@ -59,20 +59,20 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
   public static class View implements JobViewGeneric {
     public String name;
     public String url;
-    
+
     public Job[] jobs;
-    
+
     //public String description;
-    
+
     @Override
     public String toString() {
-      return "View["+name+"]";
+      return "View[" + name + "]";
     }
-    
+
     public String getName() {
       return name;
     }
-    
+
     public String getUrl() {
       return url;
     }
@@ -80,7 +80,7 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
     public String getState() {
       return "v";
     }
-    
+
     @Override
     public int hashCode() {
       final int prime = 311;
@@ -110,8 +110,13 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
       }
       return true;
     }
+
+    public boolean isFolderOrView() {
+      return true;
+    }
+
   }
-  
+
   public static class Job implements JobViewGeneric {
     public HealthReport[] healthReport;
 
@@ -134,19 +139,22 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
 
     public JenkinsJobProperty[] property;
 
+
+    public String result;
+
     @Override
     public String toString() {
-      return "Job["+name+"]";
+      return "Job[" + name + "]";
     }
-    
+
     public String getName() {
       return name;
     }
-    
+
     public String getUrl() {
       return url;
     }
-    
+
     public String getDisplayName() {
       if (this.displayName != null) {
         return this.displayName;
@@ -184,22 +192,25 @@ public class JenkinsJobsResponse extends BaseJenkinsResponse {
       }
       return true;
     }
-      public String result;
 
-      public String getState() {
-        return color;
-      }
+    public String getState() {
+      return color;
+    }
+
+    public boolean isFolderOrView() {
+      return color == null;
+    }
+
   }
 
   public interface JobViewGeneric {
     public String getName();
+
     public String getUrl();
+
     public String getState();
+
+    public boolean isFolderOrView();
   }
 
-/*  public static class PrimaryView {
-    public String name;
-    public String url;
-  }
-*/
 }

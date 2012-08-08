@@ -1,7 +1,6 @@
 package com.cloudbees.eclipse.dev.ui.views.jobs;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -21,11 +20,11 @@ import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
-import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -41,6 +40,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.progress.PendingUpdateAdapter;
 
 import com.cloudbees.eclipse.core.CBRemoteChangeAdapter;
 import com.cloudbees.eclipse.core.CBRemoteChangeListener;
@@ -60,7 +60,6 @@ import com.cloudbees.eclipse.dev.ui.actions.OpenBuildAction;
 import com.cloudbees.eclipse.dev.ui.actions.OpenLogAction;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadBuildHistoryAction;
 import com.cloudbees.eclipse.dev.ui.actions.ReloadJobsAction;
-import com.cloudbees.eclipse.dev.ui.views.forge.ForgeTreeView;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 
@@ -89,36 +88,51 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   private CBRemoteChangeListener jenkinsChangeListener;
 
   private JobsContentProvider contentProvider;
-
+  
   protected Runnable regularRefresher;
 
   private String viewUrl;
 
-  protected Object selectedJob;
+  protected JobHolder selectedJobHolder;
 
   public JobsView() {
     super();
   }
 
-  public Object getSelectedJob() {
-    return this.selectedJob;
+  public JobHolder getSelectedJob() {
+    return this.selectedJobHolder;
   }
 
-  public void setSelectedJob(final Object job) {
-    this.selectedJob = job;
-    boolean enable = this.selectedJob != null;
-    this.actionInvokeBuild.setJob(this.selectedJob);
-    this.actionOpenLastBuildDetails.setBuild(this.selectedJob instanceof Job ? ((Job) this.selectedJob).lastBuild
+  public void setSelectedJob(final JobHolder job) {
+    this.selectedJobHolder = job;
+    boolean enable = this.selectedJobHolder != null;
+    this.actionInvokeBuild.setJob(this.selectedJobHolder);
+    this.actionOpenLastBuildDetails.setBuild(getJob(this.selectedJobHolder) instanceof Job ? ((Job) (getJob(this.selectedJobHolder))).lastBuild
         : null);
-    this.actionOpenLog.setBuild(this.selectedJob instanceof Job ? ((Job) this.selectedJob).lastBuild : null);
-    this.actionDeleteJob.setEnabled(this.selectedJob instanceof Job && ((Job) this.selectedJob).color != null);
+    this.actionOpenLog.setBuild(getJob(this.selectedJobHolder) instanceof Job ? ((Job) getJob(this.selectedJobHolder)).lastBuild : null);
+    this.actionDeleteJob.setEnabled(getJob(this.selectedJobHolder) instanceof Job && ((Job) getJob(this.selectedJobHolder)).color != null);
     this.actionOpenJobInBrowser.setEnabled(enable);
     this.actionOpenBuildHistory
-        .setViewUrl(this.selectedJob instanceof Job && ((Job) this.selectedJob).color != null ? ((Job) this.selectedJob).url
+        .setViewUrl(getJob(this.selectedJobHolder) instanceof Job && ((Job) getJob(this.selectedJobHolder)).color != null ? ((Job) getJob(this.selectedJobHolder)).url
             : null);
 
     //FIXME color!=null is currently the only known way to know if this job is not a folder. 
-    this.actionOpenBuildHistory.setEnabled(this.selectedJob instanceof Job && ((Job) this.selectedJob).color != null);
+    this.actionOpenBuildHistory.setEnabled(getJob(this.selectedJobHolder) instanceof Job && ((Job) getJob(this.selectedJobHolder)).color != null);
+
+  }
+
+  /**
+   * Helper method to return the JobViewGeneric from the holder which is expected to be instanceof JobHolder. Param is Object to provider easier usage.
+   * @param holder
+   * @return
+   */
+  private JobViewGeneric getJob(Object holder) {
+    if (holder==null) return null;
+    if (! (holder instanceof JobHolder)) {
+      return null;//throw new RuntimeException("Unexpected holder type! Expected JobHelper, got "+holder);
+    }
+
+    return ((JobHolder)holder).job;
 
   }
 
@@ -143,7 +157,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         post = " for " + newView.name;
       }
       setContentDescription("No jobs available" + post);
-      this.contentProvider.inputChanged(this.treeViewer, null, new ArrayList<JenkinsJobsResponse.JobViewGeneric>());
+      this.contentProvider.inputChanged(this.treeViewer, null, new ArrayList<JobHolder>());
     } else {
       JenkinsService ss = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(newView.viewUrl);
       String label = ss.getLabel();
@@ -157,21 +171,24 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       setContentDescription(viewInfo + label + (viewInfo.length() > 0 ? "]" : "") + " (" + new Date() + ")");
       setPartName("Build Jobs [" + label + post + "]");
 
-      List<JenkinsJobsResponse.JobViewGeneric> reslist = new ArrayList<JobViewGeneric>();
+      List<JobHolder> reslist = new ArrayList<JobHolder>();
 
       // Also add views if it's not the main url
       if (!newView.viewUrl.equals(ss.getUrl() + "/") && newView.views != null) {
 
         for (View view : newView.views) {
           if (view.url != null && (newView.primaryView == null || !view.url.equals(newView.primaryView.url))) {
-            reslist.add(view);
+            reslist.add(new JobHolder(view, null));
           }
         }
 
       }
 
-      if (newView.jobs != null) {
-        reslist.addAll(Arrays.asList(newView.jobs));
+      if (newView.jobs != null) {    
+        for (Job job: newView.jobs) {
+          reslist.add(new JobHolder(job, null));  
+        }
+        
       }
       this.contentProvider.inputChanged(this.treeViewer, null, reslist);
 
@@ -184,9 +201,9 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     this.actionReloadJobs.treeViewer = this.treeViewer;
 
     // Preserve the expended state and refresh
-    TreePath[] paths = treeViewer.getExpandedTreePaths();
+    //TreePath[] paths = treeViewer.getExpandedTreePaths();
     this.treeViewer.refresh();
-    treeViewer.setExpandedTreePaths(paths);
+    //treeViewer.setExpandedTreePaths(paths);
 
     boolean reloadable = newView != null;
     this.actionReloadJobs.setEnabled(reloadable);
@@ -252,8 +269,13 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   class NameSorter extends ViewerSorter {
 
     @Override
-    public int compare(final Viewer viewer, final Object e1, final Object e2) {
+    public int compare(final Viewer viewer, Object e1, Object e2) {
 
+      if (e1 instanceof JobHolder && e2 instanceof JobHolder) {
+        e1 = ((JobHolder)e1).job;
+        e2 = ((JobHolder)e2).job;
+      }
+      
       if (e1 instanceof JenkinsJobsResponse.JobViewGeneric && e2 instanceof JenkinsJobsResponse.JobViewGeneric) {
         JenkinsJobsResponse.JobViewGeneric j1 = (JenkinsJobsResponse.JobViewGeneric) e1;
         JenkinsJobsResponse.JobViewGeneric j2 = (JenkinsJobsResponse.JobViewGeneric) e2;
@@ -276,12 +298,13 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
     initImages();
 
-    this.treeViewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION);
+    this.treeViewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION |  SWT.VIRTUAL);
     treeViewer.getTree().setHeaderVisible(true);
 
     initColumns();
 
-    this.contentProvider = new JobsContentProvider();
+    this.contentProvider = new JobsContentProvider(getViewSite());
+    
     this.treeViewer.setContentProvider(this.contentProvider);
     this.treeViewer.setSorter(new JobSorter(JobSorter.JOB));
     this.treeViewer.setInput(getViewSite());
@@ -293,11 +316,11 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
         if (sel instanceof IStructuredSelection) {
           Object el = ((IStructuredSelection) sel).getFirstElement();
-          if (el instanceof JenkinsJobsResponse.Job) {
-            Job job = (JenkinsJobsResponse.Job) el;
+          if (el instanceof JobHolder && ((JobHolder)el).job instanceof Job) {
+            Job job = (Job) ((JobHolder) el).job;
 
             //assuming it's a folder..
-            if (job.color == null || job.color.length() == 0) {
+            if (job.isFolderOrView()) {
               JobsView.this.toggle(el);
               return; // do nothing
             } else {
@@ -305,8 +328,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
             }
 
           }
-          
-          if (el instanceof JenkinsJobsResponse.View) {
+
+          if (el instanceof JobHolder && ((JobHolder)el).job instanceof View) {
             JobsView.this.toggle(el);
             return; // do nothing
           }
@@ -336,12 +359,26 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     treeViewer.getTree().setMenu(menu);
     treeViewer.getTree().setSortDirection(SWT.DOWN);
 
+    treeViewer.addTreeListener(new ITreeViewerListener() {      
+      @Override
+      public void treeExpanded(TreeExpansionEvent event) {        
+      }
+      
+      @Override
+      public void treeCollapsed(TreeExpansionEvent event) {
+        // if something was collapsed make sure it won't be expanded by deferred loaders
+        contentProvider.removeDeferredExpanders(event.getElement());        
+      }
+    });
+    
     this.treeViewer.addPostSelectionChangedListener(new ISelectionChangedListener() {
 
       @Override
       public void selectionChanged(final SelectionChangedEvent event) {
         StructuredSelection sel = (StructuredSelection) event.getSelection();
-        setSelectedJob(sel.getFirstElement());
+        if (sel.getFirstElement() instanceof JobHolder) {
+          setSelectedJob((JobHolder) sel.getFirstElement());
+        }
       }
     });
 
@@ -486,8 +523,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     this.actionOpenJobInBrowser = new Action("Open with Browser...", Action.AS_PUSH_BUTTON | SWT.NO_FOCUS) { //$NON-NLS-1$
       @Override
       public void run() {
-        if (JobsView.this.selectedJob != null && JobsView.this.selectedJob instanceof JobViewGeneric) {
-          JenkinsJobsResponse.JobViewGeneric job = (JobViewGeneric) JobsView.this.selectedJob;
+        if (JobsView.this.selectedJobHolder != null && getJob(JobsView.this.selectedJobHolder) instanceof JobViewGeneric) {
+          JenkinsJobsResponse.JobViewGeneric job = getJob(JobsView.this.selectedJobHolder);
           CloudBeesUIPlugin.getDefault().openWithBrowser(job.getUrl());
         }
       }
@@ -565,11 +602,21 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   }
 
   private void initColumns() {
-    //TODO i18n
+
     TreeViewerColumn namecol = createColumn("Job", 250, JobSorter.JOB, new ColumnLabelProvider() {
       @Override
       public void update(final ViewerCell cell) {
-        JobViewGeneric vg = (JobViewGeneric) cell.getViewerRow().getElement();
+        
+        Object el = cell.getViewerRow().getElement();
+        
+        if (el instanceof PendingUpdateAdapter) {
+          PendingUpdateAdapter uel = (PendingUpdateAdapter)el;
+          cell.setText(uel.getLabel(null));
+          cell.setImage(null);
+          return;
+        }
+                
+        JobViewGeneric vg = ((JobHolder) cell.getViewerRow().getElement()).job;
         if (vg instanceof JenkinsJobsResponse.Job) {
           JenkinsJobsResponse.Job job = (Job) vg;
           String val = job.getDisplayName();
@@ -611,13 +658,13 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       @Override
       public void update(final ViewerCell cell) {
         
-        Object element = cell.getViewerRow().getElement();
-        if ((element instanceof JenkinsJobsResponse.Job && ((JenkinsJobsResponse.Job) element).color == null)
-            || (element instanceof JenkinsJobsResponse.View)) {
+        Object element = getJob(cell.getViewerRow().getElement());
+        if ((!(element instanceof JobViewGeneric)) || (element instanceof JobViewGeneric) && ((JobViewGeneric)element).isFolderOrView()) {
           cell.setText("");
           cell.setImage(null);
           return;
         }
+        
         
         JenkinsJobsResponse.Job job = (Job) element;
 
@@ -646,13 +693,13 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     createColumn("Last build", 150, JobSorter.LAST_BUILD, new ColumnLabelProvider() {
       @Override
       public void update(final ViewerCell cell) {
-        Object element = cell.getViewerRow().getElement();
-        if ((element instanceof JenkinsJobsResponse.Job && ((JenkinsJobsResponse.Job) element).color == null)
-            || (element instanceof JenkinsJobsResponse.View)) {
+        Object element = getJob(cell.getViewerRow().getElement());
+        if ((!(element instanceof JobViewGeneric)) || (element instanceof JobViewGeneric) && ((JobViewGeneric)element).isFolderOrView()) {
           cell.setText("");
           cell.setImage(null);
           return;
         }
+
         
         JenkinsJobsResponse.Job job = (Job) element;
 
@@ -666,13 +713,13 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     createColumn("Last success", 150, JobSorter.LAST_SUCCESS, new ColumnLabelProvider() {
       @Override
       public void update(final ViewerCell cell) {
-        Object element = cell.getViewerRow().getElement();
-        if ((element instanceof JenkinsJobsResponse.Job && ((JenkinsJobsResponse.Job) element).color == null)
-            || (element instanceof JenkinsJobsResponse.View)) {
+        Object element = getJob(cell.getViewerRow().getElement());
+        if ((!(element instanceof JobViewGeneric)) || (element instanceof JobViewGeneric) && ((JobViewGeneric)element).isFolderOrView()) {
           cell.setText("");
           cell.setImage(null);
           return;
         }
+
         
         JenkinsJobsResponse.Job job = (Job) element;
 
@@ -686,13 +733,13 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
     createColumn("Last failure", 150, JobSorter.LAST_FAILURE, new ColumnLabelProvider() {
       @Override
       public void update(final ViewerCell cell) {
-        Object element = cell.getViewerRow().getElement();
-        if ((element instanceof JenkinsJobsResponse.Job && ((JenkinsJobsResponse.Job) element).color == null)
-            || (element instanceof JenkinsJobsResponse.View)) {
+        Object element = getJob(cell.getViewerRow().getElement());
+        if ((!(element instanceof JobViewGeneric)) || (element instanceof JobViewGeneric) && ((JobViewGeneric)element).isFolderOrView()) {
           cell.setText("");
           cell.setImage(null);
           return;
         }
+
         
         JenkinsJobsResponse.Job job = (Job) element;
 

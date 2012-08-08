@@ -32,8 +32,18 @@ public class JobSorter extends ViewerSorter {
   @Override
   public int compare(final Viewer viewer, final Object e1, final Object e2) {
 
-    JenkinsJobsResponse.JobViewGeneric j1 = (JenkinsJobsResponse.JobViewGeneric) e1;
-    JenkinsJobsResponse.JobViewGeneric j2 = (JenkinsJobsResponse.JobViewGeneric) e2;
+    if (! (e1 instanceof JobHolder) || !(e2 instanceof JobHolder)) {
+      if ((e1 instanceof JobHolder)) {
+        return -1;
+      }
+      if ((e1 instanceof JobHolder)) {
+        return 1;
+      }
+      return e1.toString().compareTo(e2.toString());
+    }
+    
+    JenkinsJobsResponse.JobViewGeneric j1 = ((JobHolder)e1).job;
+    JenkinsJobsResponse.JobViewGeneric j2 = ((JobHolder)e2).job;
 
     switch (this.sortCol) {
     case STATE:

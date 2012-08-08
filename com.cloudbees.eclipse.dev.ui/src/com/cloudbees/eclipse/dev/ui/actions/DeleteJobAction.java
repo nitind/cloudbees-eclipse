@@ -26,9 +26,9 @@ public class DeleteJobAction extends Action {
   @Override
   public void runWithEvent(final Event event) {
 
-    if (this.view.getSelectedJob() instanceof JenkinsJobsResponse.Job) {
+    if (this.view.getSelectedJob()!=null &&  this.view.getSelectedJob().job instanceof JenkinsJobsResponse.Job) {
       try {
-        CloudBeesDevUiPlugin.getDefault().deleteJob(((JenkinsJobsResponse.Job) this.view.getSelectedJob()));
+        CloudBeesDevUiPlugin.getDefault().deleteJob(((JenkinsJobsResponse.Job) this.view.getSelectedJob().job));
         CloudBeesDevUiPlugin.getDefault().showJobs(this.view.getReloadJobsAction().viewUrl, false);
       } catch (CloudBeesException e) {
         CloudBeesUIPlugin.getDefault().showError("Failed to refresh the jobs list", e);

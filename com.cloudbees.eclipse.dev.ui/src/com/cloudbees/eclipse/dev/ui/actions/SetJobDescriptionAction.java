@@ -4,7 +4,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
 
-import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.dev.ui.views.jobs.JobsView;
 
 public class SetJobDescriptionAction extends Action {
@@ -22,10 +21,10 @@ public class SetJobDescriptionAction extends Action {
   @Override
   public void runWithEvent(final Event event) {
 
-    if (this.view.getSelectedJob() instanceof JenkinsJobsResponse.Job) {
+/*    if (this.view.getSelectedJob() instanceof JenkinsJobsResponse.Job) {
       //CloudBeesDevUiPlugin.getDefault().showBuildForJob(((JenkinsJobsResponse.Job) view.getSelectedJob()));
     }
-
+*/
   }
 
 }

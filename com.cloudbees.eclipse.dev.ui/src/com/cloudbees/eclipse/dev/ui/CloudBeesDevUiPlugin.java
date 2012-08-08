@@ -163,10 +163,10 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
     reg.put(CBDEVImages.IMG_VIEW,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_big.png")));
-    
+
     reg.put(CBDEVImages.IMG_VIEWR2,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_bigr2.png")));
-    
+
     //reg.put(CBImages.IMG_VIEW, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/det_pane_hide.gif")));
 
     reg.put(CBDEVImages.IMG_FILE, ImageDescriptor.createFromURL(getBundle().getResource("/icons/epl/file_obj.gif")));
@@ -243,7 +243,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     return pl != null ? pl.getImageRegistry().getDescriptor(imgKey) : null;
   }
 
-  private org.eclipse.core.runtime.jobs.Job showJobsForHash(final String viewUrl, final boolean userAction, final String hash) throws CloudBeesException {
+  private org.eclipse.core.runtime.jobs.Job showJobsForHash(final String viewUrl, final boolean userAction,
+      final String hash) throws CloudBeesException {
     // CloudBeesUIPlugin.getDefault().getLogger().info("Show jobs: " + viewUrl);
     //System.out.println("Show jobs: " + viewUrl);
 
@@ -259,40 +260,46 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
         }
 
         try {
-          PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-            @Override
-            public void run() {
-              try {
-                IWorkbenchPage activePage = CloudBeesUIPlugin.getActiveWindow().getActivePage();
 
-                //hashCode = viewUrl.hashCode();
+          if (userAction) {
+            PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+              @Override
+              public void run() {
+                try {
+                  IWorkbenchPage activePage = CloudBeesUIPlugin.getActiveWindow().getActivePage();
 
-                int mode = userAction ? IWorkbenchPage.VIEW_ACTIVATE : IWorkbenchPage.VIEW_CREATE;
+                  //hashCode = viewUrl.hashCode();
 
-                IViewPart view = activePage.showView(JobsView.ID, hash, mode);
+                  int mode = userAction ? IWorkbenchPage.VIEW_ACTIVATE : IWorkbenchPage.VIEW_CREATE;
 
-              } catch (PartInitException e) {
-                CloudBeesUIPlugin.showError("Failed to show Jobs view", e);
+                  IViewPart view = activePage.showView(JobsView.ID, hash, mode);
+
+                } catch (PartInitException e) {
+                  CloudBeesUIPlugin.showError("Failed to show Jobs view", e);
+                }
               }
-            }
-          });
+            });
+          }
 
           if (monitor.isCanceled()) {
             throw new OperationCanceledException();
           }
 
-          JenkinsJobsResponse jobs = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getJobs(viewUrl, monitor);
+          JenkinsJobsResponse jobs = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl)
+              .getJobs(viewUrl, monitor);
 
-            if (monitor.isCanceled()) {
+          if (monitor.isCanceled()) {
             throw new OperationCanceledException();
           }
 
-          Iterator<CBRemoteChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
-              .iterator();
+          List<CBRemoteChangeListener> listeners = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners();
+          monitor.subTask("Notifying jenkins components");
+          Iterator<CBRemoteChangeListener> iterator = listeners.iterator();
           while (iterator.hasNext()) {
             CBRemoteChangeListener listener = iterator.next();
             listener.activeJobViewChanged(jobs);
-          }
+            monitor.worked(10);
+          }        
 
           return Status.OK_STATUS;
         } catch (CloudBeesException e) {
@@ -307,12 +314,13 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     if (CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
       job.schedule();
     }
-    
+
     return job;
-    
-}
-  
-  public org.eclipse.core.runtime.jobs.Job showJobs(final String viewUrl, final boolean userAction) throws CloudBeesException {
+
+  }
+
+  public org.eclipse.core.runtime.jobs.Job showJobs(final String viewUrl, final boolean userAction)
+      throws CloudBeesException {
     String urlHash = Long.toString(CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl).getUrl().hashCode());
 
     return showJobsForHash(viewUrl, userAction, urlHash);
