@@ -559,7 +559,11 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
         || PreferenceConstants.P_EMAIL.equals(event.getProperty())
         || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {
       try {
-        CloudBeesDevUiPlugin.getDefault().showJobs(this.viewUrl, false);
+        
+        if (viewUrl!=null) {
+          CloudBeesDevUiPlugin.getDefault().showJobs(this.viewUrl, false);
+        }
+        
       } catch (CloudBeesException e) {
         //TODO i18n
         CloudBeesUIPlugin.showError("Failed to reload Jenkins jobs!", e);
