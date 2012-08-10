@@ -39,7 +39,6 @@ public abstract class NewJenkinsJobComposite extends Composite {
   private final Map<String, List<Job>> jobs;
 
   private Button makeJobCheck;
-  private Label jenkinsInstanceLabel;
   private Label jobNameLabel;
   private Text jobNameText;
   private final Group group;
@@ -178,7 +177,6 @@ public abstract class NewJenkinsJobComposite extends Composite {
     private void handleEvent() {
       boolean selected = isMakeNewJob();
       NewJenkinsJobComposite.this.jobNameText.setEnabled(selected);
-      NewJenkinsJobComposite.this.jenkinsInstanceLabel.setEnabled(selected);
       NewJenkinsJobComposite.this.jobNameLabel.setEnabled(selected);
       validate();
     }
