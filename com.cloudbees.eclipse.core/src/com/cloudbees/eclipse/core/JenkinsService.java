@@ -113,7 +113,7 @@ public class JenkinsService {
         views.viewUrl = viewUrl;
       }
 
-      if (views.jobs == null && views.primaryView.jobs != null) {
+      if (views.jobs == null && views.primaryView!=null && views.primaryView.jobs != null) {
         views.jobs = views.primaryView.jobs;
       }
 
