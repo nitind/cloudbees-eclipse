@@ -96,8 +96,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   /**
-   * Validates JRE for run@cloud and if JRE is not compatible then warn user. RUN@cloud plugins will be disabled by
-   * themselves (look plugin#start()). Validation is just checking if the JRE is java se 7 or not.
+   * Validates JRE for run@cloud and if Run@cloud can support the JRE. RUN@cloud plugins will be disabled by
+   * themselves (look plugin#start()). 
    */
   private void validateJREforRunAtCloud() {
     if (!CloudBeesCorePlugin.validateRUNatCloudJRE()) {

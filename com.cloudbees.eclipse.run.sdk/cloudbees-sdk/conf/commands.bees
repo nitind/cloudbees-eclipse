@@ -1,33 +1,15 @@
-<!--# SDK commands list-->
-<commands>
-    <command group="Project" name="create" className="com.cloudbees.sdk.commands.ProjectCreate"/>
-    <command group="Project" name="run" className="com.cloudbees.sdk.commands.ProjectRun"/>
-    <command group="Project" name="deploy" className="com.cloudbees.sdk.commands.ProjectDeploy"/>
-    <command group="Project" name="clean" className="com.cloudbees.sdk.commands.AntTarget(clean)"/>
-    <command group="Project" name="compile" className="com.cloudbees.sdk.commands.AntTarget(compile)"/>
-    <command group="Project" name="package" className="com.cloudbees.sdk.commands.AntTarget(dist)"/>
-    <command group="Project" name="ant" className="com.cloudbees.sdk.commands.ProjectAntTarget" experimental="true" />
-    <command group="Project" name="getapp" className="com.cloudbees.sdk.commands.ApplicationGetSource" experimental="true" />
-
-    <command group="Application" name="app:run" className="com.cloudbees.sdk.commands.ApplicationRun"/>
-    <command group="Application" name="app:deploy" className="com.cloudbees.sdk.commands.ApplicationDeploy"/>
-    <command group="Application" name="app:info" className="com.cloudbees.sdk.commands.ApplicationInfo"/>
-    <command group="Application" name="app:list" className="com.cloudbees.sdk.commands.ApplicationList"/>
-    <command group="Application" name="app:restart" className="com.cloudbees.sdk.commands.ApplicationRestart"/>
-    <command group="Application" name="app:stop" className="com.cloudbees.sdk.commands.ApplicationStop"/>
-    <command group="Application" name="app:tail" className="com.cloudbees.sdk.commands.ApplicationTail"/>
-    <command group="Application" name="app:delete" className="com.cloudbees.sdk.commands.ApplicationDelete"/>
-
-    <command group="Database" name="db:create" className="com.cloudbees.sdk.commands.DatabaseCreate"/>
-    <command group="Database" name="db:info" className="com.cloudbees.sdk.commands.DatabaseInfo"/>
-    <command group="Database" name="db:list" className="com.cloudbees.sdk.commands.DatabaseList"/>
-    <command group="Database" name="db:delete" className="com.cloudbees.sdk.commands.DatabaseDelete"/>
-
+<!--# SDK built-in commands list-->
+<plugin>
     <!--# SDK command-->
     <command group="SDK" name="init" description="Re-initialize the SDK config file" className="com.cloudbees.sdk.commands.Init"/>
+    <command group="SDK" name="help" description="List all commands" className="com.cloudbees.sdk.commands.Help"/>
+    <command group="SDK" name="plugin:install" description="Install a SDK plugin" className="com.cloudbees.sdk.commands.PluginInstallCommand"/>
+    <command group="SDK" name="plugin:list" description="List SDK plugins" className="com.cloudbees.sdk.commands.PluginListCommand"/>
+    <command group="SDK" name="plugin:delete" description="Delete a SDK plugin" className="com.cloudbees.sdk.commands.PluginDeleteCommand"/>
+    <command group="SDK" name="plugin:info" description="Get SDK plugin information" className="com.cloudbees.sdk.commands.PluginInfoCommand"/>
 
     <!--# Internal command-->
     <command group="SDK" name="call" className="com.cloudbees.sdk.commands.Call" experimental="true" />
-</commands>
+</plugin>
 
 

@@ -34,7 +34,7 @@ public class ActiveAccountContributionItem extends CompoundContributionItem {
     List<IContributionItem> list = new ArrayList<IContributionItem>();
 
     if (!onlyAccountRelated) {
-      // Add new project wiz only when NOT jre 7.
+      // Add new project wiz only when RUN@cloud is available
       if (CloudBeesCorePlugin.validateRUNatCloudJRE()) {
         CommandContributionItemParameter params = new CommandContributionItemParameter(CloudBeesUIPlugin.getDefault()
             .getWorkbench(), null, "com.cloudbees.eclipse.run.ui.commands.newSampleWebApp",

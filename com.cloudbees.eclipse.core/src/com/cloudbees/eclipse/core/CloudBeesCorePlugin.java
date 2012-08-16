@@ -204,9 +204,11 @@ public class CloudBeesCorePlugin extends Plugin {
   }
 
   public static boolean validateRUNatCloudJRE() {
+    // Java7 is now supported by the SDK so we don't provide the warning anymore
+    return true;
     //1.6.0_29, 1.7.0_06-ea etc.
-    String prop = System.getProperty("java.version");
+/*    String prop = System.getProperty("java.version");
     return !(prop != null && prop.contains("1.7"));
-  }
+*/  }
 
 }
