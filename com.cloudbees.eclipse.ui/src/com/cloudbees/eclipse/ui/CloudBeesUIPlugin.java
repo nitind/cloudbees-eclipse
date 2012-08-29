@@ -251,9 +251,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         .setValue(PreferenceConstants.P_JENKINS_INSTANCES, JenkinsInstance.encode(list));
   }
 
-  public void reloadAllJenkins(final boolean userAction) {
+  public void reloadAllCloudJenkins(final boolean userAction) {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job(
-        "Loading DEV@cloud & Jenkins instances") {
+        "Loading DEV@cloud Jenkins instances") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
         if (!getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
@@ -273,15 +273,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
               toReport = e;
             }
           }
-          monitor.worked(125);
-          try {
-            instances.addAll(loadManualJenkinsInstances());
-          } catch (Exception e) {
-            if (toReport == null) {
-              toReport = e;
-            }
-          }
-          monitor.worked(125);
+          monitor.worked(250);
 
           List<JenkinsInstanceResponse> resp = pollInstances(instances, new SubProgressMonitor(monitor, 740));
 
@@ -318,6 +310,60 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
   }
 
+  public void reloadAllLocalJenkins(final boolean userAction) { 
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job(
+        "Loading local Jenkins instances") {
+      @Override
+      protected IStatus run(final IProgressMonitor monitor) {
+
+        Exception toReport = null;
+
+        try {
+          monitor.beginTask("Reading Jenkins configuration", 1000);
+
+          List<JenkinsInstance> instances = new ArrayList<JenkinsInstance>();         
+          try {
+            instances.addAll(loadManualJenkinsInstances());
+          } catch (Exception e) {
+            if (toReport == null) {
+              toReport = e;
+            }
+          }
+          monitor.worked(250);
+
+          List<JenkinsInstanceResponse> resp = pollInstances(instances, new SubProgressMonitor(monitor, 740));
+
+          //unmodifiableList to avoid ConcurrentModificationException for multithread access
+          Iterator<CBRemoteChangeListener> iterator = Collections.unmodifiableList(CloudBeesUIPlugin.this.cbRemoteChangeListeners).iterator();
+          while (iterator.hasNext()) {
+            CBRemoteChangeListener listener = iterator.next();
+            listener.jenkinsChanged(resp);
+          }
+          
+          monitor.worked(10);
+
+          if (toReport != null) {
+            throw toReport;
+          }
+
+          return Status.OK_STATUS;
+        } catch (Exception e) {
+          String msg = e.getLocalizedMessage();
+          if (e instanceof CloudBeesException) {
+            e = (Exception) e.getCause();
+          }
+          CloudBeesUIPlugin.getDefault().getLogger().error(msg, e);
+          return new Status(IStatus.ERROR, PLUGIN_ID, 0, msg, e);
+        } finally {
+          monitor.done();
+        }
+      }
+    };
+
+    job.setUser(userAction);
+    job.schedule();
+    
+  }
   private List<JenkinsInstanceResponse> pollInstances(final List<JenkinsInstance> instances,
       final IProgressMonitor monitor) {
     try {
@@ -591,14 +637,14 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   public void fireActiveAccountChanged(String newEmail, String newAccountName) {
-    reloadAllJenkins(false);    
+    reloadAllCloudJenkins(false);    
     fireApplicationInfoChanged();
     fireAccountNameChange(newEmail, newAccountName);
   }
 
   
   void fireAccountNameChange(String newEmail, String newAccountName) {
-    Iterator<CBRemoteChangeListener> iterator = CloudBeesUIPlugin.this.cbRemoteChangeListeners.iterator();
+    Iterator<CBRemoteChangeListener> iterator = Collections.unmodifiableList(CloudBeesUIPlugin.this.cbRemoteChangeListeners).iterator();
     while (iterator.hasNext()) {
       CBRemoteChangeListener listener = iterator.next();
       listener.activeAccountChanged(newEmail, newAccountName);
@@ -608,5 +654,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   public void setActiveAccountName(String accountName) throws CloudBeesException {
     MultiAccountUtils.activateAccountName(accountName);
   }
+
 
 }

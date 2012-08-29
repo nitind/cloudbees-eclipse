@@ -53,8 +53,8 @@ class MultiAccountUtils {
           String[] accts = null;
           try {
             accts = CloudBeesCorePlugin.getDefault().getGrandCentralService().getAccounts(monitor);
-          }catch (CloudBeesException e) {
-            // For this job it is safe to silently fail when accounts list is not available. It's either because of server connectivity issues or bad credentials.
+          } catch (CloudBeesException e) {
+            // Either because of server connectivity issues or bad credentials.
             monitor.setTaskName("Failed to retrieve accounts for account selection: "+e.getMessage());
             return Status.OK_STATUS;
           }

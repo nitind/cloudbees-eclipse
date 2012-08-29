@@ -55,7 +55,6 @@ import com.cloudbees.eclipse.dev.ui.actions.OpenLogAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class BuildPart extends EditorPart {
-
   public static final String ID = "com.cloudbees.eclipse.dev.ui.views.build.BuildPart"; //$NON-NLS-1$
   private final FormToolkit formToolkit = new FormToolkit(Display.getDefault());
 
@@ -97,6 +96,7 @@ public class BuildPart extends EditorPart {
   private InvokeBuildAction invokeBuild;
   private OpenLogAction openLogs;
   private DeployWarAction deployWar;
+  private boolean offline = false;
 
   public BuildPart() {
     super();
@@ -104,6 +104,10 @@ public class BuildPart extends EditorPart {
 
   public void setData(final JenkinsBuildDetailsResponse dataBuildDetail,
       final JenkinsJobAndBuildsResponse dataJobDetails) {
+
+    // if anything failed then setData doesn't get called
+    offline = false;
+
     this.dataBuildDetail = dataBuildDetail;
     this.dataJobDetails = dataJobDetails;
 
@@ -431,16 +435,18 @@ public class BuildPart extends EditorPart {
     IRunnableWithProgress op = new IRunnableWithProgress() {
       public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 
+        BuildEditorInput details = (BuildEditorInput) getEditorInput();
+        JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(
+            getBuildEditorInput().getJobUrl());
+
         try {
-          BuildEditorInput details = (BuildEditorInput) getEditorInput();
-          JenkinsService service = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(
-              getBuildEditorInput().getJobUrl());
 
           setData(service.getJobDetails(details.getBuildUrl(), monitor),
               service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor));
 
         } catch (CloudBeesException e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
+          BuildPart.this.setOffline(service);
         }
 
         reloadUI();
@@ -480,12 +486,12 @@ public class BuildPart extends EditorPart {
         try {
           setData(service.getJobDetails(newBuildUrl, monitor),
               service.getJobBuilds(getBuildEditorInput().getJobUrl(), monitor));
-
           details.setBuildUrl(BuildPart.this.dataBuildDetail.url);
           details.setDisplayName(BuildPart.this.dataBuildDetail.getDisplayName());
 
         } catch (CloudBeesException e) {
           CloudBeesUIPlugin.getDefault().getLogger().error(e);
+          BuildPart.this.setOffline(service);
         }
 
         reloadUI();
@@ -544,6 +550,7 @@ public class BuildPart extends EditorPart {
 
           } catch (CloudBeesException e) {
             CloudBeesUIPlugin.getDefault().getLogger().error(e);
+            BuildPart.this.setOffline(service);
             return;
           }
 
@@ -563,12 +570,26 @@ public class BuildPart extends EditorPart {
     }
   }
 
+  protected void setOffline(JenkinsService service) {
+    BuildPart.this.form.setText("Build ["+getBuildEditorInput().getDisplayName()+"] (offline)");
+    BuildPart.this.textTopSummary.setText(service.getLabel()+" ("+service.getUrl()+") offline! "+new Date());
+    BuildPart.this.setPartName(getBuildEditorInput().getDisplayName()+" (offline)");
+    
+    offline = true;
+    
+  }
+
   protected void reloadUI() {
+    
+    if (offline) {
+      return;
+    }
+
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       public void run() {
 
         BuildEditorInput details = (BuildEditorInput) getEditorInput();
-
+        
         //        if (BuildPart.this.dataBuildDetail != null) {
         //          setPartName(details.getDisplayName() + " #" + BuildPart.this.dataBuildDetail.number);
         //        } else {

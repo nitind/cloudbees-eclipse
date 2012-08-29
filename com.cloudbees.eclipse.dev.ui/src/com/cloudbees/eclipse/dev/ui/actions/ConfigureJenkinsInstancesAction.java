@@ -13,7 +13,7 @@ public class ConfigureJenkinsInstancesAction extends CBTreeAction implements IOb
 
   public ConfigureJenkinsInstancesAction() {
     super();
-    setText("Configure On-premise Jenkins instances...");
+    setText("Configure on-premise Jenkins instances...");
     setToolTipText("Configure more Jenkins instances to monitor");
 
     /*    setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()

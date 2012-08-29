@@ -262,6 +262,10 @@ public class JenkinsService {
     return this.jenkins.url;
   }
 
+  public boolean isCloud() {
+    return this.jenkins.atCloud;
+  }
+
   /**
    * Returns url that was assigned by the JSON request by jenkins
    * 

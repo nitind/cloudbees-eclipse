@@ -1,6 +1,7 @@
 package com.cloudbees.eclipse.dev.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,6 +17,9 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
@@ -59,7 +63,55 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
       } catch (CloudBeesException e) {
         // safe to ignore.
       }
+
+      PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+        @Override
+        public void run() {
+              closeBuildEditors();
+        }
+      });      
+
     }
+
+    private void closeBuildEditors() {
+
+      try {
+        // Close all editors that host cloud-hosted build
+        IWorkbenchPage page = CloudBeesUIPlugin.getActiveWindow().getActivePage();
+        //com.cloudbees.eclipse.dev.ui.views.build.BuildPart
+        //CloudBeesUIPlugin.getActiveWindow().getActivePage()
+
+        for (IEditorReference ref : page.getEditorReferences()) {
+          try {
+            if (ref.getId() != null && ref.getId().equals(com.cloudbees.eclipse.dev.ui.views.build.BuildPart.ID)) {
+              IEditorInput in;
+              try {
+                in = ref.getEditorInput();
+              } catch (PartInitException e) {
+                e.printStackTrace();
+                continue;
+              }
+              IEditorPart p = ref.getEditor(false);
+              if (in instanceof BuildEditorInput && p != null) {
+                JenkinsService s = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(
+                    ((BuildEditorInput) in).getJobUrl());
+                if (s == null || s.isCloud()) {
+                  // if service not existing anymore or hosted at cloud, close the editor
+                  page.closeEditor(p, false);
+                }
+              }
+            }
+
+          } catch (Throwable t) {
+            t.printStackTrace();
+            continue;
+          }
+        }
+      } catch (Exception e) {
+        getLogger().error(e);
+      }
+    }
+
   };
 
   public static final String PLUGIN_ID = "com.cloudbees.eclipse.dev.ui"; //$NON-NLS-1$
@@ -262,7 +314,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
         try {
 
           if (userAction) {
-            PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+            PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
               @Override
               public void run() {
                 try {
@@ -285,24 +337,56 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             throw new OperationCanceledException();
           }
 
-          JenkinsJobsResponse jobs = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl)
-              .getJobs(viewUrl, monitor);
+          JenkinsService jenkinsService = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl);
+
+          JenkinsJobsResponse jobs = jenkinsService.getJobs(viewUrl, monitor);
 
           if (monitor.isCanceled()) {
             throw new OperationCanceledException();
           }
 
-          List<CBRemoteChangeListener> listeners = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners();
+          List<CBRemoteChangeListener> listeners = Collections.unmodifiableList(CloudBeesUIPlugin.getDefault()
+              .getJenkinsChangeListeners());
           monitor.subTask("Notifying jenkins components");
           Iterator<CBRemoteChangeListener> iterator = listeners.iterator();
           while (iterator.hasNext()) {
             CBRemoteChangeListener listener = iterator.next();
-            listener.activeJobViewChanged(jobs);
+            try {
+              listener.activeJobViewChanged(jobs);
+            } catch (Throwable e) {
+              // listeners must not fail
+              getLogger().error(e);
+            }
+            try {
+              listener.jenkinsStatusUpdate(viewUrl, true);
+            } catch (Throwable e) {
+              // listeners must not fail
+              getLogger().error(e);
+            }
             monitor.worked(10);
-          }        
+          }
 
           return Status.OK_STATUS;
         } catch (CloudBeesException e) {
+
+          // Failed to load jobs. Notify in order to show node as offline
+          List<CBRemoteChangeListener> listeners = Collections.unmodifiableList(CloudBeesUIPlugin.getDefault()
+              .getJenkinsChangeListeners());
+          monitor.subTask("Failed! Notifying jenkins components.");
+          Iterator<CBRemoteChangeListener> iterator = listeners.iterator();
+          while (iterator.hasNext()) {
+            CBRemoteChangeListener listener = iterator.next();
+
+            try {
+              listener.jenkinsStatusUpdate(viewUrl, false);
+            } catch (Throwable t) {
+              // listeners must not fail
+              getLogger().error(t);
+            }
+
+            monitor.worked(10);
+          }
+
           getLogger().error(e);
           return new Status(Status.WARNING, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
         }
@@ -310,7 +394,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
     };
 
-    job.setUser(userAction);
+    job.setUser(userAction); // Let's always show this job as non-user so it's less distracting in the UI   //userAction
     if (CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
       job.schedule();
     }

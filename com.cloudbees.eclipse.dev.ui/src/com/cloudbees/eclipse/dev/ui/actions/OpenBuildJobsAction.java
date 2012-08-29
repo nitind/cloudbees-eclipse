@@ -41,6 +41,11 @@ public class OpenBuildJobsAction implements IObjectActionDelegate {
       viewUrl = resp.viewUrl;
     }
 
+    if (structSelection.getFirstElement() instanceof com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse.View) {
+      JenkinsInstanceResponse.View resp = (JenkinsInstanceResponse.View) structSelection.getFirstElement();
+      viewUrl = resp.url;
+    }
+    
     try {
       CloudBeesDevUiPlugin.getDefault().showJobs(viewUrl, true);
     } catch (CloudBeesException e) {

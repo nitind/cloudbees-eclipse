@@ -25,5 +25,8 @@ public class CBRemoteChangeAdapter implements CBRemoteChangeListener {
     
   }
 
+  public void jenkinsStatusUpdate(String viewUrl, boolean online) {
+    
+  }
   
 }

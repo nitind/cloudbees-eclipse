@@ -10,18 +10,18 @@ import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.views.CBTreeAction;
 
-public class ReloadJenkinsInstancesAction extends CBTreeAction implements IObjectActionDelegate {
+public class ReloadJenkinsLocalInstancesAction extends CBTreeAction implements IObjectActionDelegate {
 
-  public ReloadJenkinsInstancesAction() {
+  public ReloadJenkinsLocalInstancesAction() {
     super();
-    setText("Reload DEV@cloud Jenkins instances@");
-    setToolTipText("Reload DEV@cloud Jenkins instances");
+    setText("Reload Jenkins on-premise  instances@");
+    setToolTipText("Reload Jenkins on-premise instances");
     setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_REFRESH));
   }
 
   @Override
   public void run() {
-    CloudBeesUIPlugin.getDefault().reloadAllJenkins(true);
+    CloudBeesUIPlugin.getDefault().reloadAllLocalJenkins(true);
   }
 
   @Override

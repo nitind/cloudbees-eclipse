@@ -7,7 +7,7 @@ import java.util.List;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.ui.views.ICBGroup;
 
-public class InstanceGroup implements ICBGroup {
+class InstanceGroup implements ICBGroup {
 
   private final List<JenkinsInstanceHolder> instances;
   private final String name;
@@ -39,6 +39,18 @@ public class InstanceGroup implements ICBGroup {
 
   public void addChild(final JenkinsInstanceResponse child) {
     this.instances.add(new JenkinsInstanceHolder(this, child));
+  }
+  
+  public void removeChild(final JenkinsInstanceResponse child) {
+    JenkinsInstanceHolder holder = null;
+    for (JenkinsInstanceHolder h: instances) {
+      if (h.getBacking().equals(child)) {
+        holder = h;
+      }
+    }
+    if (holder!=null) {
+      this.instances.remove(holder);
+    }
   }
 
   public JenkinsInstanceResponse[] getChildren() {

@@ -175,29 +175,46 @@
               label="Properties">
         </action>
      </objectContribution>
+          
      <objectContribution
            adaptable="false"
-           id="com.cloudbees.eclipse.dev.ui.objectContribution.jenkins.properties"
-           objectClass="com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse">
+           id="com.cloudbees.eclipse.dev.ui.objectContribution.jenkins.view.open"
+           objectClass="com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse$View" >
         <action
-              class="com.cloudbees.eclipse.ui.internal.action.ShowPropertiesAction"
+              class="com.cloudbees.eclipse.dev.ui.actions.OpenBuildJobsAction"
               enablesFor="1"
-              id="com.cloudbees.eclipse.dev.ui.action.jenkins.properties"
-              label="Properties">
+              id="com.cloudbees.eclipse.dev.ui.actions.openViewJobs"
+              icon="icons/cb_run_wheel_topleft.png"
+              label="Jobs">
         </action>
      </objectContribution>
+     
      <objectContribution
            adaptable="false"
-           id="com.cloudbees.eclipse.dev.ui.refreshJenkins"
+           id="com.cloudbees.eclipse.dev.ui.refreshJenkinsCloud"
            objectClass="com.cloudbees.eclipse.dev.ui.views.instances.InstanceGroup$DevAtCloudJenkinsInstanceGroup">
         <action
-              class="com.cloudbees.eclipse.dev.ui.actions.ReloadJenkinsInstancesAction"
+              class="com.cloudbees.eclipse.dev.ui.actions.ReloadJenkinsCloudInstancesAction"
               enablesFor="1"
               icon="icons/epl/refresh.png"
               id="com.cloudbees.eclipse.dev.ui.action.reload"
-              label="Reload DEV@cloud Jenkins instances@">
+              label="Reload...">
         </action>
      </objectContribution>
+     
+     <objectContribution
+           adaptable="false"
+           id="com.cloudbees.eclipse.dev.ui.refreshJenkinsLocal"
+           objectClass="com.cloudbees.eclipse.dev.ui.views.instances.InstanceGroup$OnPremiseJenkinsInstanceGroup">
+        <action
+              class="com.cloudbees.eclipse.dev.ui.actions.ReloadJenkinsLocalInstancesAction"
+              enablesFor="1"
+              icon="icons/epl/refresh.png"
+              id="com.cloudbees.eclipse.dev.ui.action.reload"
+              label="Reload...">
+        </action>
+     </objectContribution>
+     
      <objectContribution
            adaptable="false"
            id="com.cloudbees.eclipse.dev.ui.configureJenkins"
@@ -208,6 +225,7 @@
               label="Configure...">
         </action>
      </objectContribution>
+     
      <objectContribution
            adaptable="false"
            id="com.cloudbees.eclipse.dev.ui.refreshForge"
@@ -219,6 +237,8 @@
               label="Configure Forge repos...">
         </action>
      </objectContribution>
+     
+     
      <objectContribution
            adaptable="false"
            id="com.cloudbees.eclipse.dev.ui.openBuildJob"
@@ -227,9 +247,25 @@
               class="com.cloudbees.eclipse.dev.ui.actions.OpenBuildJobsAction"
               enablesFor="1"
               id="com.cloudbees.eclipse.dev.ui.action.openJenkinsInstanceResponse"
-              label="Open">
+              icon="icons/cb_run_wheel_topleft.png"
+              label="Jobs">
         </action>
      </objectContribution>
+
+	 <objectContribution
+           adaptable="false"
+           id="com.cloudbees.eclipse.dev.ui.objectContribution.jenkins.properties"
+           objectClass="com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse">
+        <action
+              class="com.cloudbees.eclipse.ui.internal.action.ShowPropertiesAction"
+              enablesFor="1"
+              id="com.cloudbees.eclipse.dev.ui.action.jenkins.properties"
+              menubarPath="?after=com.cloudbees.eclipse.dev.ui.action.openJenkinsInstanceResponse"
+              label="Properties">
+        </action>
+     </objectContribution>
+     
+     
      <objectContribution
            adaptable="false"
            id="com.cloudbees.eclipse.dev.ui.showFavourites"
@@ -241,6 +277,7 @@
               label="Show View">
         </action>
      </objectContribution>
+     
      <objectContribution
            adaptable="false"
            id="com.cloudbees.eclipse.dev.ui.objectContribution.jenkins.view"
@@ -249,9 +286,11 @@
               class="com.cloudbees.eclipse.ui.internal.action.ShowPropertiesAction"
               enablesFor="1"
               id="com.cloudbees.eclipse.dev.ui.action.jenkins.view.properties"
+              menubarPath="?after=com.cloudbees.eclipse.dev.ui.actions.openViewJobs"
               label="Properties">
         </action>
      </objectContribution>
+
     	<objectContribution
           adaptable="true"
           id="com.cloudbees.eclipse.dev.ui.newJenkinsJob"
