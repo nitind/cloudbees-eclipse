@@ -22,8 +22,8 @@ public class InstanceContentProvider implements IStructuredContentProvider, ITre
   //private InstanceGroup favoritesGroup = new FavoritesInstanceGroup("Favorite Jenkins Jobs", false);
 
   public InstanceContentProvider() {
-    this.jenkinsLocalGroup.setLoading(true);
-    this.jenkinsCloudGroup.setLoading(true);
+    this.jenkinsLocalGroup.setLoading(false);
+    this.jenkinsCloudGroup.setLoading(false);
     //this.favoritesGroup.setLoading(false);
   }
 
