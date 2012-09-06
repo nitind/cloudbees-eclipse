@@ -4,4 +4,14 @@
 <extension-point id="com.cloudbees.eclipse.run.core.processLifecycleHook"
 		name="launchHook" schema="schema/com.cloudbees.eclipse.run.core.processLifecycleHook.exsd" />
 <extension-point id="com.cloudbees.eclipse.run.core.statusUpdater" name="statusUpdater" schema="schema/com.cloudbees.eclipse.run.core.statusUpdater.exsd"/>
+
+    <extension id="beesHomeProp" name="setAntBeesHomeProperty"
+        point="org.eclipse.ant.core.antProperties">
+        
+       <antProperty
+             name="bees.home" class="com.cloudbees.eclipse.run.core.BeesHomeProperty" headless="true" eclipseRuntime="false">
+       </antProperty>
+         
+    </extension>
+
 </plugin>
