@@ -52,6 +52,10 @@ public class CBSdkActivator extends Plugin {
     return plugin;
   }
 
+  /**
+   * TODO consider renaming to setBeesHome or initBeesHome and split getBeesHome into a separate method. 
+   * @return
+   */
   public String getBeesHome() {
     if (this.sdkLocation == null) {
       Bundle bundle = plugin.getBundle();

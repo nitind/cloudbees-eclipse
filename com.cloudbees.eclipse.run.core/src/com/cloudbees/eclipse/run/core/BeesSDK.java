@@ -52,6 +52,10 @@ public class BeesSDK {
 
   public static final String API_URL = "https://api."+GrandCentralService.HOST+"/api";
 
+  static {
+    CBSdkActivator.getDefault().getBeesHome(); // force loading.
+  }
+  
   public static ApplicationListResponse getList() throws Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
@@ -165,7 +169,7 @@ public class BeesSDK {
       return null;
     }
 
-    ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, warPath,
+    ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, new File(warPath),
         null, new UploadProgressWithMonitor(monitor));
     update();
 
