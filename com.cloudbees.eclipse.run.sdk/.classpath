@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/aether-api-1.13.jar"/>
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/aether-connector-asynchttpclient-1.13.jar"/>
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/aether-connector-file-1.13.jar"/>
@@ -54,8 +57,34 @@
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/xmlpull-1.1.3.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/xpp3_min-1.1.4c.jar"/>
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/xstream-1.4.1.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/ant-plugin-1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/app-plugin-1.2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/config-plugin-1.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/db-plugin-1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/activation-1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/annotations-api-6.0.35.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/ant-1.8.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/ant-launcher-1.8.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/antlr-2.7.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/app-plugin-1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/catalina-6.0.35.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/commons-codec-1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/commons-daemon-1.0.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/coyote-6.0.35.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/dbcp-6.0.35.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/ecj-3.5.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/el-api-6.0.35.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/jasper-6.0.35.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/jasper-el-6.0.35.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/jsp-api-6.0.35.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/juli-6.0.35.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/mail-1.4.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/mysql-connector-java-5.1.15.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/servlet-api-6.0.35.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/stax-api-client-1.3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/stax-appgen-1.3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/stax-appserver-1.3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/stax-logagent-1.3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/stringtemplate-3.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
