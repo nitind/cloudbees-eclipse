@@ -31,7 +31,6 @@ public class CBSdkActivator extends Plugin {
   public void start(BundleContext context) throws Exception {
     super.start(context);
     plugin = this;
-    System.setProperty("bees.home", getBeesHome());
   }
 
   /*
@@ -58,6 +57,7 @@ public class CBSdkActivator extends Plugin {
       Bundle bundle = plugin.getBundle();
       try {
         this.sdkLocation = FileLocator.toFileURL(bundle.getEntry("/cloudbees-sdk")).getPath();
+        System.setProperty("bees.home", sdkLocation);
       } catch (IOException e) {
         e.printStackTrace();
       }
