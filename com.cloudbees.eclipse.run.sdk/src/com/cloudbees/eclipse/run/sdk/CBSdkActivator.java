@@ -62,10 +62,10 @@ public class CBSdkActivator extends Plugin {
     if (this.sdkLocation == null) {
       Bundle bundle = plugin.getBundle();
       try {
-        //org.eclipse.osgi.framework.internal.core.Framework.
-        URL entry = bundle.getEntry("/cloudbees-sdk");
-        System.out.println("Entry to convert: "+entry);
-        this.sdkLocation = FileLocator.toFileURL(entry).getPath();
+        //URL entry = bundle.getEntry("/cloudbees-sdk");
+        //this.sdkLocation = FileLocator.toFileURL(entry).getPath();
+        URL url = new URL("platform:/plugin/com.cloudbees.eclipse.run.sdk/cloudbees-sdk");
+        this.sdkLocation = FileLocator.toFileURL(url).getPath();
         System.setProperty("bees.home", sdkLocation);
       } catch (IOException e) {
         e.printStackTrace();
