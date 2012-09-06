@@ -56,6 +56,13 @@ public class CBRunUtil {
       for (ILaunchConfiguration configuration : launchManager.getLaunchConfigurations()) {
 
         String name = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, "");
+
+        Map antProps = configuration.getAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", (Map) null);
+        if (antProps != null) {
+          // Overwrite bees.home with the latest directory location to support bees home dir updates.
+          //antProps.put("bees.home", CBSdkActivator.getDefault().getBeesHome()+"asf");
+        }
+
         if (name.equals(projectName)) {
           boolean cloudLaunch = "".equals(configuration.getAttribute("org.eclipse.jdt.launching.MAIN_TYPE", ""));
 
@@ -150,17 +157,18 @@ public class CBRunUtil {
 
     if (map == null) {
       map = new HashMap<String, String>();
+      conf.setAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", map);      
     }
 
-    map.put("bees.home", CBSdkActivator.getDefault().getBeesHome());
+    injectBeesHome(conf);
+
     if (port == null) {
       map.remove("run.port");
     } else {
       map.put("run.port", port);
     }
     conf.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PORT, port);
-
-    conf.setAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", map);
+    
 
     String directory = variableManager.generateVariableExpression(workspaceVarName, "/" + projectName);
     conf.setAttribute("org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY", directory);
@@ -170,6 +178,9 @@ public class CBRunUtil {
     conf.setAttribute("org.eclipse.ui.externaltools.ATTR_ANT_TARGETS", "run");
 
     conf.setAttribute("process_factory_id", "org.eclipse.ant.ui.remoteAntProcessFactory");
+    
+    conf.setAttribute("org.eclipse.jdt.launching.CLASSPATH_PROVIDER", "org.eclipse.ant.ui.AntClasspathProvider");
+    conf.setAttribute("org.eclipse.jdt.launching.DEFAULT_CLASSPATH", true);
 
     return conf;
   }
@@ -201,6 +212,18 @@ public class CBRunUtil {
         IJavaLaunchConfigurationConstants.ID_SOCKET_ATTACH_VM_CONNECTOR);
 
     return copy;
+  }
+
+  public static void injectBeesHome(ILaunchConfigurationWorkingCopy copy) throws CoreException {
+    // cb launch conf
+    Map antProps = copy.getAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", (Map) null);
+    if (antProps==null) {
+      antProps = new HashMap();
+      copy.setAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", antProps);
+    }            
+    // Overwrite bees.home with the latest directory location to support bees home dir updates.
+    antProps.put("bees.home", CBSdkActivator.getDefault().getBeesHome());           
+
   }
 
 }

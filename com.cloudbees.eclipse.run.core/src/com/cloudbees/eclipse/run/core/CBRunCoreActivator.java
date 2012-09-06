@@ -1,12 +1,23 @@
 package com.cloudbees.eclipse.run.core;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.osgi.framework.BundleContext;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
+import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBProjectProcessService;
+import com.cloudbees.eclipse.run.core.util.CBRunUtil;
+import com.cloudbees.eclipse.run.sdk.CBSdkActivator;
 
 public class CBRunCoreActivator extends Plugin {
 
@@ -29,16 +40,87 @@ public class CBRunCoreActivator extends Plugin {
    */
   @Override
   public void start(BundleContext bundleContext) throws Exception {
+    
+    super.start(bundleContext);
 
     if (!CloudBeesCorePlugin.validateRUNatCloudJRE()) {
       // Throwing exception disables the plugin.
-      throw new Exception("Java SE 7 is not supported by CloudBees RUN@cloud. Disabling com.cloudbees.eclipse.run.core functionality.");
+      throw new Exception(
+          "Java SE 7 is not supported by CloudBees RUN@cloud. Disabling com.cloudbees.eclipse.run.core functionality.");
     }
 
     CBRunCoreActivator.context = bundleContext;
     plugin = this;
 
+    cleanupCBLaunchConfigs();
+
     getPoller().start();
+  }
+
+  private void cleanupCBLaunchConfigs() {
+    // Clean up launch configurations to get rid of bees.home variable from old launch config instances.
+
+    String beesHome = CBSdkActivator.getDefault().getBeesHome();
+
+    ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
+    try {
+      for (ILaunchConfiguration configuration : launchManager.getLaunchConfigurations()) {
+        String name = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, "");
+
+        /*
+         * adjust settings for both cb launch types (deploy and local run)
+         *         if (!CBLaunchConfigurationConstants.ID_CB_LAUNCH.equals(configuration.getType().getIdentifier())) {
+                  continue;
+                }
+        */
+        if (name != null && name.length() > 0) {
+
+          boolean dirty = false;
+
+          if (!configuration.hasAttribute("org.eclipse.jdt.launching.CLASSPATH_PROVIDER")) {
+            dirty = true;
+          }
+
+          if (!configuration.hasAttribute("org.eclipse.jdt.launching.DEFAULT_CLASSPATH")) {
+            dirty = true;
+          }
+
+          if (configuration.hasAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES")) {
+            Map m = configuration.getAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", (Map) null);
+            if (m != null) {
+              if (!m.containsKey("bees.home") || !m.get("bees.home").equals(beesHome)) {
+                dirty = true;
+              }
+            }
+          } else {
+            dirty = true; // if no props then add to have bees.home
+          }
+
+          //if (name.startsWith("test"))
+          //{
+          //  System.err.println("NAME: "+name+"\n"+configuration.getAttributes());
+          //}
+
+          if (dirty) {
+            ILaunchConfigurationWorkingCopy copy = configuration.getWorkingCopy();
+
+            //copy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PORT, 8335);
+
+            copy.setAttribute("org.eclipse.jdt.launching.CLASSPATH_PROVIDER", "org.eclipse.ant.ui.AntClasspathProvider");
+            copy.setAttribute("org.eclipse.jdt.launching.DEFAULT_CLASSPATH", true);
+
+            CBRunUtil.injectBeesHome(copy);
+
+            ILaunchConfiguration newconf = copy.doSave();
+
+          }
+
+        }
+      }
+    } catch (CoreException e) {
+      e.printStackTrace();
+    }
+
   }
 
   /*
@@ -61,5 +143,5 @@ public class CBRunCoreActivator extends Plugin {
   public static ApplicationPoller getPoller() {
     return poller;
   }
-  
+
 }
