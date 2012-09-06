@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.cloudbees.eclipse.run.core;singleton:=true
 Bundle-Version: 1.1.0.qualifier
 Bundle-Activator: com.cloudbees.eclipse.run.core.CBRunCoreActivator
 Bundle-Vendor: Cloud Bees, Inc
+Eclipse-BundleShape: dir
 Require-Bundle: org.eclipse.core.runtime,
  com.cloudbees.eclipse.run.sdk;bundle-version="0.6.0",
  org.apache.ant,

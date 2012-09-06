@@ -6,6 +6,7 @@ Bundle-Version: 1.1.0.qualifier
 Bundle-Activator: com.cloudbees.eclipse.core.CloudBeesCorePlugin
 Bundle-Vendor: Cloud Bees, Inc
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Eclipse-BundleShape: dir
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,

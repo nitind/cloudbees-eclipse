@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.cloudbees.eclipse.run.sdk;singleton:=true
 Bundle-Version: 1.2.1.qualifier
 Bundle-Vendor: Cloud Bees, Inc
 Require-Bundle: org.eclipse.core.runtime
+Eclipse-BundleShape: dir
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: cloudbees-sdk/lib/aether-api-1.13.jar,
  cloudbees-sdk/lib/aether-connector-asynchttpclient-1.13.jar,
