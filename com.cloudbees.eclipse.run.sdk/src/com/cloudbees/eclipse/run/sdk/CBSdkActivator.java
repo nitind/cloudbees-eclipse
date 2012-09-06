@@ -2,6 +2,7 @@ package com.cloudbees.eclipse.run.sdk;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Plugin;
@@ -31,6 +32,7 @@ public class CBSdkActivator extends Plugin {
   public void start(BundleContext context) throws Exception {
     super.start(context);
     plugin = this;
+    getBeesHome();
   }
 
   /*
@@ -60,7 +62,10 @@ public class CBSdkActivator extends Plugin {
     if (this.sdkLocation == null) {
       Bundle bundle = plugin.getBundle();
       try {
-        this.sdkLocation = FileLocator.toFileURL(bundle.getEntry("/cloudbees-sdk")).getPath();
+        //org.eclipse.osgi.framework.internal.core.Framework.
+        URL entry = bundle.getEntry("/cloudbees-sdk");
+        System.out.println("Entry to convert: "+entry);
+        this.sdkLocation = FileLocator.toFileURL(entry).getPath();
         System.setProperty("bees.home", sdkLocation);
       } catch (IOException e) {
         e.printStackTrace();
@@ -68,4 +73,5 @@ public class CBSdkActivator extends Plugin {
     }
     return this.sdkLocation;
   }
+  
 }
