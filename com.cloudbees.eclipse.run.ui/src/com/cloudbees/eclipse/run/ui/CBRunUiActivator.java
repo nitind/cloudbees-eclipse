@@ -95,14 +95,21 @@ public class CBRunUiActivator extends AbstractUIPlugin {
     return status;
   }
 
-  public static void logErrorAndShowDialog(Exception e) {
+  public static void logErrorAndShowDialog(final Exception e) {
     final IStatus s = createStatus(e);
     logStatus(s);
     Display.getDefault().syncExec(new Runnable() {
 
       @Override
       public void run() {
-        ErrorDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(), "An error occured", null, s);
+        String msg = e.getMessage();
+        if (msg==null && e.getCause()!=null) {
+          msg = e.getCause().getMessage();
+        }
+        if (msg==null) {
+          msg = e.getClass().getName();
+        }
+        ErrorDialog.openError(PlatformUI.getWorkbench().getDisplay().getActiveShell(), "An error occured", msg, s);
       }
     });
   }

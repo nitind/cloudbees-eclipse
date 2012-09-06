@@ -1,5 +1,6 @@
 package com.cloudbees.eclipse.run.core;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.OutputStream;
 
@@ -123,7 +124,7 @@ public class BeesSDK {
     String warFile = workspacePath.toOSString() + buildPath.toOSString();
     String appId = getAppId(account, id, client, warFile);
 
-    ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, warFile,
+    ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, new File(warFile),
         null, new UploadProgressWithMonitor(monitor));
     update();
 

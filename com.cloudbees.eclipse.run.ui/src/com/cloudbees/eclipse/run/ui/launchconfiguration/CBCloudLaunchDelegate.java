@@ -116,6 +116,11 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
     }
 
     if (errorTitle != null) {
+      if (errorMsg==null || errorMsg.length()==0) {
+        if (e.getCause()!=null) {
+          errorMsg = e.getCause().getMessage();
+        }
+      }
       final String msg = errorMsg;
       final String title = errorTitle;
       Display.getDefault().syncExec(new Runnable() {
