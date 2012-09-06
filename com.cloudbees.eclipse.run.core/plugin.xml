@@ -8,9 +8,9 @@
     <extension id="beesHomeProp" name="setAntBeesHomeProperty"
         point="org.eclipse.ant.core.antProperties">
         
-       <antProperty
-             name="bees.home" class="com.cloudbees.eclipse.run.core.BeesHomeProperty" headless="true" eclipseRuntime="false">
-       </antProperty>
+       <antProperty name="bees.home" class="com.cloudbees.eclipse.run.core.BeesProperty" headless="true" eclipseRuntime="false" />
+<!--       <antProperty name="bees.apiSecret" class="com.cloudbees.eclipse.run.core.BeesProperty" headless="true" eclipseRuntime="false" />
+       <antProperty name="bees.apiKey" class="com.cloudbees.eclipse.run.core.BeesProperty" headless="true" eclipseRuntime="false" />-->
          
     </extension>
 
