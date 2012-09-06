@@ -1,5 +1,9 @@
 package com.cloudbees.eclipse.run.sdk;
 
+import java.io.File;
+import java.io.IOException;
+
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -52,7 +56,11 @@ public class CBSdkActivator extends Plugin {
   public String getBeesHome() {
     if (this.sdkLocation == null) {
       Bundle bundle = plugin.getBundle();
-      this.sdkLocation = bundle.getEntry("/cloudbees-sdk").getFile();
+      try {
+        this.sdkLocation = FileLocator.toFileURL(bundle.getEntry("/cloudbees-sdk")).getPath();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
     return this.sdkLocation;
   }
