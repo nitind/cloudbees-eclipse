@@ -98,7 +98,6 @@ Notwithstanding anything to the contrary contained herein, except for the limite
          id="com.cloudbees.eclipse.run.sdk"
          download-size="0"
          install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
 </feature>
