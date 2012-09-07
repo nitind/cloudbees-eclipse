@@ -15,7 +15,7 @@ public class ForgeInstance implements Comparable<ForgeInstance> {
   }
 
   public static enum STATUS {
-    UNKNOWN("Not Configured"), SYNCED("Synced"), SKIPPED("Skipped");
+    UNKNOWN("Not Configured"), SYNCED("Configured"), SKIPPED("Skipped");
 
     private final String label;
 

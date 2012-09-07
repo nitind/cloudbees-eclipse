@@ -41,6 +41,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse.Job;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
+import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildEditorInput;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildHistoryView;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildPart;
@@ -134,8 +135,9 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
    */
   @Override
   public void start(final BundleContext context) throws Exception {
-    super.start(context);
+    super.start(context);    
     CloudBeesDevUiPlugin.plugin = this;
+    CloudBeesDevCorePlugin.getDefault();
     this.logger = new Logger(getLog());
     reloadForgeRepos(false);
 
