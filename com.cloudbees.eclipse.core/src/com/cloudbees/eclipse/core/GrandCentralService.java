@@ -31,8 +31,6 @@ import com.google.gson.Gson;
  */
 public class GrandCentralService {
 
-  private static final String PK = "2bf5c815c8334b2";
-
   public static final String HOST = System.getProperty("cloudbees.host", "cloudbees.com");
 
   // private static final String BASE_URL =
@@ -230,7 +228,6 @@ public class GrandCentralService {
       req.account = account;
       AuthInfo auth = getAuthInfo(null);
       req.uid = auth.getAuth().uid;
-      req.partner_key = PK;
 
       //System.out.println("URL: " + url);
       HttpPost post = Utils.jsonRequest(url, req);
@@ -345,7 +342,6 @@ public class GrandCentralService {
 
       AccountNamesRequest req = new AccountNamesRequest();
       req.uid = auth.uid;
-      req.partner_key = PK;
 
       HttpPost post = Utils.jsonRequest(url, req);
 
@@ -391,7 +387,6 @@ public class GrandCentralService {
 
       AccountNameRequest req = new AccountNameRequest();
       req.uid = auth.uid;
-      req.partner_key = PK;
 
       HttpPost post = Utils.jsonRequest(url, req);
 
