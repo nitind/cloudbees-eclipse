@@ -38,8 +38,11 @@ import org.osgi.framework.BundleContext;
 
 import com.cloudbees.eclipse.core.ApplicationInfoChangeListener;
 import com.cloudbees.eclipse.core.CBRemoteChangeListener;
+import com.cloudbees.eclipse.core.ClickStartService;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.GrandCentralService;
+import com.cloudbees.eclipse.core.GrandCentralService.AuthInfo;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
@@ -484,9 +487,34 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
 
     String email = getPreferenceStore().getString(PreferenceConstants.P_EMAIL);
-    CloudBeesCorePlugin.getDefault().getGrandCentralService().setAuthInfo(email, password);
+    final GrandCentralService gcs = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    final ClickStartService css = CloudBeesCorePlugin.getDefault().getClickStartService();
+    gcs.setAuthInfo(email, password);
+    
+    if (email != null && email.length() > 0) {
+      org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Validating CloudBees account") {
+        protected IStatus run(final IProgressMonitor monitor) {
+          try {
+            AuthInfo auth = gcs.getCachedAuthInfo(true, monitor);
+            css.setAuth(auth.getAuth().api_key, auth.getAuth().secret_key);           
+          } catch (CloudBeesException e) {
+            CloudBeesUIPlugin.getDefault().getLogger().error(e.getMessage(), e);
+            monitor.setTaskName("Failed to validate account: "+e.getMessage());
+            monitor.done();
+            return new Status(IStatus.ERROR, CloudBeesUIPlugin.PLUGIN_ID, 0, e.getMessage(), e);
+          }
+          monitor.done();          
+          return Status.OK_STATUS;
+        }
+      };
+      job.setUser(false);
+      try {
+        job.schedule();
+        job.join();
+      } catch (InterruptedException e) {
+        throw new CloudBeesException(e);
+      }
 
-    if (email != null && email.length() > 0) {      
       MultiAccountUtils.selectActiveAccount();
     }
 
@@ -593,8 +621,12 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   @Override
   protected void initializeImageRegistry(ImageRegistry reg) {
     super.initializeImageRegistry(reg);
+    
     reg.put(CBImages.ICON_16X16_CB_PLAIN,
         ImageDescriptor.createFromURL(getBundle().getResource("icons/16x16/cb_plain.png")));
+
+    reg.put(CBImages.ICON_16X16_CB_CONSOLE,
+        ImageDescriptor.createFromURL(getBundle().getResource("icons/16x16/cb_console.png")));
 
     reg.put(CBImages.ICON_16X16_NEW_CB_PROJ_WIZ,
         ImageDescriptor.createFromURL(getBundle().getResource("icons/16x16/cb_new_proj_wiz_ico_16x16.png")));

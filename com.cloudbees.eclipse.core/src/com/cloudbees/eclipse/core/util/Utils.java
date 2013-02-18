@@ -25,6 +25,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.AuthPolicy;
 import org.apache.http.client.params.CookiePolicy;
@@ -362,5 +363,12 @@ public class Utils {
   public static String createSCMConfig(String description, String url) throws Exception {
     XMLReplace xmlReplace = XMLReplace.getInstance(CloudBeesCorePlugin.getSCMConfigXML());
     return xmlReplace.addReplacement("description", description).addReplacement("remote", url).replaceToString();
+  }
+
+  public static HttpGet jsonGetRequest(String url) {
+    HttpGet get = new HttpGet(url);
+    get.setHeader("Accept", "application/json");
+    get.setHeader("Content-type", "application/json");
+    return get;
   }
 }

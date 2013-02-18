@@ -1,0 +1,3 @@
+#!/bin/bash
+# CloudBees SDK
+beesd "$@"

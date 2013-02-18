@@ -10,6 +10,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import com.cloudbees.eclipse.core.GrandCentralService.AuthInfo;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.gc.api.AccountNameRequest;
@@ -48,6 +49,8 @@ public class GrandCentralService {
 
   private String[] accountsCache = null;
 
+  private AuthInfo authInfo = null;
+
   //private boolean accountSelectionActive = false;
 
   public GrandCentralService() {
@@ -62,7 +65,7 @@ public class GrandCentralService {
     this.email = email;
     this.password = password;
     activeAccount = null;
-    accountsCache=null;
+    accountsCache = null;
   }
 
   /**
@@ -92,10 +95,10 @@ public class GrandCentralService {
         && this.password.trim().length() > 0;
   }
 
-  public AuthInfo getCachedAuthInfo(final boolean refresh) throws CloudBeesException {
-    AuthInfo authInfo = null;
+  public AuthInfo getCachedAuthInfo(final boolean refresh, IProgressMonitor monitor) throws CloudBeesException {
+    //authInfo = null;
     if (refresh || authInfo == null) {
-      authInfo = getAuthInfo(null);
+      authInfo = getAuthInfo(monitor);
     }
     return authInfo;
   }
@@ -230,6 +233,7 @@ public class GrandCentralService {
       req.uid = auth.getAuth().uid;
 
       //System.out.println("URL: " + url);
+      
       HttpPost post = Utils.jsonRequest(url, req);
 
       HttpResponse resp = httpclient.execute(post);
@@ -262,12 +266,12 @@ public class GrandCentralService {
     StringBuffer errMsg = new StringBuffer();
 
     try {
-      
+
       String account = getActiveAccountName();
-      if (account==null) {
+      if (account == null) {
         return new ArrayList<JenkinsInstance>();
       }
-      
+
       List<JenkinsInstance> instances = new ArrayList<JenkinsInstance>();
       String url = "https://" + account + ".ci." + HOST;
       JenkinsInstance inst = new JenkinsInstance(account, url, this.email, this.password, true, true);
@@ -288,30 +292,30 @@ public class GrandCentralService {
    * @return
    */
   public String getActiveAccountName() {
-      return activeAccount;
+    return activeAccount;
 
-/*    if (accountSelectionActive) {
-      monitor.beginTask("Waiting for the account selection to finish", 1000);
+    /*    if (accountSelectionActive) {
+          monitor.beginTask("Waiting for the account selection to finish", 1000);
 
-      long wait = 0;      
-      //Wait max for 10sec
-      while (!accountSelectionActive && wait <= 100) {
-        try {
-          Thread.currentThread().wait(100);
-        } catch (InterruptedException e) {
-          monitor.setCanceled(true);
-          break;
+          long wait = 0;      
+          //Wait max for 10sec
+          while (!accountSelectionActive && wait <= 100) {
+            try {
+              Thread.currentThread().wait(100);
+            } catch (InterruptedException e) {
+              monitor.setCanceled(true);
+              break;
+            }
+            wait++;
+            monitor.worked(10);
+          }
+
         }
-        wait++;
-        monitor.worked(10);
-      }
 
-    }
-
-    if (activeAccount != null) {
-      return activeAccount;
-    }
-*/    
+        if (activeAccount != null) {
+          return activeAccount;
+        }
+    */
     //throw new CloudBeesException("Active account not selected!");
 
   }
@@ -360,7 +364,7 @@ public class GrandCentralService {
       Arrays.sort(services.accounts);
 
       accountsCache = services.accounts;
-      
+
       return services.accounts;
 
     } catch (Exception e) {
@@ -429,10 +433,10 @@ public class GrandCentralService {
 
     String acc = getActiveAccountName();
 
-    if (acc==null) {
+    if (acc == null) {
       return result;
     }
-    
+
     AccountServiceStatusResponse services = loadAccountServices(acc);
     Repo[] repos = services.services.forge.repos;
     for (Repo forge : repos) {
@@ -459,12 +463,17 @@ public class GrandCentralService {
     activeAccount = newname;
   }
 
-  public String[] getCachedAccounts() {    
+  public String[] getCachedAccounts() {
     return accountsCache;
   }
 
-/*  public void setAccountSelectionActive(boolean b) {
-    accountSelectionActive = b;
+  public AuthInfo getCachedAuthInfo(boolean b) throws CloudBeesException {
+    return getCachedAuthInfo(b, new NullProgressMonitor());
   }
-*/
+
+  /*  public void setAccountSelectionActive(boolean b) {
+      accountSelectionActive = b;
+    }
+  */
+
 }

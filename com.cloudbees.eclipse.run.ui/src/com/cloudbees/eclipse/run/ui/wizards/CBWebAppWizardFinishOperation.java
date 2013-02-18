@@ -23,6 +23,7 @@ import org.eclipse.ui.wizards.datatransfer.FileSystemStructureProvider;
 import org.eclipse.ui.wizards.datatransfer.IImportStructureProvider;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
 
+import com.cloudbees.eclipse.core.ClickStartService;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesNature;
 import com.cloudbees.eclipse.core.GrandCentralService;
@@ -30,6 +31,8 @@ import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.NatureUtil;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
+import com.cloudbees.eclipse.core.gc.api.ClickStartCreateResponse;
+import com.cloudbees.eclipse.core.gc.api.ClickStartTemplate;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.run.core.CBRunCoreScripts;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
@@ -44,24 +47,23 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
 
   private final CBWebAppWizard wizard;
   private final CBProjectNameAndLocationPage nameAndLocPage;
-  private final CBServicesWizardPage servicesPage;
+  private final ClickStartTemplateWizardPage clickStartPage;
 
   private IProject project;
   private boolean useDefaultLocation;
   private URI uri;
   private ImportOperation importOperation;
-  private boolean isMakeJenkinsJob;
+  //private boolean isMakeJenkinsJob;
   private boolean isAddNewRepo;
-  private ForgeInstance repo;
+  private ClickStartTemplate template;
   private String jobName;
   private URI locationURI;
-  private Failure<Exception> failiure;
-  private JenkinsService jenkinsService;
+  private Failure<Exception> failure;
 
   public CBWebAppWizardFinishOperation(final CBWebAppWizard wizard) {
     this.wizard = wizard;
     this.nameAndLocPage = wizard.getNameAndLocationPage();
-    this.servicesPage = wizard.getServicesPage();
+    this.clickStartPage = wizard.getClickStartPage();
     prepare();
   }
 
@@ -88,27 +90,42 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
     };
 
     this.importOperation = new ImportOperation(containerPath, source, structureProvider, overwriteQuery);
-    this.isMakeJenkinsJob = this.servicesPage.isMakeNewJob();
-    this.isAddNewRepo = this.servicesPage.isAddNewRepository();
-    this.repo = this.servicesPage.getRepo();
-    this.jobName = this.servicesPage.getJobNameText();
+    //this.isMakeJenkinsJob = this.clickStartPage.isMakeNewJob();
+    //this.isAddNewRepo = this.clickStartPage.isAddNewRepository();
+    this.template = this.clickStartPage.getTemplate();
+    //this.jobName = this.clickStartPage.getJobNameText();
     this.locationURI = URIUtil.append(this.uri, projectName);
-    this.failiure = new Failure<Exception>();
+    this.failure = new Failure<Exception>();
 
     CloudBeesUIPlugin plugin = CloudBeesUIPlugin.getDefault();
-    JenkinsInstance instance = CBWebAppWizardFinishOperation.this.servicesPage.getJenkinsInstance();
+    /*JenkinsInstance instance = CBWebAppWizardFinishOperation.this.clickStartPage.getJenkinsInstance();
     if (instance != null) {
       this.jenkinsService = plugin.lookupJenkinsService(instance);
-    }
+    }*/
   }
 
   @Override
   public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
     try {
 
-      monitor.beginTask("Creating new project", 0);
+      ClickStartService service = CloudBeesCorePlugin.getDefault().getClickStartService();
+      String accountName = CloudBeesCorePlugin.getDefault().getGrandCentralService().getActiveAccountName();
+      
+      monitor.beginTask("Creating '"+nameAndLocPage.getProjectName()+"' for account '"+accountName+"' using ClickStart template '"+this.template.name+"'", 0);
 
-      if (CBWebAppWizardFinishOperation.this.useDefaultLocation) {
+      // Invoke provisioning request in a separate job
+      // If request returns keep polling and reporting progress of the provisioning to the job label
+      // As progress=100, bring up a modal background job while configuring and refreshing workspace.
+      // Setup:
+      // Clone from the repo and have git repo accessible
+      // Configure datatools connection to the database
+      // Refresh jenkins job lists and run@cloud app list.
+      
+      
+      ClickStartCreateResponse resp = service.create(CBWebAppWizardFinishOperation.this.template.id, accountName, nameAndLocPage.getProjectName());
+      System.out.println("CREATED! "+resp.appUrl);
+      
+/*      if (CBWebAppWizardFinishOperation.this.useDefaultLocation) {
         this.importOperation.setContext(CBWebAppWizardFinishOperation.this.wizard.getShell());
         this.importOperation.setCreateContainerStructure(false);
         this.importOperation.run(monitor);
@@ -121,10 +138,12 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
 
       if (CBWebAppWizardFinishOperation.this.isAddNewRepo) {
         GrandCentralService service = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-        service.getForgeSyncService().addToRepository(this.repo, this.project, monitor);
+        //service.getForgeSyncService().addToRepository(this.repo, this.project, monitor);
       }
-    } catch (Exception e) {
-      this.failiure.cause = e;
+*
+*
+*/    } catch (Exception e) {
+      this.failure.cause = e;
     } finally {
       //monitor.done();
     }
@@ -136,13 +155,13 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
       CBRunCoreScripts.executeCopySampleWebAppScript(this.uri.getPath(), this.project.getName());
       this.wizard.getContainer().run(true, false, this);
 
-      if (CBWebAppWizardFinishOperation.this.isMakeJenkinsJob) {
+      /*if (CBWebAppWizardFinishOperation.this.isMakeJenkinsJob) {
         CBWizardSupport
             .makeJenkinsJob(createConfigXML(), this.jenkinsService, this.jobName, this.wizard.getContainer());
       }
-
-      if (this.failiure.cause != null) {
-        handleException(this.failiure.cause);
+*/
+      if (this.failure.cause != null) {
+        handleException(this.failure.cause);
       }
     } catch (Exception e) {
       handleException(e);
@@ -160,7 +179,7 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
     ErrorDialog.openError(this.wizard.getShell(), ERROR_TITLE, ERROR_MSG, status);
   }
 
-  private String createConfigXML() throws Exception {
+/*  private String createConfigXML() throws Exception {
     if (this.isAddNewRepo) {
       String description = "Builds " + this.project.getName() + " with SCM support";
 
@@ -177,4 +196,4 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
       return Utils.createEmptyConfig(description);
     }
   }
-}
+*/}

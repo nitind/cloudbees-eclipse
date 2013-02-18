@@ -46,8 +46,8 @@ public class CBProjectNameAndLocationPage extends NewJavaProjectWizardPageOne im
   }
 
   @Override
-  public boolean canFinish() {
-    return false;
+  public boolean canFinish() {    
+    return true;
   }
 
   @Override

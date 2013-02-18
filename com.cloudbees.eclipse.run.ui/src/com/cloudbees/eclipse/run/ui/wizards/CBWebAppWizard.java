@@ -1,7 +1,5 @@
 package com.cloudbees.eclipse.run.ui.wizards;
 
-import java.text.MessageFormat;
-
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.INewWizard;
@@ -10,40 +8,41 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
-import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
 import com.cloudbees.eclipse.ui.wizard.CBWizardPage;
 
 public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard {
 
-  private static final String WINDOW_TITLE = "CloudBees Project";
+  private static final String WINDOW_TITLE = "New CloudBees Project";
   private static final String BUILD_LABEL = "Build {0}";
 
+  private ClickStartTemplateWizardPage clickStartPage;
   private CBProjectNameAndLocationPage nameAndLocPage;
-  private CBServicesWizardPage servicesPage;
+  //private CBServicesWizardPage servicesPage;
 
   public CBWebAppWizard() {
     super();
     setNeedsProgressMonitor(true);
     setWindowTitle(WINDOW_TITLE);
-    CloudBeesDevCorePlugin.getDefault(); // initialize forge providers
+    //CloudBeesDevCorePlugin.getDefault(); // initialize forge providers
   }
 
   @Override
   public void addPages() {
+    this.clickStartPage = new ClickStartTemplateWizardPage();
+    addPage(this.clickStartPage);
+
     this.nameAndLocPage = new CBProjectNameAndLocationPage();
     addPage(this.nameAndLocPage);
 
-    this.servicesPage = new CBServicesWizardPage();
-    addPage(this.servicesPage);
 
     this.nameAndLocPage.init(getSelection(), getActivePart());
   }
 
   @Override
   public IWizardPage getNextPage(IWizardPage page) {
-    if (page instanceof CBServicesWizardPage) {
+ /*   if (page instanceof CBServicesWizardPage) {
       CBServicesWizardPage jenkinsPage = (CBServicesWizardPage) page;
       String jobName = jenkinsPage.getJobNameText();
 
@@ -51,11 +50,15 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
         jenkinsPage.setJobNameText(MessageFormat.format(BUILD_LABEL, this.nameAndLocPage.getProjectName()));
       }
 
+    }*/
+/*
+    if (page instanceof ClickStartTemplateWizardPage) {
+      return null;
     }
-
+    */
     return super.getNextPage(page);
   }
-
+ 
   @Override
   public boolean canFinish() {
     for (IWizardPage page : getPages()) {
@@ -92,8 +95,8 @@ public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard
     return this.nameAndLocPage;
   }
 
-  public CBServicesWizardPage getServicesPage() {
-    return this.servicesPage;
+  public ClickStartTemplateWizardPage getClickStartPage() {
+    return this.clickStartPage;
   }
 
   @Override

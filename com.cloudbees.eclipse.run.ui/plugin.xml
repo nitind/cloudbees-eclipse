@@ -72,6 +72,7 @@
            label="Reload RUN@cloud apps@">
      </action>
   </objectContribution>
+
   <objectContribution
         adaptable="false"
         id="com.cloudbees.eclipse.run.ui.marker.tail"
@@ -389,6 +390,4 @@
           updater="com.cloudbees.eclipse.run.ui.views.AppStatusUpdater">
     </updater>
  </extension>
-
-
 </plugin>

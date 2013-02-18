@@ -3,6 +3,7 @@ package com.cloudbees.eclipse.run.core;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.OutputStream;
+import java.util.List;
 
 import org.apache.tools.ant.listener.TimestampedLogger;
 import org.eclipse.ant.core.AntRunner;
@@ -12,6 +13,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 
 import com.cloudbees.api.ApplicationConfiguration;
@@ -21,6 +23,7 @@ import com.cloudbees.api.ApplicationListResponse;
 import com.cloudbees.api.ApplicationStatusResponse;
 import com.cloudbees.api.BeesClient;
 import com.cloudbees.api.BeesClientConfiguration;
+import com.cloudbees.api.DatabaseInfo;
 import com.cloudbees.api.UploadProgress;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
@@ -58,7 +61,7 @@ public class BeesSDK {
   
   public static ApplicationListResponse getList() throws Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    BeesClient client = getBeesClient(grandCentralService);
+    BeesClient client = getBeesClient(grandCentralService);    
     if (client == null) {
       return new ApplicationListResponse();
     }
@@ -247,13 +250,15 @@ public class BeesSDK {
 
   private static BeesClient getBeesClient(final GrandCentralService grandCentralService) throws CloudBeesException {
     if (grandCentralService.hasAuthInfo()) {
-      AuthInfo cachedAuthInfo = grandCentralService.getCachedAuthInfo(false);
+      AuthInfo cachedAuthInfo = grandCentralService.getCachedAuthInfo(false, new NullProgressMonitor());
 
       String api_key = cachedAuthInfo.getAuth().api_key;
       String secret_key = cachedAuthInfo.getAuth().secret_key;
 
-      BeesClientConfiguration conf = new BeesClientConfiguration(API_URL, api_key, secret_key, "xml", "1.0");
-      return new BeesClient(conf);
+      BeesClientConfiguration conf = new BeesClientConfiguration(API_URL, api_key, secret_key, "xml", "1.0");      
+      BeesClient beesClient = new BeesClient(conf);
+      beesClient.setVerbose(false);
+      return beesClient;
     } else {
       return null;
     }

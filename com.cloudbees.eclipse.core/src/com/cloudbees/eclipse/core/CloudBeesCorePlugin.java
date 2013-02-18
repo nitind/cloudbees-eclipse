@@ -29,6 +29,7 @@ public class CloudBeesCorePlugin extends Plugin {
   private static CloudBeesCorePlugin plugin;
 
   private GrandCentralService gcService;
+  private ClickStartService csService;
 
   private ServiceTracker proxyServiceTracker;
 
@@ -50,6 +51,8 @@ public class CloudBeesCorePlugin extends Plugin {
     plugin = this;
     this.gcService = new GrandCentralService();
     this.gcService.start();
+    
+    this.csService = new ClickStartService();
 
     this.proxyServiceTracker = new ServiceTracker(getBundle().getBundleContext(), IProxyService.class.getName(), null);
     this.proxyServiceTracker.open();
@@ -165,6 +168,11 @@ public class CloudBeesCorePlugin extends Plugin {
       this.gcService.stop();
       this.gcService = null;
     }
+    if (this.csService != null) {
+      this.csService.stop();
+      this.csService = null;
+    }
+
     if (this.proxyServiceTracker != null) {
       this.proxyServiceTracker.close();
     }
@@ -210,5 +218,12 @@ public class CloudBeesCorePlugin extends Plugin {
 /*    String prop = System.getProperty("java.version");
     return !(prop != null && prop.contains("1.7"));
 */  }
+
+  public ClickStartService getClickStartService() throws CloudBeesException {
+    if (this.csService == null) {
+      throw new CloudBeesException("CloudBeesCorePlugin not yet initialized, unable to access ClickStart templates!");
+    }
+    return this.csService;
+  }
 
 }

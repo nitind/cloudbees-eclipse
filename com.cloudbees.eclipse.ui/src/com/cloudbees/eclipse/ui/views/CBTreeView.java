@@ -34,6 +34,7 @@ import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.internal.ActiveAccountContributionItem;
 import com.cloudbees.eclipse.ui.internal.ConfigureSshKeysAction;
+import com.cloudbees.eclipse.ui.internal.ShowConsoleAction;
 import com.cloudbees.eclipse.ui.views.CBTreeSeparator.SeparatorLocation;
 
 public class CBTreeView extends ViewPart {
@@ -45,6 +46,7 @@ public class CBTreeView extends ViewPart {
   private ICBTreeProvider[] providers;
   
   private CBTreeAction configureSshAction = new ConfigureSshKeysAction();
+  private CBTreeAction showConsoleAction = new ShowConsoleAction();
   //private CBTreeAction configureAccountAction = new ConfigureCloudBeesAction();
 
   
@@ -195,6 +197,8 @@ public class CBTreeView extends ViewPart {
       }
     }
     
+    pullDownMenu.add(new CBTreeSeparator(SeparatorLocation.PULL_DOWN));
+    pullDownMenu.add(this.showConsoleAction);
     pullDownMenu.add(new CBTreeSeparator(SeparatorLocation.PULL_DOWN));
     pullDownMenu.add(this.configureSshAction);
     pullDownMenu.add(new CBTreeSeparator(SeparatorLocation.PULL_DOWN));

@@ -12,6 +12,7 @@ import org.eclipse.egit.core.Activator;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.egit.ui.internal.CompareUtils;
 import org.eclipse.egit.ui.internal.clone.GitCloneWizard;
+import org.eclipse.egit.ui.internal.clone.GitImportWizard;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jgit.lib.ObjectId;
@@ -345,5 +346,17 @@ public class ForgeEGitSync implements ForgeSync {
     //      MessageDialog.openError(getShell(), Messages.CVSSSH2PreferencePage_error, Messages.CVSSSH2PreferencePage_47);
     //    }
 
+  }
+  
+  public void cloneRepo(String url) {
+    //GitScmUrlImportWizardPage
+    //GitImportWizard
+    
+    // See ProjectReferenceImporter for hints on cloning and importing!
+    
+  }
+  
+  public void cloneFromClickStart() {
+    
   }
 }

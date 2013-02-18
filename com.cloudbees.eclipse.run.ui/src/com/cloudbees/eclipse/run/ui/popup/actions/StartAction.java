@@ -1,8 +1,6 @@
 package com.cloudbees.eclipse.run.ui.popup.actions;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -19,10 +17,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.internal.ObjectPluginAction;
 
 import com.cloudbees.api.ApplicationInfo;
-import com.cloudbees.api.BeesClient;
-import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
@@ -41,7 +36,7 @@ public class StartAction implements IObjectActionDelegate {
     @Override
     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
       //monitor.beginTask("Starting RUN@cloud server", 1);
-           
+            
       Object firstElement = ((StructuredSelection) this.selection).getFirstElement();
 
       if (firstElement instanceof ApplicationInfo) {

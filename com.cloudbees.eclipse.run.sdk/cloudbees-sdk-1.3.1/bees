@@ -1,0 +1,29 @@
+#!/bin/bash
+# CloudBees SDK
+if [ "$BEES_HOME" == "" ]
+then
+ BEES_HOME="$STAX_HOME"
+fi
+if [ "$BEES_HOME" == "" ]
+then
+ PRG="$0"
+
+ # need this for relative symlinks
+ while [ -h "$PRG" ] ; do
+  ls="$(ls -ld "$PRG")"
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+   PRG="$link"
+  else
+   PRG="`dirname "$PRG"`/$link"
+  fi
+ done
+
+ # make it fully qualified
+ BEES_HOME="$(cd "$(dirname "$PRG")" && pwd)"
+fi
+export STAX_HOME="$BEES_HOME"
+
+export JAVA_OPTS="-Dbees.home=$BEES_HOME -Xmx256m $BEES_OPTS"
+exec java $JAVA_OPTS -cp $BEES_HOME/lib/cloudbees-boot.jar com.cloudbees.sdk.boot.Launcher "$@"
+
