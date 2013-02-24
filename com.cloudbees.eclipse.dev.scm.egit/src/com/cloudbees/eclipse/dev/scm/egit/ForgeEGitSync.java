@@ -3,25 +3,36 @@ package com.cloudbees.eclipse.dev.scm.egit;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.egit.core.Activator;
 import org.eclipse.egit.core.RepositoryCache;
+import org.eclipse.egit.core.op.CloneOperation;
+import org.eclipse.egit.ui.UIPreferences;
 import org.eclipse.egit.ui.internal.CompareUtils;
 import org.eclipse.egit.ui.internal.clone.GitCloneWizard;
 import org.eclipse.egit.ui.internal.clone.GitImportWizard;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepository;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jsch.core.IJSchService;
 import org.eclipse.jsch.internal.core.JSchCorePlugin;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -32,6 +43,8 @@ import org.eclipse.team.internal.ui.Utils;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
@@ -44,10 +57,11 @@ import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
+import com.jcraft.jsch.Session;
 
 /**
  * Forge repo sync provider for EGIT
- *
+ * 
  * @author ahtik
  */
 public class ForgeEGitSync implements ForgeSync {
@@ -347,16 +361,67 @@ public class ForgeEGitSync implements ForgeSync {
     //    }
 
   }
-  
-  public void cloneRepo(String url) {
+
+  public File cloneRepo(String url, IProgressMonitor monitor) throws InterruptedException, InvocationTargetException,
+      URISyntaxException {
     //GitScmUrlImportWizardPage
     //GitImportWizard
-    
+
     // See ProjectReferenceImporter for hints on cloning and importing!
-    
+    /*
+        CloneOperation clone = Utils.createInstance(CloneOperation.class, new Class[] { URIish.class, Boolean.TYPE,
+                    Collection.class, File.class, String.class, String.class, Integer.TYPE }, new Object[] { new URIish(url),
+                    true, Collections.EMPTY_LIST, new File(""), null, "origin", 5000 });
+                if (clone == null) {
+                  // old constructor didn't have timeout at the end
+                clone = Utils.createInstance(CloneOperation.class, new Class[] { URIish.class, Boolean.TYPE, Collection.class,
+                      File.class, String.class, String.class }, new Object[] { new URIish(url), true, Collections.EMPTY_LIST,
+                      new File(""), null, "origin" });
+        
+      }*/
+    try {
+      int timeout = 60;
+
+      // force plugin activation
+      Activator.getDefault().getLog();
+
+      Platform.getPreferencesService().getInt("org.eclipse.egit.core", UIPreferences.REMOTE_CONNECTION_TIMEOUT, 60,
+          null);
+
+      String branch = "master";
+      URIish gitUrl = new URIish(url);
+      File workDir = new File("c:\\temp\\gittest2");
+      //final File repositoryPath = workDir.append(Constants.DOT_GIT_EXT).toFile();
+
+      String refName = Constants.R_HEADS + branch;
+      final CloneOperation cloneOperation = new CloneOperation(gitUrl, true, null, workDir, refName,
+          Constants.DEFAULT_REMOTE_NAME, timeout);
+      cloneOperation.run(monitor);
+
+      return workDir;
+    } catch (final InvocationTargetException e1) {
+      throw e1;
+    } catch (InterruptedException e2) {
+      throw e2;
+    }
+
   }
-  
+
   public void cloneFromClickStart() {
-    
+
   }
+
+  public boolean validateSSHConfig(IProgressMonitor monitor) throws CloudBeesException, JSchException {    
+    IJSchService ssh = CloudBeesScmEgitPlugin.getDefault().getJSchService();
+    if (ssh == null) {
+      throw new CloudBeesException("SSH not initialized!");
+    }
+    
+    Session sess = ssh.createSession("git.cloudbees.com", -1, "git");
+    ssh.connect(sess, 60000, monitor);
+    boolean ret = sess.isConnected();
+    sess.disconnect();
+    return ret;
+  }
+
 }
