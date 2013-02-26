@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -78,7 +79,7 @@ public class TestGitClone {
     String projname = "scalatest2";
     String url = "ssh://git@git.cloudbees.com/ahtikaccount2/scalatest-2.git";
     try {
-      File f = s.cloneRepo(url, new Path(""), new NullProgressMonitor());
+      File f = s.cloneRepo(url, new URI("file://c:/testdir"), new NullProgressMonitor());
       System.out.println("CLONED TO " + f);
     } catch (Exception e) {
       e.printStackTrace();
