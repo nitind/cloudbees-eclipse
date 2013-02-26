@@ -53,7 +53,7 @@ public class ClickStartCreateResponse extends ClickStartResponseBase {
   public String id;
   public String appUrl;
   public String source;
-  public String foprgeUrl;
+  public String forgeUrl;
   public String appManagerUrl;
   public String jenkinsUrl;
   public String dbManagerUrl;

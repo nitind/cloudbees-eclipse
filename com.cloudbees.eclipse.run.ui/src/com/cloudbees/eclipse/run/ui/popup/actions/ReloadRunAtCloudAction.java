@@ -29,7 +29,7 @@ public class ReloadRunAtCloudAction extends CBTreeAction implements IObjectActio
     reload();
   }
 
-  private void reload() {
+  public static void reload() {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading RUN@cloud apps") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {

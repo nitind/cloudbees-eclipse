@@ -319,7 +319,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
             pref.open();
           }
         } else if (e.text.equals("CloudBees web")) {
-          CloudBeesUIPlugin.getDefault().openWithBrowser("https://grandcentral."+GrandCentralService.HOST+"/account/edit");
+          CloudBeesUIPlugin.getDefault().openWithBrowser("https://grandcentral."+GrandCentralService.HOST+"/user/keys");
         }
       }
     });

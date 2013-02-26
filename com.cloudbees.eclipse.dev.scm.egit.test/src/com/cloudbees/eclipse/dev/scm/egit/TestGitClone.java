@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.egit.core.Activator;
 import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jsch.core.IJSchService;
@@ -77,7 +78,7 @@ public class TestGitClone {
     String projname = "scalatest2";
     String url = "ssh://git@git.cloudbees.com/ahtikaccount2/scalatest-2.git";
     try {
-      File f = s.cloneRepo(url, new NullProgressMonitor());
+      File f = s.cloneRepo(url, new Path(""), new NullProgressMonitor());
       System.out.println("CLONED TO " + f);
     } catch (Exception e) {
       e.printStackTrace();

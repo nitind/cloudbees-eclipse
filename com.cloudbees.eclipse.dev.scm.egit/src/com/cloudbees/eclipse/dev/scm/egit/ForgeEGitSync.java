@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
@@ -362,7 +363,7 @@ public class ForgeEGitSync implements ForgeSync {
 
   }
 
-  public File cloneRepo(String url, IProgressMonitor monitor) throws InterruptedException, InvocationTargetException,
+  public static File cloneRepo(String url, URI locationURI, IProgressMonitor monitor) throws InterruptedException, InvocationTargetException,
       URISyntaxException {
     //GitScmUrlImportWizardPage
     //GitImportWizard
@@ -390,7 +391,7 @@ public class ForgeEGitSync implements ForgeSync {
 
       String branch = "master";
       URIish gitUrl = new URIish(url);
-      File workDir = new File("c:\\temp\\gittest2");
+      File workDir = new File(locationURI);
       //final File repositoryPath = workDir.append(Constants.DOT_GIT_EXT).toFile();
 
       String refName = Constants.R_HEADS + branch;
@@ -407,14 +408,11 @@ public class ForgeEGitSync implements ForgeSync {
 
   }
 
-  public void cloneFromClickStart() {
 
-  }
-
-  public boolean validateSSHConfig(IProgressMonitor monitor) throws CloudBeesException, JSchException {    
+  public static boolean validateSSHConfig(IProgressMonitor monitor) throws CloudBeesException, JSchException {    
     IJSchService ssh = CloudBeesScmEgitPlugin.getDefault().getJSchService();
     if (ssh == null) {
-      throw new CloudBeesException("SSH not initialized!");
+      throw new CloudBeesException("SSH not available!");
     }
     
     Session sess = ssh.createSession("git.cloudbees.com", -1, "git");

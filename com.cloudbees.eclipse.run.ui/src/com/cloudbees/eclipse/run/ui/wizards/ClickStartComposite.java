@@ -1,9 +1,7 @@
 package com.cloudbees.eclipse.run.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -27,19 +25,19 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.gc.api.ClickStartTemplate;
+import com.cloudbees.eclipse.dev.scm.egit.ForgeEGitSync;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
-import com.cloudbees.eclipse.ui.wizard.Failure;
+import com.jcraft.jsch.JSchException;
 
 public abstract class ClickStartComposite extends Composite {
 
   private static final String GROUP_LABEL = "ClickStart template";
-  private static final String ERR_ADD_REPOS = "Please add SVN repositories to your CloudBees DEV@cloud";
-  private static final String ERR_REPO_SELECTION = "SVN repository is not selected.";
+  private static final String ERR_TEMPLATES_NOT_FOUND = "No ClickStart templates found.";
+  private static final String ERR_TEMPLATE_SELECTION = "Please select a ClickStart template to get started.";
 
   private ClickStartTemplate selectedTemplate;
 
@@ -208,10 +206,89 @@ public abstract class ClickStartComposite extends Composite {
     tblclmnUrl.getColumn().setText("Components");//TODO i18n
     tblclmnUrl.setLabelProvider(labelProvider);
 
-    loadTable();
+    loadData();
+    
     v.getTable().setFocus();
   }
 
+  private Exception loadData() {
+    final Exception[] ex = {null};
+
+    final IRunnableWithProgress operation1 = new IRunnableWithProgress() {
+
+      public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+        try {
+          monitor.beginTask(" Loading ClickStart templates from the repository...", 0);
+
+          Collection<ClickStartTemplate> retlist = CloudBeesCorePlugin.getDefault().getClickStartService()
+              .loadTemplates(monitor);
+
+          templateProvider.setElements(retlist.toArray(new ClickStartTemplate[0]));
+
+          Display.getDefault().syncExec(new Runnable() {
+            public void run() {
+              v.refresh();
+              ClickStartComposite.this.validate();
+            }
+          });
+
+        } catch (CloudBeesException e) {
+          ex[0] = e;
+        }
+      }
+    };
+    
+    
+    final IRunnableWithProgress operation2 = new IRunnableWithProgress() {
+
+      public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+        try {
+          monitor.beginTask(" Testing your connection to ssh://git.cloudbees.com...", 0);
+
+          try {
+            if (!ForgeEGitSync.validateSSHConfig(monitor)) {
+              ex[0] = new CloudBeesException("Failed to connect!");    
+            }
+          } catch (JSchException e) {
+            ex[0] = e;
+          }
+
+        } catch (CloudBeesException e) {
+          ex[0] = e;
+        }
+      }
+    };
+    Display.getDefault().asyncExec(new Runnable() {
+      public void run() {
+        try {
+          wizcontainer.run(true, false, operation2);
+          if (ex[0]==null) {
+            wizcontainer.run(true, false, operation1);
+          }
+          
+          if (ex[0]!=null) {
+            //ex[0].printStackTrace();
+            
+            if ("Auth fail".equals(ex[0].getMessage())) {
+              ClickStartComposite.this.updateErrorStatus("Authentication failed. Are SSH keys properly configured?");
+            } else {
+              ClickStartComposite.this.updateErrorStatus(ex[0].getMessage());
+            }
+            
+            ClickStartComposite.this.setPageComplete(ex[0]==null);
+          }
+        } catch (Exception e) {
+          CBRunUiActivator.logError(e);
+          e.printStackTrace();
+        }
+      }
+    });
+
+    return ex[0];
+    
+  }
+
+  
   protected void fireTemplateChanged() {
     System.out.println("Selected: "+selectedTemplate);
     validate();
@@ -221,21 +298,18 @@ public abstract class ClickStartComposite extends Composite {
     return this.selectedTemplate;
   }
 
-  private void updateErrorStatus(String errorMsg) {
-    //TODO Update!!
-    //ClickStartTemplateWizardPage.this.updateErrorStatus(errorMsg);
-  }
+  abstract protected void updateErrorStatus(String errorMsg);
 
   private void validate() {
     Object[] tarr = templateProvider.getElements(null);
     if (tarr== null || tarr.length == 0) {
-      updateErrorStatus(ERR_ADD_REPOS);
+      updateErrorStatus(ERR_TEMPLATES_NOT_FOUND);
       setPageComplete(false);
       return;
     }
 
     if (getSelectedTemplate() == null) {
-      updateErrorStatus(ERR_REPO_SELECTION);
+      updateErrorStatus(ERR_TEMPLATE_SELECTION);
       setPageComplete(false);
       return;
     }
@@ -260,89 +334,6 @@ public abstract class ClickStartComposite extends Composite {
 
   }
 
-  private void loadTable() {
-
-    try {
-
-      loadTableInternal();
-
-    } catch (Exception e) {
-      CBRunUiActivator.logError(e); // TODO
-      //return new ClickStartTemplate[0];
-    }
-
-    /*    Collections.sort(insts, new Comparator<ClickStartTemplate>() {
-          public int compare(final ClickStartTemplate o1, final ClickStartTemplate o2) {
-            return o1.name.compareTo(o2.name);
-          }
-        });*/
-
-  }
-
-  private void loadTableInternal() {
-    final List<ClickStartTemplate> repos = new ArrayList<ClickStartTemplate>();
-    final Failure<CloudBeesException> failure = new Failure<CloudBeesException>();
-
-    final IRunnableWithProgress operation = new IRunnableWithProgress() {
-
-      public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-        try {
-          monitor.beginTask(" Loading ClickStart templates from the repository...", 0);
-
-          Collection<ClickStartTemplate> retlist = CloudBeesCorePlugin.getDefault().getClickStartService()
-              .loadTemplates(monitor);
-
-          templateProvider.setElements(retlist.toArray(new ClickStartTemplate[0]));
-
-          //repos.addAll(retlist);
-
-          Display.getDefault().syncExec(new Runnable() {
-            public void run() {
-              v.refresh();
-              ClickStartComposite.this.validate();
-              //v.getTable().redraw();
-
-              /*          
-                        t.removeAll();
-                        for (ClickStartTemplate instance : repos) {
-                          TableItem tableItem = new TableItem(t, SWT.NONE);
-                          String comps = "";
-                          
-                          for (int i = 0; i<instance.components.length; i++) {
-                            comps = comps+instance.components[i].name;
-                            if (i<instance.components.length-1) {
-                              comps = comps+", ";
-                            }
-                          }
-                          
-                          tableItem.setText(new String[] { instance.name, comps });
-                          tableItem.setData(instance);
-                          
-                        }
-
-                        if (t.getItemCount() > 0) {
-                          t.setSelection(0);
-                        }
-              */
-            }
-          });
-
-        } catch (CloudBeesException e) {
-          failure.cause = e;
-        }
-      }
-    };
-    Display.getDefault().asyncExec(new Runnable() {
-      public void run() {
-        try {
-          wizcontainer.run(true, false, operation);
-        } catch (Exception e) {
-          CBRunUiActivator.logError(e);
-          e.printStackTrace();
-        }
-      }
-    });
-  }
 
   private static class TemplateProvider implements IStructuredContentProvider {
 
@@ -367,4 +358,6 @@ public abstract class ClickStartComposite extends Composite {
 
     }
   }
+  
+  
 }

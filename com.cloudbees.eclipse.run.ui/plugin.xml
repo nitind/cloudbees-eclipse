@@ -5,7 +5,7 @@
 	<extension point="org.eclipse.ui.commands">
 		<command categoryId="com.cloudbees.eclipse.ui.commands.category"
 			defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.CBSampleWebAppHandler"
-			id="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp" name="New CloudBees Project...">
+			id="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp" name="New CloudBees ClickStart Project...">
 		</command>
 	</extension>
 

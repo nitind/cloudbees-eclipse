@@ -51,9 +51,9 @@ public class ActiveAccountContributionItem extends CompoundContributionItem {
         CommandContributionItemParameter params = new CommandContributionItemParameter(CloudBeesUIPlugin.getDefault()
             .getWorkbench(), null, "com.cloudbees.eclipse.run.ui.commands.newSampleWebApp",
             CommandContributionItem.STYLE_PUSH);
-        params.label = "New CloudBees Project...";
+        params.label = "New CloudBees ClickStart Project...";
         params.mnemonic = "N";
-        params.tooltip = "Create a sample CloudBees project";
+        params.tooltip = "Create a new project from ClickStart templates";
         params.icon = CloudBeesUIPlugin.getImageDescription(CBImages.ICON_16X16_NEW_CB_PROJ_WIZ);
         list.add(new CommandContributionItem(params));
       }

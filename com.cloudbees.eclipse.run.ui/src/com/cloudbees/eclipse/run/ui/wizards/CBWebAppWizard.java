@@ -14,7 +14,7 @@ import com.cloudbees.eclipse.ui.wizard.CBWizardPage;
 
 public class CBWebAppWizard extends BasicNewResourceWizard implements INewWizard {
 
-  private static final String WINDOW_TITLE = "New CloudBees Project";
+  private static final String WINDOW_TITLE = "New CloudBees ClickStart Project";
   private static final String BUILD_LABEL = "Build {0}";
 
   private ClickStartTemplateWizardPage clickStartPage;

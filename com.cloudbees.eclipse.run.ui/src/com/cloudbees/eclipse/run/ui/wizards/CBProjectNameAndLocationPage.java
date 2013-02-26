@@ -11,8 +11,8 @@ import com.cloudbees.eclipse.ui.wizard.CBWizardPage;
 public class CBProjectNameAndLocationPage extends NewJavaProjectWizardPageOne implements CBWizardPage {
 
   public static final String PAGE_NAME = CBProjectNameAndLocationPage.class.getSimpleName();
-  private static final String PAGE_TITLE = "CloudBees Project";
-  private static final String PAGE_DESCRIPTION = "This wizard creates a new CloudBees project.";
+  private static final String PAGE_TITLE = "CloudBees project name and location";
+  private static final String PAGE_DESCRIPTION = "Please set the name and location for the project.";
 
   public CBProjectNameAndLocationPage() {
     super();

@@ -124,6 +124,7 @@ public class ClickStartService {
       resp = httpclient.execute(get);
       reader = new BufferedReader(new InputStreamReader(resp.getEntity().getContent(), "UTF-8"));
     } catch (Exception e) {
+      errMsg = new StringBuffer(e.getMessage());
       throw new CloudBeesException("Failed to invoke ClickStart!" + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
     }
     
@@ -177,7 +178,9 @@ public class ClickStartService {
 
   private void checkForErrors(HttpResponse resp, ClickStartResponseBase r) throws CloudBeesException {
     if (r != null && r.errorCode != null && r.errorCode.length() > 0) {
-      throw new CloudBeesException("Failed to invoke ClickStart API! " + r.errorCode + ":" + r.message);
+      //throw new CloudBeesException("Failed to invoke ClickStart API! " + r.errorCode + ":" + r.message);
+      CloudBeesException t = new CloudBeesException(r.message);
+      throw t;
     }
     Utils.checkResponseCode(resp);
   }

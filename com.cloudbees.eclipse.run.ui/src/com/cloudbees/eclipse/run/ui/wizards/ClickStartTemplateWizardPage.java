@@ -46,6 +46,12 @@ public class ClickStartTemplateWizardPage extends WizardPage implements CBWizard
        ClickStartTemplateWizardPage.this.setPageComplete(b);
        System.out.println("Template: "+getTemplate()+" complete? "+b);
       }
+      
+      @Override
+      protected void updateErrorStatus(String msg){
+        ClickStartTemplateWizardPage.this.updateErrorStatus(msg);  
+      }
+      
     };
     
     this.repositoryComposite.setLayoutData(data);
