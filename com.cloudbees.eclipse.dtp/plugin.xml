@@ -2,5 +2,63 @@
 <?eclipse version="3.4"?>
 <plugin>
 
+<extension point="org.eclipse.ui.popupMenus">
+  <objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.dtp.reloadDatabaseAction"
+        objectClass="com.cloudbees.eclipse.dtp.internal.treeview.DBGroup">
+     <action
+           class="com.cloudbees.eclipse.dtp.internal.ReloadDatabaseAction"
+           enablesFor="1"
+           icon="icons/16x16/refresh.png"
+           id="com.cloudbees.eclipse.dtp.action.reload"
+           label="Reload Database info">
+     </action>
+  </objectContribution>
+
+  <objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.dtp.showProperties"
+        objectClass="com.cloudbees.api.DatabaseInfo">
+     <action
+           class="com.cloudbees.eclipse.ui.internal.action.ShowPropertiesAction"
+           enablesFor="1"
+           id="com.cloudbees.eclipse.dtp.action.showProperties"
+           label="Properties"
+           menubarPath="properties">
+     </action>
+  </objectContribution>
+	</extension>
+
+    <extension
+          point="com.cloudbees.eclipse.ui.cbTreeProvider">
+       <cbTreeProvider
+             class="com.cloudbees.eclipse.dtp.internal.treeview.DBListView">
+       </cbTreeProvider>
+    </extension>
+
+ <extension
+       point="org.eclipse.core.runtime.adapters">
+    <factory
+          adaptableType="com.cloudbees.api.DatabaseInfo"
+          class="com.cloudbees.eclipse.dtp.internal.DatabaseInfoAdapterFactory">
+       <adapter
+             type="org.eclipse.ui.views.properties.IPropertySource">
+       </adapter>
+       <adapter
+             type="org.eclipse.ui.IActionFilter">
+       </adapter>
+    </factory>
+ </extension>
+
+ <extension-point id="com.cloudbees.eclipse.dtp.statusUpdater" name="statusUpdater" schema="schema/com.cloudbees.eclipse.dtp.statusUpdater.exsd"/>
+ 
+ <extension
+       point="com.cloudbees.eclipse.dtp.statusUpdater">
+    <updater
+          updater="com.cloudbees.eclipse.dtp.internal.treeview.DatabaseStatusHandler">
+    </updater>
+ </extension>
+
 
 </plugin>

@@ -18,6 +18,10 @@ Require-Bundle: org.eclipse.core.runtime,
  com.cloudbees.eclipse.core,
  com.cloudbees.eclipse.ui,
  com.cloudbees.eclipse.dev.core,
- org.eclipse.datatools.connectivity
+ org.eclipse.datatools.connectivity,
+ com.cloudbees.eclipse.run.sdk,
+ org.eclipse.datatools.connectivity.ui,
+ com.cloudbees.eclipse.run.core,
+ com.cloudbees.eclipse.run.ui
 Export-Package: com.cloudbees.eclipse.dtp
 

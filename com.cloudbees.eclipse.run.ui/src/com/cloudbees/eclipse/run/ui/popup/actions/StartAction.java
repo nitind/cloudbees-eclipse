@@ -72,7 +72,7 @@ public class StartAction implements IObjectActionDelegate {
             BeesSDK.start(account, idstr);
             monitor.worked(75);
             monitor.setTaskName("Loading RUN@cloud apps list");
-            CBRunCoreActivator.getPoller().fetchAndUpdate();
+            CBRunCoreActivator.getPoller().fetchAndUpdateApps();
             monitor.worked(25);
 
             return Status.OK_STATUS;

@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.api.ApplicationListResponse;
-import com.cloudbees.eclipse.run.core.IStatusUpdater;
+import com.cloudbees.eclipse.run.core.ApplicationStatusUpdater;
 
-public class AppStatusUpdater implements IStatusUpdater {
+public class AppStatusUpdater implements ApplicationStatusUpdater {
 
-  private static final ArrayList<IStatusUpdater> listeners = new ArrayList<IStatusUpdater>();
+  private static final ArrayList<ApplicationStatusUpdater> listeners = new ArrayList<ApplicationStatusUpdater>();
 
   public AppStatusUpdater() {
   }
@@ -20,16 +20,16 @@ public class AppStatusUpdater implements IStatusUpdater {
 
   @Override
   public void update(ApplicationListResponse response) {
-    for (IStatusUpdater l : listeners) {
+    for (ApplicationStatusUpdater l : listeners) {
       l.update(response);
     }
   }
 
-  public static void addListener(IStatusUpdater listener) {
+  public static void addListener(ApplicationStatusUpdater listener) {
     listeners.add(listener);
   }
 
-  public static void removeListener(IStatusUpdater listener) {
+  public static void removeListener(ApplicationStatusUpdater listener) {
     listeners.remove(listener);
   }
 }

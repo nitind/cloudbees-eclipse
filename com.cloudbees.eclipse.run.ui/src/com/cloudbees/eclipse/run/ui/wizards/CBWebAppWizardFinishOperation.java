@@ -208,8 +208,8 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
           if (mvnExists) {
             //NatureUtil.addNatures(project, new String[] { "org.eclipse.m2e.core.maven2Nature" }, monitor);
             monitor.subTask("Detected maven build scripts, building project to generate eclipse settings.");
-            int res = CBMavenBuilder.buildMavenProject(project);
-            System.out.println("Maven builder returned: "+res);
+            //int res = CBMavenBuilder.buildMavenProject(project);
+            //System.out.println("Maven builder returned: "+res);
             project.refreshLocal(IProject.DEPTH_INFINITE, monitor);
           }
           

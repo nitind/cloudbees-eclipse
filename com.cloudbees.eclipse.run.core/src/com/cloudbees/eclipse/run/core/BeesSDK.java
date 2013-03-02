@@ -24,6 +24,7 @@ import com.cloudbees.api.ApplicationStatusResponse;
 import com.cloudbees.api.BeesClient;
 import com.cloudbees.api.BeesClientConfiguration;
 import com.cloudbees.api.DatabaseInfo;
+import com.cloudbees.api.DatabaseListResponse;
 import com.cloudbees.api.UploadProgress;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
@@ -59,6 +60,16 @@ public class BeesSDK {
     CBSdkActivator.getDefault().getBeesHome(); // force loading.
   }
   
+  public static DatabaseListResponse getDatabaseList(String account) throws Exception {
+    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    BeesClient client = getBeesClient(grandCentralService);    
+    if (client == null) {
+      return new DatabaseListResponse();
+    }
+    return client.databaseList(account);
+  }
+
+
   public static ApplicationListResponse getList() throws Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);    
@@ -96,7 +107,7 @@ public class BeesSDK {
       public void run() {
         try {
           Thread.sleep(5 * 1000);
-          CBRunCoreActivator.getPoller().fetchAndUpdate();
+          CBRunCoreActivator.getPoller().fetchAndUpdateApps();
         } catch (Exception e) {
           CBRunCoreActivator.logError(e);
         }

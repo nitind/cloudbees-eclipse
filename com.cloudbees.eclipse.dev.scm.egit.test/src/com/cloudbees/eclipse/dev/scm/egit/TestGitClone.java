@@ -80,7 +80,6 @@ public class TestGitClone {
     String url = "ssh://git@git.cloudbees.com/ahtikaccount2/scalatest-2.git";
     try {
       File f = s.cloneRepo(url, new URI("file://c:/testdir"), new NullProgressMonitor());
-      System.out.println("CLONED TO " + f);
     } catch (Exception e) {
       e.printStackTrace();
       fail(e.getMessage());

@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.run.ui.views;
+package com.cloudbees.eclipse.dtp.internal.treeview;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -14,14 +14,14 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
-import com.cloudbees.api.ApplicationInfo;
-import com.cloudbees.api.ApplicationListResponse;
-import com.cloudbees.eclipse.core.ApplicationInfoChangeListener;
+import com.cloudbees.api.DatabaseInfo;
+import com.cloudbees.api.DatabaseListResponse;
 import com.cloudbees.eclipse.core.CBRemoteChangeListener;
+import com.cloudbees.eclipse.core.DatabaseInfoChangeListener;
+import com.cloudbees.eclipse.dtp.CloudBeesDataToolsPlugin;
+import com.cloudbees.eclipse.dtp.internal.DatabaseStatusUpdate;
+import com.cloudbees.eclipse.dtp.internal.ReloadDatabaseAction;
 import com.cloudbees.eclipse.run.core.BeesSDK;
-import com.cloudbees.eclipse.run.core.ApplicationStatusUpdater;
-import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
-import com.cloudbees.eclipse.run.ui.popup.actions.ReloadRunAtCloudAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
 import com.cloudbees.eclipse.ui.views.CBTreeContributor;
@@ -33,29 +33,29 @@ import com.cloudbees.eclipse.ui.views.ICBTreeProvider;
  * 
  * @author ahtik
  */
-public class AppListView extends CBTreeProvider implements IPropertyChangeListener, ICBTreeProvider {
+public class DBListView extends CBTreeProvider implements IPropertyChangeListener, ICBTreeProvider {
 
-  public static final String ID = "com.cloudbees.eclipse.run.ui.views.AppListView";
+  public static final String ID = "com.cloudbees.eclipse.dtp.DBListView";
 
   private TreeViewer viewer;
 
-  protected ITreeContentProvider contentProvider = new AppContentProvider();
-  protected LabelProvider labelProvider = new AppLabelProvider();
+  protected ITreeContentProvider contentProvider = new DBContentProvider();
+  protected LabelProvider labelProvider = new DBLabelProvider();
 
   protected CBRemoteChangeListener jenkinsChangeListener;
 
-  protected ApplicationInfoChangeListener applicationChangeListener;
+  protected DatabaseInfoChangeListener databaseChangeListener;
 
-  private ApplicationStatusUpdater statusUpdater;
+  private DatabaseStatusUpdate statusUpdater;
 
   protected boolean loadfinished = true;
 
   public void init() {
 
-    this.applicationChangeListener = new ApplicationInfoChangeListener() {
+    this.databaseChangeListener = new DatabaseInfoChangeListener() {
 
       @Override
-      public void applicationInfoChanged() {
+      public void databaseInfoChanged() {
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
           @Override
           public void run() {
@@ -64,35 +64,31 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
         });
       }
     };
-    this.statusUpdater = new ApplicationStatusUpdater() {
+    this.statusUpdater = new DatabaseStatusUpdate() {
 
-      @Override
-      public void update(ApplicationListResponse response) {
-        AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, response);
+      public void update(DatabaseListResponse response) {
+        DBListView.this.contentProvider.inputChanged(DBListView.this.viewer, null, response);
         Display.getDefault().asyncExec(new Runnable() {
-
-          @Override
           public void run() {
-            AppListView.this.viewer.refresh(true);
+            DBListView.this.viewer.refresh(true);
           }
         });
       }
 
-      @Override
-      public void update(String id, String status, ApplicationInfo info) {
+      public void update(String id, String status, DatabaseInfo info) {
 
       }
     };
-    AppStatusUpdater.addListener(this.statusUpdater);
+    DatabaseStatusHandler.addListener(this.statusUpdater);
 
-    CloudBeesUIPlugin.getDefault().addApplicationInfoChangeListener(this.applicationChangeListener);
+    CloudBeesUIPlugin.getDefault().addDatabaseInfoChangeListener(this.databaseChangeListener);
     CloudBeesUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
-    CloudBeesUIPlugin.getDefault().fireApplicationInfoChanged();
+    CloudBeesUIPlugin.getDefault().fireDatabaseInfoChanged();
   }
 
   @Override
   public void dispose() {
-    AppStatusUpdater.removeListener(this.statusUpdater);
+    DatabaseStatusHandler.removeListener(this.statusUpdater);
     CloudBeesUIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
     CloudBeesUIPlugin.getDefault().removeCBRemoteChangeListener(this.jenkinsChangeListener);
     this.jenkinsChangeListener = null;
@@ -114,7 +110,7 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
 
   @Override
   public CBTreeContributor[] getContributors() {
-    return new CBTreeContributor[] { new ReloadRunAtCloudAction() };
+    return new CBTreeContributor[] { new ReloadDatabaseAction() };
   }
 
   @Override
@@ -130,17 +126,17 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
   @Override
   public boolean open(final Object el) {
 
-    if (el instanceof AppGroup) {
-      boolean exp = AppListView.this.viewer.getExpandedState(el);
+    if (el instanceof DBGroup) {
+      boolean exp = DBListView.this.viewer.getExpandedState(el);
       if (exp) {
-        AppListView.this.viewer.collapseToLevel(el, 1);
+        DBListView.this.viewer.collapseToLevel(el, 1);
       } else {
-        AppListView.this.viewer.expandToLevel(el, 1);
+        DBListView.this.viewer.expandToLevel(el, 1);
       }
       return true;
     }
 
-    if (el instanceof ApplicationInfo) {
+    if (el instanceof DatabaseInfo) {
       try {
         PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(IPageLayout.ID_PROP_SHEET);
         return true;
@@ -159,28 +155,29 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
   }
 
   private void refresh(boolean userAction) {
-    if (loadfinished==false) {
+    if (loadfinished == false) {
       return;
     }
-    
-    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading RUN@cloud applications list") {
+
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Database info") {
 
       protected IStatus run(final IProgressMonitor monitor) {
         try {
-          ApplicationListResponse list = BeesSDK.getList();
-          AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, list);
+          String account = CloudBeesUIPlugin.getDefault().getActiveAccountName(monitor);
+          DatabaseListResponse list = BeesSDK.getDatabaseList(account);
+          DBListView.this.contentProvider.inputChanged(DBListView.this.viewer, null, list);
         } catch (Exception e1) {
-          AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, null);
-          CBRunUiActivator.logErrorAndShowDialog(e1);
+          DBListView.this.contentProvider.inputChanged(DBListView.this.viewer, null, null);
+          CloudBeesDataToolsPlugin.logErrorAndShowDialog(e1);
         } finally {
-          AppListView.this.loadfinished = true;
+          DBListView.this.loadfinished = true;
         }
         return Status.OK_STATUS;
       }
     };
 
     job.setUser(userAction);
-    AppListView.this.loadfinished = false;
+    DBListView.this.loadfinished = false;
     job.schedule();
 
   }

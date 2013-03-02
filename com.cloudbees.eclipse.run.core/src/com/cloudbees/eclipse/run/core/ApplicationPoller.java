@@ -26,7 +26,7 @@ public class ApplicationPoller extends Thread {
 
     while (!this.stop) {
       try {
-        fetchAndUpdate();
+        fetchAndUpdateApps();
 
         Thread.sleep(delay);
       } catch (Exception e) {
@@ -40,7 +40,7 @@ public class ApplicationPoller extends Thread {
     }
   }
 
-  public void fetchAndUpdate() throws Exception {
+  public void fetchAndUpdateApps() throws Exception {
     if (this.stop) {
       return;
     }
@@ -66,8 +66,8 @@ public class ApplicationPoller extends Thread {
       for (IConfigurationElement element : extension.getConfigurationElements()) {
         try {
           Object executableExtension = element.createExecutableExtension("updater");
-          if (executableExtension instanceof IStatusUpdater) {
-            ((IStatusUpdater) executableExtension).update(list);
+          if (executableExtension instanceof ApplicationStatusUpdater) {
+            ((ApplicationStatusUpdater) executableExtension).update(list);
           }
         } catch (CoreException e) {
           CBRunCoreActivator.logError(e);
@@ -92,8 +92,8 @@ public class ApplicationPoller extends Thread {
       for (IConfigurationElement element : extension.getConfigurationElements()) {
         try {
           Object executableExtension = element.createExecutableExtension("updater");
-          if (executableExtension instanceof IStatusUpdater) {
-            ((IStatusUpdater) executableExtension).update(id, status, info);
+          if (executableExtension instanceof ApplicationStatusUpdater) {
+            ((ApplicationStatusUpdater) executableExtension).update(id, status, info);
           }
         } catch (CoreException e) {
           CBRunCoreActivator.logError(e);

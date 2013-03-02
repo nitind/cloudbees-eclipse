@@ -1,7 +1,8 @@
-package com.cloudbees.eclipse.run.ui.popup.actions;
+package com.cloudbees.eclipse.dtp.internal;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -9,19 +10,18 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
-import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
-import com.cloudbees.eclipse.run.ui.Images;
+import com.cloudbees.eclipse.dtp.CloudBeesDataToolsPlugin;
+import com.cloudbees.eclipse.dtp.Images;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.views.CBTreeAction;
 
-public class ReloadRunAtCloudAction extends CBTreeAction implements IObjectActionDelegate {
+public class ReloadDatabaseAction extends CBTreeAction implements IObjectActionDelegate {
 
-  public ReloadRunAtCloudAction() {
+  public ReloadDatabaseAction() {
     super();
-    setText("Reload RUN@cloud apps@");
-    setToolTipText("Reload RUN@cloud apps");
-    setImageDescriptor(CBRunUiActivator.getImageDescription(Images.CLOUDBEES_REFRESH));
+    setText("Reload Database info");
+    setToolTipText("Reload Database info");
+    setImageDescriptor(CloudBeesDataToolsPlugin.getImageDescription(Images.CLOUDBEES_REFRESH));
   }
 
   @Override
@@ -30,15 +30,15 @@ public class ReloadRunAtCloudAction extends CBTreeAction implements IObjectActio
   }
 
   public static void reload() {
-    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading RUN@cloud apps") {
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Database info") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
 
-        monitor.beginTask("Loading RUN@cloud apps", 100);
+        monitor.beginTask("Loading Database info", 100);
         try {
-          CBRunCoreActivator.getPoller().fetchAndUpdateApps();
+          CloudBeesDataToolsPlugin.getPoller().fetchAndUpdateDatabases(new NullProgressMonitor());         
           monitor.worked(75);
-          CloudBeesUIPlugin.getDefault().fireApplicationInfoChanged();
+          CloudBeesUIPlugin.getDefault().fireDatabaseInfoChanged();
           monitor.worked(25);
 
           return Status.OK_STATUS;
@@ -47,8 +47,8 @@ public class ReloadRunAtCloudAction extends CBTreeAction implements IObjectActio
           if (e instanceof CloudBeesException) {
             e = (Exception) e.getCause();
           }
-          CBRunUiActivator.getDefault().getLogger().error(msg, e);
-          return new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, 0, msg, e);
+          CloudBeesDataToolsPlugin.getDefault().getLogger().error(msg, e);
+          return new Status(IStatus.ERROR, CloudBeesDataToolsPlugin.PLUGIN_ID, 0, msg, e);
         } finally {
           monitor.done();
         }

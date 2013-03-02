@@ -41,6 +41,7 @@ import com.cloudbees.eclipse.core.CBRemoteChangeListener;
 import com.cloudbees.eclipse.core.ClickStartService;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.DatabaseInfoChangeListener;
 import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.core.GrandCentralService.AuthInfo;
 import com.cloudbees.eclipse.core.JenkinsService;
@@ -72,6 +73,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   private final List<CBRemoteChangeListener> cbRemoteChangeListeners = new ArrayList<CBRemoteChangeListener>();
 
   private final List<ApplicationInfoChangeListener> applicationInfoChangeListeners = new ArrayList<ApplicationInfoChangeListener>();
+  
+  private final List<DatabaseInfoChangeListener> databaseInfoChangeListeners = new ArrayList<DatabaseInfoChangeListener>();
 
   private IPropertyChangeListener prefListener;
 
@@ -569,6 +572,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     return getPreferenceStore().getString(PreferenceConstants.P_PASSWORD);
   }
 
+
   public void addApplicationInfoChangeListener(final ApplicationInfoChangeListener listener) {
     if (listener != null) {
       this.applicationInfoChangeListeners.add(listener);
@@ -671,6 +675,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   public void fireActiveAccountChanged(String newEmail, String newAccountName) {
     reloadAllCloudJenkins(false);    
     fireApplicationInfoChanged();
+    fireDatabaseInfoChanged();
     fireAccountNameChange(newEmail, newAccountName);
   }
 
@@ -685,6 +690,30 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   public void setActiveAccountName(String accountName) throws CloudBeesException {
     MultiAccountUtils.activateAccountName(accountName);
+  }
+
+  public void addDatabaseInfoChangeListener(final DatabaseInfoChangeListener listener) {
+    if (listener != null) {
+      this.databaseInfoChangeListeners.add(listener);
+    }
+  }
+
+  public void removeDatabaseInfoChangeListener(final DatabaseInfoChangeListener listener) {
+    if (listener != null) {
+      this.databaseInfoChangeListeners.remove(listener);
+    }
+  }
+
+  public List<DatabaseInfoChangeListener> getDatabaseInfoChangeListeners() {
+    return Collections.unmodifiableList(this.databaseInfoChangeListeners);
+  }
+
+  public void fireDatabaseInfoChanged() {
+    Iterator<DatabaseInfoChangeListener> iterator = getDatabaseInfoChangeListeners().iterator();
+    while (iterator.hasNext()) {
+      DatabaseInfoChangeListener listener = iterator.next();
+      listener.databaseInfoChanged();
+    }
   }
 
 
