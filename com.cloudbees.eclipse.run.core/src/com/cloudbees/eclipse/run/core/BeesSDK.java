@@ -66,9 +66,18 @@ public class BeesSDK {
     if (client == null) {
       return new DatabaseListResponse();
     }
+    
     return client.databaseList(account);
   }
 
+  public static DatabaseInfo getDatabaseInfo(String dbId, boolean fetchPassword) throws Exception {
+    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    BeesClient client = getBeesClient(grandCentralService);    
+    if (client == null) {
+      throw new CloudBeesException("Failed to locate BeesClient API");
+    }    
+    return client.databaseInfo(dbId, fetchPassword);
+  }
 
   public static ApplicationListResponse getList() throws Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();

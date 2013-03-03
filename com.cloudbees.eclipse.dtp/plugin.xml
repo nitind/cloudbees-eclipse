@@ -3,6 +3,7 @@
 <plugin>
 
 <extension point="org.eclipse.ui.popupMenus">
+
   <objectContribution
         adaptable="false"
         id="com.cloudbees.eclipse.dtp.reloadDatabaseAction"
@@ -15,6 +16,20 @@
            label="Reload Database info">
      </action>
   </objectContribution>
+
+  <objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.dtp.connectDatabaseAction"
+        objectClass="com.cloudbees.api.DatabaseInfo">
+     <action
+           class="com.cloudbees.eclipse.dtp.internal.ConnectDatabaseAction"
+           enablesFor="1"
+           icon="icons/newconnect_wiz.gif"
+           id="com.cloudbees.eclipse.dtp.action.reload"
+           label="Connect...">
+     </action>
+  </objectContribution>
+
 
   <objectContribution
         adaptable="false"
