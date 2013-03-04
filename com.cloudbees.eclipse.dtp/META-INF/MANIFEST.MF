@@ -23,6 +23,12 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.datatools.connectivity.ui,
  com.cloudbees.eclipse.run.core,
  com.cloudbees.eclipse.run.ui,
- org.eclipse.datatools.sqltools.result
+ org.eclipse.datatools.sqltools.result,
+ org.eclipse.datatools.connectivity.db.generic.ui;bundle-version="1.0.1",
+ org.eclipse.datatools.sqltools.common.ui;bundle-version="1.0.0",
+ org.eclipse.datatools.sqltools.data.ui;bundle-version="1.2.1",
+ org.eclipse.datatools.sqltools.sql.ui;bundle-version="1.0.1",
+ org.eclipse.datatools.sqltools.sqleditor;bundle-version="1.0.2",
+ org.eclipse.datatools.connectivity.ui.dse;bundle-version="1.1.4"
 Export-Package: com.cloudbees.eclipse.dtp
 
