@@ -3,7 +3,7 @@
 <schema targetNamespace="com.cloudbees.eclipse.dtp" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="com.cloudbees.eclipse.dtp" id="com.cloudbees.eclipse.dtp.statusUpdater" name="statusUpdater"/>
+         <meta.schema plugin="com.cloudbees.eclipse.run.core" id="com.cloudbees.eclipse.run.core.statusUpdater" name="statusUpdater"/>
       </appinfo>
       <documentation>
          [Enter description of this extension point.]
@@ -55,7 +55,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":com.cloudbees.eclipse.dtp.internal.DatabaseStatusUpdate"/>
+                  <meta.attribute kind="java" basedOn=":com.cloudbees.eclipse.run.core.IStatusUpdater"/>
                </appinfo>
             </annotation>
          </attribute>

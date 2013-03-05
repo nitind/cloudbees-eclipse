@@ -1,4 +1,4 @@
-package com.cloudbees.eclipse.run.ui.popup.actions;
+package com.cloudbees.eclipse.dtp.internal.actions;
 
 import java.text.MessageFormat;
 import java.util.Iterator;
@@ -15,14 +15,13 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.internal.ObjectPluginAction;
 
-import com.cloudbees.api.ApplicationInfo;
+import com.cloudbees.api.DatabaseInfo;
+import com.cloudbees.eclipse.dtp.CloudBeesDataToolsPlugin;
 import com.cloudbees.eclipse.run.core.BeesSDK;
-import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
-import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 @SuppressWarnings("restriction")
-public class DeleteAction implements IObjectActionDelegate {
+public class DeleteDatabaseAction implements IObjectActionDelegate {
 
   @Override
   public void run(IAction action) {
@@ -33,18 +32,18 @@ public class DeleteAction implements IObjectActionDelegate {
       if (selection instanceof IStructuredSelection) {
         final IStructuredSelection structSelection = (IStructuredSelection) selection;
         @SuppressWarnings("unchecked")
-        final Iterator<ApplicationInfo> iterator = structSelection.iterator();
+        final Iterator<DatabaseInfo> iterator = structSelection.iterator();
 
         String name="-";
         
         if (structSelection.size()==1) {
-          ApplicationInfo d = (ApplicationInfo) structSelection.getFirstElement();
-          name = d.getId();
+          DatabaseInfo d = (DatabaseInfo) structSelection.getFirstElement();
+          name = d.getName();
         }
         
         
         try {
-          final String target = structSelection.size() > 1 ? "the selected apps" : "'"+name+"'";
+          final String target = structSelection.size() > 1 ? "the selected databases" : "'"+name+"'";
           String question = MessageFormat.format("Are you sure you want to delete {0}?", target);
 
           boolean confirmed = MessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "Delete", question);
@@ -59,17 +58,17 @@ public class DeleteAction implements IObjectActionDelegate {
                 try {
 
                   while (iterator.hasNext()) {
-                    ApplicationInfo applicationInfo = iterator.next();
-                    monitor.subTask("Deleting '" + applicationInfo.getId() + "'...");
-                    BeesSDK.delete(applicationInfo.getId());
+                    DatabaseInfo databaseInfo = iterator.next();
+                    monitor.subTask("Deleting '" + databaseInfo.getName() + "'...");
+                    BeesSDK.deleteDatabase(databaseInfo.getName());
                     monitor.worked(10);
                   }
 
-                  CBRunCoreActivator.getPoller().fetchAndUpdateApps();                  
-                  CloudBeesUIPlugin.getDefault().fireApplicationInfoChanged();
+                  CloudBeesDataToolsPlugin.getPoller().fetchAndUpdateDatabases(monitor);                  
+                  CloudBeesUIPlugin.getDefault().fireDatabaseInfoChanged();
 
                 } catch (Exception e) {
-                  CBRunUiActivator.logErrorAndShowDialog(e);
+                  CloudBeesDataToolsPlugin.logErrorAndShowDialog(e);
                 } finally {
                   monitor.done();
                 }
@@ -83,7 +82,7 @@ public class DeleteAction implements IObjectActionDelegate {
 
           }
         } catch (Exception e) {
-          CBRunUiActivator.logError(e);
+          CloudBeesDataToolsPlugin.logError(e);
         }
       }
     }

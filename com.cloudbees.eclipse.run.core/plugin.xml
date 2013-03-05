@@ -3,11 +3,14 @@
 <plugin>
 <extension-point id="com.cloudbees.eclipse.run.core.processLifecycleHook"
 		name="launchHook" schema="schema/com.cloudbees.eclipse.run.core.processLifecycleHook.exsd" />
+		
 <extension-point id="com.cloudbees.eclipse.run.core.statusUpdater" name="statusUpdater" schema="schema/com.cloudbees.eclipse.run.core.statusUpdater.exsd"/>
 
-    <extension id="beesHomeProp" name="setAntBeesHomeProperty"
-        point="org.eclipse.ant.core.antProperties">
-        
+<extension-point id="com.cloudbees.eclipse.run.core.newClickStartProjectHook"
+		name="launchHook" schema="schema/com.cloudbees.eclipse.run.core.newClickStartProjectHook.exsd" />
+		
+<extension id="beesHomeProp" name="setAntBeesHomeProperty"
+        point="org.eclipse.ant.core.antProperties">        
        <antProperty name="bees.home" class="com.cloudbees.eclipse.run.core.BeesProperty" headless="true" eclipseRuntime="false" />
 <!--       <antProperty name="bees.apiSecret" class="com.cloudbees.eclipse.run.core.BeesProperty" headless="true" eclipseRuntime="false" />
        <antProperty name="bees.apiKey" class="com.cloudbees.eclipse.run.core.BeesProperty" headless="true" eclipseRuntime="false" />-->

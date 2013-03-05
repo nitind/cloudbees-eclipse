@@ -3,7 +3,6 @@ package com.cloudbees.eclipse.run.core;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.OutputStream;
-import java.util.List;
 
 import org.apache.tools.ant.listener.TimestampedLogger;
 import org.eclipse.ant.core.AntRunner;
@@ -232,6 +231,20 @@ public class BeesSDK {
     }
   }
 
+  /**
+   * Delete database
+   * 
+   * @param appId
+   * @throws Exception
+   */
+  public static void deleteDatabase(final String dbId) throws Exception {
+    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    BeesClient beesClient = getBeesClient(grandCentralService);
+    if (beesClient != null) {
+      beesClient.databaseDelete(dbId);
+    }
+  }
+  
   private static IFile getWarFile(final IProject project, final boolean build) throws CloudBeesException,
       CoreException, FileNotFoundException {
     if (build) {

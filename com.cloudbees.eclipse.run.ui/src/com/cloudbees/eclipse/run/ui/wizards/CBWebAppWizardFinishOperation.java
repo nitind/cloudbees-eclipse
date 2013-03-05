@@ -3,20 +3,20 @@ package com.cloudbees.eclipse.run.ui.wizards;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.apache.maven.Maven;
-import org.apache.maven.cli.MavenCli;
-import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
@@ -38,6 +38,8 @@ import com.cloudbees.eclipse.core.NatureUtil;
 import com.cloudbees.eclipse.core.gc.api.ClickStartCreateResponse;
 import com.cloudbees.eclipse.core.gc.api.ClickStartTemplate;
 import com.cloudbees.eclipse.dev.scm.egit.ForgeEGitSync;
+import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
+import com.cloudbees.eclipse.run.core.NewClickStartProjectHook;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.popup.actions.ReloadRunAtCloudAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -148,20 +150,21 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
 
           ClickStartCreateResponse resp = service.create(CBWebAppWizardFinishOperation.this.template.id, accountName,
               nameAndLocPage.getProjectName());
-
+          
           String resId = resp.reservationId;
-          int pr=service.getCreateProgress(resId);
+          int pr = service.getCreateProgress(resId);
           int lastpr = pr;
           
           monitor.beginTask("Waiting for the servers to provision ClickStart components...", 100);
           monitor.worked(pr);
-          while (pr<100) {
+          while (pr < 100) {
             Thread.currentThread().sleep(3);
-            lastpr=pr;
-            pr=service.getCreateProgress(resId);            
-            monitor.worked(pr-lastpr);
+            lastpr = pr;
+            pr = service.getCreateProgress(resId);
+            monitor.worked(pr - lastpr);
           }
 
+          
           monitor.beginTask("Configuring local workspace for CloudBees ClickStart project", 100);
 
           //if (CBWebAppWizardFinishOperation.this.isAddNewRepo) {
@@ -174,11 +177,12 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
           }
 
           // Clone generated project.
-          monitor.subTask("Cloning git repository into the newly created project. From: "+resp.forgeUrl+" to "+project.getLocation());
+          monitor.subTask("Cloning git repository into the newly created project. From: " + resp.forgeUrl + " to "
+              + project.getLocation());
           ForgeEGitSync.cloneRepo(resp.source, CBWebAppWizardFinishOperation.this.locationURI, monitor);
           monitor.worked(30);
 
-          monitor.subTask("Creating local project '"+CBWebAppWizardFinishOperation.this.template.id+"'");
+          monitor.subTask("Creating local project '" + CBWebAppWizardFinishOperation.this.template.id + "'");
           if (CBWebAppWizardFinishOperation.this.useDefaultLocation) {
             CBWebAppWizardFinishOperation.this.importOperation.setContext(CBWebAppWizardFinishOperation.this.wizard
                 .getShell());
@@ -192,32 +196,31 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
           monitor.subTask("Adding CloudBees project nature");
           NatureUtil.addNatures(project, new String[] { CloudBeesNature.NATURE_ID }, monitor);
           monitor.worked(10);
-          
+
           // Refresh project to refresh the project nature
           project.refreshLocal(IProject.DEPTH_INFINITE, monitor);
-          
+
           // Let's add back the CB nature in case it was not configured by the maven script
           NatureUtil.addNatures(project, new String[] { CloudBeesNature.NATURE_ID }, monitor);
-          
-          
+
           // Run ant or maven build task to generate eclipse files for the project
 
-          boolean mvnExists = project.exists(new Path("/pom.xml"));
-          boolean antExists = project.exists(new Path("/build.xml"));
-
-          if (mvnExists) {
-            //NatureUtil.addNatures(project, new String[] { "org.eclipse.m2e.core.maven2Nature" }, monitor);
-            monitor.subTask("Detected maven build scripts, building project to generate eclipse settings.");
-            //int res = CBMavenBuilder.buildMavenProject(project);
-            //System.out.println("Maven builder returned: "+res);
-            project.refreshLocal(IProject.DEPTH_INFINITE, monitor);
-          }
-          
           // Refresh run@cloud and dev@cloud items
           CloudBeesUIPlugin.getDefault().reloadAllCloudJenkins(true);
           ReloadRunAtCloudAction.reload();
-          
-          
+
+          for (NewClickStartProjectHook hook : getHooks()) {
+            hook.hookProject(resp, project, monitor);
+          }
+
+          // initialize database components
+          /*          Provisioning database for: null
+          COMPONENT: key:Source_repository; name:Source repository; url:ssh://git@git.cloudbees.com/grandomstate/sw1.git
+          COMPONENT: key:Jenkins_build; name:Jenkins build; url:null
+          COMPONENT: key:Web_Application_sw1; name:Web Application sw1; url:http://sw1.grandomstate.cloudbees.net
+          COMPONENT: key:Database_sw1_fu9l; name:Database sw1_fu9l; url:null
+          */
+
           /*project.accept(new IResourceVisitor() {
             @Override
             public boolean visit(final IResource resource) throws CoreException {
@@ -227,7 +230,7 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
               return true;
             }
           });
-*/
+          */
           return Status.OK_STATUS;
         } catch (Exception e) {
           String msg = e.getLocalizedMessage();
@@ -248,6 +251,7 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
           monitor.done();
         }
       }
+
     };
 
     job.setUser(true);
@@ -303,4 +307,23 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
       }
     }
   */
+
+  private List<NewClickStartProjectHook> getHooks() throws CoreException {
+    List<NewClickStartProjectHook> hooks = new ArrayList<NewClickStartProjectHook>();
+
+    IExtension[] extensions = Platform.getExtensionRegistry()
+        .getExtensionPoint(CBRunCoreActivator.PLUGIN_ID, "newClickStartProjectHook").getExtensions();
+
+    for (IExtension extension : extensions) {
+      for (IConfigurationElement element : extension.getConfigurationElements()) {
+        Object executableExtension = element.createExecutableExtension("defaultHandler");
+        if (executableExtension instanceof NewClickStartProjectHook) {
+          hooks.add((NewClickStartProjectHook) executableExtension);
+        }
+      }
+    }
+
+    return hooks;
+  }
+
 }

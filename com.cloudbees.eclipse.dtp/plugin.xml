@@ -30,6 +30,19 @@
      </action>
   </objectContribution>
 
+  <objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.dtp.delete"
+        objectClass="com.cloudbees.api.DatabaseInfo">
+     <action
+           class="com.cloudbees.eclipse.dtp.internal.actions.DeleteDatabaseAction"
+           enablesFor="+"
+           icon="icons/16x16/delete.gif"
+           id="com.cloudbees.eclipse.dtp.action.delete"
+           label="Delete database"
+           menubarPath="run">
+     </action>
+  </objectContribution>
 
   <objectContribution
         adaptable="false"
@@ -73,6 +86,13 @@
     <updater
           updater="com.cloudbees.eclipse.dtp.internal.treeview.DatabaseStatusHandler">
     </updater>
+ </extension>
+ <extension
+       point="com.cloudbees.eclipse.run.core.newClickStartProjectHook">
+    <hook
+          defaultHandler="com.cloudbees.eclipse.dtp.NewDatabaseHook"
+          id="com.cloudbees.eclipse.dtp.NewDatabaseHook">
+    </hook>
  </extension>
 
 
