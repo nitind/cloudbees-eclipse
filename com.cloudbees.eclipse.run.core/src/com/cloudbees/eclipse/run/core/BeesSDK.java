@@ -14,6 +14,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstall2;
+import org.eclipse.jdt.launching.JavaRuntime;
 
 import com.cloudbees.api.ApplicationConfiguration;
 import com.cloudbees.api.ApplicationDeployArchiveResponse;
@@ -53,34 +58,34 @@ public class BeesSDK {
     }
   }
 
-  public static final String API_URL = "https://api."+GrandCentralService.HOST+"/api";
+  public static final String API_URL = "https://api." + GrandCentralService.HOST + "/api";
 
   static {
     CBSdkActivator.getDefault().getBeesHome(); // force loading.
   }
-  
+
   public static DatabaseListResponse getDatabaseList(String account) throws Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    BeesClient client = getBeesClient(grandCentralService);    
+    BeesClient client = getBeesClient(grandCentralService);
     if (client == null) {
       return new DatabaseListResponse();
     }
-    
+
     return client.databaseList(account);
   }
 
   public static DatabaseInfo getDatabaseInfo(String dbId, boolean fetchPassword) throws Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    BeesClient client = getBeesClient(grandCentralService);    
+    BeesClient client = getBeesClient(grandCentralService);
     if (client == null) {
       throw new CloudBeesException("Failed to locate BeesClient API");
-    }    
+    }
     return client.databaseInfo(dbId, fetchPassword);
   }
 
   public static ApplicationListResponse getList() throws Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    BeesClient client = getBeesClient(grandCentralService);    
+    BeesClient client = getBeesClient(grandCentralService);
     if (client == null) {
       return new ApplicationListResponse();
     }
@@ -145,16 +150,45 @@ public class BeesSDK {
       return null;
     }
 
+    String javaEnv = getJavaVersion(project);
+
     IPath workspacePath = project.getLocation().removeLastSegments(1);
     IPath buildPath = getWarFile(project, build).getFullPath();
     String warFile = workspacePath.toOSString() + buildPath.toOSString();
     String appId = getAppId(account, id, client, warFile);
 
-    ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, new File(warFile),
-        null, new UploadProgressWithMonitor(monitor));
+    ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, javaEnv, null, new File(
+        warFile), null, new UploadProgressWithMonitor(monitor));
     update();
 
     return applicationDeployWar;
+  }
+
+  private static String getJavaVersion(IProject project) throws CoreException {
+    IVMInstall vm = null;
+
+    if (project == null) {
+      vm = JavaRuntime.getDefaultVMInstall();
+    } else if (project.hasNature(JavaCore.NATURE_ID)) {
+      IJavaProject javaProject = JavaCore.create(project);
+      vm = JavaRuntime.getVMInstall(javaProject);
+      if (vm == null) {
+        vm = JavaRuntime.getDefaultVMInstall();
+      }
+    }
+
+    if (vm instanceof IVMInstall2) {
+      IVMInstall2 vm2 = (IVMInstall2) vm;
+      String ver = vm2.getJavaVersion();
+      String[] vera = ver.split("\\.");
+      if (vera.length >= 2) {
+        String v = vera[0] + "." + vera[1];
+        return "-Rjava_version=" + v;
+      }
+
+    }
+
+    return null;
   }
 
   public static String getAppId(final String account, final String id, final String warPath) throws CloudBeesException,
@@ -183,7 +217,20 @@ public class BeesSDK {
     return appId;
   }
 
-  public static ApplicationDeployArchiveResponse deploy(final String appId, final String warPath,
+  /**
+   * @param project
+   *          IProject is used for java version detection. If IProject is not known then submit null and workspace java
+   *          version will be used.
+   * @param appId
+   * @param warPath
+   * @param monitor
+   * @return
+   * @throws CloudBeesException
+   * @throws CoreException
+   * @throws FileNotFoundException
+   * @throws Exception
+   */
+  public static ApplicationDeployArchiveResponse deploy(IProject project, final String appId, final String warPath,
       IProgressMonitor monitor) throws CloudBeesException, CoreException, FileNotFoundException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
@@ -191,8 +238,10 @@ public class BeesSDK {
       return null;
     }
 
-    ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, null, null, new File(warPath),
-        null, new UploadProgressWithMonitor(monitor));
+    String env = getJavaVersion(project);
+
+    ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, env, null, new File(
+        warPath), null, new UploadProgressWithMonitor(monitor));
     update();
 
     return applicationDeployWar;
@@ -244,7 +293,7 @@ public class BeesSDK {
       beesClient.databaseDelete(dbId);
     }
   }
-  
+
   private static IFile getWarFile(final IProject project, final boolean build) throws CloudBeesException,
       CoreException, FileNotFoundException {
     if (build) {
@@ -288,7 +337,7 @@ public class BeesSDK {
       String api_key = cachedAuthInfo.getAuth().api_key;
       String secret_key = cachedAuthInfo.getAuth().secret_key;
 
-      BeesClientConfiguration conf = new BeesClientConfiguration(API_URL, api_key, secret_key, "xml", "1.0");      
+      BeesClientConfiguration conf = new BeesClientConfiguration(API_URL, api_key, secret_key, "xml", "1.0");
       BeesClient beesClient = new BeesClient(conf);
       beesClient.setVerbose(false);
       return beesClient;

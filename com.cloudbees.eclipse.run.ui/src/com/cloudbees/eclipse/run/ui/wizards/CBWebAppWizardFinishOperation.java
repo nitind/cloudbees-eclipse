@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.URIUtil;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -150,11 +151,11 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
 
           ClickStartCreateResponse resp = service.create(CBWebAppWizardFinishOperation.this.template.id, accountName,
               nameAndLocPage.getProjectName());
-          
+
           String resId = resp.reservationId;
           int pr = service.getCreateProgress(resId);
           int lastpr = pr;
-          
+
           monitor.beginTask("Waiting for the servers to provision ClickStart components...", 100);
           monitor.worked(pr);
           while (pr < 100) {
@@ -164,7 +165,6 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
             monitor.worked(pr - lastpr);
           }
 
-          
           monitor.beginTask("Configuring local workspace for CloudBees ClickStart project", 100);
 
           //if (CBWebAppWizardFinishOperation.this.isAddNewRepo) {
@@ -193,15 +193,16 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
           }
 
           monitor.worked(10);
-          monitor.subTask("Adding CloudBees project nature");
-          NatureUtil.addNatures(project, new String[] { CloudBeesNature.NATURE_ID }, monitor);
+          monitor.subTask("Adding CloudBees and Java project nature");
+          //JavaCore.NATURE_ID
+          NatureUtil.addNatures(project, new String[] { CloudBeesNature.NATURE_ID, JavaCore.NATURE_ID }, monitor);
           monitor.worked(10);
 
           // Refresh project to refresh the project nature
           project.refreshLocal(IProject.DEPTH_INFINITE, monitor);
 
           // Let's add back the CB nature in case it was not configured by the maven script
-          NatureUtil.addNatures(project, new String[] { CloudBeesNature.NATURE_ID }, monitor);
+          NatureUtil.addNatures(project, new String[] { CloudBeesNature.NATURE_ID, JavaCore.NATURE_ID }, monitor);
 
           // Run ant or maven build task to generate eclipse files for the project
 
