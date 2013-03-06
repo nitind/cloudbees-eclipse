@@ -191,8 +191,9 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
       FileNotFoundException {
     final String[] appId = new String[1];
     try {
-      appId[0] = BeesSDK.getAppId(account, id, warPath);
+      appId[0] = BeesSDK.getAppId(account, id, warPath, project);
     } catch (Exception e) {
+      e.printStackTrace();
       // failed to detect
     }
     if (appId[0] == null || appId[0].isEmpty()) {

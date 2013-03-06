@@ -1,6 +1,8 @@
 package com.cloudbees.eclipse.run.ui.popup.actions;
 
 import java.text.MessageFormat;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -11,6 +13,7 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleListener;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleOutputStream;
@@ -27,6 +30,39 @@ public abstract class AbstractTailAction implements IObjectActionDelegate {
   public static final String LOG_NAME_SERVER = "server";
   public static final String LOG_NAME_ACCESS = "access";
   public static final String LOG_NAME_ERROR = "error";
+  protected static final String CONSOLE_TYPE_PREFIX = "cloudbeeslog_";
+
+  private static Map<String, Thread> tmap = new ConcurrentHashMap<String, Thread>();
+
+  private static IConsoleListener listener = new IConsoleListener() {
+    public void consolesRemoved(IConsole[] arg0) {
+      if (silenceThreadKiller) {
+        return;
+      }
+      // make sure the thread that shows output is interrupted.
+      for (int i = 0; i < arg0.length; i++) {
+        IConsole c = arg0[0];
+        if (c.getType() != null && c.getType().startsWith(CONSOLE_TYPE_PREFIX)) {
+
+          Thread t = tmap.get(c);
+          if (t != null) {
+            tmap.remove(t);
+            try {
+              t.interrupt();
+            } catch (Exception e) {
+
+            }
+          }
+        }
+      }
+    }
+
+    public void consolesAdded(IConsole[] arg0) {
+
+    }
+  };
+
+  volatile private static boolean silenceThreadKiller = false;
 
   @Override
   public void run(IAction action) {
@@ -64,19 +100,37 @@ public abstract class AbstractTailAction implements IObjectActionDelegate {
     ImageDescriptor descriptor = CBRunUiActivator.imageDescriptorFromPlugin(CBRunUiActivator.PLUGIN_ID,
         Images.CLOUDBEES_ICON_16x16_PATH);
 
-    IOConsole console = new IOConsole(consoleName, descriptor);
+    IOConsole console = new IOConsole(consoleName, CONSOLE_TYPE_PREFIX + consoleName, descriptor, true);
 
     IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
-    boolean foundConsole = false;
+    IConsole foundConsole = null;
 
     for (IConsole c : manager.getConsoles()) {
       if (console.getName().equals(c.getName())) {
-        foundConsole = true;
+        foundConsole = c;
       }
     }
 
-    if (!foundConsole) {
+    if (foundConsole == null) {
       manager.addConsoles(new IConsole[] { console });
+      //manager.showConsoleView(console);      
+    } else {
+      // activate existing console. Have not found a way to force top position in console stack without removing it temporarily.
+
+      try {
+        silenceThreadKiller = true;
+        manager.removeConsoles(new IConsole[] { foundConsole });
+        manager.addConsoles(new IConsole[] { foundConsole });
+        //((IOConsole) foundConsole).activate();
+        //manager.refresh(foundConsole);
+        manager.showConsoleView(foundConsole);
+      } finally {
+        silenceThreadKiller = false;
+      }
+      //
+      //((ConsoleManager)manager).
+      //manager.showConsoleView(foundConsole);
+      //console.activate();
     }
 
     return console;
@@ -84,6 +138,9 @@ public abstract class AbstractTailAction implements IObjectActionDelegate {
 
   private void tail(final ApplicationInfo appInfo, final String logName) {
     IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
+
+    manager.addConsoleListener(listener);
+
     String consoleName = MessageFormat.format("Tail {0} log :: {1}", logName, appInfo.getTitle());
     final IOConsole console = getTailConsole(consoleName);
     manager.showConsoleView(console);
@@ -97,11 +154,14 @@ public abstract class AbstractTailAction implements IObjectActionDelegate {
           BeesSDK.tail(appInfo.getId(), logName, consoleOutputStream);
         } catch (Exception e) {
           CBRunUiActivator.logErrorAndShowDialog(e);
+          e.printStackTrace();
         }
       }
     });
 
     t.start();
+
+    tmap.put("logName", t);
   }
 
   protected abstract String getLogName();

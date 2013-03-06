@@ -9,5 +9,13 @@
       </hook>
    </extension>
 
+ <extension
+       point="com.cloudbees.eclipse.run.core.warBuilderHook">
+    <hook
+          defaultHandler="com.cloudbees.eclipse.m2e.MavenWarBuilderHook"
+          id="com.cloudbees.eclipse.m2e.MavenWarBuilderHook">
+    </hook>
+ </extension>
+
 
 </plugin>

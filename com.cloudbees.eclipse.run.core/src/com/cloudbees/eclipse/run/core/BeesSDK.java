@@ -3,6 +3,8 @@ package com.cloudbees.eclipse.run.core;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.tools.ant.listener.TimestampedLogger;
 import org.eclipse.ant.core.AntRunner;
@@ -10,10 +12,14 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IVMInstall;
@@ -153,9 +159,9 @@ public class BeesSDK {
     String javaEnv = getJavaVersion(project);
 
     IPath workspacePath = project.getLocation().removeLastSegments(1);
-    IPath buildPath = getWarFile(project, build).getFullPath();
+    IPath buildPath = getWarFile(project, build, monitor).getFullPath();
     String warFile = workspacePath.toOSString() + buildPath.toOSString();
-    String appId = getAppId(account, id, client, warFile);
+    String appId = getAppId(account, id, client, warFile, project);
 
     ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, javaEnv, null, new File(
         warFile), null, new UploadProgressWithMonitor(monitor));
@@ -191,7 +197,7 @@ public class BeesSDK {
     return null;
   }
 
-  public static String getAppId(final String account, final String id, final String warPath) throws CloudBeesException,
+  public static String getAppId(final String account, final String id, final String warPath, IProject project) throws CloudBeesException,
       Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
@@ -199,15 +205,15 @@ public class BeesSDK {
       return null;
     }
 
-    String appId = getAppId(account, id, client, warPath);
+    String appId = getAppId(account, id, client, warPath, project);
     return appId;
   }
 
-  public static String getAppId(final String account, final String id, final BeesClient client, final String warFile)
+  private static String getAppId(final String account, final String id, final BeesClient client, final String warFile, IProject project)
       throws Exception {
     String appId;
 
-    if (id == null || "".equals(id)) {
+    if (id == null || "".equals(id)) {      
       ApplicationConfiguration applicationConfiguration = client.getApplicationConfiguration(warFile, account,
           new String[] {});
       appId = applicationConfiguration.getApplicationId();
@@ -294,8 +300,19 @@ public class BeesSDK {
     }
   }
 
-  private static IFile getWarFile(final IProject project, final boolean build) throws CloudBeesException,
+  private static IFile getWarFile(final IProject project, final boolean build, IProgressMonitor monitor) throws CloudBeesException,
       CoreException, FileNotFoundException {
+    
+    // First attempt to build through extension points
+    for (WarBuilderHook hook : getWarBuilderHooks()) {
+      IFile result = hook.buildProject(project, new SubProgressMonitor(monitor, 100));
+      if (result!=null) {
+        return result;
+      }
+    }
+
+    // Extension-point-based attempts failed, try with ant
+    
     if (build) {
       runTargets(project, new String[] { "dist" });
     }
@@ -306,7 +323,7 @@ public class BeesSDK {
       file.refreshLocal(IFile.DEPTH_INFINITE, null);
 
       if (!file.exists()) {
-        throw new FileNotFoundException("Could not find webapp.war file in build folder .");
+        throw new FileNotFoundException("Could not find webapp.war file in build folder. Ensure that your build.xml has dist task that generates a war file to build directory.");
       }
     }
 
@@ -376,6 +393,24 @@ public class BeesSDK {
     IPath buildPath = project.getFile("build.xml").getFullPath();
 
     return workspacePath.toOSString() + buildPath.toOSString();
+  }
+
+  private static List<WarBuilderHook> getWarBuilderHooks() throws CoreException {
+    List<WarBuilderHook> hooks = new ArrayList<WarBuilderHook>();
+
+    IExtension[] extensions = Platform.getExtensionRegistry()
+        .getExtensionPoint(CBRunCoreActivator.PLUGIN_ID, "warBuilderHook").getExtensions();
+
+    for (IExtension extension : extensions) {
+      for (IConfigurationElement element : extension.getConfigurationElements()) {
+        Object executableExtension = element.createExecutableExtension("defaultHandler");
+        if (executableExtension instanceof WarBuilderHook) {
+          hooks.add((WarBuilderHook) executableExtension);
+        }
+      }
+    }
+
+    return hooks;
   }
 
 }

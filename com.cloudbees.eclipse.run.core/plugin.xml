@@ -9,6 +9,9 @@
 <extension-point id="com.cloudbees.eclipse.run.core.newClickStartProjectHook"
 		name="launchHook" schema="schema/com.cloudbees.eclipse.run.core.newClickStartProjectHook.exsd" />
 		
+<extension-point id="com.cloudbees.eclipse.run.core.warBuilderHook"
+		name="launchHook" schema="schema/com.cloudbees.eclipse.run.core.warBuilderHook.exsd" />
+
 <extension id="beesHomeProp" name="setAntBeesHomeProperty"
         point="org.eclipse.ant.core.antProperties">        
        <antProperty name="bees.home" class="com.cloudbees.eclipse.run.core.BeesProperty" headless="true" eclipseRuntime="false" />
