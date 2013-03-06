@@ -10,6 +10,8 @@
 	
 	<locator pattern="^org\.eclipse.\datatools(\..+)?" searchPathRef="datatools" />
 	<locator pattern="^org\.eclipse.\m2e(\..+)?" searchPathRef="m2e" />
+	<locator pattern="^org\.eclipse.\egit(\..+)?" searchPathRef="egit" />
+	
 	
 	<locator searchPathRef="target.platform" />
 
@@ -33,6 +35,14 @@
 		</provider>
 	</searchPath>
 
+
+
+	<searchPath name="egit">
+		<provider componentTypes="eclipse.feature,osgi.bundle" readerType="p2" source="false" mutable="false" resolutionFilter="(|(build.type=N)(build.type=R))">
+			<uri format=" http://download.eclipse.org/egit/github/updates" />
+		</provider>
+	</searchPath>
+ 
 	<searchPath name="m2e">
 		<provider componentTypes="eclipse.feature,osgi.bundle" readerType="p2" source="false" mutable="false" resolutionFilter="(|(build.type=N)(build.type=R))">
 			<uri format="http://download.eclipse.org/technology/m2e/releases" />
