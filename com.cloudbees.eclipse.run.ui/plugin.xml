@@ -390,4 +390,16 @@
           updater="com.cloudbees.eclipse.run.ui.views.AppStatusUpdater">
     </updater>
  </extension>
+ 
+  <extension
+     point="org.eclipse.ui.console.consolePageParticipants">
+  <consolePageParticipant
+        class="com.cloudbees.eclipse.run.ui.console.TailConsolePageParticipant"
+        id="com.cloudbees.eclipse.run.ui.tail.CloudBeesConsoleParticipant">
+     <enablement>
+        <test property="org.eclipse.ui.console.consoleTypeTest" value="com.cloudbees.eclipse.run.ui.tailLogs"/>
+     </enablement>
+  </consolePageParticipant>
+   </extension>
+ 
 </plugin>
