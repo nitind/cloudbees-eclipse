@@ -25,7 +25,7 @@ import org.eclipse.ui.IViewSite;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 
 public class ForgeContentProvider implements IStructuredContentProvider, ITreeContentProvider {
-  private ForgeGroup forgeGroup = new ForgeGroup("Forge repositories");
+  private ForgeGroup forgeGroup = new ForgeGroup("Repositories");
 
   public ForgeContentProvider() {
     this.forgeGroup.setLoading(true);

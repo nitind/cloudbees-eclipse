@@ -30,7 +30,7 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 final class AppContentProvider implements ITreeContentProvider {
 
-  AppGroup appGroup = new AppGroup("RUN@cloud applications");
+  AppGroup appGroup = new AppGroup("Applications");
   ApplicationListResponse data;
 
   @Override
