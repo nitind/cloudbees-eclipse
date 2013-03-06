@@ -31,7 +31,7 @@ public class ReloadBuildHistoryAction extends Action {
 
   @Override
   public void setEnabled(final boolean enabled) {
-    new RuntimeException("external comps must not change this").printStackTrace();
+    //new RuntimeException("external comps must not change this").printStackTrace();
     // ignore
   }
 
