@@ -74,7 +74,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   private final static boolean USE_SECURE_STORAGE = false;
 
-  private AuthStatus authStatus;
+  private AuthStatus authStatus = AuthStatus.UNKNOWN;
 
   // The plug-in ID
   public static final String PLUGIN_ID = "com.cloudbees.eclipse.ui"; //$NON-NLS-1$

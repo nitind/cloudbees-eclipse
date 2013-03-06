@@ -45,6 +45,8 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.gc.api.ClickStartTemplate;
 import com.cloudbees.eclipse.dev.scm.egit.ForgeEGitSync;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
+import com.cloudbees.eclipse.ui.AuthStatus;
+import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.jcraft.jsch.JSchException;
 
 public abstract class ClickStartComposite extends Composite {
@@ -225,7 +227,13 @@ public abstract class ClickStartComposite extends Composite {
     v.getTable().setFocus();
   }
 
-  private Exception loadData() {
+  private Exception loadData() {    
+    
+    if (AuthStatus.OK!=CloudBeesUIPlugin.getDefault().getAuthStatus()) {
+      ClickStartComposite.this.updateErrorStatus("User is not authenticated. Please review CloudBees account settings.");
+      return null;
+    }
+
     final Exception[] ex = {null};
 
     final IRunnableWithProgress operation1 = new IRunnableWithProgress() {

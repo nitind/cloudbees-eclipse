@@ -40,9 +40,9 @@ public class NewMavenClickStartProjectHook implements NewClickStartProjectHook {
       //int res = CBMavenBuilder.buildMavenProject(project);
       //System.out.println("Maven builder returned: "+res);
       try {
+        CBMavenUtils.runMaven(project, monitor, new String[] {"eclipse:eclipse"});
         project.refreshLocal(IProject.DEPTH_INFINITE, monitor);
       } catch (CoreException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
     }

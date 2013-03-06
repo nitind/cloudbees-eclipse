@@ -55,6 +55,7 @@ import com.cloudbees.eclipse.core.gc.api.ClickStartTemplate;
 import com.cloudbees.eclipse.dev.scm.egit.ForgeEGitSync;
 import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
 import com.cloudbees.eclipse.run.core.NewClickStartProjectHook;
+import com.cloudbees.eclipse.run.ui.CBProjectSettingsPage;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.popup.actions.ReloadRunAtCloudAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -166,6 +167,8 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
           ClickStartCreateResponse resp = service.create(CBWebAppWizardFinishOperation.this.template.id, accountName,
               nameAndLocPage.getProjectName());
 
+          // Set appId for the project settings
+                    
           String resId = resp.reservationId;
           int pr = service.getCreateProgress(resId);
           int lastpr = pr;
@@ -211,6 +214,14 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
           //JavaCore.NATURE_ID
           NatureUtil.addNatures(project, new String[] { CloudBeesNature.NATURE_ID, JavaCore.NATURE_ID }, monitor);
           monitor.worked(10);
+
+          String[] s1 = resp.appUrl.split("\\.");
+          String account = s1[1];
+          int idx1 = s1[0].lastIndexOf('/');
+          String appId = s1[0].substring(idx1+1); 
+          
+          project.setPersistentProperty(CBProjectSettingsPage.APPID_KEY, appId);
+          project.setPersistentProperty(CBProjectSettingsPage.ACCOUNT_KEY, account);
 
           // Refresh project to refresh the project nature
           project.refreshLocal(IProject.DEPTH_INFINITE, monitor);

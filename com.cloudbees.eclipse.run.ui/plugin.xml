@@ -401,5 +401,23 @@
      </enablement>
   </consolePageParticipant>
    </extension>
- 
+
+
+<extension
+     point = "org.eclipse.ui.propertyPages">
+        <page
+           id="com.cloudbees.eclipse.run.ui.CBProjectSettingsPage"
+           name="CloudBees"
+		   class="com.cloudbees.eclipse.run.ui.CBProjectSettingsPage">
+		   
+	 <enabledWhen>
+         <adapt type="org.eclipse.core.resources.IProject">
+              <test
+                 property="org.eclipse.core.resources.projectNature"
+                 value="com.cloudbees.eclipse.core.cloudbeesNature"/>
+         </adapt>         
+     </enabledWhen>     
+     </page>
+</extension>
+
 </plugin>
