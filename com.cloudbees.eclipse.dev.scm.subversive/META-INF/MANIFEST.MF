@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CloudBees Scm Subversive
 Bundle-SymbolicName: com.cloudbees.eclipse.dev.scm.subversive;singleton:=true
-Bundle-Version: 1.1.0.qualifier
+Bundle-Version: 1.2.0.qualifier
 Bundle-Activator: com.cloudbees.eclipse.dev.scm.subversive.CloudBeesScmSubversivePlugin
 Bundle-Vendor: Cloud Bees, Inc
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -16,5 +16,5 @@ Require-Bundle: org.eclipse.core.runtime,
  com.cloudbees.eclipse.core,
  com.cloudbees.eclipse.dev.core,
  org.eclipse.team.core,
- org.eclipse.team.svn.core;bundle-version="[0.7.0,1.1.0]",
- org.eclipse.team.svn.ui;bundle-version="[0.7.0,1.1.0]"
+ org.eclipse.team.svn.core,
+ org.eclipse.team.svn.ui

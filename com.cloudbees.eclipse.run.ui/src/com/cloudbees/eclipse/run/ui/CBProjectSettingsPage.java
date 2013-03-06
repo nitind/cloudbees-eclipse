@@ -103,14 +103,6 @@ public class CBProjectSettingsPage extends PropertyPage {
   }
 
   @Override
-  public void applyData(Object data) {
-    super.applyData(data);
-    System.out.println("GOT " + data);
-    this.textAppId.setText(data + "");
-    doGetPreferenceStore();
-  }
-
-  @Override
   public boolean performOk() {
     // store app id
     String newId = textAppId.getText();
