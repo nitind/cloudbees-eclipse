@@ -30,11 +30,11 @@ public class ApplicationPoller extends Thread {
 
         Thread.sleep(delay);
       } catch (Exception e) {
-        CBRunCoreActivator.logError(e);
+        //CBRunCoreActivator.logError(e);
         try {
           Thread.sleep(delay);
         } catch (InterruptedException e1) {
-          CBRunCoreActivator.logError(e);
+          //CBRunCoreActivator.logError(e);
         }
       }
     }

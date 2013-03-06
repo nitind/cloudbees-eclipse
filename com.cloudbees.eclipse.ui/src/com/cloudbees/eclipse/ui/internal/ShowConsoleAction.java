@@ -11,7 +11,7 @@ import com.cloudbees.eclipse.ui.views.CBTreeAction;
 public class ShowConsoleAction extends CBTreeAction {
 
   public ShowConsoleAction() {
-    super();
+    super(false);
     setText("CloudBees SDK Console");
     setToolTipText("CloudBees SDK Console");
     setImageDescriptor(CloudBeesUIPlugin.getImageDescription(CBImages.ICON_16X16_CB_CONSOLE));     

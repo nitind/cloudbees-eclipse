@@ -5,7 +5,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
@@ -18,7 +17,7 @@ import com.cloudbees.eclipse.ui.views.CBTreeAction;
 public class ReloadDatabaseAction extends CBTreeAction implements IObjectActionDelegate {
 
   public ReloadDatabaseAction() {
-    super();
+    super(true);
     setText("Reload Database info");
     setToolTipText("Reload Database info");
     setImageDescriptor(CloudBeesDataToolsPlugin.getImageDescription(Images.CLOUDBEES_REFRESH));
@@ -64,26 +63,19 @@ public class ReloadDatabaseAction extends CBTreeAction implements IObjectActionD
   public void run(IAction action) {
     reload();
   }
-
-  @Override
-  public void selectionChanged(IAction action, ISelection selection) {
-  }
-
-  @Override
+  
   public void setActivePart(IAction action, IWorkbenchPart targetPart) {
+    
   }
 
-  @Override
   public boolean isPopup() {
     return false;
   }
 
-  @Override
   public boolean isPullDown() {
     return true;
   }
 
-  @Override
   public boolean isToolbar() {
     return false;
   }

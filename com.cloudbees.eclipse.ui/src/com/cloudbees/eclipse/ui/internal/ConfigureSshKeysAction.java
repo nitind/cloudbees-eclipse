@@ -12,7 +12,7 @@ import com.cloudbees.eclipse.ui.views.CBTreeAction;
 public class ConfigureSshKeysAction extends CBTreeAction {
 
   public ConfigureSshKeysAction() {
-    super();
+    super(false);
     setText("SSH Key Setup Help");
     setToolTipText("Configure SSH keys used to access the git or svn repositories");
 

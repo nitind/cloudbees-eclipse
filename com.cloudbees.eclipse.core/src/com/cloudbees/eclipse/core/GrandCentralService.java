@@ -10,7 +10,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import com.cloudbees.eclipse.core.GrandCentralService.AuthInfo;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.gc.api.AccountNameRequest;

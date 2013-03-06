@@ -33,6 +33,8 @@ class MultiAccountUtils {
     
     selectionInProgress = true;
 
+    //  new Exception().printStackTrace();
+    
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Selecting active CloudBees account") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
@@ -55,7 +57,10 @@ class MultiAccountUtils {
             accts = CloudBeesCorePlugin.getDefault().getGrandCentralService().getAccounts(monitor);
           } catch (CloudBeesException e) {
             // Either because of server connectivity issues or bad credentials.
-            monitor.setTaskName("Failed to retrieve accounts for account selection: "+e.getMessage());
+            monitor.setTaskName("Failed to retrieve account info: "+e.getMessage());
+            //return new Status(IStatus.ERROR, CloudBeesUIPlugin.PLUGIN_ID, 0, "Failed to retrieve account info: "+e.getMessage(), e);
+            // return OK as null response is handled properly and at this point error message is avoided.
+            CloudBeesUIPlugin.getDefault().setAuthStatus(AuthStatus.FAILED);
             return Status.OK_STATUS;
           }
           
@@ -108,6 +113,8 @@ class MultiAccountUtils {
 
           }
 
+          CloudBeesUIPlugin.getDefault().setAuthStatus(AuthStatus.OK);
+
           activateAccountName(activeAccount);
 
           return Status.OK_STATUS;
@@ -117,7 +124,7 @@ class MultiAccountUtils {
           if (e instanceof CloudBeesException) {
             e = (Exception) e.getCause();
           }
-          CloudBeesUIPlugin.getDefault().getLogger().error(msg, e);
+          //CloudBeesUIPlugin.getDefault().getLogger().error(msg, e);
           return new Status(IStatus.ERROR, CloudBeesUIPlugin.PLUGIN_ID, 0, msg, e);
         } finally {
           monitor.done();

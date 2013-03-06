@@ -13,7 +13,7 @@ import com.cloudbees.eclipse.ui.views.CBTreeAction;
 public class ReloadJenkinsCloudInstancesAction extends CBTreeAction implements IObjectActionDelegate {
 
   public ReloadJenkinsCloudInstancesAction() {
-    super();
+    super(true);
     setText("Reload DEV@cloud Jenkins instances@");
     setToolTipText("Reload DEV@cloud Jenkins instances");
     setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_REFRESH));
@@ -42,10 +42,6 @@ public class ReloadJenkinsCloudInstancesAction extends CBTreeAction implements I
   @Override
   public void run(IAction action) {
     run();
-  }
-
-  @Override
-  public void selectionChanged(IAction action, ISelection selection) {
   }
 
   @Override

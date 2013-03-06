@@ -9,6 +9,10 @@ public class PreferenceConstants {
 
   public static final String P_EMAIL = "cloudbees.account.email";
   public static final String P_PASSWORD = "cloudbees.account.password";
+  public static final String P_UID = "cloudbees.account.uid";
+  public static final String P_SECRET_KEY = "cloudbees.account.secret_key";
+  public static final String P_API_KEY = "cloudbees.account.api_key";
+  
   public static final String P_ACTIVE_ACCOUNT = "cloudbees.account.active";
 
   public static final String P_ENABLE_JAAS = "cloudbees.jaas.enable";

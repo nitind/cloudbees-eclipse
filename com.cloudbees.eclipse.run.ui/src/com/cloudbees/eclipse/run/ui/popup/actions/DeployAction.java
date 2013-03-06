@@ -12,6 +12,8 @@ import org.eclipse.ui.internal.ObjectPluginAction;
 
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.launchconfiguration.CBCloudLaunchShortcut;
+import com.cloudbees.eclipse.ui.AuthStatus;
+import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 @SuppressWarnings("restriction")
 public class DeployAction implements IObjectActionDelegate {
@@ -38,10 +40,11 @@ public class DeployAction implements IObjectActionDelegate {
 
   @Override
   public void selectionChanged(IAction action, ISelection selection) {
+    action.setEnabled(CloudBeesUIPlugin.getDefault().getAuthStatus()==AuthStatus.OK);
   }
 
   @Override
   public void setActivePart(IAction action, IWorkbenchPart targetPart) {
   }
-
+  
 }

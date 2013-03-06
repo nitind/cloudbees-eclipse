@@ -168,7 +168,7 @@ public class DBListView extends CBTreeProvider implements IPropertyChangeListene
           DBListView.this.contentProvider.inputChanged(DBListView.this.viewer, null, list);
         } catch (Exception e1) {
           DBListView.this.contentProvider.inputChanged(DBListView.this.viewer, null, null);
-          CloudBeesDataToolsPlugin.logErrorAndShowDialog(e1);
+          //CloudBeesDataToolsPlugin.logErrorAndShowDialog(e1);
         } finally {
           DBListView.this.loadfinished = true;
         }

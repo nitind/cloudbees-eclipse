@@ -111,7 +111,7 @@ public class BeesConsole extends IOConsole {
               IViewPart part = page.findView(IConsoleConstants.ID_CONSOLE_VIEW);
               if (part != null && part instanceof IConsoleView) {
                 ConsoleView view = (ConsoleView) part;
-                if (view != null && BeesConsole.BEES_CONSOLE_TYPE.equals(view.getConsole().getType())) {
+                if (view != null && view.getConsole()!=null && BeesConsole.BEES_CONSOLE_TYPE.equals(view.getConsole().getType())) {
                   view.getCurrentPage().setFocus();
                 }
               }

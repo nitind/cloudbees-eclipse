@@ -8,6 +8,8 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -31,6 +33,7 @@ import com.cloudbees.eclipse.core.CBRemoteChangeListener;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.GrandCentralService;
+import com.cloudbees.eclipse.ui.AuthStatus;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.internal.ActiveAccountContributionItem;
 import com.cloudbees.eclipse.ui.internal.ConfigureSshKeysAction;
@@ -55,18 +58,31 @@ public class CBTreeView extends ViewPart {
       
       Display.getDefault().asyncExec(new Runnable() {
         public void run() {
-          if (email==null) {
-            CBTreeView.this.setContentDescription(" ");
-            return;
-          }
-          if (newAccountName!=null && newAccountName.length()>0) {
-            CBTreeView.this.setContentDescription(" "+email+" ("+newAccountName+")");
-            return;
-          }
-          CBTreeView.this.setContentDescription(" "+email);
+          updateCD(email, newAccountName);
         }     
       });
       
+    }
+  };
+
+  private IMenuListener statusUpdateListener = new IMenuListener() {
+    
+    public void menuAboutToShow(IMenuManager manager) {
+      IActionBars bars = getViewSite().getActionBars();
+      IMenuManager pullDownMenu = bars.getMenuManager();
+      IContributionItem[] items = pullDownMenu.getItems();
+      for (int i = 0; i < items.length; i++) {
+        IContributionItem it = items[i];
+        if (it instanceof ActionContributionItem) {
+          ActionContributionItem ita = (ActionContributionItem) it;
+          //System.out.println("Action: "+ita.getAction());
+          ita.update();          
+        }
+        //System.out.println("IT: "+it);
+      }
+      /*pullDownMenu.markDirty();
+      pullDownMenu.updateAll(true);*/
+      //System.out.println("About to show a menu!");
     }
   };
   
@@ -85,16 +101,14 @@ public class CBTreeView extends ViewPart {
 
   public CBTreeView() {
     super();
-
+    
     GrandCentralService gcs;
     try {
       gcs = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-      String post ="";
-      if (gcs.getActiveAccountName()!=null) {
-        post=" ("+gcs.getActiveAccountName()+")";
-      }
-      
-      setContentDescription(" "+gcs.getEmail()+post);
+
+      String accountName  = gcs.getActiveAccountName();
+      String email = gcs.getEmail();
+      updateCD(email, accountName);
       
     } catch (CloudBeesException e1) {
       //Ignore for now
@@ -174,8 +188,10 @@ public class CBTreeView extends ViewPart {
 
     MenuManager popupMenu = new MenuManager();
     popupMenu.setRemoveAllWhenShown(true);
+    
     popupMenu.addMenuListener(new IMenuListener() {
       public void menuAboutToShow(final IMenuManager mgr) {
+        
       }
     });
 
@@ -203,6 +219,8 @@ public class CBTreeView extends ViewPart {
     pullDownMenu.add(this.configureSshAction);
     pullDownMenu.add(new CBTreeSeparator(SeparatorLocation.PULL_DOWN));
     pullDownMenu.add(new ActiveAccountContributionItem(true));
+    
+    pullDownMenu.addMenuListener(statusUpdateListener);
     //pullDownMenu.add(this.configureAccountAction);
     
     
@@ -235,4 +253,19 @@ public class CBTreeView extends ViewPart {
   }
 
 
+  private void updateCD(String email, String newAccountName) {
+    if (email==null) {
+      CBTreeView.this.setContentDescription("Account not configured!");
+      return;
+    }
+    if (newAccountName!=null && newAccountName.length()>0) {
+      CBTreeView.this.setContentDescription(" "+email+" ("+newAccountName+")");
+      return;
+    }
+    String post="";
+    if (CloudBeesUIPlugin.getDefault().getAuthStatus()!=AuthStatus.OK) {
+      post=" (user not authenticated!)";
+    }
+    CBTreeView.this.setContentDescription(" "+email+post);
+  }
 }

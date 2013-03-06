@@ -3,6 +3,8 @@ package com.cloudbees.eclipse.ui.internal.preferences;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -323,5 +325,31 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
         }
       }
     });
+  }
+
+  @Override
+  public boolean performOk() {
+    boolean res = super.performOk();
+    
+    // Call programmatically as SecurePreferences does not provide change listeners    
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Validating user credentials") {
+      @Override
+      protected IStatus run(final IProgressMonitor monitor) {
+        try {
+          monitor.beginTask("Validating user credentials", 1000);
+          CloudBeesUIPlugin.getDefault().fireSecureStorageChanged();
+        } catch (CloudBeesException e) {
+          CloudBeesUIPlugin.getDefault().getLogger().error(e);
+        } finally {
+          monitor.done();
+        }
+        return Status.OK_STATUS;
+      }
+    };
+
+    job.setUser(false);
+    job.schedule();
+
+    return res;
   }
 }

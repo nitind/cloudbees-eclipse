@@ -18,7 +18,7 @@ import com.cloudbees.eclipse.ui.views.CBTreeAction;
 public class ReloadRunAtCloudAction extends CBTreeAction implements IObjectActionDelegate {
 
   public ReloadRunAtCloudAction() {
-    super();
+    super(true);
     setText("Reload RUN@cloud apps@");
     setToolTipText("Reload RUN@cloud apps");
     setImageDescriptor(CBRunUiActivator.getImageDescription(Images.CLOUDBEES_REFRESH));
@@ -63,10 +63,6 @@ public class ReloadRunAtCloudAction extends CBTreeAction implements IObjectActio
   @Override
   public void run(IAction action) {
     reload();
-  }
-
-  @Override
-  public void selectionChanged(IAction action, ISelection selection) {
   }
 
   @Override

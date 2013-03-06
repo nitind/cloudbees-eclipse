@@ -12,7 +12,7 @@ import com.cloudbees.eclipse.ui.views.CBTreeAction;
 public class ConfigureJenkinsInstancesAction extends CBTreeAction implements IObjectActionDelegate {
 
   public ConfigureJenkinsInstancesAction() {
-    super();
+    super(false);
     setText("Configure on-premise Jenkins instances...");
     setToolTipText("Configure more Jenkins instances to monitor");
 
@@ -50,10 +50,6 @@ public class ConfigureJenkinsInstancesAction extends CBTreeAction implements IOb
   @Override
   public void run(IAction action) {
     run();
-  }
-
-  @Override
-  public void selectionChanged(IAction action, ISelection selection) {
   }
 
   @Override

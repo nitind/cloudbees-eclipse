@@ -1,7 +1,6 @@
 package com.cloudbees.eclipse.dev.ui.actions;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
@@ -14,7 +13,7 @@ import com.cloudbees.eclipse.ui.views.CBTreeAction;
 public class ReloadForgeReposAction extends CBTreeAction implements IObjectActionDelegate {
 
   public ReloadForgeReposAction() {
-    super();
+    super(true);
     setText("Reload Forge repos...");
     setToolTipText("Reload Forge repositories");
     setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_REFRESH));
@@ -48,10 +47,6 @@ public class ReloadForgeReposAction extends CBTreeAction implements IObjectActio
   @Override
   public void run(IAction action) {
     run();
-  }
-
-  @Override
-  public void selectionChanged(IAction action, ISelection selection) {
   }
 
   @Override

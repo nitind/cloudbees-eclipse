@@ -171,7 +171,7 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
           AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, list);
         } catch (Exception e1) {
           AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, null);
-          CBRunUiActivator.logErrorAndShowDialog(e1);
+          //CBRunUiActivator.logErrorAndShowDialog(e1);
         } finally {
           AppListView.this.loadfinished = true;
         }

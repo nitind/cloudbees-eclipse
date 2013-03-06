@@ -17,11 +17,9 @@ import org.eclipse.datatools.connectivity.drivers.jdbc.IJDBCConnectionProfileCon
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.internal.ObjectPluginAction;
 
 import com.cloudbees.api.DatabaseInfo;
@@ -42,7 +40,7 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
   protected static final String DTP_PERSPECTIVE = "org.eclipse.datatools.sqltools.sqleditor.perspectives.EditorPerspective";
 
   public ConnectDatabaseAction() {
-    super();
+    super(true);
     setText("Connect...");
     setToolTipText("Connect to the database");
     setImageDescriptor(CloudBeesDataToolsPlugin.getImageDescription(Images.CLOUDBEES_REFRESH));
@@ -119,9 +117,6 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
 
   }
 
-  @Override
-  public void selectionChanged(IAction action, ISelection selection) {
-  }
 
   @Override
   public void setActivePart(IAction action, IWorkbenchPart targetPart) {

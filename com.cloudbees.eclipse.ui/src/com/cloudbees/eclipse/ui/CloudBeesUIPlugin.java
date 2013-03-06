@@ -60,6 +60,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   private final static boolean USE_SECURE_STORAGE = false;
 
+  private AuthStatus authStatus;
+
   // The plug-in ID
   public static final String PLUGIN_ID = "com.cloudbees.eclipse.ui"; //$NON-NLS-1$
 
@@ -73,7 +75,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   private final List<CBRemoteChangeListener> cbRemoteChangeListeners = new ArrayList<CBRemoteChangeListener>();
 
   private final List<ApplicationInfoChangeListener> applicationInfoChangeListeners = new ArrayList<ApplicationInfoChangeListener>();
-  
+
   private final List<DatabaseInfoChangeListener> databaseInfoChangeListeners = new ArrayList<DatabaseInfoChangeListener>();
 
   private IPropertyChangeListener prefListener;
@@ -97,13 +99,16 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     plugin = this;
     this.logger = new Logger(getLog());
     loadAccountCredentials();
-    hookPrefChangeListener();
+       
+    // not hooking as performOk will perform the validation
+    // hookPrefChangeListener();
+    
     validateJREforRunAtCloud();
   }
 
   /**
-   * Validates JRE for run@cloud and if Run@cloud can support the JRE. RUN@cloud plugins will be disabled by
-   * themselves (look plugin#start()). 
+   * Validates JRE for run@cloud and if Run@cloud can support the JRE. RUN@cloud plugins will be disabled by themselves
+   * (look plugin#start()).
    */
   private void validateJREforRunAtCloud() {
     if (!CloudBeesCorePlugin.validateRUNatCloudJRE()) {
@@ -128,10 +133,10 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         if (PreferenceConstants.P_PASSWORD.equalsIgnoreCase(event.getProperty())
             || PreferenceConstants.P_EMAIL.equalsIgnoreCase(event.getProperty())) {
           try {
-            
-            CloudBeesUIPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.P_ACTIVE_ACCOUNT, "");            
+
+            CloudBeesUIPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.P_ACTIVE_ACCOUNT, "");
             loadAccountCredentials();
-            
+
           } catch (CloudBeesException e) {
             CloudBeesUIPlugin.getDefault().getLogger().error(e);
           }
@@ -258,8 +263,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   public void reloadAllCloudJenkins(final boolean userAction) {
-    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job(
-        "Loading DEV@cloud Jenkins instances") {
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading DEV@cloud Jenkins instances") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
         if (!getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
@@ -281,15 +285,21 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           }
           monitor.worked(250);
 
-          List<JenkinsInstanceResponse> resp = pollInstances(instances, new SubProgressMonitor(monitor, 740));
+          List<JenkinsInstanceResponse> resp = null;
+          if (instances==null || instances.size()==0) {
+            resp = new ArrayList<JenkinsInstanceResponse>();             
+          } else { 
+            resp = pollInstances(instances, new SubProgressMonitor(monitor, 740));
+          }
 
           //unmodifiableList to avoid ConcurrentModificationException for multithread access
-          Iterator<CBRemoteChangeListener> iterator = Collections.unmodifiableList(CloudBeesUIPlugin.this.cbRemoteChangeListeners).iterator();
+          Iterator<CBRemoteChangeListener> iterator = Collections.unmodifiableList(
+              CloudBeesUIPlugin.this.cbRemoteChangeListeners).iterator();
           while (iterator.hasNext()) {
             CBRemoteChangeListener listener = iterator.next();
             listener.jenkinsChanged(resp);
           }
-          
+
           monitor.worked(10);
 
           if (toReport != null) {
@@ -316,9 +326,8 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
   }
 
-  public void reloadAllLocalJenkins(final boolean userAction) { 
-    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job(
-        "Loading local Jenkins instances") {
+  public void reloadAllLocalJenkins(final boolean userAction) {
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading local Jenkins instances") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
 
@@ -327,7 +336,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         try {
           monitor.beginTask("Reading Jenkins configuration", 1000);
 
-          List<JenkinsInstance> instances = new ArrayList<JenkinsInstance>();         
+          List<JenkinsInstance> instances = new ArrayList<JenkinsInstance>();
           try {
             instances.addAll(loadManualJenkinsInstances());
           } catch (Exception e) {
@@ -340,12 +349,13 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
           List<JenkinsInstanceResponse> resp = pollInstances(instances, new SubProgressMonitor(monitor, 740));
 
           //unmodifiableList to avoid ConcurrentModificationException for multithread access
-          Iterator<CBRemoteChangeListener> iterator = Collections.unmodifiableList(CloudBeesUIPlugin.this.cbRemoteChangeListeners).iterator();
+          Iterator<CBRemoteChangeListener> iterator = Collections.unmodifiableList(
+              CloudBeesUIPlugin.this.cbRemoteChangeListeners).iterator();
           while (iterator.hasNext()) {
             CBRemoteChangeListener listener = iterator.next();
             listener.jenkinsChanged(resp);
           }
-          
+
           monitor.worked(10);
 
           if (toReport != null) {
@@ -368,8 +378,9 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
     job.setUser(userAction);
     job.schedule();
-    
+
   }
+
   private List<JenkinsInstanceResponse> pollInstances(final List<JenkinsInstance> instances,
       final IProgressMonitor monitor) {
     try {
@@ -493,20 +504,35 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     final GrandCentralService gcs = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     final ClickStartService css = CloudBeesCorePlugin.getDefault().getClickStartService();
     gcs.setAuthInfo(email, password);
-    
+
     if (email != null && email.length() > 0) {
       org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Validating CloudBees account") {
         protected IStatus run(final IProgressMonitor monitor) {
           try {
             AuthInfo auth = gcs.getCachedAuthInfo(true, monitor);
-            css.setAuth(auth.getAuth().api_key, auth.getAuth().secret_key);           
+            css.setAuth(auth.getAuth().api_key, auth.getAuth().secret_key);
+
+            if (USE_SECURE_STORAGE) {
+              try {
+                SecurePreferencesFactory.getDefault().put(PreferenceConstants.P_UID, auth.getAuth().uid, true);
+                SecurePreferencesFactory.getDefault().put(PreferenceConstants.P_SECRET_KEY, auth.getAuth().secret_key, true);
+                SecurePreferencesFactory.getDefault().put(PreferenceConstants.P_API_KEY, auth.getAuth().api_key, true);
+              } catch (StorageException e) {
+                e.printStackTrace();
+              }
+            } else {
+              getPreferenceStore().setValue(PreferenceConstants.P_UID, auth.getAuth().uid);
+              getPreferenceStore().setValue(PreferenceConstants.P_SECRET_KEY, auth.getAuth().secret_key);
+              getPreferenceStore().setValue(PreferenceConstants.P_API_KEY, auth.getAuth().api_key);
+            }
+
           } catch (CloudBeesException e) {
             CloudBeesUIPlugin.getDefault().getLogger().error(e.getMessage(), e);
-            monitor.setTaskName("Failed to validate account: "+e.getMessage());
+            monitor.setTaskName("Failed to validate account: " + e.getMessage());
             monitor.done();
             return new Status(IStatus.ERROR, CloudBeesUIPlugin.PLUGIN_ID, 0, e.getMessage(), e);
           }
-          monitor.done();          
+          monitor.done();
           return Status.OK_STATUS;
         }
       };
@@ -560,8 +586,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     } else {
       getPreferenceStore().setValue(PreferenceConstants.P_PASSWORD, text);
     }
-    // Call programmatically as SecurePreferences does not provide change listeners
-    CloudBeesUIPlugin.getDefault().fireSecureStorageChanged();
 
   }
 
@@ -571,7 +595,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
     return getPreferenceStore().getString(PreferenceConstants.P_PASSWORD);
   }
-
 
   public void addApplicationInfoChangeListener(final ApplicationInfoChangeListener listener) {
     if (listener != null) {
@@ -625,7 +648,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   @Override
   protected void initializeImageRegistry(ImageRegistry reg) {
     super.initializeImageRegistry(reg);
-    
+
     reg.put(CBImages.ICON_16X16_CB_PLAIN,
         ImageDescriptor.createFromURL(getBundle().getResource("icons/16x16/cb_plain.png")));
 
@@ -673,15 +696,15 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   }
 
   public void fireActiveAccountChanged(String newEmail, String newAccountName) {
-    reloadAllCloudJenkins(false);    
+    reloadAllCloudJenkins(false);
     fireApplicationInfoChanged();
     fireDatabaseInfoChanged();
     fireAccountNameChange(newEmail, newAccountName);
   }
 
-  
   void fireAccountNameChange(String newEmail, String newAccountName) {
-    Iterator<CBRemoteChangeListener> iterator = Collections.unmodifiableList(CloudBeesUIPlugin.this.cbRemoteChangeListeners).iterator();
+    Iterator<CBRemoteChangeListener> iterator = Collections.unmodifiableList(
+        CloudBeesUIPlugin.this.cbRemoteChangeListeners).iterator();
     while (iterator.hasNext()) {
       CBRemoteChangeListener listener = iterator.next();
       listener.activeAccountChanged(newEmail, newAccountName);
@@ -716,5 +739,12 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     }
   }
 
+  public void setAuthStatus(AuthStatus newAuthStatus) {
+    this.authStatus = newAuthStatus;
+  }
+
+  public AuthStatus getAuthStatus() {
+    return authStatus;
+  }
 
 }

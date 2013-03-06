@@ -8,7 +8,7 @@ import com.cloudbees.eclipse.ui.views.CBTreeAction;
 public class ConfigureCloudBeesAction extends CBTreeAction {
 
   public ConfigureCloudBeesAction() {
-    super();
+    super(false);
     setText("CloudBees Account...");
     setToolTipText("Configure CloudBees account access");
     /*    action1.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
