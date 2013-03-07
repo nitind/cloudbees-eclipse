@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.cloudbees.eclipse.m2e"
-      label="CloudBees Eclipse Toolkit Maven Integration (**Maven/M2E PLUGIN MUST BE INSTALLED!!**) (Optional)"
+      label="CloudBees Toolkit Maven Integration (**Maven/M2E PLUGIN MUST BE INSTALLED!!**) (Optional)"
       version="1.2.0.qualifier"
       provider-name="CloudBees, Inc">
 

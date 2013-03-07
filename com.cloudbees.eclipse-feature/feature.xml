@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.cloudbees.eclipse"
-      label="CloudBees Eclipse Toolkit"
+      label="CloudBees Toolkit"
       version="1.2.0.qualifier"
       provider-name="CloudBees, Inc">
 
@@ -51,7 +51,7 @@ Notwithstanding anything to the contrary contained herein, except for the limite
    </license>
 
    <url>
-      <update label="CloudBees Eclipse Toolkit" url="http://eclipse.cloudbees.com"/>
+      <update label="CloudBees Toolkit" url="http://eclipse.cloudbees.com"/>
    </url>
 
    <plugin
