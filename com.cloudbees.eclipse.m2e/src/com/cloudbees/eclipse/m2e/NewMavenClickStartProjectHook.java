@@ -18,6 +18,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.project.ResolverConfiguration;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.gc.api.ClickStartCreateResponse;
@@ -40,7 +42,13 @@ public class NewMavenClickStartProjectHook implements NewClickStartProjectHook {
       //int res = CBMavenBuilder.buildMavenProject(project);
       //System.out.println("Maven builder returned: "+res);
       try {
-        CBMavenUtils.runMaven(project, monitor, new String[] {"eclipse:eclipse"});
+        ResolverConfiguration rc = new ResolverConfiguration();
+             rc.setActiveProfiles("");
+             rc.setResolveWorkspaceProjects(true);
+        MavenPlugin.getProjectConfigurationManager().enableMavenNature(project, rc, monitor);
+        MavenPlugin.getProjectConfigurationManager().addMavenBuilder(project, project.getDescription(), monitor);
+        
+        //CBMavenUtils.runMaven(project, monitor, new String[] {"eclipse:eclipse"});
         project.refreshLocal(IProject.DEPTH_INFINITE, monitor);
       } catch (CoreException e) {
         e.printStackTrace();

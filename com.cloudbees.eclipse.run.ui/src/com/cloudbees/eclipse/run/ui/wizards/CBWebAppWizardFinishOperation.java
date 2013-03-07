@@ -220,8 +220,8 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
           int idx1 = s1[0].lastIndexOf('/');
           String appId = s1[0].substring(idx1+1); 
           
-          project.setPersistentProperty(CBProjectSettingsPage.APPID_KEY, appId);
-          project.setPersistentProperty(CBProjectSettingsPage.ACCOUNT_KEY, account);
+          project.setPersistentProperty(CloudBeesCorePlugin.PRJ_APPID_KEY, appId);
+          project.setPersistentProperty(CloudBeesCorePlugin.PRJ_ACCOUNT_KEY, account);
 
           // Refresh project to refresh the project nature
           project.refreshLocal(IProject.DEPTH_INFINITE, monitor);

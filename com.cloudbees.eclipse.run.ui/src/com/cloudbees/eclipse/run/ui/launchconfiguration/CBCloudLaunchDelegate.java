@@ -61,11 +61,15 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
 
       for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
         if (project.getName().equals(projectName)) {
-          
+
           String account = CloudBeesUIPlugin.getDefault().getActiveAccountName(monitor);
-          
+
           String appId = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_CUSTOM_ID, "");
           String warPath = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, "");
+
+          if (appId == null || appId.length() == 0) {
+            appId = BeesSDK.getBareAppId(project);
+          }
 
           if (warPath != null && !warPath.isEmpty()) {
             warPath = project.getLocation().toOSString() + File.separatorChar + warPath;
@@ -130,8 +134,8 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
     }
 
     if (errorTitle != null) {
-      if (errorMsg==null || errorMsg.length()==0) {
-        if (e.getCause()!=null) {
+      if (errorMsg == null || errorMsg.length() == 0) {
+        if (e.getCause() != null) {
           errorMsg = e.getCause().getMessage();
         }
       }
@@ -200,12 +204,12 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
     job.schedule();
   }
 
-  private void deployWar(final IProject project, final ILaunchConfiguration configuration, final String account, final String id,
-      final String warPath, final String projectName) throws Exception, CloudBeesException, CoreException,
-      FileNotFoundException {
+  private void deployWar(final IProject project, final ILaunchConfiguration configuration, final String account,
+      final String id, final String warPath, final String projectName) throws Exception, CloudBeesException,
+      CoreException, FileNotFoundException {
     final String[] appId = new String[1];
     try {
-      appId[0] = BeesSDK.getAppId(account, id, warPath, project);
+      appId[0] = BeesSDK.getAppId(account, id, /*warPath, */project);
     } catch (Exception e) {
       e.printStackTrace();
       // failed to detect
@@ -244,10 +248,10 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
       });
     }
     if (appId[0] != null && !appId[0].isEmpty()) {
-      Job job = new Job("Deploying WAR file to " + account + "/" + id) {
+      Job job = new Job("Deploying to " + appId[0]) {
         @Override
         protected IStatus run(final IProgressMonitor monitor) {
-          monitor.beginTask("Deploying WAR file to " + account + "/" + id, WORK_AMOUNT);
+          monitor.beginTask("Deploying to " + appId[0], WORK_AMOUNT);
           try {
             BeesSDK.deploy(project, appId[0], warPath, monitor);
           } catch (Exception e) {

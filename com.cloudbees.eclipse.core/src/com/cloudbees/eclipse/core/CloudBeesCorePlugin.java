@@ -24,6 +24,7 @@ import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.QualifiedName;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -34,6 +35,9 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author ahtik
  */
 public class CloudBeesCorePlugin extends Plugin {
+
+  public final static QualifiedName PRJ_APPID_KEY = new QualifiedName(CloudBeesCorePlugin.PLUGIN_ID, "appId");
+  public final static QualifiedName PRJ_ACCOUNT_KEY = new QualifiedName(CloudBeesCorePlugin.PLUGIN_ID, "account");
 
   public static final String PLUGIN_ID = "com.cloudbees.eclipse.core"; //$NON-NLS-1$
 
@@ -65,7 +69,7 @@ public class CloudBeesCorePlugin extends Plugin {
     plugin = this;
     this.gcService = new GrandCentralService();
     this.gcService.start();
-    
+
     this.csService = new ClickStartService();
 
     this.proxyServiceTracker = new ServiceTracker(getBundle().getBundleContext(), IProxyService.class.getName(), null);
@@ -229,9 +233,9 @@ public class CloudBeesCorePlugin extends Plugin {
     // Java7 is now supported by the SDK so we don't provide the warning anymore
     return true;
     //1.6.0_29, 1.7.0_06-ea etc.
-/*    String prop = System.getProperty("java.version");
-    return !(prop != null && prop.contains("1.7"));
-*/  }
+    /*    String prop = System.getProperty("java.version");
+        return !(prop != null && prop.contains("1.7"));
+    */}
 
   public ClickStartService getClickStartService() throws CloudBeesException {
     if (this.csService == null) {

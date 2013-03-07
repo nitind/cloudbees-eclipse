@@ -14,12 +14,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.PropertyPage;
 
+import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
+
 public class CBProjectSettingsPage extends PropertyPage {
 
   private Text textAppId;
-
-  public final static QualifiedName APPID_KEY = new QualifiedName(CBRunUiActivator.PLUGIN_ID, "appId");
-  public final static QualifiedName ACCOUNT_KEY = new QualifiedName(CBRunUiActivator.PLUGIN_ID, "account");
 
   private IProject project;
 
@@ -61,12 +60,12 @@ public class CBProjectSettingsPage extends PropertyPage {
       String account = null;
 
       try {
-        String val = p.getPersistentProperty(APPID_KEY);
+        String val = p.getPersistentProperty(CloudBeesCorePlugin.PRJ_APPID_KEY);
         if (val != null && val.length() > 0) {
           appIdName = val;
         }
 
-        String val2 = p.getPersistentProperty(ACCOUNT_KEY);
+        String val2 = p.getPersistentProperty(CloudBeesCorePlugin.PRJ_ACCOUNT_KEY);
         if (val2 != null && val2.length() > 0) {
           account = val2;
         }
@@ -107,7 +106,7 @@ public class CBProjectSettingsPage extends PropertyPage {
     // store app id
     String newId = textAppId.getText();
     try {
-      project.setPersistentProperty(APPID_KEY, newId);
+      project.setPersistentProperty(CloudBeesCorePlugin.PRJ_APPID_KEY, newId);
     } catch (CoreException e) {
       setErrorMessage(e.getMessage());
       e.printStackTrace();

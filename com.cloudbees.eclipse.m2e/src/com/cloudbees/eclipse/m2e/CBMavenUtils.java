@@ -1,10 +1,8 @@
 package com.cloudbees.eclipse.m2e;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.execution.BuildSummary;
@@ -20,11 +18,11 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
-import org.eclipse.m2e.core.project.ResolverConfiguration;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.CloudBeesNature;
 import com.cloudbees.eclipse.core.NatureUtil;
+import com.cloudbees.eclipse.run.core.BeesSDK;
 
 public class CBMavenUtils {
   public static IFile runMaven(IProject project, IProgressMonitor monitor, String[] goals) throws CloudBeesException {
@@ -51,7 +49,7 @@ public class CBMavenUtils {
     }
 
     //IMavenProjectFacade facade = projectManager.create(pomFile, true, new SubProgressMonitor(monitor, 1));
-    ResolverConfiguration config = mpr.getResolverConfiguration();
+    //ResolverConfiguration config = mpr.getResolverConfiguration();
 
     request.setPom(project.getFile(new Path("/pom.xml")).getRawLocation().toFile());
     //request.setBaseDirectory(project.getRawLocation().toFile());
@@ -88,11 +86,14 @@ public class CBMavenUtils {
 
     Artifact artifact = proj.getArtifact();
     File f = artifact.getFile();
-    System.out.println("Artifact: " + f);
-    System.out.println("Artifact name: " + f.getName());
-    if (f.getName().endsWith(".jar")) {
+    //System.out.println("Artifact: " + f);
+    //System.out.println("Artifact name: " + f.getName());
+    if (f==null) {
+      return null;
+    }
+    if (BeesSDK.hasExtension(f.getName())) {
       String apath = f.getAbsolutePath().substring(project.getLocation().toFile().getAbsolutePath().length());
-      System.out.println("APATH: " + apath);
+      //System.out.println("APATH: " + apath);
       return project.getFile(apath);
     }
     
