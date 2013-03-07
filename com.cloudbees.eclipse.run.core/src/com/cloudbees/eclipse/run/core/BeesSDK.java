@@ -249,18 +249,18 @@ public class BeesSDK {
   }
 
   public static String getBareAppId(IProject project) throws CloudBeesException, Exception {
-    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+/*    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
     if (client == null) {
       return null;
     }
-
+*/
     String newappid = project.getPersistentProperty(CloudBeesCorePlugin.PRJ_APPID_KEY);
 
     if (newappid != null && newappid.length() > 0) {
       return newappid;
     }
-    return null;
+    return project.getName();
   }
 
   private static String getAccountAppId(final String account, final String id,
@@ -285,7 +285,7 @@ public class BeesSDK {
     } else {
       return account + "/" + id;
     }
-    return null;
+    return account+"/"+project.getName();
   }
 
   /**

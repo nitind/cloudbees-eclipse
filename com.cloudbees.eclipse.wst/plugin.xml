@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+ <extension
+       point="com.cloudbees.eclipse.run.core.warBuilderHook">
+    <hook
+          defaultHandler="com.cloudbees.eclipse.wst.DynamicWebWarBuilderHook"
+          id="com.cloudbees.eclipse.wst.DynamicWebWarBuilderHook">
+    </hook>
+ </extension>
+
+
+</plugin>
