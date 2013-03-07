@@ -27,6 +27,8 @@ import org.eclipse.ant.core.AntRunner;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -182,7 +184,7 @@ public class BeesSDK {
     String appId = getAccountAppId(account, id, client, /*warFile, */project);
 
     String deployType = getExtension(warFile);
-    
+
     Map<String, String> params = new HashMap<String, String>();
     params.put("runtime.java_version", jver);
     ApplicationDeployArgs.Builder argBuilder = new ApplicationDeployArgs.Builder(appId)
@@ -199,14 +201,14 @@ public class BeesSDK {
   }
 
   public static String getExtension(String s) {
-    if (s==null) {
+    if (s == null) {
       return null;
     }
     int idx = s.lastIndexOf(".");
-    if (idx==-1) {
+    if (idx == -1) {
       return "";
     }
-    return s.substring(idx+1);
+    return s.substring(idx + 1);
   }
 
   private static String getJavaVersion(IProject project) throws CoreException {
@@ -236,8 +238,8 @@ public class BeesSDK {
     return null;
   }
 
-  public static String getAccountAppId(final String account, final String id, /*final String warPath, */IProject project)
-      throws CloudBeesException, Exception {
+  public static String getAccountAppId(final String account, final String id, /*final String warPath, */
+      IProject project) throws CloudBeesException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
     if (client == null) {
@@ -249,12 +251,12 @@ public class BeesSDK {
   }
 
   public static String getBareAppId(IProject project) throws CloudBeesException, Exception {
-/*    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    BeesClient client = getBeesClient(grandCentralService);
-    if (client == null) {
-      return null;
-    }
-*/
+    /*    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+        BeesClient client = getBeesClient(grandCentralService);
+        if (client == null) {
+          return null;
+        }
+    */
     String newappid = project.getPersistentProperty(CloudBeesCorePlugin.PRJ_APPID_KEY);
 
     if (newappid != null && newappid.length() > 0) {
@@ -285,7 +287,7 @@ public class BeesSDK {
     } else {
       return account + "/" + id;
     }
-    return account+"/"+project.getName();
+    return account + "/" + project.getName();
   }
 
   /**
@@ -301,8 +303,9 @@ public class BeesSDK {
    * @throws FileNotFoundException
    * @throws Exception
    */
-  public static ApplicationDeployArchiveResponse deploy(IProject project, final String accountAppId, final File warFile,
-      IProgressMonitor monitor) throws CloudBeesException, CoreException, FileNotFoundException, Exception {
+  public static ApplicationDeployArchiveResponse deploy(IProject project, final String accountAppId,
+      final File warFile, IProgressMonitor monitor) throws CloudBeesException, CoreException, FileNotFoundException,
+      Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
     if (client == null) {
@@ -312,9 +315,9 @@ public class BeesSDK {
     String jver = getJavaVersion(project);
     Map<String, String> params = new HashMap<String, String>();
     params.put("runtime.java_version", jver);
-    
+
     String deployType = getExtension(warFile.getName());
-    
+
     ApplicationDeployArgs.Builder argBuilder = new ApplicationDeployArgs.Builder(accountAppId)
         .deployPackage(warFile, deployType).withParams(params)
         .withProgressFeedback(new UploadProgressWithMonitor(monitor));
@@ -391,20 +394,34 @@ public class BeesSDK {
 
     if (build) {
       runTargets(project, new String[] { "dist" });
-    }
-    IFile file = getBuildFolder(project).getFile("webapp.war");
-
-    if (!file.exists()) {
-      runTargets(project, new String[] { "dist" });
-      file.refreshLocal(IFile.DEPTH_INFINITE, null);
-
-      if (!file.exists()) {
-        throw new FileNotFoundException(
-            "Could not find webapp.war file in build folder. Ensure that your build.xml has dist task that generates a war file to build directory.");
-      }
+      project.refreshLocal(IFile.DEPTH_INFINITE, null);
     }
 
-    return file;
+    final IFile latestFile[] = { null };
+
+    try {
+      project.accept(new IResourceVisitor() {
+        @Override
+        public boolean visit(final IResource resource) throws CoreException {
+          if (resource.getType() == IResource.FILE && hasSupportedExtension(resource.getName())) {
+            if (latestFile[0] == null || resource.getModificationStamp() > latestFile[0].getModificationStamp()) {
+              latestFile[0] = (IFile) resource;
+            }
+          }
+          return true;
+        }
+      });
+    } catch (CoreException e) {
+      throw new CloudBeesException("Failed to retrieve deployable artifact", e);
+    }
+
+    if (latestFile[0] != null) {
+      return latestFile[0];
+    }
+
+    throw new FileNotFoundException(
+        "Could not find .war file in build folder. Ensure that your build.xml has a 'dist' task that generates a war file to build directory.");
+
   }
 
   private static IFolder getBuildFolder(final IProject project) throws CloudBeesException, CoreException,
@@ -413,7 +430,7 @@ public class BeesSDK {
     IFolder folder = project.getFolder("build");
     if (!folder.exists()) {
       runTargets(project, new String[] { "dist" });
-      folder.refreshLocal(IFile.DEPTH_INFINITE, null);
+      project.refreshLocal(IFile.DEPTH_INFINITE, null);
 
       if (!folder.exists()) {
         throw new FileNotFoundException(
