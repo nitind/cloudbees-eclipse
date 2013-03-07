@@ -9,7 +9,35 @@
 		</command>
 	</extension>
 
-	<extension point="org.eclipse.ui.popupMenus">
+<extension point="org.eclipse.ui.popupMenus">
+
+  <objectContribution
+        adaptable="true"
+        id="com.cloudbees.eclipse.run.ui.file.deploy"
+        nameFilter="*"
+        objectClass="org.eclipse.core.resources.IFile">
+     <action
+           class="com.cloudbees.eclipse.run.ui.popup.actions.DeployFileAction"
+           enablesFor="1"
+           icon="icons/16x16/cb_plain.png"
+           id="com.cloudbees.eclipse.run.ui.action.file.deploy"
+           label="Deploy to CloudBees RUN@cloud...@"
+           menubarPath="com.cloudbees.eclipse.ui.popup.file.cloudbees/cloudbeesGroup?after=launch">
+     </action>
+     <visibility>
+        <and>
+           <objectClass
+                 name="org.eclipse.core.resources.IFile">
+           </objectClass>
+           <objectState
+                 name="projectNature"
+                 value="com.cloudbees.eclipse.core.cloudbeesNature">
+           </objectState>
+        </and>
+     </visibility>
+  </objectContribution>
+
+
   <objectContribution
         adaptable="true"
         id="com.cloudbees.eclipse.run.ui.deploy"
@@ -20,7 +48,7 @@
            enablesFor="1"
            icon="icons/16x16/cb_plain.png"
            id="com.cloudbees.eclipse.run.ui.action.deploy"
-           label="Deploy to RUN@cloud@"
+           label="Deploy to CloudBees RUN@Cloud...@"
            menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup?after=launch">
      </action>
      <visibility>
@@ -45,7 +73,7 @@
            enablesFor="1"
            icon="icons/16x16/cb_plain.png"
            id="com.cloudbees.eclipse.run.ui.action.runLocally"
-           label="Run Local"
+           label="Run local"
            menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup?after=launch">
      </action>
      <visibility>

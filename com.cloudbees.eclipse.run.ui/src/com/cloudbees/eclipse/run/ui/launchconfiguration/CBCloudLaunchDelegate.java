@@ -209,7 +209,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
       CoreException, FileNotFoundException {
     final String[] appId = new String[1];
     try {
-      appId[0] = BeesSDK.getAppId(account, id, /*warPath, */project);
+      appId[0] = BeesSDK.getAccountAppId(account, id, /*warPath, */project);
     } catch (Exception e) {
       e.printStackTrace();
       // failed to detect
@@ -253,7 +253,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
         protected IStatus run(final IProgressMonitor monitor) {
           monitor.beginTask("Deploying to " + appId[0], WORK_AMOUNT);
           try {
-            BeesSDK.deploy(project, appId[0], warPath, monitor);
+            BeesSDK.deploy(project, appId[0], new File(warPath), monitor);
           } catch (Exception e) {
             handleException(e);
           }

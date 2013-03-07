@@ -165,7 +165,7 @@ public class ArtifactsClickListener implements IDoubleClickListener {
           final String[] newAppUrl = new String[1];
           try {
             subMonitor = SubMonitor.convert(monitor, "Deploying war file to RUN@cloud...", 50);
-            ApplicationDeployArchiveResponse result = BeesSDK.deploy(null, app.getId(), tempWar.getCanonicalPath(),
+            ApplicationDeployArchiveResponse result = BeesSDK.deploy(null, app.getId(), tempWar.getAbsoluteFile(),
                 subMonitor);
             subMonitor.worked(50);
             if (result != null) {

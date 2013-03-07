@@ -77,6 +77,7 @@
     
     <extension
         point="org.eclipse.ui.popupMenus">
+        
         <objectContribution
             adaptable="true"
             objectClass="org.eclipse.core.resources.IProject"
@@ -100,7 +101,26 @@
                 </groupMarker>
             </menu>
         </objectContribution>
+
+        <objectContribution
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IFile"
+            nameFilter="*"
+            id="com.cloudbees.eclipse.ui.popup.file.contribution">
+            <menu
+                label="%cloudbees.popup.menu.label"
+                path="additions"
+                icon="icons/16x16/cb_plain.png"
+                id="com.cloudbees.eclipse.ui.popup.file.cloudbees">
+                <separator
+                    name="cloudbeesGroup"></separator>
+                <groupMarker
+                      name="launch">
+                </groupMarker>
+            </menu>
+        </objectContribution>
         
+
         <objectContribution
             adaptable="true"
             objectClass="org.eclipse.core.resources.IProject"

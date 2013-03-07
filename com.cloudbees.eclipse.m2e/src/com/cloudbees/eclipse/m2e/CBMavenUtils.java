@@ -91,7 +91,7 @@ public class CBMavenUtils {
     if (f==null) {
       return null;
     }
-    if (BeesSDK.hasExtension(f.getName())) {
+    if (BeesSDK.hasSupportedExtension(f.getName())) {
       String apath = f.getAbsolutePath().substring(project.getLocation().toFile().getAbsolutePath().length());
       //System.out.println("APATH: " + apath);
       return project.getFile(apath);

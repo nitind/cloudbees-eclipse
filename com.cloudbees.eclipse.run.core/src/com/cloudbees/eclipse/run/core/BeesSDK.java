@@ -60,7 +60,7 @@ import com.cloudbees.eclipse.run.sdk.CBSdkActivator;
 
 public class BeesSDK {
 
-  public final static String[] SUPPORTED_EXTENSIONS = { ".war", ".ear" };
+  public final static String[] SUPPORTED_EXTENSIONS = { ".war", ".ear", ".zip" };
 
   private static final class UploadProgressWithMonitor implements UploadProgress {
     private static final String JOB_NAME = "Sent to RUN@cloud";
@@ -179,7 +179,7 @@ public class BeesSDK {
     IPath workspacePath = project.getLocation().removeLastSegments(1);
     IPath buildPath = getWarFile(project, build, monitor).getFullPath();
     String warFile = workspacePath.toOSString() + buildPath.toOSString();
-    String appId = getAppId(account, id, client, /*warFile, */project);
+    String appId = getAccountAppId(account, id, client, /*warFile, */project);
 
     String deployType = getExtension(warFile);
     
@@ -198,7 +198,7 @@ public class BeesSDK {
     return res;
   }
 
-  private static String getExtension(String s) {
+  public static String getExtension(String s) {
     if (s==null) {
       return null;
     }
@@ -236,7 +236,7 @@ public class BeesSDK {
     return null;
   }
 
-  public static String getAppId(final String account, final String id, /*final String warPath, */IProject project)
+  public static String getAccountAppId(final String account, final String id, /*final String warPath, */IProject project)
       throws CloudBeesException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
@@ -244,7 +244,7 @@ public class BeesSDK {
       return null;
     }
 
-    String appId = getAppId(account, id, client, /*warPath, */project);
+    String appId = getAccountAppId(account, id, client, /*warPath, */project);
     return appId;
   }
 
@@ -263,7 +263,7 @@ public class BeesSDK {
     return null;
   }
 
-  private static String getAppId(final String account, final String id,
+  private static String getAccountAppId(final String account, final String id,
       final BeesClient client/*, final String warFile*/, IProject project) throws Exception {
 
     if (id == null || "".equals(id)) {
@@ -292,7 +292,7 @@ public class BeesSDK {
    * @param project
    *          IProject is used for java version detection. If IProject is not known then submit null and workspace java
    *          version will be used.
-   * @param appId
+   * @param accountAppId
    * @param warPath
    * @param monitor
    * @return
@@ -301,7 +301,7 @@ public class BeesSDK {
    * @throws FileNotFoundException
    * @throws Exception
    */
-  public static ApplicationDeployArchiveResponse deploy(IProject project, final String appId, final String warPath,
+  public static ApplicationDeployArchiveResponse deploy(IProject project, final String accountAppId, final File warFile,
       IProgressMonitor monitor) throws CloudBeesException, CoreException, FileNotFoundException, Exception {
     GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     BeesClient client = getBeesClient(grandCentralService);
@@ -313,10 +313,10 @@ public class BeesSDK {
     Map<String, String> params = new HashMap<String, String>();
     params.put("runtime.java_version", jver);
     
-    String deployType = getExtension(warPath);
+    String deployType = getExtension(warFile.getName());
     
-    ApplicationDeployArgs.Builder argBuilder = new ApplicationDeployArgs.Builder(appId)
-        .deployPackage(new File(warPath), deployType).withParams(params)
+    ApplicationDeployArgs.Builder argBuilder = new ApplicationDeployArgs.Builder(accountAppId)
+        .deployPackage(warFile, deployType).withParams(params)
         .withProgressFeedback(new UploadProgressWithMonitor(monitor));
 
     ApplicationDeployArchiveResponse res = client.applicationDeployArchive(argBuilder.build());
@@ -490,7 +490,7 @@ public class BeesSDK {
     return hooks;
   }
 
-  public final static boolean hasExtension(String filename) {
+  public final static boolean hasSupportedExtension(String filename) {
     if (filename == null) {
       return false;
     }
