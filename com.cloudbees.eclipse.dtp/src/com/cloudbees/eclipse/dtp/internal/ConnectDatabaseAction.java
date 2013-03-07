@@ -41,6 +41,7 @@ import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.dtp.CloudBeesDataToolsPlugin;
 import com.cloudbees.eclipse.dtp.Images;
 import com.cloudbees.eclipse.run.core.BeesSDK;
+import com.cloudbees.eclipse.run.sdk.CBSdkActivator;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.views.CBTreeAction;
 
@@ -216,7 +217,7 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
     Properties baseProperties = new Properties();
     baseProperties.setProperty(IDriverMgmtConstants.PROP_DEFN_TYPE,
         "org.eclipse.datatools.enablement.mysql.5_0.driverTemplate");
-    baseProperties.setProperty(IDriverMgmtConstants.PROP_DEFN_JARLIST, "C:\\Java\\mysql-connector-java-5.0.8-bin.jar");
+    baseProperties.setProperty(IDriverMgmtConstants.PROP_DEFN_JARLIST, CBSdkActivator.getDefault().getBeesHome()+"\\lib\\mysql-connector-java-5.1.15.jar");
     baseProperties.setProperty(IJDBCConnectionProfileConstants.DRIVER_CLASS_PROP_ID, "com.mysql.jdbc.Driver");
     //baseProperties.setProperty(ConnectionProfileConstants.PROP_DRIVER_DEFINITION_ID, "DriverDefn.org.eclipse.datatools.enablement.mysql.5_0.driverTemplate.MySQL JDBC Driver test 1");
 
