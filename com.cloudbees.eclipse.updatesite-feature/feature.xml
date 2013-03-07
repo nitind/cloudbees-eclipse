@@ -54,4 +54,8 @@ limitations under the License.
          id="com.cloudbees.eclipse.m2e"
          version="0.0.0"/>
 
+   <includes
+         id="com.cloudbees.eclipse.wst"
+         version="0.0.0"/>
+
 </feature>
