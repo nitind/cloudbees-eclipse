@@ -15,9 +15,12 @@
 package com.cloudbees.eclipse.run.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.internal.core.SetContainerOperation;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
@@ -30,19 +33,26 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.LocationEvent;
+import org.eclipse.swt.browser.LocationListener;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.gc.api.ClickStartTemplate;
+import com.cloudbees.eclipse.core.gc.api.ClickStartTemplate.Component;
 import com.cloudbees.eclipse.dev.scm.egit.ForgeEGitSync;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.ui.AuthStatus;
@@ -68,6 +78,9 @@ public abstract class ClickStartComposite extends Composite {
   private IWizardContainer wizcontainer;
 
   private TemplateProvider templateProvider = new TemplateProvider();
+  private StyledText dlabel;
+  private Browser browser;
+  private String bgStr;
 
   public ClickStartComposite(final Composite parent, IWizardContainer wizcontainer) {
     super(parent, SWT.NONE);
@@ -77,22 +90,40 @@ public abstract class ClickStartComposite extends Composite {
 
   private void init() {
 
-    FillLayout layout = new FillLayout();
+    GridLayout layout = new GridLayout(1, false);
     layout.marginHeight = 0;
     layout.marginWidth = 0;
-    layout.spacing = 0;
-
+    layout.horizontalSpacing = 0;
+    layout.verticalSpacing = 0;
+    layout.marginTop = 10;
     setLayout(layout);
 
-    Group group = new Group(this, SWT.NONE);
+    GridData d1 = new GridData();
+    d1.horizontalSpan = 1;
+    d1.grabExcessHorizontalSpace = true;
+    d1.grabExcessVerticalSpace = true;
+    d1.horizontalAlignment = SWT.FILL;
+    d1.verticalAlignment = SWT.FILL;
+    setLayoutData(d1);
+
+    Group group = new Group(this, SWT.FILL);
     group.setText(GROUP_LABEL);
-    group.setLayout(new GridLayout(2, false));
+
+    GridLayout grl = new GridLayout(1, false);
+    grl.horizontalSpacing = 0;
+    grl.verticalSpacing = 0;
+    grl.marginHeight = 0;
+    grl.marginWidth = 0;
+    grl.marginTop = 4;
+    group.setLayout(grl);
 
     GridData data = new GridData();
-    data.horizontalSpan = 2;
+    data.horizontalSpan = 1;
     data.grabExcessHorizontalSpace = true;
     data.grabExcessVerticalSpace = true;
-    data.horizontalAlignment = SWT.LEFT;
+    data.horizontalAlignment = SWT.FILL;
+    data.verticalAlignment = SWT.FILL;
+    group.setLayoutData(data);
 
     /*   this.addTemplateCheck = new Button(group, SWT.CHECK);
        this.addTemplateCheck.setText(FORGE_REPO_CHECK_LABEL);
@@ -149,13 +180,16 @@ public abstract class ClickStartComposite extends Composite {
     v.setContentProvider(templateProvider);
     v.setInput("");
 
-    v.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+    v.getTable().setLayout(new GridLayout(1, false));
+
+    GridData vgd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
+    v.getTable().setLayoutData(vgd);
     ColumnViewerToolTipSupport.enableFor(v, ToolTip.NO_RECREATE);
 
     CellLabelProvider labelProvider = new CellLabelProvider() {
 
       public String getToolTipText(Object element) {
-         ClickStartTemplate t = (ClickStartTemplate)element;
+        ClickStartTemplate t = (ClickStartTemplate) element;
         return t.description;
       }
 
@@ -174,20 +208,20 @@ public abstract class ClickStartComposite extends Composite {
       public void update(ViewerCell cell) {
         int idx = cell.getColumnIndex();
         ClickStartTemplate t = (ClickStartTemplate) cell.getElement();
-        if (idx==0) {
+        if (idx == 0) {
           cell.setText(t.name);
-        } else if (idx==1){
+        } else if (idx == 1) {
           String comps = "";
-          
-          for (int i = 0; i<t.components.length; i++) {
-            comps = comps+t.components[i].name;
-            if (i<t.components.length-1) {
-              comps = comps+", ";
+
+          for (int i = 0; i < t.components.length; i++) {
+            comps = comps + t.components[i].name;
+            if (i < t.components.length - 1) {
+              comps = comps + ", ";
             }
           }
           cell.setText(comps);
         }
-          
+
       }
 
     };
@@ -218,23 +252,94 @@ public abstract class ClickStartComposite extends Composite {
     tblclmnLabel.setLabelProvider(labelProvider);
 
     TableViewerColumn tblclmnUrl = new TableViewerColumn(v, SWT.NONE);
-    tblclmnUrl.getColumn().setWidth(500);
+    tblclmnUrl.getColumn().setWidth(800);
     tblclmnUrl.getColumn().setText("Components");//TODO i18n
     tblclmnUrl.setLabelProvider(labelProvider);
 
     loadData();
-    
-    v.getTable().setFocus();
-  }
 
-  private Exception loadData() {    
-    
-    if (AuthStatus.OK!=CloudBeesUIPlugin.getDefault().getAuthStatus()) {
-      ClickStartComposite.this.updateErrorStatus("User is not authenticated. Please review CloudBees account settings.");
+    //Group group2 = new Group(this, SWT.NONE);
+    //group2.setText("");
+    //group2.setLayout(ld2);
+    GridData data2 = new GridData();
+    data2.horizontalSpan = 1;
+    data2.grabExcessHorizontalSpace = true;
+    //data2.grabExcessVerticalSpace = true;
+    data2.horizontalAlignment = SWT.FILL;
+    //data2.verticalAlignment = SWT.FILL;
+    //group2.setLayoutData(data2);
+
+    browser = new Browser(this, SWT.NONE);
+    //browser.getVerticalBar().setVisible(false);
+    //browser.getHorizontalBar().setVisible(false);
+
+    GridLayout ld2 = new GridLayout(2, true);
+    ld2.horizontalSpacing = 0;
+    ld2.verticalSpacing = 0;
+    ld2.marginHeight = 0;
+    ld2.marginWidth = 0;
+
+    GridData gd2 = new GridData(SWT.FILL, SWT.FILL);
+    gd2.heightHint = 50;
+    gd2.horizontalSpan = 1;
+    gd2.grabExcessHorizontalSpace = true;
+    gd2.grabExcessVerticalSpace = false;
+    gd2.horizontalAlignment = SWT.FILL;
+
+    browser.setLayout(ld2);
+    browser.setLayoutData(gd2);
+
+    Color bg = this.getBackground();
+    bgStr = "rgb(" + bg.getRed() + "," + bg.getGreen() + "," + bg.getBlue() + ")";
+
+    browser.setText("<html><head><style>body{background-color:" + bgStr
+        + ";margin:0px;padding:0px;width:100%;}</style></head><body style='overflow:hidden;'></body></html>");
+
+    //shell.open();
+
+    //browser.setUrl("https://google.com");
+
+    browser.addLocationListener(new LocationListener() {
+
+      @Override
+      public void changing(LocationEvent event) {
+        String url = event.location;
+        try {
+          if (url != null && url.startsWith("http")) {
+            event.doit = false;
+            PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
+          }
+        } catch (PartInitException e) {
+          e.printStackTrace();
+        } catch (MalformedURLException e) {
+          e.printStackTrace();
+        }
+      }
+
+      @Override
+      public void changed(LocationEvent event) {
+        //event.doit = false;
+      }
+    });
+
+    v.getTable().setFocus();
+
+    /*    getParent().setBackground(Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
+        setBackground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+        group.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_CYAN));
+        v.getTable().setBackground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GREEN));
+        browser.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_YELLOW));
+    */}
+
+  private Exception loadData() {
+
+    if (AuthStatus.OK != CloudBeesUIPlugin.getDefault().getAuthStatus()) {
+      ClickStartComposite.this
+          .updateErrorStatus("User is not authenticated. Please review CloudBees account settings.");
       return null;
     }
 
-    final Exception[] ex = {null};
+    final Exception[] ex = { null };
 
     final IRunnableWithProgress operation1 = new IRunnableWithProgress() {
 
@@ -259,8 +364,7 @@ public abstract class ClickStartComposite extends Composite {
         }
       }
     };
-    
-    
+
     final IRunnableWithProgress operation2 = new IRunnableWithProgress() {
 
       public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -269,7 +373,7 @@ public abstract class ClickStartComposite extends Composite {
 
           try {
             if (!ForgeEGitSync.validateSSHConfig(monitor)) {
-              ex[0] = new CloudBeesException("Failed to connect!");    
+              ex[0] = new CloudBeesException("Failed to connect!");
             }
           } catch (JSchException e) {
             ex[0] = e;
@@ -284,20 +388,20 @@ public abstract class ClickStartComposite extends Composite {
       public void run() {
         try {
           wizcontainer.run(true, false, operation2);
-          if (ex[0]==null) {
+          if (ex[0] == null) {
             wizcontainer.run(true, false, operation1);
           }
-          
-          if (ex[0]!=null) {
+
+          if (ex[0] != null) {
             //ex[0].printStackTrace();
-            
+
             if ("Auth fail".equals(ex[0].getMessage())) {
               ClickStartComposite.this.updateErrorStatus("Authentication failed. Are SSH keys properly configured?");
             } else {
               ClickStartComposite.this.updateErrorStatus(ex[0].getMessage());
             }
-            
-            ClickStartComposite.this.setPageComplete(ex[0]==null);
+
+            ClickStartComposite.this.setPageComplete(ex[0] == null);
           }
         } catch (Exception e) {
           CBRunUiActivator.logError(e);
@@ -307,12 +411,33 @@ public abstract class ClickStartComposite extends Composite {
     });
 
     return ex[0];
-    
+
   }
 
-  
   protected void fireTemplateChanged() {
-    System.out.println("Selected: "+selectedTemplate);
+    //System.out.println("Selected: " + selectedTemplate);
+    String style = "<html><head><style>a:visited{color:#0000A0};a{color:#0000A0};body{width:100%;overflow:auto;font-family:tahoma,verdana,arial;font-size:12px;margin:0px;margin-left:5px;margin-top:5px;padding:0px;background-color:"
+        + bgStr + "}#descr{position:absolute;top:7px;left:60px}</style></head><body>";
+    String comps = "<br/><br/>";
+
+    for (int i = 0; i < selectedTemplate.components.length; i++) {
+      Component c = selectedTemplate.components[i];
+      comps = comps + "<img style='height:25px;width:auto;' alt='"+c.name+" ("+c.description+")' src='"+c.icon+"'/>";
+      if (i<selectedTemplate.components.length-1) {
+        comps=comps+" ";
+      }
+    }
+    
+    String docs = "";
+    if (selectedTemplate.docUrl != null && selectedTemplate.docUrl.length() > 0) {
+      docs = ", <a href='" + selectedTemplate.docUrl + "' title='"+selectedTemplate.docUrl+"'>Documentation</a>";
+    }
+
+    String txt = style + "<img style='height:38px; width:auto;' src='" + selectedTemplate.icon
+        + "'/><div id='descr'><b>" + selectedTemplate.name + "</b>" + docs + "<br/>" + selectedTemplate.description
+         + "</div></body></html>";
+    //dlabel.setText(txt);
+    browser.setText(txt, false);
     validate();
   }
 
@@ -324,7 +449,7 @@ public abstract class ClickStartComposite extends Composite {
 
   private void validate() {
     Object[] tarr = templateProvider.getElements(null);
-    if (tarr== null || tarr.length == 0) {
+    if (tarr == null || tarr.length == 0) {
       updateErrorStatus(ERR_TEMPLATES_NOT_FOUND);
       setPageComplete(false);
       return;
@@ -335,7 +460,7 @@ public abstract class ClickStartComposite extends Composite {
       setPageComplete(false);
       return;
     }
-    
+
     updateErrorStatus(null);
     setPageComplete(true);
   }
@@ -355,7 +480,6 @@ public abstract class ClickStartComposite extends Composite {
     }
 
   }
-
 
   private static class TemplateProvider implements IStructuredContentProvider {
 
@@ -380,6 +504,13 @@ public abstract class ClickStartComposite extends Composite {
 
     }
   }
-  
-  
+
+  @Override
+  public void dispose() {
+    browser.close();
+    browser.dispose();
+    browser = null;
+    super.dispose();
+  }
+
 }

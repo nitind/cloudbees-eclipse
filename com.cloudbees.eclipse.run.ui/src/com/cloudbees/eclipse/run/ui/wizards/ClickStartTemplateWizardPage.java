@@ -19,6 +19,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Layout;
 
 import com.cloudbees.eclipse.core.gc.api.ClickStartTemplate;
 import com.cloudbees.eclipse.ui.wizard.CBWizardPage;
@@ -39,26 +40,44 @@ public class ClickStartTemplateWizardPage extends WizardPage implements CBWizard
 
   @Override
   public void createControl(final Composite parent) {
-    Composite container = new Composite(parent, SWT.NULL);
+    
+    GridLayout pgl = new GridLayout(1, false);
+    //parent.setLayout(pgl);  
+    GridData pgd = new GridData(SWT.FILL, SWT.FILL);
+    pgd.heightHint=500;
+    pgd.widthHint=800;
+    pgd.grabExcessHorizontalSpace=true;
+    pgd.grabExcessVerticalSpace=true;
+    pgd.horizontalAlignment=SWT.FILL;
+    pgd.verticalAlignment=SWT.FILL;
+    parent.setLayoutData(pgd);
+    
+    Composite container = new Composite(parent, SWT.NONE);
 
     GridLayout layout = new GridLayout(1, true);
-    layout.marginHeight = 10;
-    layout.marginWidth = 10;
-    layout.verticalSpacing = 10;
+    layout.marginHeight = 0;
+    layout.marginWidth = 0;
+    layout.verticalSpacing = 0;
 
     container.setLayout(layout);
+    GridData cgd = new GridData(SWT.FILL, SWT.FILL);
+    cgd.grabExcessHorizontalSpace=true;
+    cgd.grabExcessVerticalSpace=true;
+    cgd.horizontalAlignment = SWT.FILL;
+    cgd.verticalAlignment = SWT.FILL;
+    container.setLayoutData(cgd);
 
-    GridData data = new GridData();
+/*    GridData data = new GridData();
     data.grabExcessHorizontalSpace = true;
     data.grabExcessVerticalSpace = true;
     data.horizontalAlignment = SWT.FILL;
     data.verticalAlignment = SWT.FILL;
-
+*/
     this.repositoryComposite = new ClickStartComposite(container, getContainer()) {
       @Override
       protected void setPageComplete(boolean b) {
        ClickStartTemplateWizardPage.this.setPageComplete(b);
-       System.out.println("Template: "+getTemplate()+" complete? "+b);
+       //System.out.println("Template: "+getTemplate()+" complete? "+b);
       }
       
       @Override
@@ -68,7 +87,8 @@ public class ClickStartTemplateWizardPage extends WizardPage implements CBWizard
       
     };
     
-    this.repositoryComposite.setLayoutData(data);
+    //repositoryComposite.setLayout(new GridLayout(1, false));
+    //this.repositoryComposite.setLayoutData(data);
     
     setPageComplete(false);
     
