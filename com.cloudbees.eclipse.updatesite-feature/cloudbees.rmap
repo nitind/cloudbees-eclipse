@@ -13,6 +13,8 @@
 	<locator pattern="^org\.eclipse\.egit(\..+)?" searchPathRef="egit" />
 	<locator pattern="^org\.eclipse\.jgit(\..+)?" searchPathRef="egit" />
 	
+	<locator pattern="^org\.eclipse\.wst(\..+)?" searchPathRef="wst" />
+	<locator pattern="^org\.eclipse\.jst(\..+)?" searchPathRef="wst" />
 	
 	<locator searchPathRef="target.platform" />
 
@@ -50,6 +52,13 @@
 		</provider>
 	</searchPath>
 
+	<searchPath name="wst">
+		<provider componentTypes="eclipse.feature,osgi.bundle" readerType="p2" source="false" mutable="false" resolutionFilter="(|(build.type=N)(build.type=R))">
+			<uri format="http://download.eclipse.org/webtools/repository/indigo" />
+		</provider>
+	</searchPath>
+ 
+ 
 	<searchPath name="datatools">
 		<provider componentTypes="eclipse.feature,osgi.bundle" readerType="p2" source="false" mutable="false" resolutionFilter="(|(build.type=N)(build.type=R))">
 			<uri format="http://download.eclipse.org/datatools/updates" />
