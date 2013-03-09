@@ -42,6 +42,7 @@ public class CloudBeesCorePlugin extends Plugin {
   public static final String PLUGIN_ID = "com.cloudbees.eclipse.core"; //$NON-NLS-1$
 
   public static final String[] DEFAULT_NATURES = new String[] { CloudBeesNature.NATURE_ID };
+  public static final String NEWLINE = System.getProperty("line.separator");
 
   /** The shared instance */
   private static CloudBeesCorePlugin plugin;

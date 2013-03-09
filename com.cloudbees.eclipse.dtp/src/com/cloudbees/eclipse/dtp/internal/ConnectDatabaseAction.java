@@ -14,6 +14,7 @@
  *******************************************************************************/
 package com.cloudbees.eclipse.dtp.internal;
 
+import java.io.File;
 import java.util.Properties;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -37,6 +38,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.internal.ObjectPluginAction;
 
 import com.cloudbees.api.DatabaseInfo;
+import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.dtp.CloudBeesDataToolsPlugin;
 import com.cloudbees.eclipse.dtp.Images;
@@ -47,8 +49,8 @@ import com.cloudbees.eclipse.ui.views.CBTreeAction;
 
 public class ConnectDatabaseAction extends CBTreeAction implements IObjectActionDelegate {
 
-  private final static String DRIVER_INSTANCE_ID = "cloudbees-mysql-5.0-driver";
-  private final static String DRIVER_DEF_ID = "DriverDefn.org.eclipse.datatools.enablement.mysql.5_0.driverTemplate.MySQL "
+  private final static String DRIVER_INSTANCE_ID = "cloudbees-mysql-5.1-driver";
+  private final static String DRIVER_DEF_ID = "DriverDefn.org.eclipse.datatools.enablement.mysql.5_1.driverTemplate.MySQL "
       + DRIVER_INSTANCE_ID;
   private final static String PROVIDER_ID = "org.eclipse.datatools.enablement.mysql.connectionProfile";
   
@@ -216,15 +218,22 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
     // ensure a cloudbees-created driver exists
     Properties baseProperties = new Properties();
     baseProperties.setProperty(IDriverMgmtConstants.PROP_DEFN_TYPE,
-        "org.eclipse.datatools.enablement.mysql.5_0.driverTemplate");
-    baseProperties.setProperty(IDriverMgmtConstants.PROP_DEFN_JARLIST, CBSdkActivator.getDefault().getBeesHome()+"\\lib\\mysql-connector-java-5.1.15.jar");
+        "org.eclipse.datatools.enablement.mysql.5_1.driverTemplate");
+      
+    String dirs = CBSdkActivator.getDefault().getBeesHome();
+    if (!dirs.endsWith(File.separator)) {
+      dirs = dirs+File.separator;
+    }
+    
+    System.out.println("PATHSEP:"+File.separator);
+    baseProperties.setProperty(IDriverMgmtConstants.PROP_DEFN_JARLIST, dirs+"lib"+File.separator+"mysql-connector-java-5.1.15.jar");
     baseProperties.setProperty(IJDBCConnectionProfileConstants.DRIVER_CLASS_PROP_ID, "com.mysql.jdbc.Driver");
     //baseProperties.setProperty(ConnectionProfileConstants.PROP_DRIVER_DEFINITION_ID, "DriverDefn.org.eclipse.datatools.enablement.mysql.5_0.driverTemplate.MySQL JDBC Driver test 1");
 
     baseProperties.setProperty(IJDBCConnectionProfileConstants.DATABASE_NAME_PROP_ID, db.getName());
 
     baseProperties.setProperty(IJDBCConnectionProfileConstants.DATABASE_VENDOR_PROP_ID, "MySql");
-    baseProperties.setProperty(IJDBCConnectionProfileConstants.DATABASE_VERSION_PROP_ID, "5.0");
+    baseProperties.setProperty(IJDBCConnectionProfileConstants.DATABASE_VERSION_PROP_ID, "5.1");
     baseProperties.setProperty(IJDBCConnectionProfileConstants.SAVE_PASSWORD_PROP_ID, String.valueOf(true));
 
     DriverInstance driver = DriverManager.getInstance().getDriverInstanceByID(DRIVER_DEF_ID);
@@ -240,7 +249,7 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
                   pr.put("org.eclipse.datatools.connectivity.db.vendor", "MySql");
       */
 
-      IPropertySet ips = new PropertySetImpl("CloudBees Driver Definition for MySQL 5.0", DRIVER_DEF_ID);
+      IPropertySet ips = new PropertySetImpl("CloudBees Driver Definition for MySQL 5.1", DRIVER_DEF_ID);
       ips.setBaseProperties(baseProperties);
       DriverInstance di = new DriverInstance(ips);
 
