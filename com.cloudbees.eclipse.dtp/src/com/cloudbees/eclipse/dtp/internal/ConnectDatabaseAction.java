@@ -225,7 +225,6 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
       dirs = dirs+File.separator;
     }
     
-    System.out.println("PATHSEP:"+File.separator);
     baseProperties.setProperty(IDriverMgmtConstants.PROP_DEFN_JARLIST, dirs+"lib"+File.separator+"mysql-connector-java-5.1.15.jar");
     baseProperties.setProperty(IJDBCConnectionProfileConstants.DRIVER_CLASS_PROP_ID, "com.mysql.jdbc.Driver");
     //baseProperties.setProperty(ConnectionProfileConstants.PROP_DRIVER_DEFINITION_ID, "DriverDefn.org.eclipse.datatools.enablement.mysql.5_0.driverTemplate.MySQL JDBC Driver test 1");
