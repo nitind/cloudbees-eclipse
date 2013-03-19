@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 import org.eclipse.ui.console.IOConsoleOutputStream;
@@ -97,21 +98,36 @@ public class BeesRunner {
     String beesHome = "-Dbees.home=" + CBSdkActivator.getDefault().getBeesHome();
     String beesHomeDir = CBSdkActivator.getDefault().getBeesHome();
 
-    String java = System.getProperty("eclipse.vm");
+    //java.home=C:\Java\jdk1.6.0_29\jre
+    //String java = System.getProperty("eclipse.vm");
+    
+    String java = System.getProperty("java.home");
+    if (!java.endsWith(File.separator)) {
+      java = java + File.separator+"bin"+File.separator+"java";
+    }
+
+    OutputStreamWriter osw = new OutputStreamWriter(out);
+    BufferedWriter writer = new BufferedWriter(osw);
 
     final ProcessBuilder pb = new ProcessBuilder(java, "-Xmx256m", beesHome, secretKey, authKey, "-cp", beesHomeDir
         + "lib/cloudbees-boot.jar", "com.cloudbees.sdk.boot.Launcher", cmd);
     pb.environment().put("BEES_HOME", beesHomeDir);
     pb.directory(new File(beesHomeDir));
     pb.redirectErrorStream(true);
-
-    final Process p = pb.start();
-
+    
+    Process p = null;
+    try {
+      p = pb.start();
+    } catch (Exception e) {
+      writer.write("Error while running CloudBees SDK: "+e.getMessage()+"\n");
+      e.printStackTrace(new PrintWriter(writer));
+      return;
+    }
+    
     String line;
 
     InputStream stdin = p.getInputStream();
     BufferedReader reader = new BufferedReader(new InputStreamReader(stdin));
-    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
 
     while ((line = reader.readLine()) != null) {
       writer.write(line + "\n");
