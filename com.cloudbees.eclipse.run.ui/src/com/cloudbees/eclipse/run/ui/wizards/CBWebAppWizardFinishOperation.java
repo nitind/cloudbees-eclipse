@@ -33,9 +33,11 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.URIUtil;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkingSet;
@@ -142,11 +144,21 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
   public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job(
-        "Provisioning CloudBees ClickStart project") {
+        "Provisioning CloudBees ClickStart project. This may take a few minutes.") {
+      
+      
+      @Override
+      protected void canceling() {
+        // notify user "ClickStart project provisioning cannot be cancelled."
+        //MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Cannot be cancelled.", "ClickStart project provisioning cannot be cancelled.");
+        MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Cancelled.", "Partially cancelled:\n1) Provisioning cannot be cancelled and will continue.\n2) After the provisioning completes Eclipse won't be configured for the app.");
+        //super.canceling();
+      }
+      
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
 
-        monitor.beginTask("Provisioning CloudBees ClickStart project", 100);
+        monitor.beginTask("Provisioning CloudBees ClickStart project. This may take a few minutes.", 100);
         try {
 
           ClickStartService service = CloudBeesCorePlugin.getDefault().getClickStartService();
@@ -173,13 +185,27 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
           int pr = service.getCreateProgress(resId);
           int lastpr = pr;
 
-          monitor.beginTask("Waiting for the servers to start provisioning ClickStart components. This may take a few minutes.", 100);
+          if (monitor.isCanceled()) {
+            return Status.CANCEL_STATUS;
+          }
+          
+          monitor.beginTask("Waiting for the servers to provision ClickStart components. This may take a few minutes.", 100);
           monitor.worked(pr);
           while (pr < 100) {
             Thread.currentThread().sleep(1000);
             lastpr = pr;
+            if (monitor.isCanceled()) {
+              return Status.CANCEL_STATUS;
+            }
             pr = service.getCreateProgress(resId);
+            if (monitor.isCanceled()) {
+              return Status.CANCEL_STATUS;
+            }
             monitor.worked(pr - lastpr);
+          }
+
+          if (monitor.isCanceled()) {
+            return Status.CANCEL_STATUS;
           }
 
           monitor.beginTask("Configuring local workspace for CloudBees ClickStart project", 100);
@@ -277,7 +303,7 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
           monitor.done();
         }
       }
-
+      
     };
 
     job.setUser(true);

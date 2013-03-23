@@ -394,6 +394,10 @@ public class ForgeEGitSync implements ForgeSync {
                       new File(""), null, "origin" });
         
       }*/
+    if (monitor.isCanceled()) {
+      return null;
+    }
+    
     try {
       int timeout = 60;
 

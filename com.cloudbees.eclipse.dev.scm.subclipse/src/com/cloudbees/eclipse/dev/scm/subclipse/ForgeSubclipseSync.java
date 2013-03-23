@@ -92,7 +92,11 @@ public class ForgeSubclipseSync implements ForgeSync {
 
   @Override
   public void sync(final ForgeInstance instance, final IProgressMonitor monitor) throws CloudBeesException {
-
+    
+    if (monitor.isCanceled()) {
+      return;
+    }
+    
     if (!ForgeInstance.TYPE.SVN.equals(instance.type)) {
       return;
     }
