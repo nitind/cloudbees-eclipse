@@ -523,6 +523,10 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
   }
 
   public void reloadForgeRepos(final boolean userAction) throws CloudBeesException {
+    reloadForgeRepos(userAction, true);
+  }
+  
+  public void reloadForgeRepos(final boolean userAction, final boolean askSync) throws CloudBeesException {
 
     //      PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new IRunnableWithProgress() {
     //        public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -552,6 +556,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
           boolean needsToSync = false;
           final List<ForgeInstance> toSync = new ArrayList<ForgeInstance>();
+          if (askSync) {
           for (ForgeInstance repo : forgeRepos) {
             if (repo.status != STATUS.SYNCED) {
               toSync.add(repo);
@@ -560,8 +565,9 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
               }
             }
           }
+          }
 
-          if (needsToSync) {
+          if (askSync && needsToSync) {
             PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
               @Override
               public void run() {

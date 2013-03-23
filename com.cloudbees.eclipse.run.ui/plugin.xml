@@ -448,4 +448,13 @@
      </page>
 </extension>
 
+ 
+<extension
+       point="com.cloudbees.eclipse.run.core.newClickStartProjectHook">
+    <hook
+          defaultHandler="com.cloudbees.eclipse.run.ui.NewAppHook"
+          id="com.cloudbees.eclipse.run.ui.NewAppHook">
+    </hook>
+</extension>
+    
 </plugin>

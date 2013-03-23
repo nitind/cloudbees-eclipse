@@ -176,7 +176,7 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
           monitor.beginTask("Waiting for the servers to provision ClickStart components...", 100);
           monitor.worked(pr);
           while (pr < 100) {
-            Thread.currentThread().sleep(3);
+            Thread.currentThread().sleep(1000);
             lastpr = pr;
             pr = service.getCreateProgress(resId);
             monitor.worked(pr - lastpr);

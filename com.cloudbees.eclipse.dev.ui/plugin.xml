@@ -355,5 +355,13 @@
           </adapter>
        </factory>
     </extension>
-     
+    
+    <extension
+       point="com.cloudbees.eclipse.run.core.newClickStartProjectHook">
+    <hook
+          defaultHandler="com.cloudbees.eclipse.dev.ui.NewRepoHook"
+          id="com.cloudbees.eclipse.dev.ui.NewRepoHook">
+    </hook>
+    </extension>
+    
 </plugin>
