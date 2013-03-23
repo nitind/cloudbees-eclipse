@@ -56,6 +56,19 @@
            menubarPath="properties">
      </action>
   </objectContribution>
+  
+    <objectContribution
+        adaptable="false"
+        id="com.cloudbees.eclipse.dtp.showPassword"
+        objectClass="com.cloudbees.api.DatabaseInfo">
+     <action
+           class="com.cloudbees.eclipse.dtp.internal.actions.ShowPasswordAction"
+           enablesFor="1"
+           id="com.cloudbees.eclipse.dtp.action.showPassword"
+           label="Show password"
+           menubarPath="properties">
+     </action>
+  </objectContribution>
 	</extension>
 
     <extension
@@ -94,6 +107,8 @@
           id="com.cloudbees.eclipse.dtp.NewDatabaseHook">
     </hook>
  </extension>
+
+
 
 
 </plugin>
