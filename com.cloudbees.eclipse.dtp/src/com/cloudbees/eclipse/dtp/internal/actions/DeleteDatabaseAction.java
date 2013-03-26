@@ -20,6 +20,9 @@ import java.util.Iterator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.datatools.connectivity.ConnectionProfileException;
+import org.eclipse.datatools.connectivity.IConnectionProfile;
+import org.eclipse.datatools.connectivity.ProfileManager;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -31,6 +34,7 @@ import org.eclipse.ui.internal.ObjectPluginAction;
 
 import com.cloudbees.api.DatabaseInfo;
 import com.cloudbees.eclipse.dtp.CloudBeesDataToolsPlugin;
+import com.cloudbees.eclipse.dtp.internal.ConnectDatabaseAction;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
@@ -75,7 +79,9 @@ public class DeleteDatabaseAction implements IObjectActionDelegate {
                     DatabaseInfo databaseInfo = iterator.next();
                     monitor.subTask("Deleting '" + databaseInfo.getName() + "'...");
                     BeesSDK.deleteDatabase(databaseInfo.getName());
-                    monitor.worked(10);
+                    monitor.worked(5);
+                    deleteDatabaseConnectionProfile(databaseInfo);
+                    monitor.worked(5);
                   }
 
                   CloudBeesDataToolsPlugin.getPoller().fetchAndUpdateDatabases(monitor);                  
@@ -89,6 +95,7 @@ public class DeleteDatabaseAction implements IObjectActionDelegate {
 
                 return Status.OK_STATUS;
               }
+
             };
 
             job.setUser(true);
@@ -110,4 +117,15 @@ public class DeleteDatabaseAction implements IObjectActionDelegate {
   public void setActivePart(IAction action, IWorkbenchPart targetPart) {
   }
 
+  private void deleteDatabaseConnectionProfile(DatabaseInfo db) throws ConnectionProfileException {
+    String pName = db.getOwner() + "/" + db.getName();
+    IConnectionProfile exp = ProfileManager.getInstance().getProfileByName(pName);
+    if (exp != null) {
+      try {
+        exp.disconnect();
+      } finally {
+        ProfileManager.getInstance().deleteProfile(exp);
+      }      
+    }
+  }
 }
