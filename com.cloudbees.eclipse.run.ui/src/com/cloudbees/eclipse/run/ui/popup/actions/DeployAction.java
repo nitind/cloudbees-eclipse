@@ -35,7 +35,7 @@ public class DeployAction implements IObjectActionDelegate {
   @Override
   public void run(final IAction action) {
 
-    Job job = new Job("Synchronizing Forge repositories") {
+    Job job = new Job("Deploying") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
         if (action instanceof ObjectPluginAction) {
