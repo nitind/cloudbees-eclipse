@@ -108,7 +108,17 @@
     </hook>
  </extension>
 
-
+<extension
+        point="org.eclipse.ui.perspectiveExtensions">
+        <perspectiveExtension
+              targetID="com.cloudbees.eclipse.ui.CloudBeesPerspective">
+           <view
+                 id="org.eclipse.datatools.connectivity.DataSourceExplorerNavigator"
+                 relationship="stack"                 
+                 relative="com.cloudbees.eclipse.ui.views.CBTreeView">
+           </view>
+        </perspectiveExtension>
+</extension>
 
 
 </plugin>

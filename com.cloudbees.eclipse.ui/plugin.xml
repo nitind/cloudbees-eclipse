@@ -179,7 +179,7 @@
     <extension
           point="org.eclipse.ui.perspectives">
        <perspective
-             class="org.eclipse.jdt.internal.ui.JavaPerspectiveFactory"
+             class="com.cloudbees.eclipse.ui.internal.CloudBeesPerspectiveFactory"
              icon="icons/16x16/cb_plain.png"
              id="com.cloudbees.eclipse.ui.CloudBeesPerspective"
              name="CloudBees">
@@ -203,34 +203,41 @@
 	
     <extension
         point="org.eclipse.ui.perspectiveExtensions">
+                
+                <!-- relative="org.eclipse.jdt.ui.PackageExplorer" -->
+                
         <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaPerspective">
             <view
-                ratio="0.7"
-                relative="org.eclipse.jdt.ui.PackageExplorer"
-                relationship="bottom"
+                ratio="0.5"
+                relative="org.eclipse.ui.views.ContentOutline"
+                relationship="top"
                 id="com.cloudbees.eclipse.ui.views.CBTreeView">
             </view>
         </perspectiveExtension>
+
         <perspectiveExtension
             targetID="org.eclipse.ui.resourcePerspective">
             <view
-                ratio="0.7"
+                ratio="0.5"
                 relative="org.eclipse.ui.views.ContentOutline"
-                relationship="stack"
+                relationship="top"
                 id="com.cloudbees.eclipse.ui.views.CBTreeView">
             </view>
         </perspectiveExtension>
+        
         <perspectiveExtension
               targetID="com.cloudbees.eclipse.ui.CloudBeesPerspective">
            <view
-                 id="com.cloudbees.eclipse.ui.views.CBTreeView"
-                 ratio="0.7"
+                 id="org.eclipse.ui.views.ContentOutline"
+                 ratio="0.5"
                  relationship="bottom"
-                 relative="org.eclipse.jdt.ui.PackageExplorer">
+                 relative="com.cloudbees.eclipse.ui.views.CBTreeView">
            </view>
         </perspectiveExtension>
+                
 	</extension>
+	
     <extension
           point="org.eclipse.ui.commands">
        <category

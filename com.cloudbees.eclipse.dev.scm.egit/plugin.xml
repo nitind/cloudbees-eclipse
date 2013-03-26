@@ -10,4 +10,17 @@
       </forgeSyncProvider>
    </extension>
 
+	<extension
+        point="org.eclipse.ui.perspectiveExtensions">
+
+        <perspectiveExtension
+              targetID="com.cloudbees.eclipse.ui.CloudBeesPerspective">
+           <view
+                 id="org.eclipse.egit.ui.RepositoriesView"
+                 relationship="stack"                                  
+                 relative="com.cloudbees.eclipse.ui.views.CBTreeView">
+           </view>
+        </perspectiveExtension>
+	</extension>
+
 </plugin>
