@@ -225,7 +225,7 @@
                 id="com.cloudbees.eclipse.ui.views.CBTreeView">
             </view>
         </perspectiveExtension>
-        
+        <!--
         <perspectiveExtension
               targetID="com.cloudbees.eclipse.ui.CloudBeesPerspective">
            <view
@@ -235,7 +235,7 @@
                  relative="com.cloudbees.eclipse.ui.views.CBTreeView">
            </view>
         </perspectiveExtension>
-                
+            -->    
 	</extension>
 	
     <extension
