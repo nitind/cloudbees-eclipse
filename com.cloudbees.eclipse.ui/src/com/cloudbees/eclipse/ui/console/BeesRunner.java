@@ -14,12 +14,11 @@
  *******************************************************************************/
 package com.cloudbees.eclipse.ui.console;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Scanner;
@@ -39,6 +38,11 @@ import com.cloudbees.eclipse.run.sdk.CBSdkActivator;
  */
 public class BeesRunner {
 
+  private final String linesep = System.getProperty("line.separator");
+  
+  //private boolean streamProcessing = false;
+  private OutputStream currentOutputStream = null;
+
   public void run(final BeesConsoleSession sess) {
 
     Thread inputThread = new Thread(new Runnable() {
@@ -47,7 +51,7 @@ public class BeesRunner {
           Scanner scan = new Scanner(sess.getInputStream());
           while (scan.hasNextLine()) {
 
-            String input = scan.nextLine();
+            final String input = scan.nextLine();
             if (input.length() == 0) {
 
               IOConsoleOutputStream out = sess.newOutputStream();
@@ -64,16 +68,28 @@ public class BeesRunner {
               continue;
             }
 
-            IOConsoleOutputStream out = sess.newOutputStream();
-            try {
-              runBees(input, out);
-            } catch (CloudBeesException e) {
-              e.printStackTrace();
-            } finally {
-              if (out != null) {
-                out.close();
+            final IOConsoleOutputStream out = sess.newOutputStream();
+            // we need to wrap this into a separate thread in order to catch follow-up readlines even when the runbees hangs (waits for more input)
+            Thread t = new Thread(new Runnable() {
+              public void run() {
+                try {
+                  runBees(input, out);
+                } catch (CloudBeesException e) {
+                  e.printStackTrace();
+                } catch (IOException e) {
+                  e.printStackTrace();
+                } finally {
+                  if (out != null) {
+                    try {
+                      out.close();
+                    } catch (IOException e) {
+                      e.printStackTrace();
+                    }
+                  }
+                }
               }
-            }
+            },"CloudBees Console runner");
+            t.start();
 
           }
 
@@ -90,6 +106,12 @@ public class BeesRunner {
 
   private void runBees(String cmd, IOConsoleOutputStream out) throws CloudBeesException, IOException {
 
+    if (currentOutputStream != null) { // current stream in progress, potentially waiting for the user input. let's send it to the current stream.
+      currentOutputStream.write((cmd+linesep).getBytes("UTF-8"));
+      currentOutputStream.flush();
+      return;
+    }
+
     GrandCentralService grandCentralService;
     grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
     AuthInfo cachedAuthInfo = grandCentralService.getCachedAuthInfo(false);
@@ -100,10 +122,10 @@ public class BeesRunner {
 
     //java.home=C:\Java\jdk1.6.0_29\jre
     //String java = System.getProperty("eclipse.vm");
-    
+
     String java = System.getProperty("java.home");
     if (!java.endsWith(File.separator)) {
-      java = java + File.separator+"bin"+File.separator+"java";
+      java = java + File.separator + "bin" + File.separator + "java";
     }
 
     OutputStreamWriter osw = new OutputStreamWriter(out);
@@ -114,24 +136,31 @@ public class BeesRunner {
     pb.environment().put("BEES_HOME", beesHomeDir);
     pb.directory(new File(beesHomeDir));
     pb.redirectErrorStream(true);
-    
+
     Process p = null;
     try {
       p = pb.start();
     } catch (Exception e) {
-      writer.write("Error while running CloudBees SDK: "+e.getMessage()+"\n");
+      writer.write("Error while running CloudBees SDK: " + e.getMessage() + "\n");
       e.printStackTrace(new PrintWriter(writer));
       return;
     }
-    
-    String line;
+
+    //    String line;
 
     InputStream stdin = p.getInputStream();
-    BufferedReader reader = new BufferedReader(new InputStreamReader(stdin));
 
-    while ((line = reader.readLine()) != null) {
-      writer.write(line + "\n");
-      writer.flush();
+    byte[] b = new byte[4096 * 10];
+
+    currentOutputStream = p.getOutputStream();
+    try {
+      for (int n; (n = stdin.read(b)) != -1;) {
+        writer.write(new String(b, 0, n, "UTF-8"));
+        writer.flush();
+        BeesConsole.moveCaret();
+      }
+    } finally {
+      currentOutputStream = null;
     }
 
     writer.write("bees ");
@@ -139,4 +168,5 @@ public class BeesRunner {
     BeesConsole.moveCaret();
 
   }
+
 }
