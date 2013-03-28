@@ -10,6 +10,11 @@
 	
 	<locator pattern="^org\.eclipse\.datatools(\..+)?" searchPathRef="datatools" />
 	<locator pattern="^org\.eclipse\.m2e(\..+)?" searchPathRef="m2e" />
+	
+	<locator pattern="^com\.ning(\..+)?" searchPathRef="m2e" />
+	<locator pattern="^org\.slf4j\.api(\..+)?" searchPathRef="m2e" />
+	
+	
 	<locator pattern="^org\.eclipse\.egit(\..+)?" searchPathRef="egit" />
 	<locator pattern="^org\.eclipse\.jgit(\..+)?" searchPathRef="egit" />
 	
