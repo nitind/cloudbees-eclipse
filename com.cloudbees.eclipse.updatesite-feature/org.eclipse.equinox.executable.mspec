@@ -6,7 +6,7 @@
 	installLocation="${targetPlatformPath}"
 	url="org.eclipse.equinox.executable.cquery">
 
-<property key="target.arch" value="x86" />
+<property key="target.arch" value="x86_64" />
 <property key="target.os" value="linux" />
 <property key="target.ws" value="gtk" />
 
