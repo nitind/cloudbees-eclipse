@@ -6,9 +6,9 @@
 	installLocation="${targetPlatformPath}"
 	url="org.eclipse.platform.cquery">
 	
-<property key="target.arch" value="x86_64" />
-<property key="target.os" value="linux" />
-<property key="target.ws" value="gtk" />
+<property key="target.arch" value="*" />
+<property key="target.os" value="*" />
+<property key="target.ws" value="*" />
 
 
 </mspec>
