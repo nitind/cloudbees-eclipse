@@ -32,7 +32,6 @@ import com.cloudbees.api.DatabaseInfo;
 import com.cloudbees.api.DatabaseListResponse;
 import com.cloudbees.eclipse.core.CBRemoteChangeListener;
 import com.cloudbees.eclipse.core.DatabaseInfoChangeListener;
-import com.cloudbees.eclipse.dtp.CloudBeesDataToolsPlugin;
 import com.cloudbees.eclipse.dtp.internal.DatabaseStatusUpdate;
 import com.cloudbees.eclipse.dtp.internal.ReloadDatabaseAction;
 import com.cloudbees.eclipse.run.core.BeesSDK;
@@ -53,8 +52,8 @@ public class DBListView extends CBTreeProvider implements IPropertyChangeListene
 
   private TreeViewer viewer;
 
-  protected ITreeContentProvider contentProvider = new DBContentProvider();
-  protected LabelProvider labelProvider = new DBLabelProvider();
+  protected ITreeContentProvider contentProvider;
+  protected LabelProvider labelProvider;
 
   protected CBRemoteChangeListener jenkinsChangeListener;
 
@@ -65,6 +64,9 @@ public class DBListView extends CBTreeProvider implements IPropertyChangeListene
   protected boolean loadfinished = true;
 
   public void init() {
+
+    contentProvider = new DBContentProvider();
+    labelProvider = new DBLabelProvider();
 
     this.databaseChangeListener = new DatabaseInfoChangeListener() {
 

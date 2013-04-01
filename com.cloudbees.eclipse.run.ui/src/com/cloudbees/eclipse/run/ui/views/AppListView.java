@@ -32,9 +32,8 @@ import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.api.ApplicationListResponse;
 import com.cloudbees.eclipse.core.ApplicationInfoChangeListener;
 import com.cloudbees.eclipse.core.CBRemoteChangeListener;
-import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.ApplicationStatusUpdater;
-import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
+import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.ui.popup.actions.ReloadRunAtCloudAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
@@ -53,8 +52,8 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
 
   private TreeViewer viewer;
 
-  protected ITreeContentProvider contentProvider = new AppContentProvider();
-  protected LabelProvider labelProvider = new AppLabelProvider();
+  protected ITreeContentProvider contentProvider;
+  protected LabelProvider labelProvider;
 
   protected CBRemoteChangeListener jenkinsChangeListener;
 
@@ -65,6 +64,10 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
   protected boolean loadfinished = true;
 
   public void init() {
+
+    contentProvider = new AppContentProvider();
+
+    labelProvider = new AppLabelProvider();
 
     this.applicationChangeListener = new ApplicationInfoChangeListener() {
 
@@ -173,10 +176,10 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
   }
 
   private void refresh(boolean userAction) {
-    if (loadfinished==false) {
+    if (loadfinished == false) {
       return;
     }
-    
+
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading RUN@cloud applications list") {
 
       protected IStatus run(final IProgressMonitor monitor) {

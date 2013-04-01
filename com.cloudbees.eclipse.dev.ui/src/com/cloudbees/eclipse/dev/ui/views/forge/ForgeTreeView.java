@@ -25,7 +25,6 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
-import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.eclipse.core.CBRemoteChangeAdapter;
 import com.cloudbees.eclipse.core.CBRemoteChangeListener;
 import com.cloudbees.eclipse.core.CloudBeesException;
@@ -47,8 +46,8 @@ public class ForgeTreeView  extends CBTreeProvider implements IPropertyChangeLis
 
   public static final String ID = "zcom.cloudbees.eclipse.ui.views.instances.ForgeTreeView";
 
-  protected ITreeContentProvider contentProvider = new ForgeContentProvider();
-  protected ILabelProvider labelProvider = new ForgeLabelProvider();
+  protected ITreeContentProvider contentProvider;
+  protected ILabelProvider labelProvider;
 
   private TreeViewer viewer;
   private CBRemoteChangeListener jenkinsChangeListener;
@@ -56,8 +55,14 @@ public class ForgeTreeView  extends CBTreeProvider implements IPropertyChangeLis
   private CBTreeAction reloadForgeAction = new ReloadForgeReposAction();
 
   public void init() {
+
+
     boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
         .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
+    
+    contentProvider = new ForgeContentProvider();
+    labelProvider = new ForgeLabelProvider();
+
     this.reloadForgeAction = new ReloadForgeReposAction();
     this.reloadForgeAction.setEnabled(forgeEnabled);
 
