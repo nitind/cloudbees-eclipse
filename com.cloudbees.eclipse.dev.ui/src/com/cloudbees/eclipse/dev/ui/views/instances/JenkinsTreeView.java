@@ -59,8 +59,8 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
 
   public static final String ID = "acom.cloudbees.eclipse.ui.views.instances.JenkinsTreeView";
 
-  protected InstanceContentProvider contentProvider = new InstanceContentProvider();
-  protected ILabelProvider labelProvider = new InstanceLabelProvider();
+  protected InstanceContentProvider contentProvider;
+  protected ILabelProvider labelProvider;
 
   private TreeViewer viewer;
   private CBRemoteChangeListener jenkinsChangeListener;
@@ -92,6 +92,9 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
     //        .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
     //    this.reloadForgeAction.setEnabled(forgeEnabled);
 
+    contentProvider = new InstanceContentProvider();
+    labelProvider = new InstanceLabelProvider();
+    
     boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
         .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
     this.reloadJenkinsCloudAction.setEnabled(jaasEnabled);

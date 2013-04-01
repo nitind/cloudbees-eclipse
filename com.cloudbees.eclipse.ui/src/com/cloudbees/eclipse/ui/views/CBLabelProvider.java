@@ -31,6 +31,9 @@ public class CBLabelProvider extends LabelProvider implements IFontProvider {
   @Override
   public String getText(final Object obj) {
     for (ICBTreeProvider provider : this.owner.getProviders()) {
+      if (provider.getLabelProvider()==null) {
+        continue;
+      }
       String text = provider.getLabelProvider().getText(obj);
       if (text != null) {
         return text;
@@ -43,6 +46,9 @@ public class CBLabelProvider extends LabelProvider implements IFontProvider {
   @Override
   public Image getImage(final Object obj) {
     for (ICBTreeProvider provider : this.owner.getProviders()) {
+      if (provider.getLabelProvider()==null) {
+        continue;
+      }
       Image img = provider.getLabelProvider().getImage(obj);
       if (img != null) {
         return img;
@@ -54,6 +60,9 @@ public class CBLabelProvider extends LabelProvider implements IFontProvider {
 
   public Font getFont(final Object element) {
     for (ICBTreeProvider provider : this.owner.getProviders()) {
+      if (provider.getLabelProvider()==null) {
+        continue;
+      }
       ILabelProvider labelProvider = provider.getLabelProvider();
       if (labelProvider instanceof IFontProvider) {
       Font font = ((IFontProvider) labelProvider).getFont(element);

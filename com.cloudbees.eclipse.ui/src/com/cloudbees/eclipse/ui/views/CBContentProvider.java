@@ -36,6 +36,9 @@ public class CBContentProvider implements IStructuredContentProvider, ITreeConte
 
   public void inputChanged(final Viewer viewer, final Object oldInput, final Object newInput) {
     for (ICBTreeProvider provider : this.owner.getProviders()) {
+      if (provider.getContentProvider()==null) {
+        continue;
+      }
       provider.getContentProvider().inputChanged(viewer, oldInput, newInput);
     }
   }
@@ -45,6 +48,9 @@ public class CBContentProvider implements IStructuredContentProvider, ITreeConte
     List<Object> children = new ArrayList<Object>();
 
     for (ICBTreeProvider provider : this.owner.getProviders()) {
+      if (provider.getContentProvider()==null) {
+        continue;
+      }
       Object[] chlds = provider.getContentProvider().getChildren(parentElement);
       if (chlds != null) {
         children.addAll(Arrays.asList(chlds));
@@ -56,6 +62,9 @@ public class CBContentProvider implements IStructuredContentProvider, ITreeConte
 
   public Object getParent(final Object element) {
     for (ICBTreeProvider provider : this.owner.getProviders()) {
+      if (provider.getContentProvider()==null) {
+        continue;
+      }
       Object parent = provider.getContentProvider().getParent(element);
       if (parent != null) {
         return parent;
@@ -67,6 +76,9 @@ public class CBContentProvider implements IStructuredContentProvider, ITreeConte
 
   public boolean hasChildren(final Object element) {
     for (ICBTreeProvider provider : this.owner.getProviders()) {
+      if (provider.getContentProvider()==null) {
+        continue;
+      }
       if (provider.getContentProvider().hasChildren(element)) {
         return true;
       }
