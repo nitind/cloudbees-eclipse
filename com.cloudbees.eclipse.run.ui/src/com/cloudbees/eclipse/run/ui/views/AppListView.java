@@ -184,8 +184,10 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
 
       protected IStatus run(final IProgressMonitor monitor) {
         try {
-          ApplicationListResponse list = BeesSDK.getList();
-          AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, list);
+          if (contentProvider != null) {
+            ApplicationListResponse list = BeesSDK.getList();
+            AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, list);
+          }
         } catch (Exception e1) {
           AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, null);
           //CBRunUiActivator.logErrorAndShowDialog(e1);

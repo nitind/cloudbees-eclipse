@@ -179,9 +179,11 @@ public class DBListView extends CBTreeProvider implements IPropertyChangeListene
 
       protected IStatus run(final IProgressMonitor monitor) {
         try {
-          String account = CloudBeesUIPlugin.getDefault().getActiveAccountName(monitor);
-          DatabaseListResponse list = BeesSDK.getDatabaseList(account);
-          DBListView.this.contentProvider.inputChanged(DBListView.this.viewer, null, list);
+          if (contentProvider != null) {
+            String account = CloudBeesUIPlugin.getDefault().getActiveAccountName(monitor);
+            DatabaseListResponse list = BeesSDK.getDatabaseList(account);
+            DBListView.this.contentProvider.inputChanged(DBListView.this.viewer, null, list);
+          }
         } catch (Exception e1) {
           DBListView.this.contentProvider.inputChanged(DBListView.this.viewer, null, null);
           //CloudBeesDataToolsPlugin.logErrorAndShowDialog(e1);
