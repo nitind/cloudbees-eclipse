@@ -28,7 +28,7 @@ public class ForgeContentProvider implements IStructuredContentProvider, ITreeCo
   private ForgeGroup forgeGroup = new ForgeGroup("Repositories");
 
   public ForgeContentProvider() {
-    this.forgeGroup.setLoading(true);
+    this.forgeGroup.setLoading(false);
   }
 
   @Override
