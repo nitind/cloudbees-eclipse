@@ -27,9 +27,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -49,7 +47,6 @@ import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBProjectProcessService;
 import com.cloudbees.eclipse.run.core.util.CBRunUtil;
-import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 @SuppressWarnings("restriction")
@@ -60,8 +57,6 @@ public class CBLocalLaunchDelegate extends AbstractJavaLaunchConfigurationDelega
     if (monitor == null) {
       monitor = new NullProgressMonitor();
     }
-
-
 
     boolean debug = mode.equals("debug");
 
@@ -75,7 +70,7 @@ public class CBLocalLaunchDelegate extends AbstractJavaLaunchConfigurationDelega
     }
 
     conf = modifyLaunch(proj, conf, mode);
-    
+
     if (conf.getAttribute(DO_NOTHING, false)) {
       monitor.setCanceled(true);
       return;
@@ -85,9 +80,18 @@ public class CBLocalLaunchDelegate extends AbstractJavaLaunchConfigurationDelega
     String debugPort = conf.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_DEBUG_PORT,
         CBRunUtil.getDefaultLocalDebugPort() + "");
 
+    final IFile ff = file;
+
     Process p = internalLaunch(monitor, file, proj, debug, port, debugPort);
     if (p == null) {
-      throw new CoreException(new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, "Failed to create local process!"));
+      PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+        public void run() {
+          MessageDialog.openWarning(CloudBeesUIPlugin.getActiveWindow().getShell(), "Deploy stopped!",
+              "Process creation stopped for '" + ff.getName() + "'");
+        }
+      });
+      return;
+      //throw new CoreException(new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, "Failed to create local process!"));
     }
 
     Map<String, String> attrs = new HashMap<String, String>();
@@ -106,9 +110,9 @@ public class CBLocalLaunchDelegate extends AbstractJavaLaunchConfigurationDelega
 
     if (debug) {
       IVMConnector connector = new SocketAttachConnector();//.getDefaultVMConnector();
-      
+
       Map args = connector.getDefaultArguments();
-      
+
       Map argMap = conf.getAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP, (Map) null);
 
       if (argMap == null) {
@@ -125,9 +129,7 @@ public class CBLocalLaunchDelegate extends AbstractJavaLaunchConfigurationDelega
       //argMap.put(connectMapAttr, connectMap);
 
       setDefaultSourceLocator(launch, conf);
-      
-      
-      
+
       connector.connect(argMap, monitor, launch);
     }
 
@@ -178,9 +180,9 @@ public class CBLocalLaunchDelegate extends AbstractJavaLaunchConfigurationDelega
     copy.setAttribute("org.eclipse.debug.core.MAPPED_RESOURCE_TYPES", resourceTypes);
 
     copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, proj.getName());
-    
-    copy.setMappedResources(new IResource[]{proj});
-    
+
+    copy.setMappedResources(new IResource[] { proj });
+
     if (mode.equals("run")) {
       copy.removeAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_CONNECTOR);
     } else if (mode.equals("debug")) {
@@ -300,11 +302,10 @@ public class CBLocalLaunchDelegate extends AbstractJavaLaunchConfigurationDelega
     }
 
   }
-  
+
   @Override
   public boolean isAllowTerminate(ILaunchConfiguration configuration) throws CoreException {
     return super.isAllowTerminate(configuration);
   }
-  
-  
+
 }
