@@ -16,11 +16,14 @@ package com.cloudbees.eclipse.run.ui.launchconfiguration;
 
 import static com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants.DO_NOTHING;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -33,6 +36,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.jdt.internal.launching.SocketAttachConnector;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMConnector;
@@ -51,22 +55,18 @@ import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 @SuppressWarnings("restriction")
 public class CBLocalLaunchDelegate extends AbstractJavaLaunchConfigurationDelegate/* LaunchConfigurationDelegate *//*AntLaunchDelegate */{
 
-  public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
+  public void launch(ILaunchConfiguration conf, String mode, ILaunch launch, IProgressMonitor monitor)
       throws CoreException {
     if (monitor == null) {
       monitor = new NullProgressMonitor();
     }
-    if (configuration.getAttribute(DO_NOTHING, false)) {
-      monitor.setCanceled(true);
-      return;
-    }
+
+
 
     boolean debug = mode.equals("debug");
 
-    ILaunchConfiguration launchConf = modifyLaunch(configuration, mode);
-
-    String projectName = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, "");
-    String warName = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, "");
+    String projectName = conf.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, "");
+    String warName = conf.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, "");
 
     IProject proj = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
     IFile file = null;
@@ -74,9 +74,15 @@ public class CBLocalLaunchDelegate extends AbstractJavaLaunchConfigurationDelega
       file = proj.getFile(warName);
     }
 
-    String port = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PORT,
-        CBRunUtil.getDefaultLocalPort() + "");
-    String debugPort = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_DEBUG_PORT,
+    conf = modifyLaunch(proj, conf, mode);
+    
+    if (conf.getAttribute(DO_NOTHING, false)) {
+      monitor.setCanceled(true);
+      return;
+    }
+
+    String port = conf.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PORT, CBRunUtil.getDefaultLocalPort() + "");
+    String debugPort = conf.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_DEBUG_PORT,
         CBRunUtil.getDefaultLocalDebugPort() + "");
 
     Process p = internalLaunch(monitor, file, proj, debug, port, debugPort);
@@ -90,13 +96,20 @@ public class CBLocalLaunchDelegate extends AbstractJavaLaunchConfigurationDelega
       //addDebugAttrs(attrs, projectName, debugPort);
     }
 
-    IProcess runtimeProcess = DebugPlugin.newProcess(launch, p, warName, attrs); // new RuntimeProcess(launch, p, warName, null);
+    String taskName = warName;
+    if (taskName == null || taskName.length() == 0) {
+      taskName = projectName;
+    }
+    IProcess runtimeProcess = DebugPlugin.newProcess(launch, p, taskName, attrs); // new RuntimeProcess(launch, p, warName, null);
 
     launch.addProcess(runtimeProcess);
 
     if (debug) {
-      IVMConnector connector = JavaRuntime.getDefaultVMConnector();
-      Map argMap = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP, (Map) null);
+      IVMConnector connector = new SocketAttachConnector();//.getDefaultVMConnector();
+      
+      Map args = connector.getDefaultArguments();
+      
+      Map argMap = conf.getAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP, (Map) null);
 
       if (argMap == null) {
         argMap = new HashMap();
@@ -111,7 +124,10 @@ public class CBLocalLaunchDelegate extends AbstractJavaLaunchConfigurationDelega
       argMap.put("port", debugPort);
       //argMap.put(connectMapAttr, connectMap);
 
-      setDefaultSourceLocator(launch, configuration);
+      setDefaultSourceLocator(launch, conf);
+      
+      
+      
       connector.connect(argMap, monitor, launch);
     }
 
@@ -120,7 +136,7 @@ public class CBLocalLaunchDelegate extends AbstractJavaLaunchConfigurationDelega
     DebugPlugin.getDefault().getLaunchManager().addLaunchListener(new TerminateListener(projectName));
 
     //if (debug) {
-      //CBRunUtil.createTemporaryRemoteLaunchConfiguration(projectName).launch(mode, monitor);
+    //CBRunUtil.createTemporaryRemoteLaunchConfiguration(projectName).launch(mode, monitor);
     //}
 
     // handleExtensions(configuration, projectName);
@@ -147,11 +163,30 @@ public class CBLocalLaunchDelegate extends AbstractJavaLaunchConfigurationDelega
           IJavaLaunchConfigurationConstants.ID_SOCKET_ATTACH_VM_CONNECTOR);
     }
   */
-  private ILaunchConfiguration modifyLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
+  private ILaunchConfiguration modifyLaunch(IProject proj, ILaunchConfiguration configuration, String mode)
+      throws CoreException {
     ILaunchConfigurationWorkingCopy copy = configuration.copy(configuration.getName());
+
+    copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_ALLOW_TERMINATE, true);
+
+    List<String> resourcePaths = new ArrayList<String>();
+    resourcePaths.add("/" + proj.getName());
+    copy.setAttribute("org.eclipse.debug.core.MAPPED_RESOURCE_PATHS", resourcePaths);
+
+    List<String> resourceTypes = new ArrayList<String>();
+    resourceTypes.add("4");
+    copy.setAttribute("org.eclipse.debug.core.MAPPED_RESOURCE_TYPES", resourceTypes);
+
+    copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, proj.getName());
+    
+    copy.setMappedResources(new IResource[]{proj});
+    
     if (mode.equals("run")) {
-      // copy.removeAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS);
+      copy.removeAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_CONNECTOR);
     } else if (mode.equals("debug")) {
+      copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_CONNECTOR,
+          IJavaLaunchConfigurationConstants.ID_SOCKET_ATTACH_VM_CONNECTOR);
+
       //String vmargs = "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8002";
       //copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, vmargs);
     }
@@ -180,8 +215,8 @@ public class CBLocalLaunchDelegate extends AbstractJavaLaunchConfigurationDelega
 
     @Override
     public void launchesTerminated(ILaunch[] launches) {
-      CBProjectProcessService service = CBProjectProcessService.getInstance();
-      service.removeProcess(this.projectName);
+      //CBProjectProcessService service = CBProjectProcessService.getInstance();
+      //service.removeProcess(this.projectName);
     }
   }
 
@@ -265,4 +300,11 @@ public class CBLocalLaunchDelegate extends AbstractJavaLaunchConfigurationDelega
     }
 
   }
+  
+  @Override
+  public boolean isAllowTerminate(ILaunchConfiguration configuration) throws CoreException {
+    return super.isAllowTerminate(configuration);
+  }
+  
+  
 }

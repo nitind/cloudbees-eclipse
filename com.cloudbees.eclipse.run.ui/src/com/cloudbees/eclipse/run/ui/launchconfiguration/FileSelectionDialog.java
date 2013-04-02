@@ -19,6 +19,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -29,19 +30,20 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
+import com.cloudbees.eclipse.ui.UIUtils;
 
 public class FileSelectionDialog extends TitleAreaDialog {
 
-  private static final String TITLE = "War File Selection";
-  private static final String DESCRIPTION = "Please select the war file you want to deploy";
+  private static final String TITLE = "File Selection";
+  private static final String DESCRIPTION = "Please select the file (ear, war, jar) you want to deploy";
   private static final Image ICON = CBRunUiActivator.getImage(Images.CLOUDBEES_WIZ_ICON);
 
-  private final String[] warPaths;
+  private final String[] filePaths;
   private String selectedWarPath;
 
   public FileSelectionDialog(final Shell shell, final String[] warPaths) {
     super(shell);
-    this.warPaths = warPaths;
+    this.filePaths = warPaths;
   }
 
   @Override
@@ -50,8 +52,13 @@ public class FileSelectionDialog extends TitleAreaDialog {
     setTitle(TITLE);
     setMessage(DESCRIPTION);
     setTitleImage(ICON);
+    getShell().setText(TITLE);
     getShell().setSize(400, 400);
     getShell().setMinimumSize(250, 250);
+    
+    Point shellCenter = UIUtils.getCenterPoint();
+    getShell().setLocation(shellCenter.x - 400 / 2, shellCenter.y - 400 / 2);
+    
     return contents;
   }
 
@@ -68,9 +75,9 @@ public class FileSelectionDialog extends TitleAreaDialog {
 
     Label label = new Label(content, SWT.NONE);
     label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-    label.setText("Select war file:");
+    label.setText("Select file:");
 
-    final List list = new org.eclipse.swt.widgets.List(content, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL);
+    final List list = new org.eclipse.swt.widgets.List(content, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
     list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     list.addSelectionListener(new SelectionListener() {
 
@@ -84,7 +91,7 @@ public class FileSelectionDialog extends TitleAreaDialog {
         handleSelectionChange(list);
       }
     });
-    list.setItems(this.warPaths);
+    list.setItems(this.filePaths);
 
     return area;
   }

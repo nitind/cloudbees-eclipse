@@ -63,25 +63,35 @@ public class CBRunUtil {
    * @return list of launch configurations associated with this project name
    * @throws CoreException
    */
-  public static List<ILaunchConfiguration> getLaunchConfigurations(IFile file, boolean cloud) throws CoreException {
+  public static List<ILaunchConfiguration> getLaunchConfigurations(IResource res, boolean cloud) throws CoreException {
     ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
     List<ILaunchConfiguration> launchConfigurations = new ArrayList<ILaunchConfiguration>();
 
     try {
       for (ILaunchConfiguration configuration : launchManager.getLaunchConfigurations()) {
 
-        String name = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, "");
+        String prj = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, "");
+        String war = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, "");
 
-        Map antProps = configuration.getAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", (Map) null);
+/*        Map antProps = configuration.getAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", (Map) null);
         if (antProps != null) {
           // Overwrite bees.home with the latest directory location to support bees home dir updates.
           //antProps.put("bees.home", CBSdkActivator.getDefault().getBeesHome()+"asf");
         }
-
-        if (name.equals(file.getProject().getName())) {
+*/
+        if (res!=null && prj.equals(res.getProject().getName())) {
           boolean cloudLaunch = "".equals(configuration.getAttribute(
               CBLaunchConfigurationConstants.ATTR_CB_LOCAL_LAUNCH, ""));
 
+          if (!res.getProject().isOpen()) {
+            continue; // we can work only with open projects
+          }
+          
+          if (war!=null && war.length()>0) {
+            String s1 = res.getProjectRelativePath().toOSString();
+            System.out.println("COMPARING "+s1+" & "+war);
+          }
+          
           if (cloudLaunch && cloud) {
             launchConfigurations.add(configuration);
           } else if (!cloudLaunch && !cloud) {
@@ -90,6 +100,7 @@ public class CBRunUtil {
         }
       }
     } catch (Exception e) {
+      e.printStackTrace();
       throw new CoreException(new Status(IStatus.ERROR, CBRunCoreActivator.PLUGIN_ID,
           "Error retrieving launch configurations", e));
     }
@@ -122,23 +133,23 @@ public class CBRunUtil {
   /**
    * @param projectName
    * @param port
-   * @return list of launch configurations associated with this project name, guaranteed to return at least 1
+   * @return list of launch configurations associated with this IResource (either IFile or IProject), guaranteed to return at least 1
    *         configuration
    * @throws CoreException
    */
-  public static List<ILaunchConfiguration> getOrCreateLocalCloudBeesLaunchConfigurations(IFile file)
+  public static List<ILaunchConfiguration> getOrCreateLocalCloudBeesLaunchConfigurations(IResource res)
       throws CoreException {
-    List<ILaunchConfiguration> launchConfiguration = getLaunchConfigurations(file, false);
+    List<ILaunchConfiguration> launchConfiguration = getLaunchConfigurations(res, false);
 
     if (launchConfiguration.isEmpty()) {
       ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
 
       ILaunchConfigurationType configType = launchManager
           .getLaunchConfigurationType(CBLaunchConfigurationConstants.ID_CB_LAUNCH);
-      String name = file.getName() + " (local)";
+      String name = res.getName() + " (local)";
 
       ILaunchConfigurationWorkingCopy copy = configType.newInstance(null, name);
-      addLaunchConfLocalAttributes(copy, file, getDefaultLocalPort() + "", getDefaultLocalDebugPort() + "");
+      addLaunchConfLocalAttributes(copy, res, getDefaultLocalPort() + "", getDefaultLocalDebugPort() + "");
 
       launchConfiguration.add(copy.doSave());
     }
@@ -172,6 +183,9 @@ public class CBRunUtil {
     conf.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PORT, port);
     conf.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_DEBUG_PORT, debugPort);
 
+    conf.setAttribute(IJavaLaunchConfigurationConstants.ATTR_ALLOW_TERMINATE, true);
+
+    
     //IStringVariableManager variableManager = VariablesPlugin.getDefault().getStringVariableManager();
     //String workspaceVarName = "workspace_loc";
 

@@ -20,33 +20,27 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleListener;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsole;
-import org.eclipse.ui.console.IOConsoleOutputStream;
 
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.core.util.CBRunUtil;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
-import com.cloudbees.eclipse.run.ui.console.ConsoleUtil;
-import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class CBLocalLaunchShortcut implements ILaunchShortcut {
 
@@ -85,14 +79,11 @@ public class CBLocalLaunchShortcut implements ILaunchShortcut {
   @Override
   public void launch(ISelection selection, String mode) {
 
-    if (!DebugUITools.saveBeforeLaunch()) {
-      return;
-    }
-
     if (selection instanceof IStructuredSelection) {
 
       IStructuredSelection structuredSelection = (IStructuredSelection) selection;
 
+      
       final Object element = structuredSelection.getFirstElement();
 
       String name = null;
@@ -114,11 +105,16 @@ public class CBLocalLaunchShortcut implements ILaunchShortcut {
         throw new RuntimeException("Element type not detected: " + element);
       }
 
-      final IFile file1 = file;
-      final IProject project1 = project;
-
       try {
-        List<ILaunchConfiguration> launchConfigurations = CBRunUtil.getOrCreateLocalCloudBeesLaunchConfigurations(file);
+        
+        IResource res = null;
+        if (file!=null) {
+          res = file;
+        } else {
+          res = project;
+        }
+        
+        List<ILaunchConfiguration> launchConfigurations = CBRunUtil.getOrCreateLocalCloudBeesLaunchConfigurations(res);
         ILaunchConfiguration configuration = launchConfigurations.get(launchConfigurations.size() - 1);
         DebugUITools.launch(configuration, mode);
       } catch (CoreException e) {

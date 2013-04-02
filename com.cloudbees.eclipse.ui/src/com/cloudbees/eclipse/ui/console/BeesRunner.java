@@ -15,7 +15,6 @@
 package com.cloudbees.eclipse.ui.console;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,13 +24,8 @@ import java.util.Scanner;
 
 import org.eclipse.ui.console.IOConsoleOutputStream;
 
-import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.core.GrandCentralService;
-import com.cloudbees.eclipse.core.GrandCentralService.AuthInfo;
 import com.cloudbees.eclipse.run.core.BeesSDK;
-import com.cloudbees.eclipse.run.sdk.CBSdkActivator;
-import com.cloudbees.sdk.BeesSecurityException;
 
 /**
  * Wrapper to run Bees command line client commands and access input/output streams
@@ -114,7 +108,7 @@ public class BeesRunner {
       return;
     }
 
-    final ProcessBuilder pb = BeesSDK.createBeesProcess(cmd);
+    final ProcessBuilder pb = BeesSDK.createBeesProcess(true, cmd);
 
     OutputStreamWriter osw = new OutputStreamWriter(out);
     BufferedWriter writer = new BufferedWriter(osw);
