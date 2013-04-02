@@ -39,7 +39,7 @@ public class ProjectDeleteListener implements IResourceChangeListener {
     }
 
     try {
-      for (ILaunchConfiguration configuration : CBRunUtil.getLaunchConfigurations(project.getName(), false)) {
+      for (ILaunchConfiguration configuration : CBRunUtil.getLaunchConfigurations(project.getFile("/"), false)) {
         configuration.delete();
       }
     } catch (CoreException e) {

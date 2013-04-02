@@ -49,7 +49,7 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
 
   private Text customIdText;
   private Button useCustomId;
-  private WarSelecionComposite warSelector;
+  private DeployArtifactSelecionComposite warSelector;
 
   @Override
   public void performApply(final ILaunchConfigurationWorkingCopy configuration) {
@@ -65,7 +65,7 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
       }
     }
 
-    configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, this.warSelector.getWarPath());
+    configuration.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, this.warSelector.getFilePath());
   }
 
   @Override
@@ -84,7 +84,7 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
       this.customIdText.setText(id);
 
       String warPath = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, "");
-      this.warSelector.setWarPath(warPath);
+      this.warSelector.setFilePath(warPath);
 
       updateLaunchConfigurationDialog();
     } catch (CoreException e) {
@@ -113,7 +113,7 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
               break;
             }
           }
-          CBCloudLaunchConfigurationTab.this.warSelector.setUseCustomWar(!hasBuildXml(projectName));
+          CBCloudLaunchConfigurationTab.this.warSelector.setUseCustomFile(!hasBuildXml(projectName));
         }
         CBCloudLaunchConfigurationTab.this.warSelector.setProject(proj);
 
@@ -124,7 +124,7 @@ public class CBCloudLaunchConfigurationTab extends AbstractLaunchConfigurationTa
 
     setControl(this.main);
 
-    this.warSelector = new WarSelecionComposite(this.main) {
+    this.warSelector = new DeployArtifactSelecionComposite(this.main) {
       @Override
       public void handleUpdate() {
         validateConfigurationTab();

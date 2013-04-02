@@ -46,20 +46,20 @@ import org.eclipse.ui.progress.WorkbenchJob;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
 @SuppressWarnings("restriction")
-public abstract class WarSelecionComposite extends Composite {
+public abstract class DeployArtifactSelecionComposite extends Composite {
 
-  private static final String GROUP_TITLE = "Custom War";
+  private static final String GROUP_TITLE = "Custom Deploy Artifact";
   private static final String BUTTON_LABEL = "Choose...";
-  private static final String HINT = "Choose war file to deploy...";
+  private static final String HINT = "Choose a custom ear, war or jar file to deploy...";
   private static final String ERROR_TITLE = "Error";
 
-  private Text warPathText;
-  private Button chooseWarButton;
-  private List<String> warPaths;
+  private Text filePathText;
+  private Button chooseFileButton;
+  private List<String> filePaths;
   private IProject project;
-  private Button useCustomWar;
+  private Button useCustomFile;
 
-  public WarSelecionComposite(final Composite parent) {
+  public DeployArtifactSelecionComposite(final Composite parent) {
     super(parent, SWT.NONE);
     prepare(parent);
     createComponents(parent);
@@ -72,27 +72,27 @@ public abstract class WarSelecionComposite extends Composite {
 
     this.project = project;
     if (this.project != null) {
-      this.warPaths = findWars(project);
+      this.filePaths = findSupportedFiles(project);
     } else {
-      this.warPaths = new ArrayList<String>();
+      this.filePaths = new ArrayList<String>();
     }
 
-    this.warPathText.setText("");
+    this.filePathText.setText("");
     updateFields();
   }
 
-  public void setUseCustomWar(final boolean enable) {
-    this.useCustomWar.setSelection(enable);
+  public void setUseCustomFile(final boolean enable) {
+    this.useCustomFile.setSelection(enable);
     updateFields();
   }
 
   private void prepare(final Composite parent) {
-    this.warPaths = findWars(this.project);
+    this.filePaths = findSupportedFiles(this.project);
   }
 
-  public static List<String> findWars(final IProject project) {
-    final List<String> wars = new ArrayList<String>();
-    WorkbenchJob job = new WorkbenchJob("Searching for war files") {
+  public static List<String> findSupportedFiles(final IProject project) {
+    final List<String> files = new ArrayList<String>();
+    WorkbenchJob job = new WorkbenchJob("Searching for supported files") {
       @Override
       public IStatus runInUIThread(final IProgressMonitor monitor) {
 
@@ -104,14 +104,20 @@ public abstract class WarSelecionComposite extends Composite {
           project.accept(new IResourceVisitor() {
             @Override
             public boolean visit(final IResource resource) throws CoreException {
-              if (resource.getType() == IResource.FILE && "war".equalsIgnoreCase(resource.getFileExtension())) {
-                wars.add(resource.getProjectRelativePath().toOSString());
+              if (resource.getType() == IResource.FILE && 
+                  (
+                  "war".equalsIgnoreCase(resource.getFileExtension()) ||
+                  "ear".equalsIgnoreCase(resource.getFileExtension()) ||
+                  "jar".equalsIgnoreCase(resource.getFileExtension())
+                  )
+                  ) {
+                files.add(resource.getProjectRelativePath().toOSString());
               }
               return true;
             }
           });
         } catch (CoreException e) {
-          return new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, "Failed to find wars", e);
+          return new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, "Failed to find supported files (ear, war, jar)", e);
         }
 
         return Status.OK_STATUS;
@@ -120,9 +126,9 @@ public abstract class WarSelecionComposite extends Composite {
 
     IStatus status = job.runInUIThread(new NullProgressMonitor());
     if (!status.isOK()) {
-      handleException("Exception while searching for wars", status);
+      handleException("Exception while searching for files", status);
     }
-    return wars;
+    return files;
   }
 
   private void createComponents(final Composite parent) {
@@ -137,12 +143,12 @@ public abstract class WarSelecionComposite extends Composite {
     GridData data = new GridData(SWT.FILL, SWT.CENTER, true, false);
     group.setLayoutData(data);
 
-    this.useCustomWar = new Button(group, SWT.CHECK);
-    this.useCustomWar.setText("Specify custom war file to deploy");
+    this.useCustomFile = new Button(group, SWT.CHECK);
+    this.useCustomFile.setText("Specify custom ear, war or jar to deploy");
     new Label(group, SWT.NONE);
 
-    this.warPathText = new Text(group, SWT.SINGLE | SWT.BORDER);
-    this.warPathText.addModifyListener(new ModifyListener() {
+    this.filePathText = new Text(group, SWT.SINGLE | SWT.BORDER);
+    this.filePathText.addModifyListener(new ModifyListener() {
       @Override
       public void modifyText(final ModifyEvent e) {
         handleUpdate();
@@ -150,27 +156,27 @@ public abstract class WarSelecionComposite extends Composite {
     });
 
     data = new GridData(SWT.FILL, SWT.CENTER, true, false);
-    this.warPathText.setLayoutData(data);
-    this.warPathText.setFont(parent.getFont());
-    this.warPathText.setMessage(HINT);
-    this.warPathText.setText(getDefaultWarPath());
+    this.filePathText.setLayoutData(data);
+    this.filePathText.setFont(parent.getFont());
+    this.filePathText.setMessage(HINT);
+    this.filePathText.setText(getDefaultFilePath());
 
-    this.chooseWarButton = SWTFactory.createPushButton(group, BUTTON_LABEL, null);
-    this.chooseWarButton.addSelectionListener(new SelectionAdapter() {
+    this.chooseFileButton = SWTFactory.createPushButton(group, BUTTON_LABEL, null);
+    this.chooseFileButton.addSelectionListener(new SelectionAdapter() {
 
       @Override
       public void widgetSelected(final SelectionEvent e) {
-        openWarSelectionDialog();
+        openFileSelectionDialog();
       }
 
       @Override
       public void widgetDefaultSelected(final SelectionEvent e) {
-        openWarSelectionDialog();
+        openFileSelectionDialog();
       }
 
     });
 
-    this.useCustomWar.addSelectionListener(new SelectionAdapter() {
+    this.useCustomFile.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(final SelectionEvent e) {
         updateFields();
@@ -188,26 +194,26 @@ public abstract class WarSelecionComposite extends Composite {
   public abstract void handleUpdate();
 
   public IStatus validate() {
-    String currentText = this.warPathText.getText();
+    String currentText = this.filePathText.getText();
 
-    if (this.useCustomWar.getSelection() && (currentText == null || currentText.isEmpty())) {
-      return new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, "Please provide war path.");
+    if (this.useCustomFile.getSelection() && (currentText == null || currentText.isEmpty())) {
+      return new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, "Please provide ear, war or jar path.");
     }
 
     return Status.OK_STATUS;
   }
 
-  public String getWarPath() {
-    if (this.useCustomWar.getSelection()) {
-      return this.warPathText.getText();
+  public String getFilePath() {
+    if (this.useCustomFile.getSelection()) {
+      return this.filePathText.getText();
     } else {
       return "";
     }
   }
 
-  private String getDefaultWarPath() {
-    if (!this.warPaths.isEmpty()) {
-      return this.warPaths.get(0);
+  private String getDefaultFilePath() {
+    if (!this.filePaths.isEmpty()) {
+      return this.filePaths.get(0);
     }
     return "";
   }
@@ -224,29 +230,33 @@ public abstract class WarSelecionComposite extends Composite {
     ErrorDialog.openError(CBRunUiActivator.getDefault().getWorkbench().getDisplay().getActiveShell(), ERROR_TITLE, msg, status);
   }
 
-  private void openWarSelectionDialog() {
-    WarSelectionDialog dialog = new WarSelectionDialog(getShell(), this.warPaths.toArray(new String[this.warPaths
+  private void openFileSelectionDialog() {
+    FileSelectionDialog dialog = new FileSelectionDialog(getShell(), this.filePaths.toArray(new String[this.filePaths
         .size()]));
     dialog.open();
     if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
-      this.warPathText.setText(dialog.getSelectedWarPath());
+      if (dialog.getSelectedFilePath()!=null) {
+        this.filePathText.setText(dialog.getSelectedFilePath());
+      } else {
+        this.filePathText.setText("");
+      }
     }
   }
 
-  public void setWarPath(final String warPath) {
-    this.warPathText.setText(warPath);
-    if (!this.useCustomWar.getSelection() && warPath != null && !warPath.isEmpty()) {
-      this.useCustomWar.setSelection(true);
+  public void setFilePath(final String filePath) {
+    this.filePathText.setText(filePath);
+    if (!this.useCustomFile.getSelection() && filePath != null && !filePath.isEmpty()) {
+      this.useCustomFile.setSelection(true);
     }
     updateFields();
   }
 
   public void updateFields() {
-    boolean enable = WarSelecionComposite.this.useCustomWar.getSelection();
-    WarSelecionComposite.this.warPathText.setEnabled(enable);
-    WarSelecionComposite.this.chooseWarButton.setEnabled(enable);
-    if (enable && this.warPathText.getText().isEmpty() && this.warPaths.size() == 1) {
-      this.warPathText.setText(getDefaultWarPath());
+    boolean enable = DeployArtifactSelecionComposite.this.useCustomFile.getSelection();
+    DeployArtifactSelecionComposite.this.filePathText.setEnabled(enable);
+    DeployArtifactSelecionComposite.this.chooseFileButton.setEnabled(enable);
+    if (enable && this.filePathText.getText().isEmpty() && this.filePaths.size() == 1) {
+      this.filePathText.setText(getDefaultFilePath());
     }
     handleUpdate();
   }

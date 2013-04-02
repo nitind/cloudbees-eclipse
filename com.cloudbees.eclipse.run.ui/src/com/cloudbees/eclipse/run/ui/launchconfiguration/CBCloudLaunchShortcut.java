@@ -110,8 +110,8 @@ public class CBCloudLaunchShortcut implements ILaunchShortcut {
       }
 
       try {
-        List<ILaunchConfiguration> launchConfigurations = CBRunUtil.getOrCreateCloudBeesLaunchConfigurations(name,
-            true, null);
+        List<ILaunchConfiguration> launchConfigurations = CBRunUtil.getOrCreateCloudBeesLaunchConfigurations(file!=null?file:project.getFile("/"),
+            true);
         this.configuration = launchConfigurations.get(launchConfigurations.size() - 1);
 
         if (!this.cancelled) {

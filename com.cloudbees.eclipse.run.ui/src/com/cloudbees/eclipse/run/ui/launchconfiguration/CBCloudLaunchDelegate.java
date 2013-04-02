@@ -87,7 +87,7 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
               }
             } else {
               // configured war and no build.xml - let's try to find wars
-              List<String> wars = WarSelecionComposite.findWars(project);
+              List<String> wars = DeployArtifactSelecionComposite.findSupportedFiles(project);
               if (wars.size() == 0) {
                 deploy(project, account, appId);
               } else if (wars.size() == 1) {
@@ -163,9 +163,9 @@ public class CBCloudLaunchDelegate extends LaunchConfigurationDelegate {
       public void run() {
         try {
           Shell shell = Display.getDefault().getActiveShell();
-          WarSelectionDialog dialog = new WarSelectionDialog(shell, warPaths);
+          FileSelectionDialog dialog = new FileSelectionDialog(shell, warPaths);
           dialog.open();
-          String war = dialog.getSelectedWarPath();
+          String war = dialog.getSelectedFilePath();
 
           if (dialog.getReturnCode() != IDialogConstants.OK_ID || war == null || war.isEmpty()) {
             Status status = new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, "War file is not specified.");

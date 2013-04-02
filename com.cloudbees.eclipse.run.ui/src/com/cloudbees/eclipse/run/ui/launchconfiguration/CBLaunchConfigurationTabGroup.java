@@ -24,7 +24,7 @@ public class CBLaunchConfigurationTabGroup extends AbstractLaunchConfigurationTa
   }
 
   public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
-    ILaunchConfigurationTab[] tabs = { new CBLaunchConfigurationTab() };
+    ILaunchConfigurationTab[] tabs = { new CBLocalLaunchConfigurationTab() };
     setTabs(tabs);
   }
   

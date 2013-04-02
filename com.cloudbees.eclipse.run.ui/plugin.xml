@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="com.cloudbees.eclipse.run.ui.launchDelegateAditions" name="launchDelegateAditions" schema="schema/com.cloudbees.eclipse.run.ui.launchDelegateAditions.exsd"/>
+<!--   <extension-point id="com.cloudbees.eclipse.run.ui.launchDelegateAditions" name="launchDelegateAditions" schema="schema/com.cloudbees.eclipse.run.ui.launchDelegateAditions.exsd"/>
+-->
 	<extension point="org.eclipse.ui.commands">
 		<command categoryId="com.cloudbees.eclipse.ui.commands.category"
 			defaultHandler="com.cloudbees.eclipse.run.ui.contributions.handlers.CBSampleWebAppHandler"
@@ -63,6 +64,8 @@
         </and>
      </visibility>
   </objectContribution>
+  
+  
   <objectContribution
         adaptable="true"
         id="com.cloudbees.eclipse.run.ui.runLocally"
@@ -73,7 +76,7 @@
            enablesFor="1"
            icon="icons/16x16/cb_plain.png"
            id="com.cloudbees.eclipse.run.ui.action.runLocally"
-           label="Run local"
+           label="Run Locally"
            menubarPath="com.cloudbees.eclipse.ui.popup.cloudbees/cloudbeesGroup?after=launch">
      </action>
      <visibility>
@@ -88,6 +91,33 @@
         </and>
      </visibility>
   </objectContribution>
+  
+    <objectContribution
+        adaptable="true"
+        id="com.cloudbees.eclipse.run.ui.file.runLocally"
+        nameFilter="*"
+        objectClass="org.eclipse.core.resources.IFile">
+     <action
+           class="com.cloudbees.eclipse.run.ui.popup.actions.RunLocallyAction"
+           enablesFor="1"
+           icon="icons/16x16/cb_plain.png"
+           id="com.cloudbees.eclipse.run.ui.action.file.runLocally"
+           label="Run Locally"
+           menubarPath="com.cloudbees.eclipse.ui.popup.file.cloudbees/cloudbeesGroup?after=launch">
+     </action>
+     <visibility>
+        <and>
+           <objectClass
+                 name="org.eclipse.core.resources.IFile">
+           </objectClass>
+           <objectState
+                 name="projectNature"
+                 value="com.cloudbees.eclipse.core.cloudbeesNature">
+           </objectState>
+        </and>
+     </visibility>
+  </objectContribution>
+  
   <objectContribution
         adaptable="false"
         id="com.cloudbees.eclipse.run.ui.reloadRunAtCloudApps"
@@ -321,7 +351,7 @@
 	</extension>
 	<extension point="org.eclipse.debug.ui.launchShortcuts">
 		<shortcut
-			class="com.cloudbees.eclipse.run.ui.launchconfiguration.CBLaunchShortcut"
+			class="com.cloudbees.eclipse.run.ui.launchconfiguration.CBLocalLaunchShortcut"
 			icon="icons/16x16/cb_plain.png" id="com.cloudbees.eclipse.run.ui.launchconfiguration.shortcut"
 			label="CloudBees Application (local)" modes="run, debug">
 			<contextualLaunch>
@@ -372,7 +402,7 @@
 	</extension>
 	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
 		<launchConfigurationType
-			delegate="com.cloudbees.eclipse.run.ui.launchconfiguration.CBLaunchDelegate"
+			delegate="com.cloudbees.eclipse.run.ui.launchconfiguration.CBLocalLaunchDelegate"
 			id="com.cloudbees.eclipse.run.core.launchconfiguration.launchConfigurationType"
 			modes="run, debug" name="CloudBees Application at Local">
 		</launchConfigurationType>
@@ -422,10 +452,13 @@
   <extension
      point="org.eclipse.ui.console.consolePageParticipants">
   <consolePageParticipant
-        class="com.cloudbees.eclipse.run.ui.console.TailConsolePageParticipant"
+        class="com.cloudbees.eclipse.run.ui.console.CloseConsolePageParticipant"
         id="com.cloudbees.eclipse.run.ui.tail.CloudBeesConsoleParticipant">
      <enablement>
-        <test property="org.eclipse.ui.console.consoleTypeTest" value="com.cloudbees.eclipse.run.ui.tailLogs"/>
+     	<or>
+     	<test property="org.eclipse.ui.console.consoleTypeTest" value="com.cloudbees.eclipse.run.ui.runLocalLog"/>
+     	<test property="org.eclipse.ui.console.consoleTypeTest" value="com.cloudbees.eclipse.run.ui.tailLogs"/>        
+     	</or>     	
      </enablement>
   </consolePageParticipant>
    </extension>

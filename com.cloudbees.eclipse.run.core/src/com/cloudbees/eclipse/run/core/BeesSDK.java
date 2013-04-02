@@ -14,10 +14,16 @@
  *******************************************************************************/
 package com.cloudbees.eclipse.run.core;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -198,6 +204,118 @@ public class BeesSDK {
     */update();
 
     return res;
+  }
+
+  public static Process deployProjectLocal(final IProject project, final boolean build, final boolean debug,
+      String port, String debugPort, IProgressMonitor monitor) throws CloudBeesException {
+
+    /*    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+        BeesClient client = getBeesClient(grandCentralService);
+        if (client == null) {
+          return;
+        }
+    */
+    try {
+      String jver = getJavaVersion(project);
+
+      IPath workspacePath = project.getLocation().removeLastSegments(1);
+      IPath buildPath = getWarFile(project, build, monitor).getFullPath();
+      String warFile = workspacePath.toOSString() + buildPath.toOSString();
+      //String appId = getAccountAppId(account, id, client, /*warFile, */project);
+
+      String deployType = getExtension(warFile);
+
+      Map<String, String> params = new HashMap<String, String>();
+      params.put("runtime.java_version", jver);
+
+      return internalDeployLocal(project, warFile, debug, port, debugPort, monitor);
+    } catch (Exception e) {
+      throw new CloudBeesException("Failed to deploy to local using CloudBees SDK!", e);
+    }
+    /*    ApplicationDeployArgs.Builder argBuilder = new ApplicationDeployArgs.Builder("")
+            .deployPackage(new File(warFile), deployType).withParams(params)
+            .withProgressFeedback(new UploadProgressWithMonitor(monitor));
+    */
+
+    /*    ApplicationDeployArchiveResponse applicationDeployWar = client.applicationDeployWar(appId, javaVer, null, new File(
+            warFile), null, new UploadProgressWithMonitor(monitor));
+    */
+
+  }
+
+  private static Process internalDeployLocal(IProject project, String warFile, boolean debug, String port,
+      String debugPort, IProgressMonitor monitor) throws CloudBeesException, IOException {
+
+    String cmd = "app:run";
+    //System.out.println("RUNNING: " + cmd);
+
+    //System.err.println("LAUNCHING INTERNAL " + warFile + " on " + project);
+
+    String[] vmargs = new String[] {};
+
+    if (debug) {
+      vmargs = new String[] { "-Xdebug", "-Xnoagent", "-Djava.compiler=NONE",
+          "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" + debugPort };
+    }
+
+    ProcessBuilder pb = createBeesProcess(false, vmargs, cmd, warFile, "--port", port);
+
+    //OutputStreamWriter osw = new OutputStreamWriter(out);
+    //BufferedWriter writer = new BufferedWriter(osw);
+
+    Process p = null;
+    try {
+      p = pb.start();
+    } catch (Exception e) {
+      //writer.write("Error while running CloudBees SDK: " + e.getMessage() + "\n");
+      //e.printStackTrace(new PrintWriter(writer));
+      throw new CloudBeesException("Failed to run CloudBees SDK!", e);
+    }
+
+    /*    InputStream stdin = p.getInputStream();
+
+        byte[] b = new byte[4096 * 10];
+
+        for (int n; (n = stdin.read(b)) != -1;) {
+          writer.write(new String(b, 0, n, "UTF-8"));
+          writer.flush();
+        }
+
+        writer.flush();
+    */
+    return p;
+  }
+
+  public static Process deployFileLocal(IProject project, final IFile warFile, boolean debug, String port,
+      String debugPort, IProgressMonitor monitor) throws CloudBeesException {
+
+    /*    GrandCentralService grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+        BeesClient client = getBeesClient(grandCentralService);
+        if (client == null) {
+          return null;
+        }*/
+
+    try {
+      String jver = getJavaVersion(project);
+      Map<String, String> params = new HashMap<String, String>();
+      params.put("runtime.java_version", jver);
+
+      String deployType = getExtension(warFile.getName());
+
+      // bees app:run [options] WAR_Filename | WAR_directory
+      // -e,--environment <environment>   environment configurations to load (default: run)
+      //-p,--port <port>         server listen port (default: 8080)
+      return internalDeployLocal(project, warFile.getRawLocation().toOSString(), debug, port, debugPort, monitor);
+    } catch (Exception e) {
+      throw new CloudBeesException("Failed to deploy to local using CloudBees SDK!", e);
+    }
+    /*
+        ApplicationDeployArgs.Builder argBuilder = new ApplicationDeployArgs.Builder(accountAppId)
+            .deployPackage(warFile, deployType).withParams(params)
+            .withProgressFeedback(new UploadProgressWithMonitor(monitor));
+
+        ApplicationDeployArchiveResponse res = client.applicationDeployArchive(argBuilder.build());
+    */
   }
 
   public static String getExtension(String s) {
@@ -517,5 +635,63 @@ public class BeesSDK {
       }
     }
     return false;
+  }
+
+  public final static ProcessBuilder createBeesProcess(boolean addAuth, String... cmd) throws CloudBeesException {
+    return createBeesProcess(addAuth, new String[] {}, cmd);
+  }
+
+  public final static ProcessBuilder createBeesProcess(boolean addAuth, String[] vmargs, String... cmd)
+      throws CloudBeesException {
+
+    List<String> cmds = new ArrayList<String>();
+
+    String secretKey = null;
+    String authKey = null;
+
+    if (addAuth) {
+      GrandCentralService grandCentralService;
+      grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+      AuthInfo cachedAuthInfo = grandCentralService.getCachedAuthInfo(false);
+      secretKey = "-Dbees.apiSecret=" + cachedAuthInfo.getAuth().secret_key;//$NON-NLS-1$
+      authKey = "-Dbees.apiKey=" + cachedAuthInfo.getAuth().api_key;//$NON-NLS-1$
+    }
+
+    String beesHome = "-Dbees.home=" + CBSdkActivator.getDefault().getBeesHome();
+    String beesHomeDir = CBSdkActivator.getDefault().getBeesHome();
+
+    //java.home=C:\Java\jdk1.6.0_29\jre
+    //String java = System.getProperty("eclipse.vm");
+
+    //FIXME At one point we might want to use eclipse JRE configs to suport project-specific JREs
+
+    String java = System.getProperty("java.home");
+    if (!java.endsWith(File.separator)) {
+      java = java + File.separator + "bin" + File.separator + "java";
+    }
+
+    String[] c1 = new String[] { java, "-Xmx256m" };
+
+    String[] c2 = new String[] { beesHome, "-cp", beesHomeDir + "lib/cloudbees-boot.jar",
+        "com.cloudbees.sdk.boot.Launcher" };
+
+    cmds.addAll(Arrays.asList(c1));
+    cmds.addAll(Arrays.asList(vmargs));
+    cmds.addAll(Arrays.asList(c2));
+
+    if (addAuth) {
+      cmds.add(secretKey);
+      cmds.add(authKey);
+    }
+
+    cmds.addAll(Arrays.asList(cmd));
+
+    final ProcessBuilder pb = new ProcessBuilder(cmds);
+
+    pb.environment().put("BEES_HOME", beesHomeDir);
+    pb.directory(new File(beesHomeDir));
+    pb.redirectErrorStream(true);
+    return pb;
+
   }
 }

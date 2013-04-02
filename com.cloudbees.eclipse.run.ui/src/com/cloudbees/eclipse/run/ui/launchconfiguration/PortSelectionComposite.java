@@ -35,7 +35,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 
 public abstract class PortSelectionComposite extends Composite {
 
-  private static final String DEFAULT_PORT = "8335";
   private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
   private final Text text;
   private final Button btnUseDefaultPort;
@@ -52,14 +51,14 @@ public abstract class PortSelectionComposite extends Composite {
     setLayout(new FillLayout(SWT.HORIZONTAL));
 
     Group grpSelectPort = new Group(this, SWT.NONE);
-    grpSelectPort.setText("HTTP Port");
+    grpSelectPort.setText(getPortLabel());
     GridLayout gl_grpSelectPort = new GridLayout(2, false);
     grpSelectPort.setLayout(gl_grpSelectPort);
 
     this.btnUseDefaultPort = new Button(grpSelectPort, SWT.CHECK);
     this.btnUseDefaultPort.setSelection(true);
     this.btnUseDefaultPort.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-    this.btnUseDefaultPort.setText("Use default port (" + DEFAULT_PORT + ")");
+    this.btnUseDefaultPort.setText("Use default port (" + getDefaultPort() + ")");
     this.btnUseDefaultPort.addSelectionListener(new SelectionListener() {
 
       @Override
@@ -81,7 +80,7 @@ public abstract class PortSelectionComposite extends Composite {
 
     this.text = new Text(grpSelectPort, SWT.BORDER);
     this.text.setEnabled(false);
-    this.text.setText(DEFAULT_PORT);
+    this.text.setText(getDefaultPort());
     this.text.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
     this.text.addModifyListener(new ModifyListener() {
 
@@ -110,14 +109,14 @@ public abstract class PortSelectionComposite extends Composite {
 
   public String getPort() {
     if (this.btnUseDefaultPort.getSelection()) {
-      return DEFAULT_PORT;
+      return getDefaultPort();
     } else {
       return this.text.getText();
     }
   }
 
   public void setPort(String port) {
-    if (port == null || "".equals(port) || DEFAULT_PORT.equals(port)) {
+    if (port == null || "".equals(port) || getDefaultPort().equals(port)) {
       this.btnUseDefaultPort.setSelection(true);
     } else {
       this.btnUseDefaultPort.setSelection(false);
@@ -129,4 +128,7 @@ public abstract class PortSelectionComposite extends Composite {
 
   public abstract void handleChange();
 
+  public abstract String getDefaultPort();
+  public abstract String getPortLabel();
+  
 }

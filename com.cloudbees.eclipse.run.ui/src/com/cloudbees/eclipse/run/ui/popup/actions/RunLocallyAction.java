@@ -25,7 +25,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.internal.ObjectPluginAction;
 
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
-import com.cloudbees.eclipse.run.ui.launchconfiguration.CBLaunchShortcut;
+import com.cloudbees.eclipse.run.ui.launchconfiguration.CBLocalLaunchShortcut;
 
 @SuppressWarnings("restriction")
 public class RunLocallyAction implements IObjectActionDelegate {
@@ -36,7 +36,7 @@ public class RunLocallyAction implements IObjectActionDelegate {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
         if (action instanceof ObjectPluginAction) {
-          CBLaunchShortcut shortcut = new CBLaunchShortcut();
+          CBLocalLaunchShortcut shortcut = new CBLocalLaunchShortcut();
           ISelection selection = ((ObjectPluginAction) action).getSelection();
           shortcut.launch(selection, "run");
         }

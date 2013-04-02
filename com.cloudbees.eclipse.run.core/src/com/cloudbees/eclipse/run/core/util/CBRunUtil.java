@@ -21,8 +21,10 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
@@ -43,12 +45,12 @@ import com.cloudbees.eclipse.run.sdk.CBSdkActivator;
 public class CBRunUtil {
 
   /**
-   * @return projects in workbench that have {@link CloudBeesNature}
+   * @return projects in workbench that have {@link CloudBeesNature}. Only projects that are open!
    */
   public static List<IProject> getWorkbenchCloudBeesProjects() {
     List<IProject> projects = new ArrayList<IProject>();
     for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-      if (CloudBeesNature.isEnabledFor(project)) {
+      if (project.isOpen() && CloudBeesNature.isEnabledFor(project)) {
         projects.add(project);
       }
     }
@@ -61,8 +63,7 @@ public class CBRunUtil {
    * @return list of launch configurations associated with this project name
    * @throws CoreException
    */
-  public static List<ILaunchConfiguration> getLaunchConfigurations(String projectName, boolean cloud)
-      throws CoreException {
+  public static List<ILaunchConfiguration> getLaunchConfigurations(IFile file, boolean cloud) throws CoreException {
     ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
     List<ILaunchConfiguration> launchConfigurations = new ArrayList<ILaunchConfiguration>();
 
@@ -77,8 +78,9 @@ public class CBRunUtil {
           //antProps.put("bees.home", CBSdkActivator.getDefault().getBeesHome()+"asf");
         }
 
-        if (name.equals(projectName)) {
-          boolean cloudLaunch = "".equals(configuration.getAttribute("org.eclipse.jdt.launching.MAIN_TYPE", ""));
+        if (name.equals(file.getProject().getName())) {
+          boolean cloudLaunch = "".equals(configuration.getAttribute(
+              CBLaunchConfigurationConstants.ATTR_CB_LOCAL_LAUNCH, ""));
 
           if (cloudLaunch && cloud) {
             launchConfigurations.add(configuration);
@@ -95,21 +97,21 @@ public class CBRunUtil {
     return launchConfigurations;
   }
 
-  public static List<ILaunchConfiguration> getOrCreateCloudBeesLaunchConfigurations(String projectName, boolean cloud,
-      String port) throws CoreException {
+  public static List<ILaunchConfiguration> getOrCreateCloudBeesLaunchConfigurations(IFile file, boolean cloud)
+      throws CoreException {
     if (!cloud) {
-      return getOrCreateCloudBeesLaunchConfigurations(projectName, port);
+      return getOrCreateLocalCloudBeesLaunchConfigurations(file);
     }
 
-    List<ILaunchConfiguration> launchConfiguration = getLaunchConfigurations(projectName, cloud);
+    List<ILaunchConfiguration> launchConfiguration = getLaunchConfigurations(file, cloud);
     if (launchConfiguration.isEmpty()) {
       ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
 
       ILaunchConfigurationType configType = launchManager
           .getLaunchConfigurationType(CBLaunchConfigurationConstants.ID_CB_DEPLOY_LAUNCH);
 
-      ILaunchConfigurationWorkingCopy copy = configType.newInstance(null, projectName);
-      copy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, projectName);
+      ILaunchConfigurationWorkingCopy copy = configType.newInstance(null, file.getName());
+      copy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, file.getProject().getName());
       copy.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_BROWSER, true);
       launchConfiguration.add(copy.doSave());
     }
@@ -124,19 +126,19 @@ public class CBRunUtil {
    *         configuration
    * @throws CoreException
    */
-  public static List<ILaunchConfiguration> getOrCreateCloudBeesLaunchConfigurations(String projectName, String port)
+  public static List<ILaunchConfiguration> getOrCreateLocalCloudBeesLaunchConfigurations(IFile file)
       throws CoreException {
-    List<ILaunchConfiguration> launchConfiguration = getLaunchConfigurations(projectName, false);
+    List<ILaunchConfiguration> launchConfiguration = getLaunchConfigurations(file, false);
 
     if (launchConfiguration.isEmpty()) {
       ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
 
       ILaunchConfigurationType configType = launchManager
           .getLaunchConfigurationType(CBLaunchConfigurationConstants.ID_CB_LAUNCH);
-      String name = projectName + " (local)";
+      String name = file.getName() + " (local)";
 
       ILaunchConfigurationWorkingCopy copy = configType.newInstance(null, name);
-      addDefaultAttributes(copy, projectName, port);
+      addLaunchConfLocalAttributes(copy, file, getDefaultLocalPort() + "", getDefaultLocalDebugPort() + "");
 
       launchConfiguration.add(copy.doSave());
     }
@@ -145,56 +147,66 @@ public class CBRunUtil {
   }
 
   /**
-   * Adds attributes to this launch configuration working copy to enable launching as ant task on a separate JRE.
+   * Adds attributes to this launch configuration working copy to enable launching
    * 
    * @param conf
-   * @param projectName
+   * @param targetResource
+   *          (usually either IProject or IFile. IProject will be extracted from IFiles)
    * @return
    * @throws CoreException
    */
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public static ILaunchConfigurationWorkingCopy addDefaultAttributes(ILaunchConfigurationWorkingCopy conf,
-      String projectName, String port) throws CoreException {
+  public static ILaunchConfigurationWorkingCopy addLaunchConfLocalAttributes(ILaunchConfigurationWorkingCopy conf,
+      IResource targetResource, String port, String debugPort) throws CoreException {
 
-    conf.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, projectName);
+    if (targetResource != null) {
+      conf.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, targetResource.getProject().getName());
 
-    IStringVariableManager variableManager = VariablesPlugin.getDefault().getStringVariableManager();
-    String workspaceVarName = "workspace_loc";
+      if (targetResource instanceof IFile) {
+        conf.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, targetResource
+            .getProjectRelativePath().toOSString());
+      }
 
-    if (!projectName.isEmpty()) {
-      IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(projectName + "/build.xml"));
-      String location = variableManager.generateVariableExpression(workspaceVarName, file.getFullPath().toString());
-      conf.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", location);
     }
 
-    Map<String, String> map = conf.getAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", (Map) null);
-
-    if (map == null) {
-      map = new HashMap<String, String>();
-      conf.setAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", map);      
-    }
-
-    injectBeesHome(conf);
-
-    if (port == null) {
-      map.remove("run.port");
-    } else {
-      map.put("run.port", port);
-    }
     conf.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_PORT, port);
-    
+    conf.setAttribute(CBLaunchConfigurationConstants.ATTR_CB_DEBUG_PORT, debugPort);
 
-    String directory = variableManager.generateVariableExpression(workspaceVarName, "/" + projectName);
-    conf.setAttribute("org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY", directory);
+    //IStringVariableManager variableManager = VariablesPlugin.getDefault().getStringVariableManager();
+    //String workspaceVarName = "workspace_loc";
 
-    conf.setAttribute("org.eclipse.jdt.launching.MAIN_TYPE", "org.eclipse.ant.internal.ui.antsupport.InternalAntRunner");
+    /*    if (!projectName.isEmpty()) {
+          IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(projectName + "/build.xml"));
+          String location = variableManager.generateVariableExpression(workspaceVarName, file.getFullPath().toString());
+          conf.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", location);
+        }
+        Map<String, String> map = conf.getAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", (Map) null);
 
-    conf.setAttribute("org.eclipse.ui.externaltools.ATTR_ANT_TARGETS", "run");
+        if (map == null) {
+          map = new HashMap<String, String>();
+          conf.setAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", map);      
+        }
 
-    conf.setAttribute("process_factory_id", "org.eclipse.ant.ui.remoteAntProcessFactory");
-    
-    conf.setAttribute("org.eclipse.jdt.launching.CLASSPATH_PROVIDER", "org.eclipse.ant.ui.AntClasspathProvider");
-    conf.setAttribute("org.eclipse.jdt.launching.DEFAULT_CLASSPATH", true);
+        injectBeesHome(conf);
+
+        if (port == null) {
+          map.remove("run.port");
+        } else {
+          map.put("run.port", port);
+        }
+        */
+
+    /*    String directory = variableManager.generateVariableExpression(workspaceVarName, "/" + projectName);
+        conf.setAttribute("org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY", directory);
+
+        conf.setAttribute("org.eclipse.jdt.launching.MAIN_TYPE", "org.eclipse.ant.internal.ui.antsupport.InternalAntRunner");
+
+        conf.setAttribute("org.eclipse.ui.externaltools.ATTR_ANT_TARGETS", "run");
+
+        conf.setAttribute("process_factory_id", "org.eclipse.ant.ui.remoteAntProcessFactory");
+        
+        conf.setAttribute("org.eclipse.jdt.launching.CLASSPATH_PROVIDER", "org.eclipse.ant.ui.AntClasspathProvider");
+    */conf.setAttribute("org.eclipse.jdt.launching.DEFAULT_CLASSPATH", true);
 
     return conf;
   }
@@ -231,13 +243,21 @@ public class CBRunUtil {
   public static void injectBeesHome(ILaunchConfigurationWorkingCopy copy) throws CoreException {
     // cb launch conf
     Map antProps = copy.getAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", (Map) null);
-    if (antProps==null) {
+    if (antProps == null) {
       antProps = new HashMap();
       copy.setAttribute("org.eclipse.ui.externaltools.ATTR_ANT_PROPERTIES", antProps);
-    }            
+    }
     // Overwrite bees.home with the latest directory location to support bees home dir updates.
-    antProps.put("bees.home", CBSdkActivator.getDefault().getBeesHome());           
+    antProps.put("bees.home", CBSdkActivator.getDefault().getBeesHome());
 
+  }
+
+  public static long getDefaultLocalPort() {
+    return 8335L;
+  }
+
+  public static long getDefaultLocalDebugPort() {
+    return 18335L;
   }
 
 }

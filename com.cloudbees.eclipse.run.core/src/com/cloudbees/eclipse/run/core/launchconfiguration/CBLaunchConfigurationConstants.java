@@ -26,6 +26,9 @@ public interface CBLaunchConfigurationConstants {
   String ATTR_CB_LAUNCH_CUSTOM_ID = CBRunCoreActivator.PLUGIN_ID + ".customId";
   String ATTR_CB_LAUNCH_WAR_PATH = CBRunCoreActivator.PLUGIN_ID + ".warPath";
   String ATTR_CB_PORT = CBRunCoreActivator.PLUGIN_ID + ".port";
+  String ATTR_CB_DEBUG_PORT = CBRunCoreActivator.PLUGIN_ID + ".debugPort";
+  String ATTR_CB_LOCAL_LAUNCH = CBRunCoreActivator.PLUGIN_ID + ".localLaunch";
+  
   public static final String COM_CLOUDBEES_ECLIPSE_WST = "com.cloudbees.eclipse.wst";
   public static final String DO_NOTHING = "DO_NOTHING";
 

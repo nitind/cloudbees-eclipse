@@ -14,28 +14,28 @@
  *******************************************************************************/
 package com.cloudbees.eclipse.run.ui.launchconfiguration;
 
-import static com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME;
 import static com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants.DO_NOTHING;
 
-import org.eclipse.ant.internal.launching.launchConfigurations.AntLaunchDelegate;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchesListener2;
+import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jdt.launching.JavaLaunchDelegate;
 
+import com.cloudbees.eclipse.run.core.launchconfiguration.CBLaunchConfigurationConstants;
 import com.cloudbees.eclipse.run.core.launchconfiguration.CBProjectProcessService;
 import com.cloudbees.eclipse.run.core.util.CBRunUtil;
-import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 
 @SuppressWarnings("restriction")
-public class CBLaunchDelegate extends AntLaunchDelegate {
+public class CBLocalVMLaunchDelegate extends JavaLaunchDelegate /*AntLaunchDelegate */{
 
   @Override
   public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
@@ -49,9 +49,19 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
     boolean debug = mode.equals("debug");
 
     ILaunchConfiguration launchConf = modifyLaunch(configuration, mode);
-    super.launch(launchConf, mode, launch, monitor);
+    
+    String projectName = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_PROJECT_NAME, "");
+    String warName = configuration.getAttribute(CBLaunchConfigurationConstants.ATTR_CB_LAUNCH_WAR_PATH, "");
 
-    String projectName = configuration.getAttribute(ATTR_CB_PROJECT_NAME, "");
+    IProject proj = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+    IFile file = null;
+    if (proj!=null) {
+      //file = proj.getFile(warName);
+    }
+    
+    //CBLocalLaunchShortcut.internalLaunch(monitor, file, proj, debug);
+    //super.launch(launchConf, mode, launch, monitor);
+
     CBProjectProcessService.getInstance().addProcess(projectName, launch.getProcesses()[0]);
     DebugPlugin.getDefault().getLaunchManager().addLaunchListener(new TerminateListener(projectName));
 
@@ -59,7 +69,7 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
       CBRunUtil.createTemporaryRemoteLaunchConfiguration(projectName).launch(mode, monitor);
     }
 
-    handleExtensions(configuration, projectName);
+    // handleExtensions(configuration, projectName);
   }
 
   private ILaunchConfiguration modifyLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
@@ -100,7 +110,7 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
     }
   }
 
-  private IExtension[] handleExtensions(ILaunchConfiguration configuration, String projectName) {
+/*  private IExtension[] handleExtensions(ILaunchConfiguration configuration, String projectName) {
     IExtension[] extensions = Platform.getExtensionRegistry()
         .getExtensionPoint(CBRunUiActivator.PLUGIN_ID, "launchDelegateAditions").getExtensions();
 
@@ -118,5 +128,5 @@ public class CBLaunchDelegate extends AntLaunchDelegate {
     }
     return extensions;
   }
-
+*/
 }

@@ -44,6 +44,7 @@ import com.cloudbees.api.ApplicationInfo;
 import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
+import com.cloudbees.eclipse.run.ui.console.ConsoleUtil;
 
 @SuppressWarnings("restriction")
 public abstract class AbstractTailAction implements IObjectActionDelegate {
@@ -165,7 +166,7 @@ public abstract class AbstractTailAction implements IObjectActionDelegate {
     String consoleName = MessageFormat.format("Tail {0} log :: {1}", logName, appInfo.getTitle());
     final IConsole console = getTailConsole(consoleName);
 
-    activateConsole(console);
+    ConsoleUtil.activateConsole(console);
 
     manager.showConsoleView(console);
 
@@ -189,38 +190,7 @@ public abstract class AbstractTailAction implements IObjectActionDelegate {
     tmap.put(consoleName, t);
   }
 
-  private void activateConsole(final IConsole console) {
-    ConsolePlugin.getStandardDisplay().asyncExec(new Runnable() {
-      public void run() {
-
-        IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
-        for (int i = 0; i < workbenchWindows.length; i++) {
-          IWorkbenchWindow window = workbenchWindows[i];
-          if (window != null) {
-            IWorkbenchPage page = window.getActivePage();
-            if (page != null) {
-              IViewPart part = page.findView(IConsoleConstants.ID_CONSOLE_VIEW);
-              if (part != null && part instanceof IConsoleView) {
-                ConsoleView view = (ConsoleView) part;
-
-                view.display(console);
-
-/*                if (view != null && console.getName().equals(view.getConsole().getName())) {
-                  StyledText control = (StyledText) view.getCurrentPage().getControl();
-                  if (!control.isDisposed()) {
-                    control.setCaretOffset(control.getCharCount());
-                  }
-                }
-*/
-              }
-
-            }
-          }
-        }
-      }
-    });
-
-  }
+ 
 
   protected abstract String getLogName();
 

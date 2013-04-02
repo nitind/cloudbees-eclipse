@@ -29,7 +29,9 @@ import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.core.GrandCentralService.AuthInfo;
+import com.cloudbees.eclipse.run.core.BeesSDK;
 import com.cloudbees.eclipse.run.sdk.CBSdkActivator;
+import com.cloudbees.sdk.BeesSecurityException;
 
 /**
  * Wrapper to run Bees command line client commands and access input/output streams
@@ -112,30 +114,10 @@ public class BeesRunner {
       return;
     }
 
-    GrandCentralService grandCentralService;
-    grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    AuthInfo cachedAuthInfo = grandCentralService.getCachedAuthInfo(false);
-    String secretKey = "-Dbees.apiSecret=" + cachedAuthInfo.getAuth().secret_key;//$NON-NLS-1$
-    String authKey = "-Dbees.apiKey=" + cachedAuthInfo.getAuth().api_key;//$NON-NLS-1$
-    String beesHome = "-Dbees.home=" + CBSdkActivator.getDefault().getBeesHome();
-    String beesHomeDir = CBSdkActivator.getDefault().getBeesHome();
-
-    //java.home=C:\Java\jdk1.6.0_29\jre
-    //String java = System.getProperty("eclipse.vm");
-
-    String java = System.getProperty("java.home");
-    if (!java.endsWith(File.separator)) {
-      java = java + File.separator + "bin" + File.separator + "java";
-    }
+    final ProcessBuilder pb = BeesSDK.createBeesProcess(cmd);
 
     OutputStreamWriter osw = new OutputStreamWriter(out);
     BufferedWriter writer = new BufferedWriter(osw);
-
-    final ProcessBuilder pb = new ProcessBuilder(java, "-Xmx256m", beesHome, secretKey, authKey, "-cp", beesHomeDir
-        + "lib/cloudbees-boot.jar", "com.cloudbees.sdk.boot.Launcher", cmd);
-    pb.environment().put("BEES_HOME", beesHomeDir);
-    pb.directory(new File(beesHomeDir));
-    pb.redirectErrorStream(true);
 
     Process p = null;
     try {

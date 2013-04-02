@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Shell;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.Images;
 
-public class WarSelectionDialog extends TitleAreaDialog {
+public class FileSelectionDialog extends TitleAreaDialog {
 
   private static final String TITLE = "War File Selection";
   private static final String DESCRIPTION = "Please select the war file you want to deploy";
@@ -39,7 +39,7 @@ public class WarSelectionDialog extends TitleAreaDialog {
   private final String[] warPaths;
   private String selectedWarPath;
 
-  public WarSelectionDialog(final Shell shell, final String[] warPaths) {
+  public FileSelectionDialog(final Shell shell, final String[] warPaths) {
     super(shell);
     this.warPaths = warPaths;
   }
@@ -106,7 +106,7 @@ public class WarSelectionDialog extends TitleAreaDialog {
     this.selectedWarPath = list.getSelection()[0];
   }
 
-  public String getSelectedWarPath() {
+  public String getSelectedFilePath() {
     return this.selectedWarPath;
   }
 }
