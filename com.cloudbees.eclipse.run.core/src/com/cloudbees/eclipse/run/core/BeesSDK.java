@@ -671,14 +671,15 @@ public class BeesSDK {
     String[] c2 = new String[] { beesHome, "-cp", beesHomeDir + "lib/cloudbees-boot.jar",
         "com.cloudbees.sdk.boot.Launcher" };
 
-    cmds.addAll(Arrays.asList(c1));
-    cmds.addAll(Arrays.asList(vmargs));
-    cmds.addAll(Arrays.asList(c2));
 
+    cmds.addAll(Arrays.asList(c1));
     if (addAuth) {
       cmds.add(secretKey);
       cmds.add(authKey);
     }
+    cmds.addAll(Arrays.asList(vmargs));
+    cmds.addAll(Arrays.asList(c2));
+
 
     cmds.addAll(Arrays.asList(cmd));
 
