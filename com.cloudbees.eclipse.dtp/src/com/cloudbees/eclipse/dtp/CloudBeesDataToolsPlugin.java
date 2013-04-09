@@ -26,6 +26,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import com.cloudbees.eclipse.core.Logger;
+import com.cloudbees.eclipse.dtp.internal.ConnectDatabaseAction;
 import com.cloudbees.eclipse.dtp.internal.DatabasePoller;
 import com.cloudbees.eclipse.run.core.ApplicationPoller;
 
@@ -49,8 +50,12 @@ public class CloudBeesDataToolsPlugin extends AbstractUIPlugin {
     super.start(bundleContext);
     plugin = this;
     this.logger = new Logger(getLog());
+    
+    ConnectDatabaseAction.reloadDriverDefinition();
+    
     getPoller().start();
   }
+
 
   /*
    * (non-Javadoc)

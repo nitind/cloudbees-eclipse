@@ -29,6 +29,8 @@ import org.eclipse.datatools.connectivity.drivers.IDriverMgmtConstants;
 import org.eclipse.datatools.connectivity.drivers.IPropertySet;
 import org.eclipse.datatools.connectivity.drivers.PropertySetImpl;
 import org.eclipse.datatools.connectivity.drivers.jdbc.IJDBCConnectionProfileConstants;
+import org.eclipse.datatools.connectivity.drivers.models.OverrideTemplateDescriptor;
+import org.eclipse.datatools.connectivity.internal.ui.DriverPropertySourceProvider;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -38,7 +40,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.internal.ObjectPluginAction;
 
 import com.cloudbees.api.DatabaseInfo;
-import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.dtp.CloudBeesDataToolsPlugin;
 import com.cloudbees.eclipse.dtp.Images;
@@ -53,7 +54,7 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
   private final static String DRIVER_DEF_ID = "DriverDefn.org.eclipse.datatools.enablement.mysql.5_1.driverTemplate.MySQL "
       + DRIVER_INSTANCE_ID;
   private final static String PROVIDER_ID = "org.eclipse.datatools.enablement.mysql.connectionProfile";
-  
+
   protected static final String DTP_PERSPECTIVE = "org.eclipse.datatools.sqltools.sqleditor.perspectives.EditorPerspective";
 
   public ConnectDatabaseAction() {
@@ -120,12 +121,12 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
       public void run() {
         try {
           IWorkbenchPage activePage = CloudBeesUIPlugin.getActiveWindow().getActivePage();
-          if (activePage.getPerspective().getId() != DTP_PERSPECTIVE)  {
-            CloudBeesUIPlugin.getActiveWindow().getWorkbench().showPerspective(DTP_PERSPECTIVE, CloudBeesUIPlugin.getActiveWindow());
+          if (activePage.getPerspective().getId() != DTP_PERSPECTIVE) {
+            CloudBeesUIPlugin.getActiveWindow().getWorkbench()
+                .showPerspective(DTP_PERSPECTIVE, CloudBeesUIPlugin.getActiveWindow());
           }
-            
-          activePage
-              .showView("org.eclipse.datatools.connectivity.DataSourceExplorerNavigator");
+
+          activePage.showView("org.eclipse.datatools.connectivity.DataSourceExplorerNavigator");
         } catch (Exception e) {
           CloudBeesUIPlugin.showError("Failed to show Data Source Explorer", e);
         }
@@ -133,7 +134,6 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
     });
 
   }
-
 
   @Override
   public void setActivePart(IAction action, IWorkbenchPart targetPart) {
@@ -216,48 +216,9 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
     // org.eclipse.datatools.connectivity.db.vendor=MySql}
 
     // ensure a cloudbees-created driver exists
-    Properties baseProperties = new Properties();
-    baseProperties.setProperty(IDriverMgmtConstants.PROP_DEFN_TYPE,
-        "org.eclipse.datatools.enablement.mysql.5_1.driverTemplate");
-      
-    String dirs = CBSdkActivator.getDefault().getBeesHome();
-    if (!dirs.endsWith(File.separator)) {
-      dirs = dirs+File.separator;
-    }
-    
-    baseProperties.setProperty(IDriverMgmtConstants.PROP_DEFN_JARLIST, dirs+"lib"+File.separator+"mysql-connector-java-5.1.15.jar");
-    baseProperties.setProperty(IJDBCConnectionProfileConstants.DRIVER_CLASS_PROP_ID, "com.mysql.jdbc.Driver");
-    //baseProperties.setProperty(ConnectionProfileConstants.PROP_DRIVER_DEFINITION_ID, "DriverDefn.org.eclipse.datatools.enablement.mysql.5_0.driverTemplate.MySQL JDBC Driver test 1");
 
-    baseProperties.setProperty(IJDBCConnectionProfileConstants.DATABASE_NAME_PROP_ID, db.getName());
-
-    baseProperties.setProperty(IJDBCConnectionProfileConstants.DATABASE_VENDOR_PROP_ID, "MySql");
-    baseProperties.setProperty(IJDBCConnectionProfileConstants.DATABASE_VERSION_PROP_ID, "5.1");
-    baseProperties.setProperty(IJDBCConnectionProfileConstants.SAVE_PASSWORD_PROP_ID, String.valueOf(true));
-
-    DriverInstance driver = DriverManager.getInstance().getDriverInstanceByID(DRIVER_DEF_ID);
     monitor.subTask("Validating driver definition");
-    if (driver == null) {
-      /*            Properties pr = new Properties();
-                  pr.put("jarList", "C:\\Java\\mysql-connector-java-5.0.8-bin.jar");
-                  pr.put("org.eclipse.datatools.connectivity.drivers.defnType",
-                      "org.eclipse.datatools.enablement.mysql.5_0.driverTemplate");
-                  pr.put("org.eclipse.datatools.connectivity.db.driverClass", "com.mysql.jdbc.Driver");
-                  pr.put("org.eclipse.datatools.connectivity.db.databaseName", "database");
-                  pr.put("org.eclipse.datatools.connectivity.db.version", "5.0");
-                  pr.put("org.eclipse.datatools.connectivity.db.vendor", "MySql");
-      */
-
-      IPropertySet ips = new PropertySetImpl("CloudBees Driver Definition for MySQL 5.1", DRIVER_DEF_ID);
-      ips.setBaseProperties(baseProperties);
-      DriverInstance di = new DriverInstance(ips);
-
-      monitor.subTask("Configuring driver definition");
-      DriverManager.getInstance().addDriverInstance(di);
-
-      //DriverInstance ndri = DriverManager.getInstance().createNewDriverInstance(DRIVER_INSTANCE_ID, "CloudBees MySQL Driver", "C:\\Java\\mysql-connector-java-5.0.8-bin.jar", "com.mysql.jdbc.Driver");
-
-    }
+    reloadDriverDefinition();
     monitor.worked(10);
     //
     // create connection profile
@@ -312,6 +273,8 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
                   "C:\\Java\\mysql-connector-java-5.0.8-bin.jar");
               baseProperties.setProperty(IJDBCConnectionProfileConstants.DRIVER_CLASS_PROP_ID, "com.mysql.jdbc.Driver");
     */
+    Properties baseProperties = getBaseProps();
+    baseProperties.setProperty(IJDBCConnectionProfileConstants.DATABASE_NAME_PROP_ID, db.getName());
     baseProperties.setProperty(IJDBCConnectionProfileConstants.URL_PROP_ID,
         "jdbc:mysql://" + db.getMaster() + ":" + db.getPort() + "/" + db.getName());
     baseProperties.setProperty(IJDBCConnectionProfileConstants.USERNAME_PROP_ID, db.getUsername());
@@ -337,6 +300,62 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
     monitor.subTask("Connecting to '" + pName + "'");
     profile.connect();
     monitor.done();
+  }
+
+  public final static void reloadDriverDefinition() {
+    Properties baseProperties = getBaseProps();
+    DriverInstance driver = DriverManager.getInstance().getDriverInstanceByID(DRIVER_DEF_ID);
+    if (driver == null) {
+      /*            Properties pr = new Properties();
+                  pr.put("jarList", "C:\\Java\\mysql-connector-java-5.0.8-bin.jar");
+                  pr.put("org.eclipse.datatools.connectivity.drivers.defnType",
+                      "org.eclipse.datatools.enablement.mysql.5_0.driverTemplate");
+                  pr.put("org.eclipse.datatools.connectivity.db.driverClass", "com.mysql.jdbc.Driver");
+                  pr.put("org.eclipse.datatools.connectivity.db.databaseName", "database");
+                  pr.put("org.eclipse.datatools.connectivity.db.version", "5.0");
+                  pr.put("org.eclipse.datatools.connectivity.db.vendor", "MySql");
+      */
+
+      IPropertySet ips = new PropertySetImpl("CloudBees Driver Definition for MySQL 5.1", DRIVER_DEF_ID);
+      ips.setBaseProperties(baseProperties);
+      DriverInstance di = new DriverInstance(ips);
+      DriverManager.getInstance().addDriverInstance(di);
+
+      //OverrideTemplateDescriptor.getByDriverTemplate(driverTemplateId)
+      driver.getPropertySet().setBaseProperties(baseProperties);
+      
+      //DriverInstance ndri = DriverManager.getInstance().createNewDriverInstance(DRIVER_INSTANCE_ID, "CloudBees MySQL Driver", "C:\\Java\\mysql-connector-java-5.0.8-bin.jar", "com.mysql.jdbc.Driver");
+
+    } else {
+      // already exists, update jar location if needed
+      driver.getPropertySet().setBaseProperties(baseProperties);
+    }
+
+  }
+
+  private static Properties getBaseProps() {
+    Properties baseProperties = new Properties();
+    baseProperties.setProperty(IDriverMgmtConstants.PROP_DEFN_TYPE,
+        "org.eclipse.datatools.enablement.mysql.5_1.driverTemplate");
+
+    baseProperties.setProperty(IDriverMgmtConstants.PROP_DEFN_JARLIST, getJarList());
+    baseProperties.setProperty(IJDBCConnectionProfileConstants.DRIVER_CLASS_PROP_ID, "com.mysql.jdbc.Driver");
+
+    //baseProperties.setProperty(ConnectionProfileConstants.PROP_DRIVER_DEFINITION_ID, "DriverDefn.org.eclipse.datatools.enablement.mysql.5_0.driverTemplate.MySQL JDBC Driver test 1");
+
+    baseProperties.setProperty(IJDBCConnectionProfileConstants.DATABASE_VENDOR_PROP_ID, "MySql");
+    baseProperties.setProperty(IJDBCConnectionProfileConstants.DATABASE_VERSION_PROP_ID, "5.1");
+    baseProperties.setProperty(IJDBCConnectionProfileConstants.SAVE_PASSWORD_PROP_ID, String.valueOf(true));
+    return baseProperties;
+  }
+
+  private static String getJarList() {
+    String dirs = CBSdkActivator.getDefault().getBeesHome();
+    if (!dirs.endsWith(File.separator)) {
+      dirs = dirs + File.separator;
+    }
+
+    return dirs + "lib" + File.separator + "mysql-connector-java-5.1.15.jar";
   }
 
 }
