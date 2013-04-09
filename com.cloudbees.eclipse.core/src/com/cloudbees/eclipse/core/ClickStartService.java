@@ -98,8 +98,8 @@ public class ClickStartService {
       
       HttpParams params = httpclient.getParams();
       // Override timeouts, this request can be long..
-      HttpConnectionParams.setConnectionTimeout(params, 100000);
-      HttpConnectionParams.setSoTimeout(params, 100000);
+      HttpConnectionParams.setConnectionTimeout(params, 180000);
+      HttpConnectionParams.setSoTimeout(params, 180000);
 
       
       HttpPost get = Utils.jsonRequest(url, "");
