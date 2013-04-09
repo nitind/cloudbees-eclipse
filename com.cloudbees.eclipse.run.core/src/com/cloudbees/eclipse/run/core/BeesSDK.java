@@ -671,7 +671,6 @@ public class BeesSDK {
     String[] c2 = new String[] { beesHome, "-cp", beesHomeDir + "lib/cloudbees-boot.jar",
         "com.cloudbees.sdk.boot.Launcher" };
 
-
     cmds.addAll(Arrays.asList(c1));
     if (addAuth) {
       cmds.add(secretKey);
@@ -680,8 +679,14 @@ public class BeesSDK {
     cmds.addAll(Arrays.asList(vmargs));
     cmds.addAll(Arrays.asList(c2));
 
-
-    cmds.addAll(Arrays.asList(cmd));
+    if (cmd != null) {
+      for (int i = 0; i < cmd.length; i++) {
+        String[] subcmd = cmd[i].split(" ");
+        if (subcmd!=null && subcmd.length>0) {
+          cmds.addAll(Arrays.asList(subcmd));     
+        }
+      }
+    }    
 
     final ProcessBuilder pb = new ProcessBuilder(cmds);
 
