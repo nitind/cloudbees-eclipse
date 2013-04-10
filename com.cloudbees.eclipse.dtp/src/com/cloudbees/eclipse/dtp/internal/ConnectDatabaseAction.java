@@ -322,7 +322,7 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
       DriverManager.getInstance().addDriverInstance(di);
 
       //OverrideTemplateDescriptor.getByDriverTemplate(driverTemplateId)
-      driver.getPropertySet().setBaseProperties(baseProperties);
+      //di.getPropertySet().setBaseProperties(baseProperties);
       
       //DriverInstance ndri = DriverManager.getInstance().createNewDriverInstance(DRIVER_INSTANCE_ID, "CloudBees MySQL Driver", "C:\\Java\\mysql-connector-java-5.0.8-bin.jar", "com.mysql.jdbc.Driver");
 
@@ -351,6 +351,9 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
 
   private static String getJarList() {
     String dirs = CBSdkActivator.getDefault().getBeesHome();
+    
+    dirs = dirs.replaceAll("\\/", File.separator);
+    
     if (!dirs.endsWith(File.separator)) {
       dirs = dirs + File.separator;
     }
