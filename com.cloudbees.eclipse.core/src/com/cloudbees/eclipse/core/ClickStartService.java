@@ -50,12 +50,11 @@ public class ClickStartService {
 
   public void setAuth(String apiKey, String secretKey) {
     this.apiKey = apiKey;
-    this.secretKey = secretKey;    
+    this.secretKey = secretKey;
   }
-  
+
   public Collection<ClickStartTemplate> loadTemplates(IProgressMonitor monitor) throws CloudBeesException {
 
-    
     StringBuffer errMsg = new StringBuffer();
 
     try {
@@ -95,20 +94,21 @@ public class ClickStartService {
     try {
       String url = CS_API_URL + "launch?account=" + account + "&name=" + name + "&template=" + template;
       HttpClient httpclient = Utils.getAPIClient(url);
-      
+
       HttpParams params = httpclient.getParams();
       // Override timeouts, this request can be long..
-      HttpConnectionParams.setConnectionTimeout(params, 180000);
-      HttpConnectionParams.setSoTimeout(params, 180000);
+      HttpConnectionParams.setConnectionTimeout(params, 6 * 60 * 1000);
+      HttpConnectionParams.setSoTimeout(params, 6 *  60  * 1000);
 
-      
       HttpPost get = Utils.jsonRequest(url, "");
       applyAuth(get);
-      System.out.println("Request URL: "+url);
-      System.out.println("curl --header \"Authorization: Basic NzgxNUI0MUQzRjREOTk2ODpVUDQzM1NURjFOQjlZRElFRytWSzk4RFhNQjBDSExPRko2WFlFQlRIMENBPQ==\" -i -X POST \""+url+"\"");
+      System.out.println("Request URL: " + url);
+      System.out
+          .println("curl --header \"Authorization: Basic NzgxNUI0MUQzRjREOTk2ODpVUDQzM1NURjFOQjlZRElFRytWSzk4RFhNQjBDSExPRko2WFlFQlRIMENBPQ==\" -i -X POST \""
+              + url + "\"");
       HttpResponse resp = httpclient.execute(get);
       String bodyResponse = Utils.getResponseBody(resp);
-      System.out.println("JSON RESPONSE for the create command:\n"+bodyResponse);
+      System.out.println("JSON RESPONSE for the create command:\n" + bodyResponse);
       Gson g = Utils.createGson();
       ClickStartCreateResponse r = g.fromJson(bodyResponse, ClickStartCreateResponse.class);
 
@@ -141,18 +141,18 @@ public class ClickStartService {
       errMsg = new StringBuffer(e.getMessage());
       throw new CloudBeesException("Failed to invoke ClickStart!" + (errMsg.length() > 0 ? " (" + errMsg + ")" : ""), e);
     }
-    
+
     try {
       ClickStartResponseBase r = Utils.createGson().fromJson(reader, ClickStartTemplateDetailsResponse.class);
       checkForErrors(resp, r);
       return (ClickStartTemplateDetailsResponse) r;
     } finally {
-        try {
-          reader.close();
-        } catch (IOException e) {
-          e.printStackTrace();
-          // safe to fail.
-        }
+      try {
+        reader.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+        // safe to fail.
+      }
     }
 
   }
@@ -201,7 +201,7 @@ public class ClickStartService {
 
   public void stop() {
     // TODO Auto-generated method stub
-    
+
   }
 
 }
