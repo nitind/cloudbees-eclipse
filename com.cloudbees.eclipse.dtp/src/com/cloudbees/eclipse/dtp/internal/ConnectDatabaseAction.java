@@ -329,6 +329,7 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
     } else {
       // already exists, update jar location if needed
       driver.getPropertySet().setBaseProperties(baseProperties);
+      DriverManager.getInstance().resetDefaultInstances();  
     }
 
   }
