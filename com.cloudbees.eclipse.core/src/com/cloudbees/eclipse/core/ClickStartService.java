@@ -41,7 +41,7 @@ import com.google.gson.reflect.TypeToken;
 
 public class ClickStartService {
 
-  private static final String CS_API_URL = "https://api-staging.cloudbees.com/v2/clickstart/";
+  private static final String CS_API_URL = "https://api.cloudbees.com/v2/clickstart/";
   private String apiKey;
   private String secretKey;
 
