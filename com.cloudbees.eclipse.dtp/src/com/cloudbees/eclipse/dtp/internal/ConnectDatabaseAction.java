@@ -352,7 +352,7 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
   private static String getJarList() {
     String dirs = CBSdkActivator.getDefault().getBeesHome();
     
-    dirs = dirs.replaceAll("\\/", File.separator);
+    dirs = dirs.replace('/', File.separator.charAt(0));
     
     if (!dirs.endsWith(File.separator)) {
       dirs = dirs + File.separator;
