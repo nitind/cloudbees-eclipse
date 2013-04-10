@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.URIUtil;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -57,7 +56,6 @@ import com.cloudbees.eclipse.core.gc.api.ClickStartTemplate;
 import com.cloudbees.eclipse.dev.scm.egit.ForgeEGitSync;
 import com.cloudbees.eclipse.run.core.CBRunCoreActivator;
 import com.cloudbees.eclipse.run.core.NewClickStartProjectHook;
-import com.cloudbees.eclipse.run.ui.CBProjectSettingsPage;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.run.ui.popup.actions.ReloadRunAtCloudAction;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -68,6 +66,9 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
   private static final String ERROR_TITLE = "Error";
   private static final String ERROR_MSG = "Received error while creating new project";
 
+  private final static boolean SUPPORT_CANCEL = false;;
+
+  
   private final CBWebAppWizard wizard;
   private final CBProjectNameAndLocationPage nameAndLocPage;
   private final ClickStartTemplateWizardPage clickStartPage;
@@ -151,13 +152,17 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
       protected void canceling() {
         // notify user "ClickStart project provisioning cannot be cancelled."
         //MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Cannot be cancelled.", "ClickStart project provisioning cannot be cancelled.");
-        MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Cancelled.", "Partially cancelled:\n1) Provisioning cannot be cancelled and will continue.\n2) After the provisioning completes Eclipse won't be configured for the app.");
+        
+        MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Cannot be canceled.", "This operation cannot be canceled.");
+        
+        //MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Cancelled.", "Partially cancelled:\n1) Provisioning cannot be cancelled and will continue.\n2) After the provisioning completes Eclipse won't be configured for the app.");
+        
         //super.canceling();
       }
       
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
-
+        
         monitor.beginTask("Provisioning CloudBees ClickStart project. This may take a few minutes.", 100);
         try {
 
@@ -185,7 +190,7 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
           int pr = service.getCreateProgress(resId);
           int lastpr = pr;
 
-          if (monitor.isCanceled()) {
+          if (SUPPORT_CANCEL && monitor.isCanceled()) {
             return Status.CANCEL_STATUS;
           }
           
@@ -194,17 +199,17 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
           while (pr < 100) {
             Thread.currentThread().sleep(1000);
             lastpr = pr;
-            if (monitor.isCanceled()) {
+            if (SUPPORT_CANCEL && monitor.isCanceled()) {
               return Status.CANCEL_STATUS;
             }
             pr = service.getCreateProgress(resId);
-            if (monitor.isCanceled()) {
+            if (SUPPORT_CANCEL && monitor.isCanceled()) {
               return Status.CANCEL_STATUS;
             }
             monitor.worked(pr - lastpr);
           }
 
-          if (monitor.isCanceled()) {
+          if (SUPPORT_CANCEL && monitor.isCanceled()) {
             return Status.CANCEL_STATUS;
           }
 
