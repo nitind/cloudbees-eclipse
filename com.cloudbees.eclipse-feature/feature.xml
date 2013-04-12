@@ -31,10 +31,6 @@ limitations under the License.
       <update label="CloudBees Toolkit" url="http://eclipse.cloudbees.com"/>
    </url>
 
-   <includes
-         id="com.cloudbees.eclipse.dev.scm.egit"
-         version="0.0.0"/>
-
    <requires>
       <import plugin="org.eclipse.swt"/>
    </requires>
