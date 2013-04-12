@@ -49,7 +49,7 @@ public class ReloadDatabaseAction extends CBTreeAction implements IObjectActionD
 
         monitor.beginTask("Loading Database info", 100);
         try {
-          CloudBeesDataToolsPlugin.getPoller().fetchAndUpdateDatabases(new NullProgressMonitor());         
+          CloudBeesDataToolsPlugin.getPoller().fetchAndUpdateDatabases(monitor);         
           monitor.worked(75);
           CloudBeesUIPlugin.getDefault().fireDatabaseInfoChanged();
           monitor.worked(25);

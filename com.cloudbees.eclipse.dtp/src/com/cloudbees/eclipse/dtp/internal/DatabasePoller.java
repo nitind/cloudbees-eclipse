@@ -14,12 +14,20 @@
  *******************************************************************************/
 package com.cloudbees.eclipse.dtp.internal;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.datatools.connectivity.ConnectionProfileConstants;
+import org.eclipse.datatools.connectivity.IConnectionProfile;
+import org.eclipse.datatools.connectivity.ProfileManager;
 
 import com.cloudbees.api.DatabaseInfo;
 import com.cloudbees.api.DatabaseListResponse;
@@ -66,12 +74,66 @@ public class DatabasePoller extends Thread {
     }
 
     String account = CloudBeesUIPlugin.getDefault().getActiveAccountName(monitor);
-    
+
     DatabaseListResponse list = BeesSDK.getDatabaseList(account);
 
     updateStatus(list);
     for (DatabaseInfo info : list.getDatabases()) {
       updateStatus(info.getName(), info.getStatus(), info);
+    }
+
+    deleteNonExistingConnectionProfiles(list, monitor);
+
+  }
+
+  private void deleteNonExistingConnectionProfiles(DatabaseListResponse list, IProgressMonitor monitor) {
+    // Construct a list of DB names to match.
+    List<DatabaseInfo> dblist = list.getDatabases();
+    try {
+      if (list == null || dblist == null) {
+        return;
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    Set<String> dbset = new HashSet<String>();
+    for (DatabaseInfo db : dblist) {
+      String name = db.getOwner() + "/" + db.getName();
+      dbset.add(name);
+    }
+
+    List<IConnectionProfile> toRemove = new ArrayList<IConnectionProfile>();
+    for (IConnectionProfile profile : ProfileManager.getInstance().getProfiles()) {
+
+      String prop = profile.getBaseProperties().getProperty(ConnectionProfileConstants.PROP_DRIVER_DEFINITION_ID);
+      if (prop != null && prop.equalsIgnoreCase(ConnectDatabaseAction.DRIVER_DEF_ID) && profile.getName() != null
+          && !dbset.contains(profile.getName())) {
+        // profile exists but the corresponding database in the cloud is not there.
+        toRemove.add(profile);
+      }
+    }
+
+    for (IConnectionProfile profile : toRemove) {
+      try {
+        try {
+          profile.disconnect();
+        } finally {
+          ProfileManager.getInstance().deleteProfile(profile);
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+        // semisilently ignore
+      }
+    }
+
+    if (toRemove.size() > 0) {
+      try {
+        CloudBeesDataToolsPlugin.getPoller().fetchAndUpdateDatabases(monitor);
+        CloudBeesUIPlugin.getDefault().fireDatabaseInfoChanged();
+      } catch (Exception e) {
+        e.printStackTrace();
+        // semisilently ignore        
+      }
     }
   }
 

@@ -29,8 +29,6 @@ import org.eclipse.datatools.connectivity.drivers.IDriverMgmtConstants;
 import org.eclipse.datatools.connectivity.drivers.IPropertySet;
 import org.eclipse.datatools.connectivity.drivers.PropertySetImpl;
 import org.eclipse.datatools.connectivity.drivers.jdbc.IJDBCConnectionProfileConstants;
-import org.eclipse.datatools.connectivity.drivers.models.OverrideTemplateDescriptor;
-import org.eclipse.datatools.connectivity.internal.ui.DriverPropertySourceProvider;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -51,7 +49,7 @@ import com.cloudbees.eclipse.ui.views.CBTreeAction;
 public class ConnectDatabaseAction extends CBTreeAction implements IObjectActionDelegate {
 
   private final static String DRIVER_INSTANCE_ID = "cloudbees-mysql-5.1-driver";
-  private final static String DRIVER_DEF_ID = "DriverDefn.org.eclipse.datatools.enablement.mysql.5_1.driverTemplate.MySQL "
+  public final static String DRIVER_DEF_ID = "DriverDefn.org.eclipse.datatools.enablement.mysql.5_1.driverTemplate.MySQL "
       + DRIVER_INSTANCE_ID;
   private final static String PROVIDER_ID = "org.eclipse.datatools.enablement.mysql.connectionProfile";
 
