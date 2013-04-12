@@ -14,16 +14,14 @@
          id="com.cloudbees.eclipse"
          version="0.0.0"/>
 
-<!-- do not offer egit anymore as its part of the main installation
    <includes
          id="com.cloudbees.eclipse.dev.scm.egit"
          version="0.0.0"
          optional="true"/>
--->
 
    <includes
          id="com.cloudbees.eclipse.dev.scm.subclipse"
-         version="0.0.0"
+         version="0.0.0"         
          optional="true"/>
 
    <includes
