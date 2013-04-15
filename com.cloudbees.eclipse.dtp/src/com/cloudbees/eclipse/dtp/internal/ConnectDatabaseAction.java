@@ -17,6 +17,7 @@ package com.cloudbees.eclipse.dtp.internal;
 import java.io.File;
 import java.util.Properties;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -28,7 +29,10 @@ import org.eclipse.datatools.connectivity.drivers.DriverManager;
 import org.eclipse.datatools.connectivity.drivers.IDriverMgmtConstants;
 import org.eclipse.datatools.connectivity.drivers.IPropertySet;
 import org.eclipse.datatools.connectivity.drivers.PropertySetImpl;
+import org.eclipse.datatools.connectivity.drivers.XMLFileManager;
 import org.eclipse.datatools.connectivity.drivers.jdbc.IJDBCConnectionProfileConstants;
+import org.eclipse.datatools.connectivity.drivers.models.TemplateDescriptor;
+import org.eclipse.datatools.connectivity.internal.ConnectivityPlugin;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -321,13 +325,38 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
 
       //OverrideTemplateDescriptor.getByDriverTemplate(driverTemplateId)
       //di.getPropertySet().setBaseProperties(baseProperties);
-      
+
       //DriverInstance ndri = DriverManager.getInstance().createNewDriverInstance(DRIVER_INSTANCE_ID, "CloudBees MySQL Driver", "C:\\Java\\mysql-connector-java-5.0.8-bin.jar", "com.mysql.jdbc.Driver");
 
     } else {
       // already exists, update jar location if needed
-      driver.getPropertySet().setBaseProperties(baseProperties);
-      DriverManager.getInstance().resetDefaultInstances();  
+      IPropertySet ps = driver.getPropertySet();
+      ps.setBaseProperties(baseProperties);
+
+      //XMLFileManager.setFileName(IDriverMgmtConstants.DRIVER_FILE);
+      //XMLFileManager.saveNamedPropertySet(new IPropertySet[]{ps});
+
+      // force property reload by creating&removing a dummy template. didn't find a safer way to guarantee reload
+      IPropertySet ips = new PropertySetImpl("tempCloudBees Driver Definition for MySQL 5.1", DRIVER_DEF_ID + "dummy");
+      ips.setBaseProperties(baseProperties);
+      DriverInstance di = new DriverInstance(ips);
+      DriverManager.getInstance().addDriverInstance(di);
+      DriverManager.getInstance().removeDriverInstance(di.getId());
+
+      //DriverManager.getInstance().resetDefaultInstances();
+
+      /*      TemplateDescriptor types[] = TemplateDescriptor
+                .getDriverTemplateDescriptors();
+            for (TemplateDescriptor templ : types) {
+            }
+      */
+      // workaround to trigger driver instances reload      
+      DriverManager.getInstance().resetDefaultInstances();
+
+      //addDriverInstances(new IPropertySet[]{});
+
+      //ProfileManager.getInstance().modifyProfile(profile);
+
     }
 
   }
@@ -350,9 +379,9 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
 
   private static String getJarList() {
     String dirs = CBSdkActivator.getDefault().getBeesHome();
-    
+
     dirs = dirs.replace('/', File.separator.charAt(0));
-    
+
     if (!dirs.endsWith(File.separator)) {
       dirs = dirs + File.separator;
     }
