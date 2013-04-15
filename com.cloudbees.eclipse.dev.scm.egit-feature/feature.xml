@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.cloudbees.eclipse.dev.scm.egit"
-      label="CloudBees Toolkit GIT Support (**eGIT MUST BE INSTALLED!!**) (Required)"
+      label="Backwards Compatibility Plugin (Not required)"
       version="1.2.0.qualifier"
       provider-name="CloudBees, Inc">
 
@@ -31,12 +31,5 @@ limitations under the License.
       <import plugin="org.eclipse.egit" version="1.3.0" match="greaterOrEqual"/>
       <import plugin="com.cloudbees.eclipse.ui"/>
    </requires>
-
-   <plugin
-         id="com.cloudbees.eclipse.dev.scm.egit"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 
 </feature>
