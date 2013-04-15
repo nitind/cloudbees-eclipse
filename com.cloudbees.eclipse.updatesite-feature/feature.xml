@@ -14,10 +14,11 @@
          id="com.cloudbees.eclipse"
          version="0.0.0"/>
 
-   <includes
+<!--   <includes
          id="com.cloudbees.eclipse.dev.scm.egit"
          version="0.0.0"
          optional="true"/>
+-->
 
    <includes
          id="com.cloudbees.eclipse.dev.scm.subclipse"
