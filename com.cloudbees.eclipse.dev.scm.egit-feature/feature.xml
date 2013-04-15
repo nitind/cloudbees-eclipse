@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.cloudbees.eclipse.dev.scm.egit"
-      label="Backwards Compatibility Plugin (Not required)"
+      label="Backward Compatibility Plugin (Not required)"
       version="1.2.0.qualifier"
       provider-name="CloudBees, Inc">
 
