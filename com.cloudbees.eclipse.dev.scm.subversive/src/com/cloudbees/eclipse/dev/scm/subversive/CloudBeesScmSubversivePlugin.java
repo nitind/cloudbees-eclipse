@@ -17,6 +17,10 @@ package com.cloudbees.eclipse.dev.scm.subversive;
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
+/**
+ * @author ahtik
+ *
+ */
 public class CloudBeesScmSubversivePlugin extends Plugin {
 
   /*

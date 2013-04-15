@@ -17,6 +17,10 @@ package com.cloudbees.eclipse.dev.scm.subclipse;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+/**
+ * @author ahtik
+ *
+ */
 public class CloudBeesScmSubclipsePlugin extends AbstractUIPlugin {
 
   private static CloudBeesScmSubclipsePlugin plugin;
