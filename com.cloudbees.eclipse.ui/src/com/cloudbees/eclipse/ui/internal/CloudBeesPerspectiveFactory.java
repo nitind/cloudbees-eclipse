@@ -59,6 +59,8 @@ public class CloudBeesPerspectiveFactory implements IPerspectiveFactory {
  </view>
 </perspectiveExtension>
 */
+    layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
+
     cbFolder.addView("com.cloudbees.eclipse.ui.views.CBTreeView");
     //cbFolder.addView(IPageLayout.ID_OUTLINE);
     
@@ -84,7 +86,6 @@ public class CloudBeesPerspectiveFactory implements IPerspectiveFactory {
     layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);
 
     // views - standard workbench
-    layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
     layout.addShowViewShortcut(IPageLayout.ID_PROBLEM_VIEW);
     layout.addShowViewShortcut("org.eclipse.ui.views.ResourceNavigator");
     layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
