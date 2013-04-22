@@ -22,6 +22,9 @@ import org.osgi.framework.BundleContext;
  *
  */
 public class CloudBeesScmSubversivePlugin extends Plugin {
+  
+  public final static String PLUGIN_ID="com.cloudbees.eclipse.dev.scm.subversive";
+  
 
   /*
    * (non-Javadoc)

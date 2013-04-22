@@ -33,7 +33,6 @@ public class ForgeContentProvider implements IStructuredContentProvider, ITreeCo
 
   @Override
   public void inputChanged(final Viewer v, final Object oldInput, final Object newInput) {
-    this.forgeGroup.clear();
 
     this.forgeGroup.setLoading(false);
 
@@ -43,6 +42,8 @@ public class ForgeContentProvider implements IStructuredContentProvider, ITreeCo
       }
       return;
     }
+
+    this.forgeGroup.clear();
 
     for (Object instance : (List) newInput) {
       if (instance instanceof ForgeInstance) {

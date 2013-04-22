@@ -94,7 +94,7 @@ public class ForgeTreeView  extends CBTreeProvider implements IPropertyChangeLis
         || PreferenceConstants.P_EMAIL.equals(event.getProperty())
         || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {
       try {
-        CloudBeesDevUiPlugin.getDefault().reloadForgeRepos(true);
+        CloudBeesDevUiPlugin.getDefault().reloadForgeRepos(false);
       } catch (CloudBeesException e) {
         CloudBeesDevUiPlugin.logError(e);
       }

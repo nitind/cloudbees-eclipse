@@ -20,6 +20,7 @@ Require-Bundle: org.eclipse.core.runtime,
  com.cloudbees.eclipse.dev.core,
  org.eclipse.team.core,
  org.tigris.subversion.subclipse.core,
- org.tigris.subversion.subclipse.ui
+ org.tigris.subversion.subclipse.ui,
+ org.tigris.subversion.clientadapter
 Export-Package: com.cloudbees.eclipse.dev.scm.subclipse
  

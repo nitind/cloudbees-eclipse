@@ -81,7 +81,7 @@ public class ForgeSubversiveSync implements ForgeSync {
     }
   }
 
-  public boolean isExists(final ForgeInstance instance, final IRepositoryLocation loc)
+  public static boolean isExists(final ForgeInstance instance, final IRepositoryLocation loc)
       throws CloudBeesException {
     Exception ex = SVNUtility.validateRepositoryLocation(loc);
     if (ex != null) {
@@ -105,9 +105,13 @@ public class ForgeSubversiveSync implements ForgeSync {
 
   @Override
   public void sync(final ForgeInstance instance, final IProgressMonitor monitor) throws CloudBeesException {
+    internalSync(instance, monitor);
+  }
+
+  public static boolean internalSync(ForgeInstance instance, IProgressMonitor monitor) throws CloudBeesException {
 
     if (!ForgeInstance.TYPE.SVN.equals(instance.type)) {
-      return;
+      return false;
     }
 
     String url = instance.url;
@@ -129,7 +133,7 @@ public class ForgeSubversiveSync implements ForgeSync {
       boolean exists = isExists(instance, loc);
       if (exists) {
         instance.status = ForgeInstance.STATUS.SYNCED;
-        return;
+        return false;
       }
 
       monitor.worked(1);
@@ -140,10 +144,13 @@ public class ForgeSubversiveSync implements ForgeSync {
 
       instance.status = ForgeInstance.STATUS.SYNCED;
 
+      return true;
+      
     } finally {
       monitor.worked(10);
       monitor.done();
     }
+    
   }
 
   @Override

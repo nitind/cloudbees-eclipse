@@ -16,13 +16,17 @@ package com.cloudbees.eclipse.core.forge.api;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.eclipse.core.runtime.IAdaptable;
 
 import com.cloudbees.eclipse.core.util.Utils;
 import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
 
-public class ForgeInstance implements Comparable<ForgeInstance> {
+public class ForgeInstance implements Comparable<ForgeInstance>, IAdaptable {
 
   public static enum TYPE {
     SVN, GIT, CVS
@@ -51,6 +55,8 @@ public class ForgeInstance implements Comparable<ForgeInstance> {
   public STATUS status = STATUS.UNKNOWN;
   @Expose(deserialize = false, serialize = false)
   public transient Throwable lastException;
+
+  private Map<String, Object> adaptables = new HashMap<String, Object>();
 
   /** Only for Gson!!! */
   public ForgeInstance() {
@@ -109,7 +115,7 @@ public class ForgeInstance implements Comparable<ForgeInstance> {
    * <p>
    * Possible use cases include storing this information in preferences.
    * </p>
-   *
+   * 
    * @param instances
    * @return
    */
@@ -127,7 +133,7 @@ public class ForgeInstance implements Comparable<ForgeInstance> {
    * <p>
    * Possible use cases include storing this information in preferences.
    * </p>
-   *
+   * 
    * @param encodedInstances
    * @return
    */
@@ -145,6 +151,25 @@ public class ForgeInstance implements Comparable<ForgeInstance> {
   @Override
   public int compareTo(final ForgeInstance o) {
     return this.url.compareToIgnoreCase(o.url);
+  }
+
+  public String getTypeName() {
+    if (type == null) {
+      return "";
+    }
+    return type.name();
+  }
+
+  public void addAdaptable(Class adapter, Object af) {
+    adaptables.put(adapter.getName(), af);
+  }
+
+  public Object getAdapter(Class adapter) {
+    if (adapter != null) {
+      Object ret = adaptables.get(adapter.getName());
+      return ret;
+    }
+    return null;
   }
 
 }

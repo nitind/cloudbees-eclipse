@@ -175,7 +175,7 @@
               label="Properties">
         </action>
      </objectContribution>
-          
+
      <objectContribution
            adaptable="false"
            id="com.cloudbees.eclipse.dev.ui.objectContribution.jenkins.view.open"
@@ -234,7 +234,7 @@
               class="com.cloudbees.eclipse.dev.ui.actions.ReloadForgeReposAction"
               icon="icons/epl/refresh.png"
               id="com.cloudbees.eclipse.dev.ui.action.reloadForge"
-              label="Configure Forge repos...">
+              label="Reload Forge repos...">
         </action>
      </objectContribution>
      

@@ -92,13 +92,16 @@ public class ForgeSubclipseSync implements ForgeSync {
 
   @Override
   public void sync(final ForgeInstance instance, final IProgressMonitor monitor) throws CloudBeesException {
-    
+    internalSync(instance, monitor);
+  }
+
+  public static boolean internalSync(ForgeInstance instance, IProgressMonitor monitor) throws CloudBeesException {
     if (monitor.isCanceled()) {
-      return;
+      return false;
     }
     
     if (!ForgeInstance.TYPE.SVN.equals(instance.type)) {
-      return;
+      return false;
     }
 
     if (instance.url == null) {
@@ -113,7 +116,7 @@ public class ForgeSubclipseSync implements ForgeSync {
       boolean exists = repos.isKnownRepository(instance.url, false);
       if (exists) {
         instance.status = ForgeInstance.STATUS.SYNCED;
-        return;
+        return false;
       }
 
       Properties props = new Properties();
@@ -129,12 +132,15 @@ public class ForgeSubclipseSync implements ForgeSync {
 
       instance.status = ForgeInstance.STATUS.SYNCED;
 
+      return true;
+      
     } catch (SVNException e) {
       throw new CloudBeesException("Failed to create missing repository!", e);
     } finally {
       monitor.worked(10);
       monitor.done();
     }
+
   }
 
   @Override

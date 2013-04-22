@@ -19,11 +19,16 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.cloudbees.eclipse.core.Logger;
+
 public class CloudBeesScmEgitPlugin extends AbstractUIPlugin {
 
+  public static final String PLUGIN_ID = "com.cloudbees.eclipse.dev.scm.egit"; //$NON-NLS-1$
+  
   private static CloudBeesScmEgitPlugin plugin;
   private ServiceTracker tracker;
-
+  private Logger logger;
+  
   /*
    * (non-Javadoc)
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
@@ -32,11 +37,13 @@ public class CloudBeesScmEgitPlugin extends AbstractUIPlugin {
   public void start(final BundleContext bundleContext) throws Exception {
     super.start(bundleContext);
     plugin = this;
+    this.logger = new Logger(getLog());
     tracker = new ServiceTracker(
         getBundle().getBundleContext(),
         IJSchService.class.getName(),
          null);
      tracker.open();
+     
   }
 
   /*
@@ -48,6 +55,7 @@ public class CloudBeesScmEgitPlugin extends AbstractUIPlugin {
     plugin = null;
     super.stop(bundleContext);
     tracker.close();
+    logger = null;
   }
 
   public IJSchService getJSchService() {
@@ -57,4 +65,9 @@ public class CloudBeesScmEgitPlugin extends AbstractUIPlugin {
   public static CloudBeesScmEgitPlugin getDefault() {
     return plugin;
   }
+  
+  public Logger getLogger() {
+    return this.logger;
+  }
+
 }

@@ -46,7 +46,11 @@ public class ForgeLabelProvider extends LabelProvider implements IFontProvider {
     if (obj instanceof ForgeInstance) {
       ForgeInstance inst = (ForgeInstance) obj;
 
-      return inst.url + " (" + inst.status.getLabel().toLowerCase()+")";
+      if (inst.status.equals(ForgeInstance.STATUS.SYNCED)) {
+        return inst.url;
+      }
+      return inst.url + " (" + inst.status.getLabel().toLowerCase() + ")";
+      
     }
 
     return null;
@@ -77,11 +81,13 @@ public class ForgeLabelProvider extends LabelProvider implements IFontProvider {
       }
     }
 
-    //    if (obj instanceof JenkinsInstanceResponse) {
-    //      if (((JenkinsInstanceResponse) obj).offline) {
-    //        return JFaceResources.getFontRegistry().getItalic(JFaceResources.DEFAULT_FONT);
-    //      }
-    //    }
+    if (obj instanceof ForgeInstance) {
+      ForgeInstance inst = (ForgeInstance) obj;
+      if (inst.status.equals(ForgeInstance.STATUS.SYNCED)) {
+        return JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
+      }
+    }
+
 
     return null;
   }

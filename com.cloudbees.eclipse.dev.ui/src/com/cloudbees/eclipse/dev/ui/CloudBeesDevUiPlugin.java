@@ -530,7 +530,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
 
     //      PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new IRunnableWithProgress() {
     //        public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Synchronizing Forge repositories") {
+    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Detecting Forge repositories") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
         if (!CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_FORGE)) {
@@ -539,7 +539,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
         }
 
         try {
-          monitor.beginTask("Checking Forge repositories", 10);
+          monitor.beginTask("Detecting Forge repositories", 10);
 
           final List<ForgeInstance> forgeRepos = CloudBeesUIPlugin.getDefault().getForgeRepos(monitor);
           int step = 1000 / Math.max(forgeRepos.size(), 1);
@@ -547,7 +547,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
           IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 4);
           subMonitor.beginTask("", 1000);
           for (ForgeInstance repo : forgeRepos) {
-            subMonitor.subTask("Checking repository '" + repo.url + "'");
+            subMonitor.subTask("Detecting repository '" + repo.url + "'");
             CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService()
                 .updateStatus(repo, subMonitor);
             subMonitor.worked(step);
@@ -567,7 +567,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
           }
           }
 
-          if (askSync && needsToSync) {
+          if (askSync && needsToSync && userAction) {
             PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
               @Override
               public void run() {

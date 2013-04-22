@@ -17,6 +17,8 @@ package com.cloudbees.eclipse.dev.ui.views.forge;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.ui.IActionFilter;
+
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.ui.views.ICBGroup;
 
@@ -25,6 +27,20 @@ public class ForgeGroup implements ICBGroup {
   private List<ForgeInstance> instances = new ArrayList<ForgeInstance>();
   private String name;
   private boolean loading;
+  
+  private IActionFilter af = new IActionFilter() {
+    public boolean testAttribute(Object target, String name, String value) {
+      if (name.equals("typeName")) {
+        ForgeInstance fi = (ForgeInstance) target;
+        return fi.getTypeName().equals(value);
+      }
+      if (name.equals("statusName")) {
+        ForgeInstance fi = (ForgeInstance) target;
+        return fi.status.name().equals(value);
+      }
+      return false;
+    }
+  };
 
   public ForgeGroup(final String name) {
     this.name = name;
@@ -44,6 +60,8 @@ public class ForgeGroup implements ICBGroup {
   }
 
   public void addChild(final ForgeInstance child) {
+    // ensure child is adaptable to IActionFilter
+    child.addAdaptable(IActionFilter.class, af);
     this.instances.add(child);
   }
 

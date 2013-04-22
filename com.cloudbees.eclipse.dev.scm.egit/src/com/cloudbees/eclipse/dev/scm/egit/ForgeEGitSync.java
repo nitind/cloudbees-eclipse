@@ -123,9 +123,13 @@ public class ForgeEGitSync implements ForgeSync {
 
   @Override
   public void sync(final ForgeInstance instance, final IProgressMonitor monitor) throws CloudBeesException {
+    internalSync(instance, monitor);
+  }
+
+  public static boolean internalSync(final ForgeInstance instance, final IProgressMonitor monitor) {
 
     if (!ForgeInstance.TYPE.GIT.equals(instance.type)) {
-      return;
+      return false;
     }
 
     final String url = instance.url;
@@ -135,7 +139,7 @@ public class ForgeEGitSync implements ForgeSync {
     }
 
     try {
-      monitor.beginTask("Syncing EGit repository '" + url + "'", 10);
+      monitor.beginTask("Cloning EGit repository '" + url + "'", 10);
 
       PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
         @Override
@@ -205,9 +209,15 @@ public class ForgeEGitSync implements ForgeSync {
       monitor.worked(10);
       monitor.done();
     }
+
+    if (instance!=null && instance.status.equals(ForgeInstance.STATUS.SYNCED)) {
+      return true;
+    }
+    return false;
+    
   }
 
-  protected boolean isAlreadyCloned(final String url) {
+  protected static boolean isAlreadyCloned(final String url) {
     try {
       URIish proposal = new URIish(url);
 
@@ -377,8 +387,8 @@ public class ForgeEGitSync implements ForgeSync {
 
   }
 
-  public static File cloneRepo(String url, URI locationURI, IProgressMonitor monitor) throws InterruptedException, InvocationTargetException,
-      URISyntaxException {
+  public static File cloneRepo(String url, URI locationURI, IProgressMonitor monitor) throws InterruptedException,
+      InvocationTargetException, URISyntaxException {
     //GitScmUrlImportWizardPage
     //GitImportWizard
 
@@ -397,7 +407,7 @@ public class ForgeEGitSync implements ForgeSync {
     if (monitor.isCanceled()) {
       return null;
     }
-    
+
     try {
       int timeout = 60;
 
@@ -426,13 +436,12 @@ public class ForgeEGitSync implements ForgeSync {
 
   }
 
-
-  public static boolean validateSSHConfig(IProgressMonitor monitor) throws CloudBeesException, JSchException {    
+  public static boolean validateSSHConfig(IProgressMonitor monitor) throws CloudBeesException, JSchException {
     IJSchService ssh = CloudBeesScmEgitPlugin.getDefault().getJSchService();
     if (ssh == null) {
       throw new CloudBeesException("SSH not available!");
     }
-    
+
     Session sess = ssh.createSession("git.cloudbees.com", -1, "git");
     ssh.connect(sess, 60000, monitor);
     boolean ret = sess.isConnected();

@@ -42,6 +42,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -759,6 +760,19 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
   public AuthStatus getAuthStatus() {
     return authStatus;
+  }
+
+  public void showView(final String viewId) {
+    getWorkbench().getDisplay().asyncExec(new Runnable() {
+      public void run() {
+        try {
+          IWorkbenchPage activePage = CloudBeesUIPlugin.getActiveWindow().getActivePage();
+          activePage.showView(viewId);
+        } catch (Exception e) {
+          CloudBeesUIPlugin.showError("Failed to show View "+viewId, e);
+        }
+      }
+    });
   }
 
 }

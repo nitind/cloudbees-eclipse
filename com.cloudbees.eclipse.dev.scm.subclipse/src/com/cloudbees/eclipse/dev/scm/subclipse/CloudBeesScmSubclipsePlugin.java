@@ -23,6 +23,8 @@ import org.osgi.framework.BundleContext;
  */
 public class CloudBeesScmSubclipsePlugin extends AbstractUIPlugin {
 
+  public static final String PLUGIN_ID = "com.cloudbees.eclipse.dev.scm.subclipse";
+  
   private static CloudBeesScmSubclipsePlugin plugin;
 
   /*
