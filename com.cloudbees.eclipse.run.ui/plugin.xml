@@ -320,9 +320,9 @@
 		<category id="com.cloudbees.eclipse.run.ui" name="CloudBees">
 		</category>
 		<wizard category="com.cloudbees.eclipse.run.ui"
-			class="com.cloudbees.eclipse.run.ui.wizards.CBWebAppWizard"
+			class="com.cloudbees.eclipse.run.ui.wizards.CBWebAppWizard"			
 			icon="icons/16x16/cb_new_proj_wiz_ico_16x16.png" id="com.cloudbees.eclipse.run.ui.wizards.CBSampleWebAppWizard"
-			name="CloudBees Project" project="true">
+			name="CloudBees ClickStart Project" project="true">
 		</wizard>
 	</extension>
 	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
@@ -489,5 +489,64 @@
           id="com.cloudbees.eclipse.run.ui.NewAppHook">
     </hook>
 </extension>
+
+<extension
+         point="org.eclipse.ui.navigator.navigatorContent">
+                  
+      <commonWizard
+            type="new"            
+            menuGroupId="ProgramNewProjectResourceGroup"
+            wizardId="com.cloudbees.eclipse.run.ui.wizards.CBSampleWebAppWizard">
+         <enablement>         
+            <with 
+            variable="selection">
+            	<or>
+				<count value="0" />
+				<iterate>
+						<instanceof value="org.eclipse.core.resources.IProject" />
+				</iterate>
+				</or>
+            </with>
+         </enablement>
+      </commonWizard>
+   </extension>   
+   
+   
+  <extension point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+         <newWizardShortcut id="com.cloudbees.eclipse.run.ui.wizards.CBSampleWebAppWizard"/>
+         <perspectiveShortcut
+               id="com.cloudbees.eclipse.ui.CloudBeesPerspective">
+         </perspectiveShortcut>         
+      </perspectiveExtension>
+      
+      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <newWizardShortcut id="com.cloudbees.eclipse.run.ui.wizards.CBSampleWebAppWizard"/>
+         <perspectiveShortcut
+               id="com.cloudbees.eclipse.ui.CloudBeesPerspective">
+         </perspectiveShortcut>
+      </perspectiveExtension>
+      
+      <perspectiveExtension targetID="com.cloudbees.eclipse.ui.CloudBeesPerspective">
+         <newWizardShortcut id="com.cloudbees.eclipse.run.ui.wizards.CBSampleWebAppWizard"/>
+      </perspectiveExtension>
+      
+   </extension>   
+
+<!-- <extension point="org.eclipse.ui.menus">
+    <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
+      <command commandId="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp"
+        label="CloudBees ClickStart Project..." style="push">
+      </command>
+    </menuContribution>
     
+     <menuContribution
+        locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+     <command commandId="com.cloudbees.eclipse.run.ui.commands.newSampleWebApp"
+        label="CloudBees ClickStart Project..." style="push">
+      </command>
+  	</menuContribution>
+    
+  </extension>
+    -->
 </plugin>
