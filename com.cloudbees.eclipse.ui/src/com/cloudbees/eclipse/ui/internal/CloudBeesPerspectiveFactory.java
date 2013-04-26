@@ -1,14 +1,13 @@
 package com.cloudbees.eclipse.ui.internal;
 /*******************************************************************************
- * Copyright (c) 2000, 2010, 2013 IBM Corporation, CloudBees and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2013 Cloud Bees, Inc.
+ * All rights reserved. 
+ * This program is made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, 
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
- *     CloudBees - CloudBees Perspective derived from Java Perspective
+ * 	Cloud Bees, Inc. - initial API and implementation 
  *******************************************************************************/
 
 import org.eclipse.ui.IFolderLayout;
