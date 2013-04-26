@@ -2,7 +2,7 @@
 <feature
       id="com.cloudbees.eclipse.dev.scm.egit"
       label="Backward Compatibility Plugin (Not required)"
-      version="1.2.0.qualifier"
+      version="2.0.0.qualifier"
       provider-name="CloudBees, Inc">
 
    <description url="http://www.cloudbees.com">
