@@ -2,7 +2,7 @@
 <feature
       id="com.cloudbees.eclipse.dev.scm.subclipse"
       label="CloudBees Toolkit SVN Support (**SUBCLIPSE MUST BE INSTALLED!!**) (Optional)"
-      version="2.0.0.qualifier"
+      version="2.0.1.qualifier"
       provider-name="CloudBees, Inc">
 
    <description url="http://www.cloudbees.com">
@@ -18,7 +18,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 </license>
 
    <requires>
-      <import feature="com.cloudbees.eclipse" version="2.0.0" match="greaterOrEqual"/>
+      <import feature="com.cloudbees.eclipse" version="2.0.1" match="greaterOrEqual"/>
    </requires>
 
    <plugin
