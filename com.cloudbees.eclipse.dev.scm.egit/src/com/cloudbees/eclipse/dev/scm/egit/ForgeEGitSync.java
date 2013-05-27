@@ -10,9 +10,12 @@
  *******************************************************************************/
 package com.cloudbees.eclipse.dev.scm.egit;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -21,7 +24,6 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.egit.core.Activator;
 import org.eclipse.egit.core.RepositoryCache;
@@ -66,6 +68,7 @@ import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.GitConnectionType;
 import com.cloudbees.eclipse.ui.PreferenceConstants;
+import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 import com.jcraft.jsch.Session;
@@ -495,12 +498,12 @@ public class ForgeEGitSync implements ForgeSync {
           CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
 
           // Store to secure storage to ensure the connection remains available without reentering the password
-         
+
           UserPasswordCredentials credentials = new UserPasswordCredentials(username, password);
-          
+
           URIish uri = new URIish(url);
           SecureStoreUtils.storeCredentials(credentials, uri);
-          
+
           cloneOperation.setCredentialsProvider(credentialsProvider);
 
         } catch (StorageException e) {
@@ -542,23 +545,77 @@ public class ForgeEGitSync implements ForgeSync {
 
     ssh.connect(sess, 60000, monitor);
     boolean ret = sess.isConnected();
-    sess.disconnect();
-    
-    // Not checking the repo read access for the given key as that would require at least one git repo to exist for this user and depending on this does not make sense at this point
-/*
+
     if (ret) {
-      // attempt git clone operation to validate the git key
-      try {
-        //Caused by: org.eclipse.jgit.errors.NoRemoteRepositoryException: ssh://git@git.cloudbees.com/grandomstate/nonexistigthingiea234: CloudBees Forge: HTTP Error 404: Not Found
-        //Caused by: org.eclipse.jgit.errors.NoRemoteRepositoryException: ssh://git@git.cloudbees.com/ahtitestacc/ahtitestrepo01.git: CloudBees Forge: Repository read access denied to 'ahtik'
-        URI location = new File(System.getProperty("java.io.tmpdir")+"/rnd99491").toURI();
-        cloneRepo("ssh://git@git.cloudbees.com/grandomstate", location, new NullProgressMonitor());
-      } catch (Exception e) {
+/*      try {
+        sess.write(new Packet(new Buffer("echo".getBytes("ISO-8859-1"))));
+      } catch (UnsupportedEncodingException e) {
+        // TODO Auto-generated catch block
         e.printStackTrace();
-        //throw e;
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
       }
-      
-    }*/
+*/
+      ChannelExec channelExec = (ChannelExec) sess.openChannel("exec");
+
+      try {
+        
+        InputStream inerr = channelExec.getErrStream();
+        
+        channelExec.setCommand("echo");
+        channelExec.connect();
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inerr));
+        String line;
+        
+        
+        while ((line = reader.readLine()) != null) {
+          String mstr = "CloudBees Forge: You have successfully authenticated as ";
+          if (line.contains(mstr)) {
+            String username = line.substring(mstr.length());
+            int spaceidx = username.indexOf(" ");
+            if (spaceidx>0) {
+              username = username.substring(0, spaceidx);
+              
+              String currentUser = CloudBeesCorePlugin.getDefault().getGrandCentralService().getCurrentUsername(monitor);
+              // System.out.println("Matched username: '"+username+"'. Validating for: '"+currentUser+"'");
+              if (currentUser!=null) {
+                ret = currentUser.equalsIgnoreCase(username);
+                if (!ret) {
+                  throw new CloudBeesException("Eclipse SSH key is authenticating as '"+username+"' but current CloudBees user is '"+currentUser+"'");
+                }
+              }
+            }
+          }
+        }
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+
+      channelExec.disconnect();
+      sess.disconnect();
+
+    }
+
+    sess.disconnect();
+
+    // Not checking the repo read access for the given key as that would require at least one git repo to exist for this user and depending on this does not make sense at this point
+    /*
+        if (ret) {
+          // attempt git clone operation to validate the git key
+          try {
+            //Caused by: org.eclipse.jgit.errors.NoRemoteRepositoryException: ssh://git@git.cloudbees.com/grandomstate/nonexistigthingiea234: CloudBees Forge: HTTP Error 404: Not Found
+            //Caused by: org.eclipse.jgit.errors.NoRemoteRepositoryException: ssh://git@git.cloudbees.com/ahtitestacc/ahtitestrepo01.git: CloudBees Forge: Repository read access denied to 'ahtik'
+            URI location = new File(System.getProperty("java.io.tmpdir")+"/rnd99491").toURI();
+            cloneRepo("ssh://git@git.cloudbees.com/grandomstate", location, new NullProgressMonitor());
+          } catch (Exception e) {
+            e.printStackTrace();
+            //throw e;
+          }
+          
+        }*/
 
     return ret;
 

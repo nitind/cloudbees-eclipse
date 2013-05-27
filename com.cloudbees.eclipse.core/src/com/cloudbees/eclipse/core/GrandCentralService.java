@@ -464,6 +464,19 @@ public class GrandCentralService {
     return result;
   }
 
+  
+  public String getCurrentUsername(final IProgressMonitor monitor) throws CloudBeesException {
+    String acc = getActiveAccountName();
+
+    if (acc == null) {
+      return null;
+    }
+
+    AccountServiceStatusResponse services = loadAccountServices(acc);
+    return services.username;
+  }
+
+  
   public String getEmail() {
     return email;
   }
