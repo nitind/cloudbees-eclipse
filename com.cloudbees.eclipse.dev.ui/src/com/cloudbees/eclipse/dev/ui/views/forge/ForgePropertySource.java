@@ -58,9 +58,20 @@ public class ForgePropertySource implements IPropertySource {
       return this.forge.status.name();
     }
     if (id.equals(PROPERTY_URL)) {
-      return this.forge.url;
+      String url = stripGitPrefixes(this.forge.url);
+      return url;
     }
     return null;
+  }
+
+  private String stripGitPrefixes(String url) {
+    if (url!=null && url.startsWith("ssh://git@")) {
+      return url.substring("ssh://git@".length());
+    }
+    if (url!=null && url.startsWith("https://")) {
+      return url.substring("https://".length());
+    }
+    return url;
   }
 
   @Override

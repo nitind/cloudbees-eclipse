@@ -609,14 +609,6 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
   @Override
   public void propertyChange(final PropertyChangeEvent event) {
 
-    if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())) {
-      boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-          .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
-      if (!jaasEnabled) {
-        setInput(null); // all gone
-      }
-    }
-
     if (PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
         || PreferenceConstants.P_EMAIL.equals(event.getProperty())
         || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {

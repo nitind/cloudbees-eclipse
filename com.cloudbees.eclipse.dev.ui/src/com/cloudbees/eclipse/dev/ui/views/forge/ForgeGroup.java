@@ -11,6 +11,8 @@
 package com.cloudbees.eclipse.dev.ui.views.forge;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.ui.IActionFilter;
@@ -62,7 +64,8 @@ public class ForgeGroup implements ICBGroup {
   }
 
   public ForgeInstance[] getChildren() {
-    return this.instances.toArray(new ForgeInstance[this.instances.size()]);
+    ForgeInstance[] ret = this.instances.toArray(new ForgeInstance[this.instances.size()]);
+    return ret;
   }
 
   public boolean hasChildren() {

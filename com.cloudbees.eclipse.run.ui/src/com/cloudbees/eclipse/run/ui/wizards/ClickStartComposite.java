@@ -52,6 +52,7 @@ import com.cloudbees.eclipse.dev.scm.egit.ForgeEGitSync;
 import com.cloudbees.eclipse.run.ui.CBRunUiActivator;
 import com.cloudbees.eclipse.ui.AuthStatus;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
+import com.cloudbees.eclipse.ui.GitConnectionType;
 import com.jcraft.jsch.JSchException;
 
 public abstract class ClickStartComposite extends Composite {
@@ -363,6 +364,12 @@ public abstract class ClickStartComposite extends Composite {
     final IRunnableWithProgress operation2 = new IRunnableWithProgress() {
 
       public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+
+        GitConnectionType type = CloudBeesUIPlugin.getDefault().getGitConnectionType();
+        if (!type.equals(GitConnectionType.SSH)) {
+          return;
+        }
+
         try {
           monitor.beginTask(" Testing your connection to ssh://git.cloudbees.com...", 0);
 
@@ -417,20 +424,21 @@ public abstract class ClickStartComposite extends Composite {
 
     for (int i = 0; i < selectedTemplate.components.length; i++) {
       Component c = selectedTemplate.components[i];
-      comps = comps + "<img style='height:25px;width:auto;' alt='"+c.name+" ("+c.description+")' src='"+c.icon+"'/>";
-      if (i<selectedTemplate.components.length-1) {
-        comps=comps+" ";
+      comps = comps + "<img style='height:25px;width:auto;' alt='" + c.name + " (" + c.description + ")' src='"
+          + c.icon + "'/>";
+      if (i < selectedTemplate.components.length - 1) {
+        comps = comps + " ";
       }
     }
-    
+
     String docs = "";
     if (selectedTemplate.docUrl != null && selectedTemplate.docUrl.length() > 0) {
-      docs = ", <a href='" + selectedTemplate.docUrl + "' title='"+selectedTemplate.docUrl+"'>Documentation</a>";
+      docs = ", <a href='" + selectedTemplate.docUrl + "' title='" + selectedTemplate.docUrl + "'>Documentation</a>";
     }
 
     String txt = style + "<img style='height:38px; width:auto;' src='" + selectedTemplate.icon
         + "'/><div id='descr'><b>" + selectedTemplate.name + "</b>" + docs + "<br/>" + selectedTemplate.description
-         + "</div></body></html>";
+        + "</div></body></html>";
     //dlabel.setText(txt);
     browser.setText(txt, false);
     validate();

@@ -52,15 +52,11 @@ public class ForgeTreeView  extends CBTreeProvider implements IPropertyChangeLis
 
   public void init() {
 
-
-    boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-        .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
-    
     contentProvider = new ForgeContentProvider();
     labelProvider = new ForgeLabelProvider();
 
     this.reloadForgeAction = new ReloadForgeReposAction();
-    this.reloadForgeAction.setEnabled(forgeEnabled);
+    this.reloadForgeAction.setEnabled(true);
 
     this.jenkinsChangeListener = new CBRemoteChangeAdapter() {
       @Override
@@ -80,12 +76,9 @@ public class ForgeTreeView  extends CBTreeProvider implements IPropertyChangeLis
 
   @Override
   public void propertyChange(final PropertyChangeEvent event) {
-    if (PreferenceConstants.P_ENABLE_FORGE.equals(event.getProperty())) {
-      boolean forgeEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-          .getBoolean(PreferenceConstants.P_ENABLE_FORGE);
-      this.reloadForgeAction.setEnabled(forgeEnabled);
-    }
-    if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())
+      this.reloadForgeAction.setEnabled(true);
+      
+    if (PreferenceConstants.P_GITPROTOCOL.equals(event.getProperty())
         || PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
         || PreferenceConstants.P_EMAIL.equals(event.getProperty())
         || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {

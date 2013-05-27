@@ -116,8 +116,7 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
 
   @Override
   public void propertyChange(final PropertyChangeEvent event) {
-    if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())
-        || PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
+    if (PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
         || PreferenceConstants.P_EMAIL.equals(event.getProperty())
         || PreferenceConstants.P_ACTIVE_ACCOUNT.equals(event.getProperty())
         || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {

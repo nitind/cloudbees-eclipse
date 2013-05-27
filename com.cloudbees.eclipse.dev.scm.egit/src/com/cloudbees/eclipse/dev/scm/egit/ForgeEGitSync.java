@@ -16,46 +16,44 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.egit.core.Activator;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.egit.core.op.CloneOperation;
+import org.eclipse.egit.core.securestorage.UserPasswordCredentials;
 import org.eclipse.egit.ui.UIPreferences;
 import org.eclipse.egit.ui.internal.CompareUtils;
-import org.eclipse.egit.ui.internal.clone.GitCloneWizard;
+import org.eclipse.egit.ui.internal.SecureStoreUtils;
 import org.eclipse.egit.ui.internal.clone.GitImportWizard;
+import org.eclipse.egit.ui.internal.provisional.wizards.GitRepositoryInfo;
+import org.eclipse.egit.ui.internal.provisional.wizards.IRepositorySearchResult;
+import org.eclipse.egit.ui.internal.provisional.wizards.NoRepositoryInfoException;
+import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepository;
+import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jsch.core.IJSchService;
 import org.eclipse.jsch.internal.core.JSchCorePlugin;
-import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.dnd.TextTransfer;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.team.core.history.IFileRevision;
 import org.eclipse.team.internal.ui.Utils;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
@@ -66,6 +64,8 @@ import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsScmConfig;
 import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
+import com.cloudbees.eclipse.ui.GitConnectionType;
+import com.cloudbees.eclipse.ui.PreferenceConstants;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 import com.jcraft.jsch.Session;
@@ -76,6 +76,9 @@ import com.jcraft.jsch.Session;
  * @author ahtik
  */
 public class ForgeEGitSync implements ForgeSync {
+
+  static private String prssh = "ssh://git@";
+  static private String prhttps = "https://";
 
   @Override
   public void updateStatus(final ForgeInstance instance, final IProgressMonitor monitor) throws CloudBeesException {
@@ -128,11 +131,13 @@ public class ForgeEGitSync implements ForgeSync {
       return false;
     }
 
-    final String url = instance.url;
+    String u = instance.url;
 
-    if (url == null) {
+    if (u == null) {
       throw new IllegalArgumentException("url not provided!");
     }
+
+    final String url = reformatGitUrlToCurrent(u);
 
     try {
       monitor.beginTask("Cloning EGit repository '" + url + "'", 10);
@@ -152,10 +157,41 @@ public class ForgeEGitSync implements ForgeSync {
           monitor.subTask("Cloning remote repository");
           monitor.worked(1);
 
-          Clipboard clippy = new Clipboard(Display.getCurrent());
-          clippy.setContents(new Object[] { url }, new Transfer[] { TextTransfer.getInstance() });
-          GitCloneWizard cloneWizard = new GitCloneWizard();
-          //      cloneWizard.setCallerRunsCloneOperation(true);
+          //Clipboard clippy = new Clipboard(Display.getCurrent());
+
+          String clipurl = url;
+
+          GitConnectionType type = CloudBeesUIPlugin.getDefault().getGitConnectionType();
+
+          final GitRepositoryInfo repoInfo = new GitRepositoryInfo(clipurl);
+          IRepositorySearchResult repoSearch = new IRepositorySearchResult() {
+            public GitRepositoryInfo getGitRepositoryInfo() throws NoRepositoryInfoException {
+              return repoInfo;
+            }
+          };
+
+          if (type.equals(GitConnectionType.HTTPS)) {
+
+            try {
+
+              String username = CloudBeesUIPlugin.getDefault().getPreferenceStore()
+                  .getString(PreferenceConstants.P_EMAIL);
+              String password = CloudBeesUIPlugin.getDefault().readP();
+
+              CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
+              UserPasswordCredentials credentials = new UserPasswordCredentials(username, password);
+
+              repoInfo.setShouldSaveCredentialsInSecureStore(true);
+              repoInfo.setCredentials(username, password);
+
+            } catch (StorageException e) {
+              e.printStackTrace();
+            }
+
+          }
+
+          GitImportWizard cloneWizard = new GitImportWizard(repoSearch);
+
           WizardDialog dlg = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
               cloneWizard);
           dlg.setHelpAvailable(true);
@@ -206,16 +242,27 @@ public class ForgeEGitSync implements ForgeSync {
       monitor.done();
     }
 
-    if (instance!=null && instance.status.equals(ForgeInstance.STATUS.SYNCED)) {
+    if (instance != null && instance.status.equals(ForgeInstance.STATUS.SYNCED)) {
       return true;
     }
     return false;
-    
+
   }
 
   protected static boolean isAlreadyCloned(final String url) {
     try {
-      URIish proposal = new URIish(url);
+
+      if (url == null) {
+        return false;
+      }
+
+      String bareUrl = stripProtocol(url);
+      if (bareUrl == null) {
+        return false;
+      }
+
+      URIish proposalHTTPS = new URIish(prhttps + bareUrl);
+      URIish proposalSSH = new URIish(prssh + bareUrl);
 
       List<String> reps = Activator.getDefault().getRepositoryUtil().getConfiguredRepositories();
       for (String repo : reps) {
@@ -227,7 +274,7 @@ public class ForgeEGitSync implements ForgeSync {
             List<URIish> uris = remo.getURIs();
             for (URIish uri : uris) {
               //System.out.println("Checking URI: " + uri + " - " + proposal.equals(uri));
-              if (proposal.equals(uri)) {
+              if (proposalHTTPS.equals(uri) || proposalSSH.equals(uri)) {
                 return true;
               }
             }
@@ -242,6 +289,15 @@ public class ForgeEGitSync implements ForgeSync {
     }
 
     return false;
+  }
+
+  private static String stripProtocol(String url) {
+    if (url.toLowerCase().startsWith(prhttps)) {
+      return url.substring(prhttps.length());
+    } else if (url.toLowerCase().startsWith(prssh)) {
+      return url.substring(prssh.length());
+    }
+    return null;
   }
 
   @Override
@@ -414,13 +470,44 @@ public class ForgeEGitSync implements ForgeSync {
           null);
 
       String branch = "master";
+
+      url = reformatGitUrlToCurrent(url);
+
       URIish gitUrl = new URIish(url);
       File workDir = new File(locationURI);
       //final File repositoryPath = workDir.append(Constants.DOT_GIT_EXT).toFile();
 
       String refName = Constants.R_HEADS + branch;
+
+      GitConnectionType type = CloudBeesUIPlugin.getDefault().getGitConnectionType();
+
       final CloneOperation cloneOperation = new CloneOperation(gitUrl, true, null, workDir, refName,
           Constants.DEFAULT_REMOTE_NAME, timeout);
+
+      // https password
+      if (type.equals(GitConnectionType.HTTPS)) {
+
+        try {
+
+          String username = CloudBeesUIPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.P_EMAIL);
+          String password = CloudBeesUIPlugin.getDefault().readP();
+
+          CredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
+
+          // Store to secure storage to ensure the connection remains available without reentering the password
+         
+          UserPasswordCredentials credentials = new UserPasswordCredentials(username, password);
+          
+          URIish uri = new URIish(url);
+          SecureStoreUtils.storeCredentials(credentials, uri);
+          
+          cloneOperation.setCredentialsProvider(credentialsProvider);
+
+        } catch (StorageException e) {
+          throw new InvocationTargetException(new Exception("Failed to read credentials!", e));
+        }
+      }
+
       cloneOperation.run(monitor);
 
       return workDir;
@@ -432,6 +519,19 @@ public class ForgeEGitSync implements ForgeSync {
 
   }
 
+  private static String reformatGitUrlToCurrent(String url) {
+    String burl = stripProtocol(url);
+    if (burl == null) {
+      return burl;
+    }
+
+    GitConnectionType type = CloudBeesUIPlugin.getDefault().getGitConnectionType();
+    if (type.equals(GitConnectionType.HTTPS)) {
+      return prhttps + burl;
+    }
+    return prssh + burl;
+  }
+
   public static boolean validateSSHConfig(IProgressMonitor monitor) throws CloudBeesException, JSchException {
     IJSchService ssh = CloudBeesScmEgitPlugin.getDefault().getJSchService();
     if (ssh == null) {
@@ -439,10 +539,29 @@ public class ForgeEGitSync implements ForgeSync {
     }
 
     Session sess = ssh.createSession("git.cloudbees.com", -1, "git");
+
     ssh.connect(sess, 60000, monitor);
     boolean ret = sess.isConnected();
     sess.disconnect();
+    
+    // Not checking the repo read access for the given key as that would require at least one git repo to exist for this user and depending on this does not make sense at this point
+/*
+    if (ret) {
+      // attempt git clone operation to validate the git key
+      try {
+        //Caused by: org.eclipse.jgit.errors.NoRemoteRepositoryException: ssh://git@git.cloudbees.com/grandomstate/nonexistigthingiea234: CloudBees Forge: HTTP Error 404: Not Found
+        //Caused by: org.eclipse.jgit.errors.NoRemoteRepositoryException: ssh://git@git.cloudbees.com/ahtitestacc/ahtitestrepo01.git: CloudBees Forge: Repository read access denied to 'ahtik'
+        URI location = new File(System.getProperty("java.io.tmpdir")+"/rnd99491").toURI();
+        cloneRepo("ssh://git@git.cloudbees.com/grandomstate", location, new NullProgressMonitor());
+      } catch (Exception e) {
+        e.printStackTrace();
+        //throw e;
+      }
+      
+    }*/
+
     return ret;
+
   }
 
 }

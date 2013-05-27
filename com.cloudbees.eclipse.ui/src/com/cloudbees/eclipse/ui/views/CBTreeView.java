@@ -43,6 +43,7 @@ import com.cloudbees.eclipse.core.CBRemoteChangeListener;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.GrandCentralService;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.ui.AuthStatus;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.internal.ActiveAccountContributionItem;
@@ -104,6 +105,10 @@ public class CBTreeView extends ViewPart {
         return ((ICBGroup) e1).getOrder() - ((ICBGroup) e2).getOrder();
       }
 
+      if (e1 instanceof ForgeInstance && e2 instanceof ForgeInstance) {
+        return ((ForgeInstance)e1).compareTo((ForgeInstance) e2);
+      }
+      
       return super.compare(viewer, e1, e2);
     }
 

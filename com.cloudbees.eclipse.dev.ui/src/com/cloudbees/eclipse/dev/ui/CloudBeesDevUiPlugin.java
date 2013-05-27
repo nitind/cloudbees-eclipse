@@ -319,9 +319,6 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading Jenkins jobs") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
-        if (!CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
-          return Status.CANCEL_STATUS;
-        }
 
         try {
 
@@ -407,9 +404,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     };
 
     job.setUser(userAction); // Let's always show this job as non-user so it's less distracting in the UI   //userAction
-    if (CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
-      job.schedule();
-    }
+
+    job.schedule();
 
     return job;
 
@@ -529,10 +525,6 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Detecting Forge repositories") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
-        if (!CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_FORGE)) {
-          // Forge sync disabled.
-          return Status.CANCEL_STATUS;
-        }
 
         try {
           monitor.beginTask("Detecting Forge repositories", 10);
@@ -651,9 +643,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     };
 
     job.setUser(userAction);
-    if (CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_FORGE)) {
-      job.schedule();
-    }
+    job.schedule();
   }
 
   public void showBuildHistory(final String jobUrl, final boolean userAction) throws CloudBeesException {
@@ -667,9 +657,6 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading build history") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
-        if (!CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
-          return Status.CANCEL_STATUS;
-        }
 
         try {
           PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -716,9 +703,8 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     };
 
     job.setUser(userAction);
-    if (CloudBeesUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
-      job.schedule();
-    }
+    job.schedule();
+    
   }
 
   public static void logError(final Exception e) {

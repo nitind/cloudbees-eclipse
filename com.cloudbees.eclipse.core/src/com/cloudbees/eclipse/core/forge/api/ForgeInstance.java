@@ -12,6 +12,8 @@ package com.cloudbees.eclipse.core.forge.api;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,6 +148,10 @@ public class ForgeInstance implements Comparable<ForgeInstance>, IAdaptable {
 
   @Override
   public int compareTo(final ForgeInstance o) {
+    int w = this.type.name().compareTo(o.type.name());
+    if (w!=0) {
+      return w;
+    }
     return this.url.compareToIgnoreCase(o.url);
   }
 

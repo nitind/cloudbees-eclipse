@@ -286,19 +286,33 @@ public class CBWebAppWizardFinishOperation implements IRunnableWithProgress {
           */
           return Status.OK_STATUS;
         } catch (Exception e) {
-          String msg = e.getLocalizedMessage();
           if (e instanceof CloudBeesException) {
             e = (Exception) e.getCause();
           }
-          CBRunUiActivator.getDefault().getLogger().error(msg, e);
+          
+          Throwable iterT = e;
+          Throwable realT = e;
+          while (iterT.getCause()!=null) {
+            iterT = iterT.getCause();
+            if (iterT.getMessage()!=null && iterT.getMessage().contains("CloudBees Forge")) {
+              realT = iterT;              
+            }
+          }
+          
+          String msg = realT.getLocalizedMessage();
+          if (msg==null) {
+            msg = realT.getMessage();
+          }
+          
+          CBRunUiActivator.getDefault().getLogger().error(msg, realT);
 
-          String rmsg = "Failed to provision ClickStart project: " + msg;
+          String rmsg = "Failed to complete ClickStart project provisioning: " + msg;
 
-          if (e instanceof CloudBeesException && e.getMessage() != null) {
-            rmsg = e.getMessage();
+          if (realT instanceof CloudBeesException && realT.getMessage() != null) {
+            rmsg = realT.getMessage();
           }
 
-          return new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, rmsg, e);
+          return new Status(IStatus.ERROR, CBRunUiActivator.PLUGIN_ID, rmsg, realT);
 
         } finally {
           monitor.done();

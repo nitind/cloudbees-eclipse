@@ -90,10 +90,8 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
 
     contentProvider = new InstanceContentProvider();
     labelProvider = new InstanceLabelProvider();
-    
-    boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-        .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
-    this.reloadJenkinsCloudAction.setEnabled(jaasEnabled);
+        
+    this.reloadJenkinsCloudAction.setEnabled(true);
 
     this.jenkinsChangeListener = new CBRemoteChangeAdapter() {
 
@@ -193,14 +191,10 @@ public class JenkinsTreeView extends ViewPart implements IPropertyChangeListener
     //      this.reloadForgeAction.setEnabled(forgeEnabled);
     //    }
 
-    if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())) {
-      boolean jaasEnabled = CloudBeesUIPlugin.getDefault().getPreferenceStore()
-          .getBoolean(PreferenceConstants.P_ENABLE_JAAS);
-      this.reloadJenkinsCloudAction.setEnabled(jaasEnabled);
-    }
+    
+    this.reloadJenkinsCloudAction.setEnabled(true);
 
-    if (PreferenceConstants.P_ENABLE_JAAS.equals(event.getProperty())
-        || PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
+    if (PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
         || PreferenceConstants.P_EMAIL.equals(event.getProperty())
         || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {
       CloudBeesUIPlugin.getDefault().reloadAllCloudJenkins(false);

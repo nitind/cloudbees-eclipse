@@ -277,10 +277,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Loading DEV@cloud Jenkins instances") {
       @Override
       protected IStatus run(final IProgressMonitor monitor) {
-        if (!getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
-          return new Status(Status.INFO, PLUGIN_ID, "DEV@cloud Continuous Integration is not enabled");
-        }
-
+        
         Exception toReport = null;
 
         try {
@@ -332,9 +329,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     };
 
     job.setUser(userAction);
-    if (getPreferenceStore().getBoolean(PreferenceConstants.P_ENABLE_JAAS)) {
-      job.schedule();
-    }
+    job.schedule();
   }
 
   public void reloadAllLocalJenkins(final boolean userAction) {
@@ -771,4 +766,13 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     });
   }
 
+  public GitConnectionType getGitConnectionType() {
+    String str = CloudBeesUIPlugin.getDefault().getPreferenceStore()
+    .getString(PreferenceConstants.P_GITPROTOCOL);
+    if (str!=null && str.toUpperCase().equals("SSH")) {
+      return GitConnectionType.SSH;
+    }
+    return GitConnectionType.HTTPS;
+  }
+  
 }

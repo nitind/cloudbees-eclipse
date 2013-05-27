@@ -42,11 +42,31 @@ public class ForgeLabelProvider extends LabelProvider implements IFontProvider {
     if (obj instanceof ForgeInstance) {
       ForgeInstance inst = (ForgeInstance) obj;
 
-      if (inst.status.equals(ForgeInstance.STATUS.SYNCED)) {
-        return inst.url;
+      String instUrl = inst.url;
+
+      // string repo prefix
+      if (instUrl != null) {
+
+        if (instUrl.endsWith("/")) {
+          instUrl = instUrl.substring(0, instUrl.length()-1);
+        }
+        
+        if (instUrl.endsWith(".git")) {
+          instUrl = instUrl.substring(0, instUrl.length()-4);
+        }
+
+        int idx = instUrl.lastIndexOf("/");
+        if (idx > 0 && instUrl.length() > idx + 1) {
+          instUrl = instUrl.substring(idx + 1);
+        }
+        
       }
-      return inst.url + " (" + inst.status.getLabel().toLowerCase() + ")";
-      
+
+      if (inst.status.equals(ForgeInstance.STATUS.SYNCED)) {
+        return instUrl;
+      }
+      return instUrl + " (" + inst.status.getLabel().toLowerCase() + ")";
+
     }
 
     return null;
@@ -83,7 +103,6 @@ public class ForgeLabelProvider extends LabelProvider implements IFontProvider {
         return JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
       }
     }
-
 
     return null;
   }

@@ -20,6 +20,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.BooleanFieldEditor;
+import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -81,24 +82,58 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
   private void createCompositeServices() {
     Group group = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_IN);
     group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    group.setLayout(new GridLayout(1, false));
+    GridLayout gl = new GridLayout(1, false);
+    gl.marginLeft = 5;
+    gl.marginRight = 5;
+    gl.marginTop = 5;
+    gl.marginBottom = 5;
+    gl.horizontalSpacing = 5;
+
+    group.setLayout(gl);
 
     Composite groupInnerComp = new Composite(group, SWT.NONE);
     groupInnerComp.setLayout(new GridLayout(2, false));
     groupInnerComp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+    Composite groupInnerComp2 = new Composite(group, SWT.NONE);
+    
+    GridLayout gl2 = new GridLayout(1, false);
+    gl2.marginTop=5;
+    gl2.marginHeight=0;
+    gl2.marginWidth=0;
+    gl2.horizontalSpacing=0;
+    gl2.verticalSpacing=0;
+    
+    groupInnerComp2.setLayout(gl2);
+    //groupInnerComp2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    
     group.setText(Messages.pref_group_devAtCloud);
 
-    addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_JAAS, Messages.pref_enable_jaas, groupInnerComp));
-    addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_FORGE, Messages.pref_enable_forge, groupInnerComp));
+    // addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_JAAS, Messages.pref_enable_jaas, groupInnerComp));
+    // addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_FORGE, Messages.pref_enable_forge, groupInnerComp));
+    ComboFieldEditor comboEditor = new ComboFieldEditor(PreferenceConstants.P_GITPROTOCOL, Messages.pref_gitprotocol,
+        new String[][]{{"HTTPS", "HTTPS"}, {"SSH", "SSH"}},
+        groupInnerComp);
+        
+    addField(comboEditor);
+    
+    //Label l = new Label(groupInnerComp, SWT.NONE);
 
-    createGitAccessLink(groupInnerComp);
+    createGitAccessLink(groupInnerComp2);
   }
 
   private void createAllJenkins() {
     Group group = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_IN);
     group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    group.setLayout(new GridLayout(1, false));
+    
+    GridLayout gl = new GridLayout(1, false);    
+    gl.marginLeft = 5;
+    gl.marginRight = 5;
+    gl.marginTop = 5;
+    gl.marginBottom = 5;
+    gl.horizontalSpacing = 5;
+
+    group.setLayout(gl);
 
     final Composite groupInnerComp = new Composite(group, SWT.NONE);
     groupInnerComp.setLayout(new GridLayout(2, false));
@@ -319,11 +354,16 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
   private void createGitAccessLink(Composite parent) {
     final Link link = new Link(parent, SWT.NONE);
+    //GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+    //gd.horizontalSpan=2;
+    //link.setLayoutData(gd);
+    
+    
     link.setText(Messages.git_access_reminder);
     link.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        if (e.text.equals("Eclipse SSH")) {
+        if (e.text.equals("Eclipse SSH page")) {
           PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(CloudBeesUIPlugin.getActiveWindow()
               .getShell(), "org.eclipse.jsch.ui.SSHPreferences", null, null);
 
@@ -335,6 +375,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
         }
       }
     });
+    
   }
 
   @Override

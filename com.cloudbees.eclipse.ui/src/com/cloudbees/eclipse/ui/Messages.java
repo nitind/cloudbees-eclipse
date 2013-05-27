@@ -35,8 +35,7 @@ public final class Messages extends NLS {
   public static String pref_validate_login;
 
   public static String pref_group_devAtCloud;
-  public static String pref_enable_jaas;
-  public static String pref_enable_forge;
+  public static String pref_gitprotocol;
   public static String pref_attach_jenkins;
   public static String pref_attach_jenkins_tooltip;
   public static String pref_group_allJenkins;
@@ -44,4 +43,5 @@ public final class Messages extends NLS {
   public static String pref_jenkins_refresh_enabled;
 
   public static String git_access_reminder;
+  
 }
