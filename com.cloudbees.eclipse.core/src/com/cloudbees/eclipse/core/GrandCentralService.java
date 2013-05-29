@@ -468,6 +468,8 @@ public class GrandCentralService {
   public String getCurrentUsername(final IProgressMonitor monitor) throws CloudBeesException {
     String acc = getActiveAccountName();
 
+    
+    
     if (acc == null) {
       return null;
     }

@@ -40,12 +40,16 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
+import com.cloudbees.eclipse.core.ForgeUtil;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance.STATUS;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance.TYPE;
 import com.cloudbees.eclipse.core.forge.api.ForgeSyncEnabler;
 import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
 import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
+import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
+import com.cloudbees.eclipse.ui.GitConnectionType;
 
 public class ForgeSyncConfirmation extends TitleAreaDialog {
 
@@ -70,7 +74,19 @@ public class ForgeSyncConfirmation extends TitleAreaDialog {
 
     @Override
     public String getColumnText(final Object element, final int columnIndex) {
-      return ((ForgeInstance) element).url;
+      String url = ((ForgeInstance) element).url;
+
+      if (((ForgeInstance) element).type == TYPE.GIT) {
+        url = ForgeUtil.stripGitPrefixes(url);
+
+        GitConnectionType type = CloudBeesUIPlugin.getDefault().getGitConnectionType();
+        if (type.equals(GitConnectionType.SSH)) {
+          url = ForgeUtil.PR_SSH + url;
+        } else {
+          url = ForgeUtil.PR_HTTPS + url;
+        }
+      }
+      return url;
     }
   }
 

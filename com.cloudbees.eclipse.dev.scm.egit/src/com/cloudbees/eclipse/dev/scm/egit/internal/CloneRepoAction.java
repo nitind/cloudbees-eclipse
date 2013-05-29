@@ -25,6 +25,7 @@ import org.eclipse.ui.internal.ObjectPluginAction;
 import com.cloudbees.eclipse.core.CBRemoteChangeListener;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance.STATUS;
 import com.cloudbees.eclipse.dev.scm.egit.CloudBeesScmEgitPlugin;
 import com.cloudbees.eclipse.dev.scm.egit.ForgeEGitSync;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -44,7 +45,7 @@ public class CloneRepoAction implements IObjectActionDelegate {
           final ForgeInstance fi = (ForgeInstance) element;
 
           cloneRepo(fi);
-
+          
         }
       }
     }
@@ -61,6 +62,14 @@ public class CloneRepoAction implements IObjectActionDelegate {
           if (ForgeEGitSync.internalSync(fi, monitor)) {
             CloudBeesUIPlugin.getDefault().showView("org.eclipse.egit.ui.RepositoriesView");
             
+            boolean cloned = ForgeEGitSync.isAlreadyCloned(fi.url);
+
+            if (cloned) {
+              fi.status = STATUS.SYNCED;
+            } else {
+              fi.status = STATUS.SKIPPED;
+            }
+
             Iterator<CBRemoteChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
                 .iterator();
             while (iterator.hasNext()) {

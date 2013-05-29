@@ -59,6 +59,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.ForgeUtil;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance.STATUS;
 import com.cloudbees.eclipse.core.forge.api.ForgeSync;
@@ -79,9 +80,6 @@ import com.jcraft.jsch.Session;
  * @author ahtik
  */
 public class ForgeEGitSync implements ForgeSync {
-
-  static private String prssh = "ssh://git@";
-  static private String prhttps = "https://";
 
   @Override
   public void updateStatus(final ForgeInstance instance, final IProgressMonitor monitor) throws CloudBeesException {
@@ -232,11 +230,27 @@ public class ForgeEGitSync implements ForgeSync {
           //    } catch (InterruptedException e) {
           //      throw new CloudBeesException(e);
 
-          if (res == Window.OK) {
+/*          if (res == Window.OK) {
             instance.status = ForgeInstance.STATUS.SYNCED;
           } else {
             instance.status = ForgeInstance.STATUS.SKIPPED;
           }
+*/          
+          // CHECK IF THE REPO NOW EXISTS. Even if it was cancelled at the final import, the repo might still exist
+          
+          if (isAlreadyCloned(url)) {
+            instance.status = ForgeInstance.STATUS.SYNCED;
+          } else {
+            instance.status = ForgeInstance.STATUS.SKIPPED;
+          }
+          /*
+          if (res == Window.OK) {
+            
+          } else {
+            
+          }*/
+          
+          
         }
       });
 
@@ -252,20 +266,20 @@ public class ForgeEGitSync implements ForgeSync {
 
   }
 
-  protected static boolean isAlreadyCloned(final String url) {
+  public static boolean isAlreadyCloned(final String url) {
     try {
 
       if (url == null) {
         return false;
       }
 
-      String bareUrl = stripProtocol(url);
+      String bareUrl = ForgeUtil.stripGitPrefixes(url);
       if (bareUrl == null) {
         return false;
       }
 
-      URIish proposalHTTPS = new URIish(prhttps + bareUrl);
-      URIish proposalSSH = new URIish(prssh + bareUrl);
+      URIish proposalHTTPS = new URIish(ForgeUtil.PR_HTTPS + bareUrl);
+      URIish proposalSSH = new URIish(ForgeUtil.PR_SSH + bareUrl);
 
       List<String> reps = Activator.getDefault().getRepositoryUtil().getConfiguredRepositories();
       for (String repo : reps) {
@@ -294,14 +308,6 @@ public class ForgeEGitSync implements ForgeSync {
     return false;
   }
 
-  private static String stripProtocol(String url) {
-    if (url.toLowerCase().startsWith(prhttps)) {
-      return url.substring(prhttps.length());
-    } else if (url.toLowerCase().startsWith(prssh)) {
-      return url.substring(prssh.length());
-    }
-    return null;
-  }
 
   @Override
   public boolean openRemoteFile(final JenkinsScmConfig scmConfig, final ChangeSetPathItem item,
@@ -523,16 +529,16 @@ public class ForgeEGitSync implements ForgeSync {
   }
 
   private static String reformatGitUrlToCurrent(String url) {
-    String burl = stripProtocol(url);
+    String burl = ForgeUtil.stripGitPrefixes(url);
     if (burl == null) {
       return burl;
     }
 
     GitConnectionType type = CloudBeesUIPlugin.getDefault().getGitConnectionType();
-    if (type.equals(GitConnectionType.HTTPS)) {
-      return prhttps + burl;
+    if (type.equals(GitConnectionType.SSH)) {
+      return ForgeUtil.PR_SSH + burl;
     }
-    return prssh + burl;
+    return ForgeUtil.PR_HTTPS + burl;
   }
 
   public static boolean validateSSHConfig(IProgressMonitor monitor) throws CloudBeesException, JSchException {

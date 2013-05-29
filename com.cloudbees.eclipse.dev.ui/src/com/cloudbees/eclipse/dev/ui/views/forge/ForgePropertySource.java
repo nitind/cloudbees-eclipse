@@ -14,7 +14,11 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
+import com.cloudbees.eclipse.core.ForgeUtil;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
+import com.cloudbees.eclipse.core.forge.api.ForgeInstance.TYPE;
+import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
+import com.cloudbees.eclipse.ui.GitConnectionType;
 
 public class ForgePropertySource implements IPropertySource {
 
@@ -57,21 +61,25 @@ public class ForgePropertySource implements IPropertySource {
     if (id.equals(PROPERTY_STATUS)) {
       return this.forge.status.name();
     }
+    
     if (id.equals(PROPERTY_URL)) {
-      String url = stripGitPrefixes(this.forge.url);
+
+      String url = this.forge.url;
+      if (this.forge.type==TYPE.GIT) {
+      url = ForgeUtil.stripGitPrefixes(url);
+
+      GitConnectionType type = CloudBeesUIPlugin.getDefault().getGitConnectionType();
+      if (type.equals(GitConnectionType.SSH)) {
+        url = ForgeUtil.PR_SSH + url;
+      } else {
+        url = ForgeUtil.PR_HTTPS + url;
+      }
+      }
+
       return url;
     }
+    
     return null;
-  }
-
-  private String stripGitPrefixes(String url) {
-    if (url!=null && url.startsWith("ssh://git@")) {
-      return url.substring("ssh://git@".length());
-    }
-    if (url!=null && url.startsWith("https://")) {
-      return url.substring("https://".length());
-    }
-    return url;
   }
 
   @Override
