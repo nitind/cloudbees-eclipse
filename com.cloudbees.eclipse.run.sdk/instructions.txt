@@ -1,0 +1,13 @@
+Instructions to upgrade bundled Bees SDK
+
+1. delete user home .m2 and .bees dirs
+2. unpack new sdk to cloudbees-sdk dir
+3. from that dir run bees console and enter bees create to start fetching jars
+4. copy jars from .m2/repository to cloudbees-sdk/boot-repo
+Example:
+find /cygdrive/c/Users/ahtik/.m2/repository -type f -iname "*.jar" -exec cp --parents {} /cygdrive/m/cb/cloudbees-eclipse/com.cloudbees.eclipse.run.sdk/cloudbees-sdk/boot-repo ";"
+This command is not perfect, it will recreate the full path.
+Get it to the same level as rest of the boot-repo
+5. run update-jarlist.sh
+6. use generated jarlist.txt for MANIFEST.MF classpath
+7. export all relevant packages in MANIFEST.MF editor

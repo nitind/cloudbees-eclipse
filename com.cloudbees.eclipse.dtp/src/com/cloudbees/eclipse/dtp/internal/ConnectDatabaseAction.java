@@ -381,8 +381,13 @@ public class ConnectDatabaseAction extends CBTreeAction implements IObjectAction
     if (!dirs.endsWith(File.separator)) {
       dirs = dirs + File.separator;
     }
-
-    return dirs + "lib" + File.separator + "mysql-connector-java-5.1.15.jar";
+    
+    /*BEFORE
+    com.cloudbees.eclipse.run.sdk\cloudbees-sdk\lib\mysql-connector-java-5.1.15.jar.
+    NOW
+    com.cloudbees.eclipse.run.sdk\cloudbees-sdk\boot-repo\mysql\mysql-connector-java\5.1.15\mysql-connector-java-5.1.15.jar
+    */
+    return dirs + "boot-repo" + File.separator + "mysql" + File.separator +"mysql-connector-java" + File.separator +"5.1.15" + File.separator +"mysql-connector-java-5.1.15.jar";
   }
 
 }

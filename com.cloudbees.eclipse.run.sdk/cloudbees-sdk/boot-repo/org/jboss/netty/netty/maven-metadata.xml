@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.jboss.netty</groupId>
+  <artifactId>netty</artifactId>
+  <version>3.2.5.Final</version>
+  <versioning>
+    <latest>3.2.5.Final</latest>
+    <release>3.2.5.Final</release>
+    <versions>
+      <version>3.2.5.Final</version>
+    </versions>
+  </versioning>
+</metadata>
