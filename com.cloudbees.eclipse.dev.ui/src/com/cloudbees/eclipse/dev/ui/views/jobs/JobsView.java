@@ -413,7 +413,8 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
       public void activeAccountChanged(String email, String newAccountName) {
         // if cloud-hosted view and account changed, close this view
         JenkinsService ss = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl);
-        if (ss.isCloud()) {
+
+        if (ss==null ||  ss.isCloud()) {
 
           PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
             public void run() {

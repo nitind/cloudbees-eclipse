@@ -17,6 +17,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -113,7 +114,13 @@ public class BeesSDK {
     if (client == null) {
       return new ApplicationListResponse();
     }
-    return client.applicationList();
+    ApplicationListResponse list = client.applicationList();
+/*    Iterator<ApplicationInfo> iter = list.getApplications().iterator();
+    while (iter.hasNext()) {
+      ApplicationInfo info = (ApplicationInfo) iter.next();
+      System.out.println("SETTINGS: "+info.getSettings());
+    }
+*/    return list;
   }
 
   public static ApplicationInfo getServerState(final String accountName, final String id) throws CloudBeesException,
