@@ -13,8 +13,8 @@
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/boot-repo/com/cloudbees/cloudbees-api-core/1.4.0/cloudbees-api-core-1.4.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/boot-repo/com/cloudbees/extensibility/1.3/extensibility-1.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/boot-repo/com/cloudbees/sdk/bees-api/1.3.2/bees-api-1.3.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/boot-repo/com/cloudbees/sdk/bees-api/1.3.5/bees-api-1.3.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/boot-repo/com/cloudbees/sdk/bees-boot2/1.5.0/bees-boot2-1.5.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/boot-repo/com/cloudbees/sdk/bees-api/1.3.5/bees-api-1.3.5.jar" sourcepath="/bees-api"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/boot-repo/com/cloudbees/sdk/bees-boot2/1.5.0/bees-boot2-1.5.0.jar" sourcepath="/bees-boot2"/>
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/boot-repo/com/cloudbees/sdk/bees-driver/1.3.2/bees-driver-1.3.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/boot-repo/com/cloudbees/sdk/bees-driver/1.3.5/bees-driver-1.3.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/boot-repo/com/cloudbees/sdk/plugins/service-plugin/1.2.1/service-plugin-1.2.1.jar"/>
@@ -157,6 +157,6 @@
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/boot-repo/stax/stax-api/1.0.1/stax-api-1.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/boot-repo/xmlpull/xmlpull/1.1.3.1/xmlpull-1.1.3.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/boot-repo/xpp3/xpp3_min/1.1.4c/xpp3_min-1.1.4c.jar"/>
-	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/cloudbees-boot.jar"/>
+	<classpathentry exported="true" kind="lib" path="cloudbees-sdk/lib/cloudbees-boot.jar" sourcepath="/bees-boot"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

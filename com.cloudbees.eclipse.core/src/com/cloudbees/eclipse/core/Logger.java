@@ -62,4 +62,8 @@ public class Logger {
     log(IStatus.ERROR, exception.getLocalizedMessage(), exception);
   }
 
+  public static Logger getLogger(Class clazz) {
+    return new Logger(null);
+  }
+
 }

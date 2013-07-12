@@ -285,7 +285,7 @@
     
    		<menuContribution locationURI="menu:com.cloudbees.eclipse.ui.commands.referenceToMenu">
    		<dynamic
-           id="com.cloudbees.eclipse.ui.activeAccount" class="com.cloudbees.eclipse.ui.internal.ActiveAccountContributionItem">           
+           id="com.cloudbees.eclipse.ui.activeAccount" class="com.cloudbees.eclipse.ui.internal.ActiveAccountAndRegionContributionItem">           
    		</dynamic>
 		</menuContribution>       
        

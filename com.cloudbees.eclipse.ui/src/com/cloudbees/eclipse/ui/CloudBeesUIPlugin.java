@@ -57,6 +57,7 @@ import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.core.GrandCentralService.AuthInfo;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
+import com.cloudbees.eclipse.core.Region;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
@@ -511,6 +512,17 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     final ClickStartService css = CloudBeesCorePlugin.getDefault().getClickStartService();
     gcs.setAuthInfo(email, password);
 
+    String regionString = CloudBeesUIPlugin.getDefault().getPreferenceStore()
+        .getString(PreferenceConstants.P_ACTIVE_REGION);
+    
+    Region region = Region.US;
+    
+    if (regionString!=null && regionString.length()>0) {
+      region = Region.valueOf(regionString);
+    }
+    
+    gcs.setActiveRegion(region);
+    
     if (email != null && email.length() > 0) {
       org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Validating CloudBees account") {
         protected IStatus run(final IProgressMonitor monitor) {
@@ -701,19 +713,19 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     });
   }
 
-  public void fireActiveAccountChanged(String newEmail, String newAccountName) {
+  public void fireActiveAccountChanged(String newEmail, String newAccountName, Region newRegion) {
     reloadAllCloudJenkins(false);
     fireApplicationInfoChanged();
     fireDatabaseInfoChanged();
-    fireAccountNameChange(newEmail, newAccountName);
+    fireAccountNameChange(newEmail, newAccountName, newRegion);
   }
 
-  void fireAccountNameChange(String newEmail, String newAccountName) {
+  void fireAccountNameChange(String newEmail, String newAccountName, Region region) {
     Iterator<CBRemoteChangeListener> iterator = Collections.unmodifiableList(
         CloudBeesUIPlugin.this.cbRemoteChangeListeners).iterator();
     while (iterator.hasNext()) {
       CBRemoteChangeListener listener = iterator.next();
-      listener.activeAccountChanged(newEmail, newAccountName);
+      listener.activeAccountChanged(newEmail, newAccountName, region);
     }
   }
 
@@ -773,6 +785,26 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       return GitConnectionType.SSH;
     }
     return GitConnectionType.HTTPS;
+  }
+
+  public void setActiveRegion(String activeRegionName) throws CloudBeesException {
+    final GrandCentralService gcs = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    
+    String email = gcs.getEmail();
+    
+    String origActiveRegion = CloudBeesUIPlugin.getDefault().getPreferenceStore()
+        .getString(PreferenceConstants.P_ACTIVE_REGION);
+    
+    Region activeRegion = Region.valueOf(activeRegionName);
+    gcs.setActiveRegion(activeRegion);        
+    
+    if (origActiveRegion == null || !origActiveRegion.equals(activeRegionName)) {
+      CloudBeesUIPlugin.getDefault().getPreferenceStore()
+          .setValue(PreferenceConstants.P_ACTIVE_REGION, activeRegionName);
+    }
+    
+    CloudBeesUIPlugin.getDefault().fireActiveAccountChanged(email, gcs.getActiveAccountName(), activeRegion);
+    
   }
   
 }

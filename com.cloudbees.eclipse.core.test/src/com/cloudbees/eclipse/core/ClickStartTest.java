@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.Test;
 
@@ -85,7 +84,7 @@ public class ClickStartTest {
     assertNotSame("", resp.reservationId);
 
     while (cs.getCreateProgress(reservationId)<100) {
-      log.debug(".. waiting for the creation to complete.");
+      log.info(".. waiting for the creation to complete.");
       Thread.currentThread().sleep(1000);
     }
 

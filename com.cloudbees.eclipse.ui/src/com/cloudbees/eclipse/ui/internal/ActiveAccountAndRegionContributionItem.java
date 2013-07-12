@@ -24,18 +24,19 @@ import org.eclipse.ui.menus.CommandContributionItemParameter;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
+import com.cloudbees.eclipse.core.Region;
 import com.cloudbees.eclipse.ui.CBImages;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
-public class ActiveAccountContributionItem extends CompoundContributionItem {
+public class ActiveAccountAndRegionContributionItem extends CompoundContributionItem {
 
   boolean onlyAccountRelated = false;
 
-  public ActiveAccountContributionItem() {
+  public ActiveAccountAndRegionContributionItem() {
     super();
   }
 
-  public ActiveAccountContributionItem(boolean onlyAccountRelated) {
+  public ActiveAccountAndRegionContributionItem(boolean onlyAccountRelated) {
     this.onlyAccountRelated = onlyAccountRelated;
   }
 
@@ -70,41 +71,10 @@ public class ActiveAccountContributionItem extends CompoundContributionItem {
       list.add(new Separator());
     }
 
-    try {
-      final String accountName = CloudBeesUIPlugin.getDefault().getActiveAccountName(new NullProgressMonitor());
+    addActiveRegion(list);
 
-      String email = CloudBeesCorePlugin.getDefault().getGrandCentralService().getEmail();
-      final String accounts[] = CloudBeesCorePlugin.getDefault().getGrandCentralService().getCachedAccounts();
-
-      if (accounts != null && accounts.length >= 1) {
-        String post = "";
-        if (accountName != null && accountName.length() > 0) {
-          post = " (" + accountName + ")";
-        }
-
-        MenuManager submenu = new MenuManager(email + post, "com.cloudbees.eclipse.ui.activeAccount");
-
-        submenu.add(new CompoundContributionItem("accountitems") {
-          protected IContributionItem[] getContributionItems() {
-            // Here's where you would dynamically generate your list
-            List<IContributionItem> sublist = new ArrayList<IContributionItem>();
-
-            for (String ac : accounts) {
-              ActionContributionItem item = new ActionContributionItem(new SelectAccountAction(ac, ac
-                  .equals(accountName)));
-              sublist.add(item);
-            }
-
-            return sublist.toArray(new IContributionItem[0]);
-          }
-        });
-        list.add(submenu);
-
-      }
-
-    } catch (CloudBeesException e) {
-      e.printStackTrace();
-    }
+    addActiveAccount(list);
+    
 
     {
       CommandContributionItemParameter params = new CommandContributionItemParameter(CloudBeesUIPlugin.getDefault()
@@ -119,6 +89,76 @@ public class ActiveAccountContributionItem extends CompoundContributionItem {
 
     return list.toArray(new IContributionItem[0]);
 
+  }
+
+  private void addActiveAccount(List<IContributionItem> list) {
+    try {
+      final String accountName = CloudBeesUIPlugin.getDefault().getActiveAccountName(new NullProgressMonitor());
+
+      String email = CloudBeesCorePlugin.getDefault().getGrandCentralService().getEmail();
+      final String accounts[] = CloudBeesCorePlugin.getDefault().getGrandCentralService().getCachedAccounts();
+
+      if (accounts != null && accounts.length >= 1) {
+        String post = "";
+        if (accountName != null && accountName.length() > 0) {
+          post = " (" + accountName + ")";
+        }
+
+        MenuManager submenuActiveAccount = new MenuManager(email + post, "com.cloudbees.eclipse.ui.activeAccount");
+
+        submenuActiveAccount.add(new CompoundContributionItem("accountitems") {
+          protected IContributionItem[] getContributionItems() {
+            // Here's where you would dynamically generate your list
+            List<IContributionItem> sublist = new ArrayList<IContributionItem>();
+
+            for (String ac : accounts) {
+              ActionContributionItem item = new ActionContributionItem(new SelectAccountAction(ac, ac
+                  .equals(accountName)));
+              sublist.add(item);
+            }
+
+            return sublist.toArray(new IContributionItem[0]);
+          }
+        });
+        list.add(submenuActiveAccount);
+
+      }
+
+    } catch (CloudBeesException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void addActiveRegion(List<IContributionItem> list) {
+    try {
+      final Region region = CloudBeesCorePlugin.getDefault().getGrandCentralService().getActiveRegion();
+
+      final String regionName = region.getLabel();
+
+      final Region regions[] = Region.values();
+
+      MenuManager submenuActiveAccount = new MenuManager("Region (" + regionName+")",
+          "com.cloudbees.eclipse.ui.activeRegion");
+
+      submenuActiveAccount.add(new CompoundContributionItem("accountitems") {
+        protected IContributionItem[] getContributionItems() {
+          // Here's where you would dynamically generate your list
+          List<IContributionItem> sublist = new ArrayList<IContributionItem>();
+
+          for (Region ac : regions) {
+            ActionContributionItem item = new ActionContributionItem(new SelectRegionAction(ac.getLabel(), ac.getLabel()
+                .equals(regionName)));
+            sublist.add(item);
+          }
+
+          return sublist.toArray(new IContributionItem[0]);
+        }
+      });
+      list.add(submenuActiveAccount);
+
+    } catch (CloudBeesException e) {
+      e.printStackTrace();
+    }
   }
 
 }

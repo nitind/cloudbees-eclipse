@@ -48,7 +48,7 @@ public class GrandCentralService {
   private static final String BASE_URL = "https://grandcentral." + HOST + "/api/";
 
   public static final String GC_BASE_URL = "https://grandcentral." + HOST;
-
+  
   private final ForgeSyncService forgeSyncService;
 
   private String email = null;
@@ -59,6 +59,8 @@ public class GrandCentralService {
   private String[] accountsCache = null;
 
   private AuthInfo authInfo = null;
+  
+  private Region region = Region.US;
 
   //private boolean accountSelectionActive = false;
 
@@ -66,6 +68,10 @@ public class GrandCentralService {
     this.forgeSyncService = new ForgeSyncService();
   }
 
+  public Region getActiveRegion() {
+    return region;
+  }
+  
   public ForgeSyncService getForgeSyncService() {
     return this.forgeSyncService;
   }
@@ -493,6 +499,10 @@ public class GrandCentralService {
 
   public AuthInfo getCachedAuthInfo(boolean b) throws CloudBeesException {
     return getCachedAuthInfo(b, new NullProgressMonitor());
+  }
+
+  public void setActiveRegion(Region activeRegion) {
+    this.region = activeRegion;
   }
 
   /*  public void setAccountSelectionActive(boolean b) {

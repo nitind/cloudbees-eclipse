@@ -31,7 +31,7 @@ public class CBRemoteChangeAdapter implements CBRemoteChangeListener {
   public void forgeChanged(List<ForgeInstance> instances) {
   }
 
-  public void activeAccountChanged(String email, String newAccountName) {
+  public void activeAccountChanged(String email, String newAccountName, Region region) {
     
   }
 

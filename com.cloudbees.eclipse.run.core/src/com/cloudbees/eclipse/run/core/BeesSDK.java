@@ -10,10 +10,14 @@
  *******************************************************************************/
 package com.cloudbees.eclipse.run.core;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,6 +32,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -57,6 +62,7 @@ import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.core.GrandCentralService.AuthInfo;
+import com.cloudbees.eclipse.core.Region;
 import com.cloudbees.eclipse.run.sdk.CBSdkActivator;
 
 public class BeesSDK {
@@ -566,6 +572,11 @@ public class BeesSDK {
       String secret_key = cachedAuthInfo.getAuth().secret_key;
 
       BeesClientConfiguration conf = new BeesClientConfiguration(API_URL, api_key, secret_key, "xml", "1.0");
+      
+      String apiUrl = grandCentralService.getActiveRegion().getApiUrl();
+
+      conf.setServerApiUrl(apiUrl);
+      
       BeesClient beesClient = new BeesClient(conf);
       beesClient.setVerbose(false);
       return beesClient;
@@ -645,20 +656,21 @@ public class BeesSDK {
 
     List<String> cmds = new ArrayList<String>();
 
-    String secretKey = null;
-    String authKey = null;
 
     if (addAuth) {
-      GrandCentralService grandCentralService;
-      grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-      AuthInfo cachedAuthInfo = grandCentralService.getCachedAuthInfo(false);
-      secretKey = "-Dbees.apiSecret=" + cachedAuthInfo.getAuth().secret_key;//$NON-NLS-1$
-      authKey = "-Dbees.apiKey=" + cachedAuthInfo.getAuth().api_key;//$NON-NLS-1$
+      writeBeesConfig();
     }
-
+    
     String beesHome = "-Dbees.home=" + CBSdkActivator.getDefault().getBeesHome();
     String beesHomeDir = CBSdkActivator.getDefault().getBeesHome();
 
+    
+    IPath sdk = getBeesRepoDir();
+    
+    
+    //System.out.println("PLUGIN PATH: "+sdk.toOSString());
+    String beesRepoDir = sdk.toOSString();
+    
     //java.home=C:\Java\jdk1.6.0_29\jre
     //String java = System.getProperty("eclipse.vm");
 
@@ -672,15 +684,49 @@ public class BeesSDK {
     String[] c1 = new String[] { java, "-Xmx256m" };
 
     String[] c2 = new String[] { beesHome, "-cp", beesHomeDir + "lib/cloudbees-boot.jar",
-        "com.cloudbees.sdk.boot.Launcher" };
+        "com.cloudbees.sdk.boot.Launcher"};
 
     cmds.addAll(Arrays.asList(c1));
     if (addAuth) {
-      cmds.add(secretKey);
-      cmds.add(authKey);
+      //cmds.add(secretKey);
+      //cmds.add(authKey);
+      //cmds.add("-Dbees.api.url=https://api.cloudbees.com/api");
+
     }
     cmds.addAll(Arrays.asList(vmargs));
+    
+
     cmds.addAll(Arrays.asList(c2));
+    if (addAuth) {
+      //cmds.add("-Dbees.api.key="+"\""+authKey+"\"");
+      //cmds.add("-Dbees.api.secret="+"\""+secretKey+"\"");
+     }
+    //bees.project.app.domain
+    //cmds.add("-v");
+    
+    //cmds.add("-all");
+    
+
+    GrandCentralService grandCentralService;
+    grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    AuthInfo cachedAuthInfo = grandCentralService.getCachedAuthInfo(false);
+    
+    //cmds.add("--key "+cachedAuthInfo.getAuth().secret_key);
+    ///cmds.add("--endPoint us");
+    //cmds.add("-v");
+    //cmds.add("-all");
+    
+    
+    //cmds.add("--secret us");
+    //cmds.add("--key us");
+
+    //cmds.add("-ep"); cmds.add("us");
+    
+    //cmds.add("-a"); cmds.add("ahti@codehoop.com");
+    //cmds.add("--domain"); cmds.add("grandomstate");
+    
+    //cmds.add("--email"); cmds.add("ahti@codehoop.com");
+    
 
     if (cmd != null) {
       for (int i = 0; i < cmd.length; i++) {
@@ -691,12 +737,74 @@ public class BeesSDK {
       }
     }    
 
+
+    
+    //cmds.add("--email"); cmds.add("ahti@codehoop.com");
+    
+    //cmds.add("-key"); cmds.add(secretKey);    
+    //cmds.add("-secret"); cmds.add(authKey);
+    
+    // cmds.add("-vaa");
+    //https://grandcentral.cloudbees.com/api/account/keys
+      
+    
+    //cmds.add(cachedAuthInfo.getAuth().secret_key);
+
+    
+    for (String c: cmds) {
+      System.out.println(c);
+    }
     final ProcessBuilder pb = new ProcessBuilder(cmds);
 
     pb.environment().put("BEES_HOME", beesHomeDir);
+    
+    pb.environment().put("BEES_REPO", beesRepoDir);
+    
     pb.directory(new File(beesHomeDir));
     pb.redirectErrorStream(true);
     return pb;
 
   }
+
+  private static IPath getBeesRepoDir() {
+    return ResourcesPlugin.getWorkspace().getRoot().getLocation().append(".metadata").append(".plugins").append("com.cloudbees.eclipse.run.sdk");
+  }
+
+  private static void writeBeesConfig() throws CloudBeesException {
+
+    IPath sdk = getBeesRepoDir();
+    File sdkFile = sdk.append("bees.config").toFile();
+
+    GrandCentralService grandCentralService;
+    grandCentralService = CloudBeesCorePlugin.getDefault().getGrandCentralService();
+    AuthInfo cachedAuthInfo = grandCentralService.getCachedAuthInfo(false);
+    String secretKey = cachedAuthInfo.getAuth().secret_key;//$NON-NLS-1$
+    String authKey = cachedAuthInfo.getAuth().api_key;//$NON-NLS-1$
+
+    String active = CloudBeesCorePlugin.getDefault().getGrandCentralService().getActiveAccountName();
+    if (active==null) {
+      throw new CloudBeesException("User not logged in, active account not selected!");
+    }
+    
+    Region region = CloudBeesCorePlugin.getDefault().getGrandCentralService().getActiveRegion();
+    
+    Writer writer = null;
+    try {
+      writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(sdkFile), "utf-8"));
+           
+      writer.write("bees.api.key=" + authKey + CloudBeesCorePlugin.NEWLINE);
+      writer.write("bees.api.secret=" + secretKey + CloudBeesCorePlugin.NEWLINE);
+      writer.write("bees.project.app.domain="+active + CloudBeesCorePlugin.NEWLINE);
+      writer.write("bees.api.url="+region.getApiUrl() + CloudBeesCorePlugin.NEWLINE);
+
+    } catch (IOException ex) {
+      throw new CloudBeesException("Failed to write bees.config to " + sdk.toOSString(), ex);
+    } finally {
+      try {
+        writer.close();
+      } catch (Exception ex) {
+      }
+    }
+  }
+  
 }

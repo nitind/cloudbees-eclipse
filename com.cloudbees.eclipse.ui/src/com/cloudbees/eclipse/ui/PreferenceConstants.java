@@ -24,6 +24,7 @@ public class PreferenceConstants {
   public static final String P_API_KEY = "cloudbees.account.api_key";
   
   public static final String P_ACTIVE_ACCOUNT = "cloudbees.account.active";
+  public static final String P_ACTIVE_REGION = "cloudbees.region.active";
 
   public static final String P_GITPROTOCOL = "cloudbees.gitprotocol";
   

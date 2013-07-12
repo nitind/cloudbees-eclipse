@@ -119,6 +119,7 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
     if (PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
         || PreferenceConstants.P_EMAIL.equals(event.getProperty())
         || PreferenceConstants.P_ACTIVE_ACCOUNT.equals(event.getProperty())
+        || PreferenceConstants.P_ACTIVE_REGION.equals(event.getProperty())
         || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {
       refresh(false);
     }
@@ -187,7 +188,16 @@ public class AppListView extends CBTreeProvider implements IPropertyChangeListen
           AppListView.this.contentProvider.inputChanged(AppListView.this.viewer, null, null);
           //CBRunUiActivator.logErrorAndShowDialog(e1);
         } finally {
+          
           AppListView.this.loadfinished = true;
+          
+          PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+              AppListView.this.viewer.refresh(true);
+            }
+          });
+          
         }
         return Status.OK_STATUS;
       }

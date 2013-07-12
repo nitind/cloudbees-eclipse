@@ -114,6 +114,7 @@ public class DBListView extends CBTreeProvider implements IPropertyChangeListene
     if (PreferenceConstants.P_JENKINS_INSTANCES.equals(event.getProperty())
         || PreferenceConstants.P_EMAIL.equals(event.getProperty())
         || PreferenceConstants.P_ACTIVE_ACCOUNT.equals(event.getProperty())
+        || PreferenceConstants.P_ACTIVE_REGION.equals(event.getProperty())
         || PreferenceConstants.P_PASSWORD.equals(event.getProperty())) {
       refresh(false);
     }
@@ -183,7 +184,16 @@ public class DBListView extends CBTreeProvider implements IPropertyChangeListene
           DBListView.this.contentProvider.inputChanged(DBListView.this.viewer, null, null);
           //CloudBeesDataToolsPlugin.logErrorAndShowDialog(e1);
         } finally {
+          
           DBListView.this.loadfinished = true;
+          
+          PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+              DBListView.this.viewer.refresh(true);
+            }
+          });
+          
         }
         return Status.OK_STATUS;
       }

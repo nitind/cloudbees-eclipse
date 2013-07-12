@@ -27,7 +27,7 @@ public interface CBRemoteChangeListener {
 
   void forgeChanged(List<ForgeInstance> instances);
   
-  void activeAccountChanged(String email, String newAccountName);
+  void activeAccountChanged(String email, String newAccountName, Region region);
 
   /**
    * Called when jenkins instance status could have been potentially changed. For example called whenever jobs list changed for this url 
