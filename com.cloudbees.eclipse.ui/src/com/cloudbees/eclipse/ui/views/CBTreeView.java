@@ -276,7 +276,7 @@ public class CBTreeView extends ViewPart {
       return;
     }
     if (newAccountName!=null && newAccountName.length()>0) {
-      CBTreeView.this.setContentDescription(" "+email+" ("+newAccountName+","+" region: "+region.getLabel()+")");
+      CBTreeView.this.setContentDescription(" "+email+"; "+newAccountName+"; region: "+region.getLabel());
       return;
     }
     String post="";

@@ -104,35 +104,41 @@ public class BeesRunner {
       return;
     }
 
-    final ProcessBuilder pb = BeesSDK.createBeesProcess(true, cmd);
-
     OutputStreamWriter osw = new OutputStreamWriter(out);
     BufferedWriter writer = new BufferedWriter(osw);
 
-    Process p = null;
     try {
-      p = pb.start();
-    } catch (Exception e) {
-      writer.write("Error while running CloudBees SDK: " + e.getMessage() + "\n");
-      e.printStackTrace(new PrintWriter(writer));
-      return;
-    }
+      final ProcessBuilder pb = BeesSDK.createBeesProcess(true, cmd);
 
-    //    String line;
-
-    InputStream stdin = p.getInputStream();
-
-    byte[] b = new byte[4096 * 10];
-
-    currentOutputStream = p.getOutputStream();
-    try {
-      for (int n; (n = stdin.read(b)) != -1;) {
-        writer.write(new String(b, 0, n, "UTF-8"));
-        writer.flush();
-        BeesConsole.moveCaret();
+      Process p = null;
+      try {
+        p = pb.start();
+      } catch (Exception e) {
+        writer.write("Error while running CloudBees SDK: " + e.getMessage() + "\n");
+        e.printStackTrace(new PrintWriter(writer));
+        return;
       }
-    } finally {
-      currentOutputStream = null;
+
+      //    String line;
+
+      InputStream stdin = p.getInputStream();
+
+      byte[] b = new byte[4096 * 10];
+
+      currentOutputStream = p.getOutputStream();
+      try {
+        for (int n; (n = stdin.read(b)) != -1;) {
+          writer.write(new String(b, 0, n, "UTF-8"));
+          writer.flush();
+          BeesConsole.moveCaret();
+        }
+      } finally {
+        currentOutputStream = null;
+      }
+
+    } catch (CloudBeesException e) {
+      writer.write("Error while creating CloudBees SDK process: " + e.getMessage() + "\n");
+      e.printStackTrace(new PrintWriter(writer));
     }
 
     writer.write("bees ");

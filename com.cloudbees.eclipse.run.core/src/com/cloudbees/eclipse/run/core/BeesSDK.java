@@ -713,7 +713,7 @@ public class BeesSDK {
     
     //cmds.add("--key "+cachedAuthInfo.getAuth().secret_key);
     ///cmds.add("--endPoint us");
-    //cmds.add("-v");
+    // cmds.add("-v");
     //cmds.add("-all");
     
     
@@ -751,9 +751,6 @@ public class BeesSDK {
     //cmds.add(cachedAuthInfo.getAuth().secret_key);
 
     
-    for (String c: cmds) {
-      System.out.println(c);
-    }
     final ProcessBuilder pb = new ProcessBuilder(cmds);
 
     pb.environment().put("BEES_HOME", beesHomeDir);
@@ -790,6 +787,12 @@ public class BeesSDK {
     
     Writer writer = null;
     try {
+      
+      if (!sdkFile.exists()) {
+        //make sure dirs exist
+        sdkFile.getParentFile().mkdirs();
+      }
+      
       writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(sdkFile), "utf-8"));
            
       writer.write("bees.api.key=" + authKey + CloudBeesCorePlugin.NEWLINE);
