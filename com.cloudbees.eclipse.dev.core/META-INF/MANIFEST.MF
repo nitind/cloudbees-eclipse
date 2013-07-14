@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CloudBees Dev Core
 Bundle-SymbolicName: com.cloudbees.eclipse.dev.core;singleton:=true
-Bundle-Version: 2.0.1.qualifier
+Bundle-Version: 2.0.2.qualifier
 Bundle-Activator: com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin
 Bundle-Vendor: Cloud Bees, Inc
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
