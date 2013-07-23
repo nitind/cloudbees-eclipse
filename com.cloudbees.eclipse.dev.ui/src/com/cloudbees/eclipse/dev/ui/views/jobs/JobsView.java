@@ -412,16 +412,30 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
       public void activeAccountChanged(String email, String newAccountName) {
         // if cloud-hosted view and account changed, close this view
-        JenkinsService ss = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl);
+        
+        boolean closeView = false;
 
-        if (ss==null ||  ss.isCloud()) {
+        if (viewUrl==null || viewUrl.length()==0) {
+            closeView = true;
+        }
 
-          PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-            public void run() {
-              IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-              page.hideView(JobsView.this);
+
+        if (!closeView) {
+            JenkinsService ss = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(viewUrl);
+
+            if (ss==null ||  ss.isCloud()) {
+                closeView = true;
             }
-          });
+        }
+        
+        if (closeView) {
+            PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+              public void run() {
+                IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+                page.hideView(JobsView.this);
+              }
+            });
+        }
 
         }
       }
