@@ -436,8 +436,6 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
               }
             });
         }
-
-        }
       }
 
       public void activeJobViewChanged(final JenkinsJobsResponse newView) {
