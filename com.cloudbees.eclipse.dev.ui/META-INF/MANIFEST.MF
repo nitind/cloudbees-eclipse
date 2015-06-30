@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CloudBees Dev UI
 Bundle-SymbolicName: com.cloudbees.eclipse.dev.ui;singleton:=true
-Bundle-Version: 2.0.2.qualifier
+Bundle-Version: 3.0.1.qualifier
 Bundle-Activator: com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin
 Bundle-Vendor: Cloud Bees, Inc
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -21,15 +21,12 @@ Require-Bundle: com.cloudbees.eclipse.core,
  org.eclipse.jdt.core,
  com.cloudbees.eclipse.ui,
  com.cloudbees.eclipse.dev.core,
- com.cloudbees.eclipse.run.core,
- com.cloudbees.eclipse.run.sdk,
  org.eclipse.team.core,
  org.eclipse.team.ui,
  org.eclipse.jdt.junit;resolution:=optional,
  org.eclipse.jdt.junit.core;resolution:=optional,
  org.eclipse.jdt.debug.ui;resolution:=optional,
- org.eclipse.jface.text,
- com.cloudbees.eclipse.dev.scm.egit;bundle-version="2.0.2"
+ org.eclipse.jface.text
 Export-Package: com.cloudbees.eclipse.dev.ui,
  com.cloudbees.eclipse.dev.ui.views.build,
  com.cloudbees.eclipse.dev.ui.views.instances,

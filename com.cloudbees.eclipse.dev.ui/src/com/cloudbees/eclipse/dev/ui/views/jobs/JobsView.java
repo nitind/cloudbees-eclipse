@@ -682,7 +682,7 @@ public class JobsView extends ViewPart implements IPropertyChangeListener {
 
         if (el instanceof PendingUpdateAdapter) {
           PendingUpdateAdapter uel = (PendingUpdateAdapter) el;
-          cell.setText(uel.getLabel(null));
+          cell.setText("Loading...");
           cell.setImage(null);
           return;
         }

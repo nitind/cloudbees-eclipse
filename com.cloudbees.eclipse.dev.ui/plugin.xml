@@ -198,7 +198,7 @@
               enablesFor="1"
               icon="icons/epl/refresh.png"
               id="com.cloudbees.eclipse.dev.ui.action.reload"
-              label="Reload...">
+              label="Refresh...">
         </action>
      </objectContribution>
      
@@ -211,7 +211,7 @@
               enablesFor="1"
               icon="icons/epl/refresh.png"
               id="com.cloudbees.eclipse.dev.ui.action.reload"
-              label="Reload...">
+              label="Refresh...">
         </action>
      </objectContribution>
      
@@ -223,18 +223,6 @@
               class="com.cloudbees.eclipse.dev.ui.actions.ConfigureJenkinsInstancesAction"
               id="com.cloudbees.eclipse.dev.ui.action.attachJenkins"
               label="Configure...">
-        </action>
-     </objectContribution>
-     
-     <objectContribution
-           adaptable="false"
-           id="com.cloudbees.eclipse.dev.ui.refreshForge"
-           objectClass="com.cloudbees.eclipse.dev.ui.views.forge.ForgeGroup">
-        <action
-              class="com.cloudbees.eclipse.dev.ui.actions.ReloadForgeReposAction"
-              icon="icons/epl/refresh.png"
-              id="com.cloudbees.eclipse.dev.ui.action.reloadForge"
-              label="Reload Forge repos...">
         </action>
      </objectContribution>
      
@@ -326,12 +314,6 @@
     </extension>
 
     <extension
-          point="com.cloudbees.eclipse.ui.cbTreeProvider">
-       <cbTreeProvider
-             class="com.cloudbees.eclipse.dev.ui.views.forge.ForgeTreeView">
-       </cbTreeProvider>
-    </extension>
-    <extension
           point="org.eclipse.core.runtime.adapters">
        <factory
              adaptableType="com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse"
@@ -355,13 +337,4 @@
           </adapter>
        </factory>
     </extension>
-    
-    <extension
-       point="com.cloudbees.eclipse.run.core.newClickStartProjectHook">
-    <hook
-          defaultHandler="com.cloudbees.eclipse.dev.ui.NewRepoHook"
-          id="com.cloudbees.eclipse.dev.ui.NewRepoHook">
-    </hook>
-    </extension>
-    
 </plugin>

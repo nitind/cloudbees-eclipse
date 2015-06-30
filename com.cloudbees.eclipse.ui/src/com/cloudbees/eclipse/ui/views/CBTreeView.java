@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Cloud Bees, Inc.
+ * Copyright (c) 2013, 2015 Cloud Bees, Inc.
  * All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -44,12 +44,9 @@ import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.GrandCentralService;
 import com.cloudbees.eclipse.core.Region;
-import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.ui.AuthStatus;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 import com.cloudbees.eclipse.ui.internal.ActiveAccountAndRegionContributionItem;
-import com.cloudbees.eclipse.ui.internal.ConfigureSshKeysAction;
-import com.cloudbees.eclipse.ui.internal.ShowConsoleAction;
 import com.cloudbees.eclipse.ui.views.CBTreeSeparator.SeparatorLocation;
 
 public class CBTreeView extends ViewPart {
@@ -59,12 +56,7 @@ public class CBTreeView extends ViewPart {
   private TreeViewer viewer;
 
   private ICBTreeProvider[] providers;
-  
-  private CBTreeAction configureSshAction = new ConfigureSshKeysAction();
-  private CBTreeAction showConsoleAction = new ShowConsoleAction();
-  //private CBTreeAction configureAccountAction = new ConfigureCloudBeesAction();
-
-  
+   
   private CBRemoteChangeListener changeListener = new CBRemoteChangeAdapter() {
     public void activeAccountChanged(final String email, final String newAccountName, final Region region) {
       
@@ -106,10 +98,6 @@ public class CBTreeView extends ViewPart {
         return ((ICBGroup) e1).getOrder() - ((ICBGroup) e2).getOrder();
       }
 
-      if (e1 instanceof ForgeInstance && e2 instanceof ForgeInstance) {
-        return ((ForgeInstance)e1).compareTo((ForgeInstance) e2);
-      }
-      
       return super.compare(viewer, e1, e2);
     }
 
@@ -230,10 +218,6 @@ public class CBTreeView extends ViewPart {
       }
     }
     
-    pullDownMenu.add(new CBTreeSeparator(SeparatorLocation.PULL_DOWN));
-    pullDownMenu.add(this.showConsoleAction);
-    pullDownMenu.add(new CBTreeSeparator(SeparatorLocation.PULL_DOWN));
-    pullDownMenu.add(this.configureSshAction);
     pullDownMenu.add(new CBTreeSeparator(SeparatorLocation.PULL_DOWN));
     pullDownMenu.add(new ActiveAccountAndRegionContributionItem(true));
     

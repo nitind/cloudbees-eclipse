@@ -14,9 +14,7 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.ui.IActionFilter;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
-import com.cloudbees.eclipse.dev.ui.views.forge.ForgePropertySource;
 import com.cloudbees.eclipse.dev.ui.views.instances.InstancePropertySource;
 import com.cloudbees.eclipse.dev.ui.views.instances.ViewPropertySource;
 
@@ -34,12 +32,6 @@ public class AdapterFactory implements IAdapterFactory {
     if (adaptableObject instanceof JenkinsInstanceResponse.View) {
       if (adapterType == IPropertySource.class) {
         return new ViewPropertySource((JenkinsInstanceResponse.View) adaptableObject);
-      }
-    }
-
-    if (adaptableObject instanceof ForgeInstance) {
-      if (adapterType == IPropertySource.class) {
-        return new ForgePropertySource((ForgeInstance) adaptableObject);
       }
     }
 

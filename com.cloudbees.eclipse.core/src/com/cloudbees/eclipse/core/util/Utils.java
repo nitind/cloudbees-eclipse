@@ -290,7 +290,7 @@ public class Utils {
       throw new CloudBeesException("Authentication required! Either wrong or no credentials were provided! Reason:"
           + resp.getStatusLine().getReasonPhrase());
     }
-    if (responseStatus != 200) {
+    if (responseStatus != 200 && responseStatus != 201 && responseStatus != 202) {
       throw new CloudBeesException("Unexpected response code:" + responseStatus + ". Message:"
           + resp.getStatusLine().getReasonPhrase());
     }

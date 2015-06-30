@@ -19,9 +19,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import com.cloudbees.eclipse.core.GrandCentralService.AuthInfo;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
-import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.gc.api.AccountNameRequest;
 import com.cloudbees.eclipse.core.gc.api.AccountNameResponse;
 import com.cloudbees.eclipse.core.gc.api.AccountNamesRequest;
@@ -418,33 +416,6 @@ public class CBAPIService {
       return this.auth;
     }
 
-  }
-
-  public List<ForgeInstance> getForgeRepos(final IProgressMonitor monitor) throws CloudBeesException {
-    List<ForgeInstance> result = new ArrayList<ForgeInstance>();
-
-    String acc = getActiveAccountName();
-
-    if (acc==null) {
-      return result;
-    }
-    
-    AccountServiceStatusResponse services = loadAccountServices(acc);
-    Repo[] repos = services.services.forge.repos;
-    for (Repo forge : repos) {
-      ForgeInstance.TYPE type = null; //ForgeInstance.TYPE.GIT;
-      for (ForgeInstance.TYPE t : ForgeInstance.TYPE.values()) {
-        if (t.name().equalsIgnoreCase(forge.type)) {
-          type = t;
-          break;
-        }
-      }
-      if (type != null) {
-        result.add(new ForgeInstance(forge.url, services.username, this.password, type));
-      }
-    }
-
-    return result;
   }
 
   public String getEmail() {

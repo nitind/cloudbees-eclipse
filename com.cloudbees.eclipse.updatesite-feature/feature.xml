@@ -2,48 +2,19 @@
 <feature
       id="com.cloudbees.eclipse.updatesite"
       label="CloudBees Eclipse Toolkit Update Site"
-      version="2.0.2.qualifier"
+      version="3.0.1.qualifier"
       provider-name="CloudBees, Inc">
 
    <description url="http://www.cloudbees.com">
       Visit CloudBees website for more info.
    </description>
 
+   <url>
+      <update label="CloudBees Eclipse Toolkit" url="http://eclipse.cloudbees.com/"/>
+   </url>
 
    <includes
          id="com.cloudbees.eclipse"
          version="0.0.0"/>
-
-<!--   <includes
-         id="com.cloudbees.eclipse.dev.scm.egit"
-         version="0.0.0"
-         optional="true"/>
--->
-
-   <includes
-         id="com.cloudbees.eclipse.dev.scm.subclipse"
-         version="0.0.0"         
-         optional="true"/>
-
-   <includes
-         id="com.cloudbees.eclipse.dev.scm.subversive"
-         version="0.0.0"
-         optional="true"/>
-
-   <includes
-         id="com.cloudbees.eclipse.dtp"
-         version="0.0.0"/>
-
-   <includes
-         id="com.cloudbees.eclipse.m2e"
-         version="0.0.0"/>
-
-   <includes
-         id="com.cloudbees.eclipse.wst"
-         version="0.0.0"/>
-
-   <requires>
-      <import plugin="org.eclipse.swt"/>
-   </requires>
 
 </feature>

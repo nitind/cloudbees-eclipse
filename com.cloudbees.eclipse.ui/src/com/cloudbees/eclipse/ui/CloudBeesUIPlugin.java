@@ -49,7 +49,6 @@ import org.osgi.framework.BundleContext;
 
 import com.cloudbees.eclipse.core.ApplicationInfoChangeListener;
 import com.cloudbees.eclipse.core.CBRemoteChangeListener;
-import com.cloudbees.eclipse.core.ClickStartService;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.DatabaseInfoChangeListener;
@@ -59,7 +58,6 @@ import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.Region;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
-import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobProperty;
 
@@ -91,8 +89,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
   private final List<DatabaseInfoChangeListener> databaseInfoChangeListeners = new ArrayList<DatabaseInfoChangeListener>();
 
   private IPropertyChangeListener prefListener;
-
-  private List<ForgeInstance> forgeRegistry;
 
   public CloudBeesUIPlugin() {
     super();
@@ -514,8 +510,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
 
     String email = getPreferenceStore().getString(PreferenceConstants.P_EMAIL);
     final GrandCentralService gcs = CloudBeesCorePlugin.getDefault().getGrandCentralService();
-    final ClickStartService css = CloudBeesCorePlugin.getDefault().getClickStartService();
-    gcs.setAuthInfo(email, password);
 
     String regionString = CloudBeesUIPlugin.getDefault().getPreferenceStore()
         .getString(PreferenceConstants.P_ACTIVE_REGION);
@@ -533,7 +527,6 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
         protected IStatus run(final IProgressMonitor monitor) {
           try {
             AuthInfo auth = gcs.getCachedAuthInfo(true, monitor);
-            css.setAuth(auth.getAuth().api_key, auth.getAuth().secret_key);
 
             if (USE_SECURE_STORAGE) {
               try {
@@ -642,32 +635,7 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
       listener.applicationInfoChanged();
     }
   }
-
-  synchronized public List<ForgeInstance> getForgeRepos(final IProgressMonitor monitor) throws CloudBeesException {
-    List<ForgeInstance> cloudRepos = CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeRepos(monitor);
-
-    if (this.forgeRegistry == null) {
-      IPreferenceStore store = CloudBeesUIPlugin.getDefault().getPreferenceStore();
-      String instances = store.getString(PreferenceConstants.P_FORGE_INSTANCES);
-      this.forgeRegistry = new ArrayList<ForgeInstance>(ForgeInstance.decode(instances));
-    }
-
-    for (ForgeInstance forge : cloudRepos) {
-      int pos = this.forgeRegistry.indexOf(forge);
-      if (pos >= 0) {
-        ForgeInstance old = this.forgeRegistry.get(pos);
-        forge.status = old.status;
-      }
-    }
-
-    Collections.sort(cloudRepos);
-
-    this.forgeRegistry.clear();
-    this.forgeRegistry.addAll(cloudRepos);
-
-    return cloudRepos;
-  }
-
+  
   @Override
   protected void initializeImageRegistry(ImageRegistry reg) {
     super.initializeImageRegistry(reg);

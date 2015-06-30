@@ -17,10 +17,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
-import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
-import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.Logger;
-import com.cloudbees.eclipse.core.forge.api.ForgeSync;
 import com.cloudbees.eclipse.core.forge.api.ForgeSyncEnabler;
 
 public class CloudBeesDevCorePlugin extends Plugin {
@@ -67,15 +64,6 @@ public class CloudBeesDevCorePlugin extends Plugin {
             getLogger().info("skipping sync provider: " + enabler + " because of dependencies");
             continue;
           }
-
-          Object provider = element.createExecutableExtension("class");
-          if (provider instanceof ForgeSync) {
-            ForgeSync provider1 = ((ForgeSync) provider);
-            CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().addProvider(provider1);
-            //System.out.println("adding: " + provider1);
-          }
-        } catch (CloudBeesException e) {
-          logger.error(e.getMessage(), e);
         } catch (CoreException e) {
           logger.error(e.getMessage(), e);
         }

@@ -20,14 +20,14 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.BooleanFieldEditor;
-import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
-import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -59,8 +59,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
   public GeneralPreferencePage() {
     super(GRID);
     setPreferenceStore(CloudBeesUIPlugin.getDefault().getPreferenceStore());
-    setDescription(Messages.pref_description);
-
+//    setDescription(Messages.pref_description);    
   }
 
   @Override
@@ -68,65 +67,46 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
     getFieldEditorParent().setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+    createHeader();
+    
     createCompositeLogin();
-
-    new Label(getFieldEditorParent(), SWT.NONE);
-
-    createCompositeServices();
 
     new Label(getFieldEditorParent(), SWT.NONE);
 
     createAllJenkins();
   }
 
-  private void createCompositeServices() {
-    Group group = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_IN);
-    group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    GridLayout gl = new GridLayout(1, false);
-    gl.marginLeft = 5;
-    gl.marginRight = 5;
-    gl.marginTop = 5;
-    gl.marginBottom = 5;
-    gl.horizontalSpacing = 5;
+  private void createHeader() {
+//    Group group = new Group(getFieldEditorParent(), SWT.NONE);
+//    group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+//
+//    GridLayout gl = new GridLayout(1, false);
+//    gl.marginLeft = 5;
+//    gl.marginRight = 5;
+//    gl.marginTop = 5;
+//    gl.marginBottom = 5;
+//    gl.horizontalSpacing = 5;
+//
+//    group.setLayout(gl);
 
-    group.setLayout(gl);
-
-    Composite groupInnerComp = new Composite(group, SWT.NONE);
-    groupInnerComp.setLayout(new GridLayout(2, false));
+    final Composite groupInnerComp = new Composite(getFieldEditorParent(), SWT.NONE);
+    groupInnerComp.setLayout(new GridLayout(1, false));
     groupInnerComp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-    Composite groupInnerComp2 = new Composite(group, SWT.NONE);
     
-    GridLayout gl2 = new GridLayout(1, false);
-    gl2.marginTop=5;
-    gl2.marginHeight=0;
-    gl2.marginWidth=0;
-    gl2.horizontalSpacing=0;
-    gl2.verticalSpacing=0;
+    ImageDescriptor id = ImageDescriptor.createFromURL(CloudBeesUIPlugin.getDefault().getBundle()
+        .getResource("/icons/jenkins_cloudbees_logo2.png"));    
+    Label label = new Label (groupInnerComp, SWT.NONE);
+    label.setImage (id.createImage());
     
-    groupInnerComp2.setLayout(gl2);
-    //groupInnerComp2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    new Label(getFieldEditorParent(), SWT.NONE);
     
-    group.setText(Messages.pref_group_devAtCloud);
-
-    // addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_JAAS, Messages.pref_enable_jaas, groupInnerComp));
-    // addField(new BooleanFieldEditor(PreferenceConstants.P_ENABLE_FORGE, Messages.pref_enable_forge, groupInnerComp));
-    ComboFieldEditor comboEditor = new ComboFieldEditor(PreferenceConstants.P_GITPROTOCOL, Messages.pref_gitprotocol,
-        new String[][]{{"HTTPS", "HTTPS"}, {"SSH", "SSH"}},
-        groupInnerComp);
-        
-    addField(comboEditor);
-    
-    //Label l = new Label(groupInnerComp, SWT.NONE);
-
-    createGitAccessLink(groupInnerComp2);
   }
 
   private void createAllJenkins() {
     Group group = new Group(getFieldEditorParent(), SWT.SHADOW_ETCHED_IN);
     group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    
-    GridLayout gl = new GridLayout(1, false);    
+
+    GridLayout gl = new GridLayout(1, false);
     gl.marginLeft = 5;
     gl.marginRight = 5;
     gl.marginTop = 5;
@@ -178,7 +158,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
     Composite groupInnerComp = new Composite(group, SWT.NONE);
 
-    groupInnerComp.setLayout(new GridLayout(2, false));
+    groupInnerComp.setLayout(new GridLayout(3, false));
     groupInnerComp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
     group.setText(Messages.pref_group_login);
@@ -186,7 +166,9 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
     final StringFieldEditor fieldEmail = new StringFieldEditor(PreferenceConstants.P_EMAIL, Messages.pref_email, 30,
         groupInnerComp);
 
-    fieldEmail.getTextControl(groupInnerComp).setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    GridData emailLayoutData = new GridData(GridData.FILL_HORIZONTAL);
+    emailLayoutData.horizontalSpan = 3;
+    fieldEmail.getTextControl(groupInnerComp).setLayoutData(emailLayoutData);
     addField(fieldEmail);
 
     final StringFieldEditor fieldPassword = new StringFieldEditor(PreferenceConstants.P_PASSWORD,
@@ -213,8 +195,8 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
           CloudBeesUIPlugin.getDefault().storeP(getTextControl().getText());
 
         } catch (Exception e) {
-          CloudBeesUIPlugin.showError(
-              "Saving password failed!\nPossible cause: Eclipse security master password is not set.", e);
+          CloudBeesUIPlugin
+              .showError("Saving password failed!\nPossible cause: Eclipse security master password is not set.", e);
         }
       }
 
@@ -228,21 +210,8 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
     fieldPassword.getTextControl(groupInnerComp).setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     addField(fieldPassword);
 
-    Composite signupAndValidateRow = new Composite(groupInnerComp, SWT.NONE);
-    GridData signupRowData = new GridData(GridData.FILL_HORIZONTAL);
-    signupRowData.horizontalSpan = 2;
-
-    signupAndValidateRow.setLayoutData(signupRowData);
-    GridLayout gl2 = new GridLayout(2, false);
-    gl2.marginWidth = 0;
-    gl2.marginHeight = 0;
-    gl2.marginTop = 5;
-    signupAndValidateRow.setLayout(gl2);
-
-    createSignUpLink(signupAndValidateRow);
-
-    Button b = new Button(signupAndValidateRow, SWT.PUSH);
-    GridData validateButtonLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_END);
+    Button b = new Button(groupInnerComp, SWT.PUSH);
+    GridData validateButtonLayoutData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
     validateButtonLayoutData.widthHint = 75;
     b.setLayoutData(validateButtonLayoutData);
 
@@ -268,7 +237,7 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
                 monitor.worked(20);
 
                 monitor.subTask("Validating...");//TODO i18n
-                
+
                 final boolean loginValid = gcs.validateUser(monitor);
                 monitor.worked(50);
 
@@ -276,12 +245,13 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
                   public void run() {
                     if (loginValid) {
-                      MessageDialog.openInformation(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay()
-                          .getActiveShell(), "Validation result", "Validation successful!");//TODO i18n
+                      MessageDialog.openInformation(
+                          CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay().getActiveShell(),
+                          "Validation result", "Validation successful!");//TODO i18n
                     } else {
-                      MessageDialog.openError(CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay()
-                          .getActiveShell(), "Validation result",
-                          "Validation was not successful!\nWrong email or password?");//TODO i18n
+                      MessageDialog.openError(
+                          CloudBeesUIPlugin.getDefault().getWorkbench().getDisplay().getActiveShell(),
+                          "Validation result", "Validation was not successful!\nWrong email or password?");//TODO i18n
                     }
                   }
 
@@ -297,8 +267,8 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
             }
           });
         } catch (InvocationTargetException e1) {
-          Throwable t1 = e1.getTargetException().getCause() != null ? e1.getTargetException().getCause() : e1
-              .getTargetException();
+          Throwable t1 = e1.getTargetException().getCause() != null ? e1.getTargetException().getCause()
+              : e1.getTargetException();
           Throwable t2 = t1.getCause() != null ? t1.getCause() : null;
 
           CloudBeesUIPlugin.showError("Failed to validate your account.", t1.getMessage(), t2);
@@ -308,6 +278,18 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
 
       }
     });
+    Composite signupAndValidateRow = new Composite(groupInnerComp, SWT.NONE);
+    GridData signupRowData = new GridData(GridData.FILL_HORIZONTAL);
+    signupRowData.horizontalSpan = 2;
+
+    signupAndValidateRow.setLayoutData(signupRowData);
+    GridLayout gl2 = new GridLayout(2, false);
+    gl2.marginWidth = 0;
+    gl2.marginHeight = 0;
+    gl2.marginTop = 5;
+    signupAndValidateRow.setLayout(gl2);
+
+    createSignUpLink(signupAndValidateRow);
 
   }
 
@@ -326,21 +308,22 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
   }
 
   private void createSignUpLink(Composite parent) {
-    final Link link = new Link(parent, SWT.NONE);
-    link.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    final Link link = new Link(parent, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP);
+    
+    GridData layoutData = new GridData(GridData.FILL_BOTH);
+    layoutData.widthHint = 130;
+    
+    link.setLayoutData(layoutData);
     link.setText(Messages.pref_signup);
     link.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        openSignupPage();
+        CloudBeesUIPlugin.getDefault()
+        .openWithBrowser("https://grandcentral." + GrandCentralService.HOST + "/account/"+e.text);        
       }
     });
     String linktooltip = Messages.pref_signup_tooltip;
     link.setToolTipText(linktooltip);
-  }
-
-  private void openSignupPage() {
-    CloudBeesUIPlugin.getDefault().openWithBrowser("https://grandcentral."+GrandCentralService.HOST+"/account/signup");
   }
 
   /*
@@ -352,36 +335,10 @@ public class GeneralPreferencePage extends FieldEditorPreferencePage implements 
   public void init(IWorkbench workbench) {
   }
 
-  private void createGitAccessLink(Composite parent) {
-    final Link link = new Link(parent, SWT.NONE);
-    //GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-    //gd.horizontalSpan=2;
-    //link.setLayoutData(gd);
-    
-    
-    link.setText(Messages.git_access_reminder);
-    link.addSelectionListener(new SelectionAdapter() {
-      @Override
-      public void widgetSelected(SelectionEvent e) {
-        if (e.text.equals("Eclipse SSH page")) {
-          PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(CloudBeesUIPlugin.getActiveWindow()
-              .getShell(), "org.eclipse.jsch.ui.SSHPreferences", null, null);
-
-          if (pref != null) {
-            pref.open();
-          }
-        } else if (e.text.equals("CloudBees web")) {
-          CloudBeesUIPlugin.getDefault().openWithBrowser("https://grandcentral."+GrandCentralService.HOST+"/user/keys");
-        }
-      }
-    });
-    
-  }
-
   @Override
   public boolean performOk() {
     boolean res = super.performOk();
-    
+
     // Call programmatically as SecurePreferences does not provide change listeners    
     org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Validating user credentials") {
       @Override

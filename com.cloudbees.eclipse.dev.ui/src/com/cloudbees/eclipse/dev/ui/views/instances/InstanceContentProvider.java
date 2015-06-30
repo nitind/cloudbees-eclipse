@@ -26,8 +26,8 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class InstanceContentProvider implements IStructuredContentProvider, ITreeContentProvider {
-  private InstanceGroup jenkinsLocalGroup = new InstanceGroup.OnPremiseJenkinsInstanceGroup("Local Builds", false);
-  private InstanceGroup jenkinsCloudGroup = new InstanceGroup.DevAtCloudJenkinsInstanceGroup("Builds", true);
+  private InstanceGroup jenkinsLocalGroup = new InstanceGroup.OnPremiseJenkinsInstanceGroup("Jenkins On-Premise", false);
+  private InstanceGroup jenkinsCloudGroup = new InstanceGroup.DevAtCloudJenkinsInstanceGroup("Jenkins in the Cloud", true);
 
   //private InstanceGroup favoritesGroup = new FavoritesInstanceGroup("Favorite Jenkins Jobs", false);
 
