@@ -24,19 +24,18 @@ import org.eclipse.ui.menus.CommandContributionItemParameter;
 
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
-import com.cloudbees.eclipse.core.Region;
 import com.cloudbees.eclipse.ui.CBImages;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
-public class ActiveAccountAndRegionContributionItem extends CompoundContributionItem {
+public class ActiveAccountContributionItem extends CompoundContributionItem {
 
   boolean onlyAccountRelated = false;
 
-  public ActiveAccountAndRegionContributionItem() {
+  public ActiveAccountContributionItem() {
     super();
   }
 
-  public ActiveAccountAndRegionContributionItem(boolean onlyAccountRelated) {
+  public ActiveAccountContributionItem(boolean onlyAccountRelated) {
     this.onlyAccountRelated = onlyAccountRelated;
   }
 
@@ -70,8 +69,6 @@ public class ActiveAccountAndRegionContributionItem extends CompoundContribution
 
       list.add(new Separator());
     }
-
-    addActiveRegion(list);
 
     addActiveAccount(list);
     
@@ -123,38 +120,6 @@ public class ActiveAccountAndRegionContributionItem extends CompoundContribution
         list.add(submenuActiveAccount);
 
       }
-
-    } catch (CloudBeesException e) {
-      e.printStackTrace();
-    }
-  }
-
-  private void addActiveRegion(List<IContributionItem> list) {
-    try {
-      final Region region = CloudBeesCorePlugin.getDefault().getGrandCentralService().getActiveRegion();
-
-      final String regionName = region.getLabel();
-
-      final Region regions[] = Region.values();
-
-      MenuManager submenuActiveAccount = new MenuManager("Region (" + regionName+")",
-          "com.cloudbees.eclipse.ui.activeRegion");
-
-      submenuActiveAccount.add(new CompoundContributionItem("accountitems") {
-        protected IContributionItem[] getContributionItems() {
-          // Here's where you would dynamically generate your list
-          List<IContributionItem> sublist = new ArrayList<IContributionItem>();
-
-          for (Region ac : regions) {
-            ActionContributionItem item = new ActionContributionItem(new SelectRegionAction(ac.getLabel(), ac.getLabel()
-                .equals(regionName)));
-            sublist.add(item);
-          }
-
-          return sublist.toArray(new IContributionItem[0]);
-        }
-      });
-      list.add(submenuActiveAccount);
 
     } catch (CloudBeesException e) {
       e.printStackTrace();

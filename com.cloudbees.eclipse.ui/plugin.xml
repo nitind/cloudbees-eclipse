@@ -16,7 +16,7 @@
             class="com.cloudbees.eclipse.ui.internal.preferences.JenkinsInstancesPreferencePage"
             id="com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage"
             category="com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage"
-            name="On-premise Jenkins">
+            name="On-Premise Jenkins">
         </page>
     </extension>
     
@@ -285,7 +285,7 @@
     
    		<menuContribution locationURI="menu:com.cloudbees.eclipse.ui.commands.referenceToMenu">
    		<dynamic
-           id="com.cloudbees.eclipse.ui.activeAccount" class="com.cloudbees.eclipse.ui.internal.ActiveAccountAndRegionContributionItem">           
+           id="com.cloudbees.eclipse.ui.activeAccount" class="com.cloudbees.eclipse.ui.internal.ActiveAccountContributionItem">           
    		</dynamic>
 		</menuContribution>       
        

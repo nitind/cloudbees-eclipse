@@ -55,17 +55,9 @@ public class GrandCentralService {
   private String[] accountsCache = null;
 
   private AuthInfo authInfo = null;
-  
-  private Region region = Region.US;
-
-  //private boolean accountSelectionActive = false;
 
   public GrandCentralService() {
 
-  }
-
-  public Region getActiveRegion() {
-    return region;
   }
   
   public void setAuthInfo(final String email, final String password) {
@@ -438,8 +430,6 @@ public class GrandCentralService {
   public String getCurrentUsername(final IProgressMonitor monitor) throws CloudBeesException {
     String acc = getActiveAccountName();
 
-    
-    
     if (acc == null) {
       return null;
     }
@@ -464,14 +454,5 @@ public class GrandCentralService {
   public AuthInfo getCachedAuthInfo(boolean b) throws CloudBeesException {
     return getCachedAuthInfo(b, new NullProgressMonitor());
   }
-
-  public void setActiveRegion(Region activeRegion) {
-    this.region = activeRegion;
-  }
-
-  /*  public void setAccountSelectionActive(boolean b) {
-      accountSelectionActive = b;
-    }
-  */
 
 }

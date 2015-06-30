@@ -60,7 +60,7 @@ class MultiAccountUtils {
           String activeAccount = origActiveAccount;
 
           //Reset current elements in case login fails.
-          CloudBeesUIPlugin.getDefault().fireAccountNameChange(gcs.getEmail(), null, null);
+          CloudBeesUIPlugin.getDefault().fireAccountNameChange(gcs.getEmail(), null);
           
           String[] accts = null;
           try {
@@ -164,7 +164,7 @@ class MultiAccountUtils {
           .setValue(PreferenceConstants.P_ACTIVE_ACCOUNT, activeAccount);
     }
     
-    CloudBeesUIPlugin.getDefault().fireActiveAccountChanged(email, activeAccount, gcs.getActiveRegion());
+    CloudBeesUIPlugin.getDefault().fireActiveAccountChanged(email, activeAccount);
     
   }
   

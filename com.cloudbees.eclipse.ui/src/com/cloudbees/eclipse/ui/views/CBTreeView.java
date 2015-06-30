@@ -43,10 +43,9 @@ import com.cloudbees.eclipse.core.CBRemoteChangeListener;
 import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.GrandCentralService;
-import com.cloudbees.eclipse.core.Region;
 import com.cloudbees.eclipse.ui.AuthStatus;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
-import com.cloudbees.eclipse.ui.internal.ActiveAccountAndRegionContributionItem;
+import com.cloudbees.eclipse.ui.internal.ActiveAccountContributionItem;
 import com.cloudbees.eclipse.ui.views.CBTreeSeparator.SeparatorLocation;
 
 public class CBTreeView extends ViewPart {
@@ -58,11 +57,11 @@ public class CBTreeView extends ViewPart {
   private ICBTreeProvider[] providers;
    
   private CBRemoteChangeListener changeListener = new CBRemoteChangeAdapter() {
-    public void activeAccountChanged(final String email, final String newAccountName, final Region region) {
+    public void activeAccountChanged(final String email, final String newAccountName) {
       
       Display.getDefault().asyncExec(new Runnable() {
         public void run() {
-          updateCD(email, newAccountName, region);
+          updateCD(email, newAccountName);
         }     
       });
       
@@ -112,8 +111,7 @@ public class CBTreeView extends ViewPart {
 
       String accountName  = gcs.getActiveAccountName();
       String email = gcs.getEmail();
-      Region region = gcs.getActiveRegion();
-      updateCD(email, accountName, region);
+      updateCD(email, accountName);
       
     } catch (CloudBeesException e1) {
       //Ignore for now
@@ -219,7 +217,7 @@ public class CBTreeView extends ViewPart {
     }
     
     pullDownMenu.add(new CBTreeSeparator(SeparatorLocation.PULL_DOWN));
-    pullDownMenu.add(new ActiveAccountAndRegionContributionItem(true));
+    pullDownMenu.add(new ActiveAccountContributionItem(true));
     
     pullDownMenu.addMenuListener(statusUpdateListener);
     //pullDownMenu.add(this.configureAccountAction);
@@ -254,13 +252,13 @@ public class CBTreeView extends ViewPart {
   }
 
 
-  private void updateCD(String email, String newAccountName, Region region) {
+  private void updateCD(String email, String newAccountName) {
     if (email==null) {
       CBTreeView.this.setContentDescription("Account not configured!");
       return;
     }
     if (newAccountName!=null && newAccountName.length()>0) {
-      CBTreeView.this.setContentDescription(" "+email+"; "+newAccountName+"; region: "+region.getLabel());
+      CBTreeView.this.setContentDescription(" "+email+"; "+newAccountName);
       return;
     }
     String post="";

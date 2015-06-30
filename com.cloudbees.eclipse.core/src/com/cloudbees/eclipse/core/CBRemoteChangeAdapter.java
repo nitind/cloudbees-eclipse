@@ -27,7 +27,7 @@ public class CBRemoteChangeAdapter implements CBRemoteChangeListener {
   public void activeJobHistoryChanged(JenkinsJobAndBuildsResponse newView) {
   }
 
-  public void activeAccountChanged(String email, String newAccountName, Region region) {
+  public void activeAccountChanged(String email, String newAccountName) {
     
   }
 

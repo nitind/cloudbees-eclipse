@@ -24,7 +24,7 @@ public interface CBRemoteChangeListener {
 
   void activeJobHistoryChanged(JenkinsJobAndBuildsResponse newView);
 
-  void activeAccountChanged(String email, String newAccountName, Region region);
+  void activeAccountChanged(String email, String newAccountName);
 
   /**
    * Called when jenkins instance status could have been potentially changed. For example called whenever jobs list changed for this url 
