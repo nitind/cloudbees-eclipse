@@ -7,20 +7,7 @@
 	<locator pattern="^com\.cloudbees\.eclipse(\-.+)?" searchPathRef="cloudbees.feature" failOnError="false"/>
 	<locator pattern="^com\.cloudbees\.eclipse(\..+)?" searchPathRef="cloudbees.plugins" />
 	<locator pattern="^org\.tigris(\..+)?" searchPathRef="subclipse" />
-	
-	<locator pattern="^org\.eclipse\.datatools(\..+)?" searchPathRef="datatools" />
-	<locator pattern="^org\.eclipse\.m2e(\..+)?" searchPathRef="m2e" />
-	
-	<locator pattern="^com\.ning(\..+)?" searchPathRef="m2e" />
-	<locator pattern="^org\.slf4j\.api(\..+)?" searchPathRef="m2e" />
-	
-	
-	<locator pattern="^org\.eclipse\.egit(\..+)?" searchPathRef="egit" />
-	<locator pattern="^org\.eclipse\.jgit(\..+)?" searchPathRef="egit" />
-	
-	<locator pattern="^org\.eclipse\.wst(\..+)?" searchPathRef="wst" />
-	<locator pattern="^org\.eclipse\.jst(\..+)?" searchPathRef="wst" />
-	
+
 	<locator searchPathRef="target.platform" />
 
 	<!-- <locator pattern="^org\.eclipse(\..+)?" searchPathRef="target.platform" /> -->
@@ -40,39 +27,6 @@
 				<bc:propertyRef key="workspace.root" />
 				<bc:propertyRef key="buckminster.component" />
 			</uri>
-		</provider>
-	</searchPath>
-
-
-
-	<searchPath name="egit">
-		<provider componentTypes="eclipse.feature,osgi.bundle" readerType="p2" source="false" mutable="false" resolutionFilter="(|(build.type=N)(build.type=R))">
-			<uri format="http://download.eclipse.org/egit/updates" />
-		</provider>
-	</searchPath>
- 
-	<searchPath name="m2e">
-		<provider componentTypes="eclipse.feature,osgi.bundle" readerType="p2" source="false" mutable="false" resolutionFilter="(|(build.type=N)(build.type=R))">
-			<uri format="http://download.eclipse.org/technology/m2e/releases" />
-		</provider>
-	</searchPath>
-
-	<searchPath name="wst">
-		<provider componentTypes="eclipse.feature,osgi.bundle" readerType="p2" source="false" mutable="false" resolutionFilter="(|(build.type=N)(build.type=R))">
-			<uri format="http://download.eclipse.org/webtools/repository/indigo" />
-		</provider>
-	</searchPath>
- 
- 
-	<searchPath name="datatools">
-		<provider componentTypes="eclipse.feature,osgi.bundle" readerType="p2" source="false" mutable="false" resolutionFilter="(|(build.type=N)(build.type=R))">
-			<uri format="http://download.eclipse.org/datatools/updates" />
-		</provider>
-	</searchPath>
-
-	<searchPath name="subclipse">
-		<provider componentTypes="eclipse.feature,osgi.bundle" readerType="p2" source="false" mutable="false" resolutionFilter="(|(build.type=N)(build.type=R))">
-			<uri format="http://subclipse.tigris.org/update_1.6.x" />
 		</provider>
 	</searchPath>
 

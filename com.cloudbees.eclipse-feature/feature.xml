@@ -21,10 +21,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <update label="CloudBees Toolkit" url="http://eclipse.cloudbees.com"/>
    </url>
 
-   <requires>
-      <import plugin="org.eclipse.swt"/>
-   </requires>
-
    <plugin
          id="com.cloudbees.eclipse.core"
          download-size="0"
@@ -46,32 +42,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
    <plugin
          id="com.cloudbees.eclipse.dev.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.cloudbees.eclipse.run.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="com.cloudbees.eclipse.run.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.cloudbees.eclipse.run.sdk"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="com.cloudbees.eclipse.dev.scm.egit"
          download-size="0"
          install-size="0"
          version="0.0.0"
