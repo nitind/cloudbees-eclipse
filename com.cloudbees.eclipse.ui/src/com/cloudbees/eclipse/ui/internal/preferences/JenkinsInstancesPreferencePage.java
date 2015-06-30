@@ -50,7 +50,7 @@ public class JenkinsInstancesPreferencePage extends PreferencePage implements IW
 
   public JenkinsInstancesPreferencePage() {
     setPreferenceStore(CloudBeesUIPlugin.getDefault().getPreferenceStore());
-    setDescription("Configure connection information for your instances that are not hosted at CloudBees JaaS.");//TODO i18n
+    setDescription("Configure On-Premise Jenkins access.");//TODO i18n
 
   }
 
@@ -75,7 +75,7 @@ public class JenkinsInstancesPreferencePage extends PreferencePage implements IW
     comp.setLayout(gl_comp);
 
     Label lblConfiguredJenkins = new Label(comp, SWT.NONE);
-    lblConfiguredJenkins.setText("Available Jenkins instances:"); //TODO i18n
+    lblConfiguredJenkins.setText("Available On-Premise Jenkins installations:"); //TODO i18n
 
     Composite compositeJenkinsInstances = new Composite(comp, SWT.NONE);
     compositeJenkinsInstances.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));

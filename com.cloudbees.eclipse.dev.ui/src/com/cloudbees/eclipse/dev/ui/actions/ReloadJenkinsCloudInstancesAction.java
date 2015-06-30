@@ -24,8 +24,8 @@ public class ReloadJenkinsCloudInstancesAction extends CBTreeAction implements I
 
   public ReloadJenkinsCloudInstancesAction() {
     super(true);
-    setText("Reload DEV@cloud Jenkins instances@");
-    setToolTipText("Reload DEV@cloud Jenkins instances");
+    setText("Refresh Jenkins in the Cloud information");
+    setToolTipText("Refresh Jenkins in the Cloud information");
     setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_REFRESH));
   }
 

@@ -21,14 +21,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
-import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.gc.api.AccountNameRequest;
 import com.cloudbees.eclipse.core.gc.api.AccountNameResponse;
 import com.cloudbees.eclipse.core.gc.api.AccountNamesRequest;
 import com.cloudbees.eclipse.core.gc.api.AccountNamesResponse;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusRequest;
 import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse;
-import com.cloudbees.eclipse.core.gc.api.AccountServiceStatusResponse.AccountServices.ForgeService.Repo;
 import com.cloudbees.eclipse.core.gc.api.KeysUsingAuthRequest;
 import com.cloudbees.eclipse.core.gc.api.KeysUsingAuthResponse;
 import com.cloudbees.eclipse.core.util.Utils;
@@ -49,8 +47,6 @@ public class GrandCentralService {
 
   public static final String GC_BASE_URL = "https://grandcentral." + HOST;
   
-  private final ForgeSyncService forgeSyncService;
-
   private String email = null;
   private String password = null;
 
@@ -65,17 +61,13 @@ public class GrandCentralService {
   //private boolean accountSelectionActive = false;
 
   public GrandCentralService() {
-    this.forgeSyncService = new ForgeSyncService();
+
   }
 
   public Region getActiveRegion() {
     return region;
   }
   
-  public ForgeSyncService getForgeSyncService() {
-    return this.forgeSyncService;
-  }
-
   public void setAuthInfo(final String email, final String password) {
     this.email = email;
     this.password = password;
@@ -442,34 +434,6 @@ public class GrandCentralService {
     }
 
   }
-
-  public List<ForgeInstance> getForgeRepos(final IProgressMonitor monitor) throws CloudBeesException {
-    List<ForgeInstance> result = new ArrayList<ForgeInstance>();
-
-    String acc = getActiveAccountName();
-
-    if (acc == null) {
-      return result;
-    }
-
-    AccountServiceStatusResponse services = loadAccountServices(acc);
-    Repo[] repos = services.services.forge.repos;
-    for (Repo forge : repos) {
-      ForgeInstance.TYPE type = null; //ForgeInstance.TYPE.GIT;
-      for (ForgeInstance.TYPE t : ForgeInstance.TYPE.values()) {
-        if (t.name().equalsIgnoreCase(forge.type)) {
-          type = t;
-          break;
-        }
-      }
-      if (type != null) {
-        result.add(new ForgeInstance(forge.url, services.username, this.password, type));
-      }
-    }
-
-    return result;
-  }
-
   
   public String getCurrentUsername(final IProgressMonitor monitor) throws CloudBeesException {
     String acc = getActiveAccountName();

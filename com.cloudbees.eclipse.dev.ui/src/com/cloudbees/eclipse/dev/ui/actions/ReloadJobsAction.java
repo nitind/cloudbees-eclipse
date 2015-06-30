@@ -28,8 +28,8 @@ public class ReloadJobsAction extends Action {
   public ReloadJobsAction() {
     super();
 
-    setText("Reload Jenkins jobs");
-    setToolTipText("Reload Jenkins jobs");
+    setText("Refresh Jenkins jobs");
+    setToolTipText("Refresh Jenkins jobs");
     setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_REFRESH));
 
     setAccelerator(SWT.F5);

@@ -86,7 +86,7 @@
             <menu
                 label="%cloudbees.popup.menu.label"
                 path="additions"
-                icon="icons/16x16/cb_plain.png"
+                icon="icons/16x16/cb_plain3.png"
                 id="com.cloudbees.eclipse.ui.popup.cloudbees">
                 <separator
                     name="cloudbeesGroup"></separator>
@@ -110,7 +110,7 @@
             <menu
                 label="%cloudbees.popup.menu.label"
                 path="additions"
-                icon="icons/16x16/cb_plain.png"
+                icon="icons/16x16/cb_plain3.png"
                 id="com.cloudbees.eclipse.ui.popup.file.cloudbees">
                 <separator
                     name="cloudbeesGroup"></separator>
@@ -180,7 +180,7 @@
           point="org.eclipse.ui.perspectives">
        <perspective
              class="com.cloudbees.eclipse.ui.internal.CloudBeesPerspectiveFactory"
-             icon="icons/16x16/cb_plain.png"
+             icon="icons/16x16/cb_plain3.png"
              id="com.cloudbees.eclipse.ui.CloudBeesPerspective"
              name="CloudBees">
        </perspective>
@@ -194,7 +194,7 @@
         </category>
         <view
             name="CloudBees"
-            icon="icons/16x16/cb_plain.png"
+            icon="icons/16x16/cb_plain3.png"
             category="com.cloudbees.eclipse"
             class="com.cloudbees.eclipse.ui.views.CBTreeView"
             id="com.cloudbees.eclipse.ui.views.CBTreeView">
@@ -276,7 +276,7 @@
                 label="CloudBees">
              <command
                    commandId="com.cloudbees.eclipse.ui.commands.referenceToMenu"
-                   icon="icons/16x16/cb_plain.png"
+                   icon="icons/16x16/cb_plain3.png"
                    label="CloudBees"
                    style="pulldown">
              </command>

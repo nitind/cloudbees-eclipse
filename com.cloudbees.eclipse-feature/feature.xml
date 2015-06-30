@@ -2,7 +2,7 @@
 <feature
       id="com.cloudbees.eclipse"
       label="CloudBees Toolkit"
-      version="2.0.2.qualifier"
+      version="3.0.1.qualifier"
       provider-name="CloudBees, Inc">
 
    <description url="http://www.cloudbees.com">
@@ -10,7 +10,7 @@
    </description>
 
    <license>
-Copyright 2013 Cloud Bees, Inc.
+Copyright 2013-2015 Cloud Bees, Inc.
 
 This program is made available under the terms of the 
 Eclipse Public License v1.0 which accompanies this distribution, 

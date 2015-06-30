@@ -24,8 +24,8 @@ public class ReloadJenkinsLocalInstancesAction extends CBTreeAction implements I
 
   public ReloadJenkinsLocalInstancesAction() {
     super(false);
-    setText("Reload Jenkins on-premise  instances@");
-    setToolTipText("Reload Jenkins on-premise instances");
+    setText("Refresh On-Premise Jenkins information");
+    setToolTipText("Refresh On-Premise Jenkins information");
     setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_REFRESH));
   }
 

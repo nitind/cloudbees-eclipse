@@ -28,7 +28,6 @@ import org.eclipse.ui.PlatformUI;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
-import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
@@ -110,47 +109,6 @@ public class CBWizardSupport {
     try {
       container.run(true, false, operation);
       return jobsList;
-    } catch (Exception e) {
-      if (failiure.cause != null) {
-        throw failiure.cause;
-      }
-      throw e;
-    }
-  }
-
-  public static ForgeInstance[] getRepos(final IWizardContainer container) throws Exception {
-    return getRepos(container, null);
-  }
-
-  public static ForgeInstance[] getRepos(final IWizardContainer container, final ForgeInstance.TYPE type)
-      throws Exception {
-    final List<ForgeInstance> repos = new ArrayList<ForgeInstance>();
-    final Failure<CloudBeesException> failiure = new Failure<CloudBeesException>();
-
-    IRunnableWithProgress operation = new IRunnableWithProgress() {
-
-      public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-        try {
-          monitor.beginTask("Fetching forge repositories", 0);
-          List<ForgeInstance> forgeRepos = CloudBeesUIPlugin.getDefault().getForgeRepos(monitor);
-          if (type == null) {
-            repos.addAll(forgeRepos);
-          } else {
-            for (ForgeInstance r : forgeRepos) {
-              if (r.type.equals(type)) {
-                repos.add(r);
-              }
-            }
-          }
-        } catch (CloudBeesException e) {
-          failiure.cause = e;
-        }
-      }
-    };
-
-    try {
-      container.run(true, false, operation);
-      return repos.toArray(new ForgeInstance[repos.size()]);
     } catch (Exception e) {
       if (failiure.cause != null) {
         throw failiure.cause;

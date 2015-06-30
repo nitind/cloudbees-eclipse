@@ -10,7 +10,6 @@
  *******************************************************************************/
 package com.cloudbees.eclipse.dev.ui;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -20,8 +19,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -43,8 +40,6 @@ import com.cloudbees.eclipse.core.CloudBeesCorePlugin;
 import com.cloudbees.eclipse.core.CloudBeesException;
 import com.cloudbees.eclipse.core.JenkinsService;
 import com.cloudbees.eclipse.core.Logger;
-import com.cloudbees.eclipse.core.forge.api.ForgeInstance;
-import com.cloudbees.eclipse.core.forge.api.ForgeInstance.STATUS;
 import com.cloudbees.eclipse.core.jenkins.api.ChangeSetPathItem;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsBuild;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
@@ -55,11 +50,9 @@ import com.cloudbees.eclipse.dev.core.CloudBeesDevCorePlugin;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildEditorInput;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildHistoryView;
 import com.cloudbees.eclipse.dev.ui.views.build.BuildPart;
-import com.cloudbees.eclipse.dev.ui.views.forge.ForgeSyncConfirmation;
 import com.cloudbees.eclipse.dev.ui.views.jobs.JobConsoleManager;
 import com.cloudbees.eclipse.dev.ui.views.jobs.JobsView;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
-import com.cloudbees.eclipse.ui.PreferenceConstants;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -69,12 +62,6 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
   private CBRemoteChangeListener remoteChangeListener = new CBRemoteChangeAdapter() {
 
     public void activeAccountChanged(String email, String newAccountName) {
-      try {
-        CloudBeesDevUiPlugin.this.reloadForgeRepos(false);
-      } catch (CloudBeesException e) {
-        // safe to ignore.
-      }
-
       PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
         @Override
         public void run() {
@@ -148,9 +135,7 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     super.start(context);    
     CloudBeesDevUiPlugin.plugin = this;
     CloudBeesDevCorePlugin.getDefault();
-    this.logger = new Logger(getLog());
-    reloadForgeRepos(false);
-
+    this.logger = new Logger(getLog());    
     CloudBeesUIPlugin.getDefault().addCBRemoteChangeListener(this.remoteChangeListener);
 
   }
@@ -217,13 +202,6 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_run_plain.png")));
     reg.put(CBDEVImages.IMG_INSTANCE,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/jenkins.png")));
-
-    reg.put(CBDEVImages.IMG_FOLDER_FORGE,
-        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_folder_cb.png")));
-    reg.put(CBDEVImages.IMG_INSTANCE_FORGE_GIT,
-        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/scm_git.png")));
-    reg.put(CBDEVImages.IMG_INSTANCE_FORGE_SVN,
-        ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/scm_svn.png")));
 
     reg.put(CBDEVImages.IMG_VIEW,
         ImageDescriptor.createFromURL(getBundle().getResource("/icons/16x16/cb_view_dots_big.png")));
@@ -499,10 +477,12 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
             throw new OperationCanceledException();
           }
 
-          boolean opened = CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService()
-              .openRemoteFile(scmConfig, item, monitor);
+//          boolean opened = CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService()
+//              .openRemoteFile(scmConfig, item, monitor);
 
-          return opened ? Status.OK_STATUS : new Status(IStatus.INFO, PLUGIN_ID, "Can't open " + item.path);
+//          return opened ? Status.OK_STATUS : new Status(IStatus.INFO, PLUGIN_ID, "Can't open " + item.path);
+          return new Status(IStatus.INFO, PLUGIN_ID, "Not implemented!");
+          
         } catch (CloudBeesException e) {
           getLogger().error(e);
           return new Status(Status.ERROR, PLUGIN_ID, 0, e.getLocalizedMessage(), e.getCause());
@@ -511,138 +491,6 @@ public class CloudBeesDevUiPlugin extends AbstractUIPlugin {
     };
 
     job.setUser(true);
-    job.schedule();
-  }
-
-  public void reloadForgeRepos(final boolean userAction) throws CloudBeesException {
-    reloadForgeRepos(userAction, true);
-  }
-  
-  public void reloadForgeRepos(final boolean userAction, final boolean askSync) throws CloudBeesException {
-
-    //      PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new IRunnableWithProgress() {
-    //        public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-    org.eclipse.core.runtime.jobs.Job job = new org.eclipse.core.runtime.jobs.Job("Detecting Forge repositories") {
-      @Override
-      protected IStatus run(final IProgressMonitor monitor) {
-
-        try {
-          monitor.beginTask("Detecting Forge repositories", 10);
-
-          final List<ForgeInstance> forgeRepos = CloudBeesUIPlugin.getDefault().getForgeRepos(monitor);
-          int step = 1000 / Math.max(forgeRepos.size(), 1);
-
-          IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 4);
-          subMonitor.beginTask("", 1000);
-          for (ForgeInstance repo : forgeRepos) {
-            subMonitor.subTask("Detecting repository '" + repo.url + "'");
-            CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService()
-                .updateStatus(repo, subMonitor);
-            subMonitor.worked(step);
-          }
-          subMonitor.subTask("");
-
-          boolean needsToSync = false;
-          final List<ForgeInstance> toSync = new ArrayList<ForgeInstance>();
-          if (askSync) {
-          for (ForgeInstance repo : forgeRepos) {
-            if (repo.status != STATUS.SYNCED) {
-              toSync.add(repo);
-              if (userAction || repo.status == STATUS.UNKNOWN) { // automatically check only unknowns, which are either new or failed
-                needsToSync = true;
-              }
-            }
-          }
-          }
-
-          if (askSync && needsToSync && userAction) {
-            PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-              @Override
-              public void run() {
-
-                ForgeSyncConfirmation confDialog = new ForgeSyncConfirmation(CloudBeesDevUiPlugin.getDefault()
-                    .getWorkbench().getDisplay().getActiveShell(), toSync);
-                int result = confDialog.open();
-
-                toSync.clear();
-                if (result == Dialog.OK) {
-                  if (confDialog.getSelectedRepos() != null && !confDialog.getSelectedRepos().isEmpty()) {
-                    toSync.addAll(confDialog.getSelectedRepos());
-                  }
-                  // set those which user has seen but not checked as SKIPPED, otherwise it is UNKNOWN and must be checked
-                  for (ForgeInstance repo : forgeRepos) {
-                    if (repo.status != STATUS.SYNCED) {
-                      if (!toSync.contains(repo)) {
-                        repo.status = STATUS.SKIPPED;
-                      } else {
-                        repo.status = STATUS.UNKNOWN;
-                      }
-                    }
-                  }
-                }
-              }
-            });
-          } else {
-            toSync.clear();
-          }
-
-          String mess = new String();
-          if (!toSync.isEmpty()) {
-            subMonitor = new SubProgressMonitor(monitor, 4);
-            subMonitor.beginTask("", 1000);
-            for (ForgeInstance repo : toSync) {
-              subMonitor.subTask("Synchronizing repository '" + repo.url + "'");
-              CloudBeesCorePlugin.getDefault().getGrandCentralService().getForgeSyncService().sync(repo, subMonitor);
-              mess += repo.status.getLabel() + " " + repo.url + "\n\n"; // TODO show lastException somewhere here?
-              subMonitor.worked(step);
-            }
-            subMonitor.subTask("");
-          }
-
-          CloudBeesUIPlugin.getDefault().getPreferenceStore()
-              .setValue(PreferenceConstants.P_FORGE_INSTANCES, ForgeInstance.encode(forgeRepos));
-
-          if (forgeRepos.isEmpty()) {
-            mess = "Found no Forge repositories!";
-          }
-
-          Iterator<CBRemoteChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
-              .iterator();
-          while (iterator.hasNext()) {
-            CBRemoteChangeListener listener = iterator.next();
-            listener.forgeChanged(forgeRepos);
-          }
-
-          monitor.worked(4);
-
-          if (userAction && !toSync.isEmpty()) {
-            final String msg = mess;
-            PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-              @Override
-              public void run() {
-                MessageDialog.openInformation(CloudBeesDevUiPlugin.getDefault().getWorkbench().getDisplay()
-                    .getActiveShell(), "Synced Forge repositories", msg);
-              }
-            });
-          }
-
-          return Status.OK_STATUS; // new Status(Status.INFO, PLUGIN_ID, mess);
-        } catch (Exception e) {
-          CloudBeesUIPlugin.getDefault().getLogger().error(e);
-          Iterator<CBRemoteChangeListener> iterator = CloudBeesUIPlugin.getDefault().getJenkinsChangeListeners()
-              .iterator();
-          while (iterator.hasNext()) {
-            CBRemoteChangeListener listener = iterator.next();
-            listener.forgeChanged(null);
-          }
-          return new Status(Status.ERROR, PLUGIN_ID, e.getLocalizedMessage(), e);
-        } finally {
-          monitor.done();
-        }
-      }
-    };
-
-    job.setUser(userAction);
     job.schedule();
   }
 

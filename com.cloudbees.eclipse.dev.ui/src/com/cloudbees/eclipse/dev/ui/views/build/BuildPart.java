@@ -58,7 +58,6 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.util.Utils;
 import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
-import com.cloudbees.eclipse.dev.ui.actions.DeployWarAction;
 import com.cloudbees.eclipse.dev.ui.actions.InvokeBuildAction;
 import com.cloudbees.eclipse.dev.ui.actions.OpenJunitViewAction;
 import com.cloudbees.eclipse.dev.ui.actions.OpenLogAction;
@@ -105,7 +104,6 @@ public class BuildPart extends EditorPart {
   private Action openBuildHistory;
   private InvokeBuildAction invokeBuild;
   private OpenLogAction openLogs;
-  private DeployWarAction deployWar;
   private boolean offline = false;
 
   public BuildPart() {
@@ -122,7 +120,6 @@ public class BuildPart extends EditorPart {
     this.dataJobDetails = dataJobDetails;
 
     this.openLogs.setBuild(this.dataBuildDetail);
-    this.deployWar.setBuild(this.dataBuildDetail);
     this.invokeBuild.setJob(this.dataJobDetails);
     //this.openBuildHistory.setViewUrl(dataJobDetails.viewUrl);
   }
@@ -389,9 +386,6 @@ public class BuildPart extends EditorPart {
     this.openLogs = new OpenLogAction();
     this.openLogs.setBuild(this.dataBuildDetail);
 
-    this.deployWar = new DeployWarAction();
-    this.deployWar.setBuild(this.dataBuildDetail);
-
     this.invokeBuild = new InvokeBuildAction();
     this.invokeBuild.setJob(this.dataJobDetails);
 
@@ -426,7 +420,6 @@ public class BuildPart extends EditorPart {
     this.openBuildHistory.setImageDescriptor(CloudBeesDevUiPlugin.getImageDescription(CBDEVImages.IMG_BUILD_HISTORY));
 
     this.form.getToolBarManager().add(this.invokeBuild);
-    this.form.getToolBarManager().add(this.deployWar);
     this.form.getToolBarManager().add(new Separator("openActions"));
     this.form.getToolBarManager().add(this.openLogs);
     this.form.getToolBarManager().add(this.openBuildHistory);
