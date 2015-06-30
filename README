@@ -5,7 +5,7 @@ CloudBees Eclipse Toolkit provides developer access to various CloudBees service
 
 == Setting up the development environment == 
 
-1. Download Eclipse 4.4 SDK
+1. Download Eclipse 4.4 or 4.5 SDK
 Set it as Target Platform
 
 2. We maintain compatibility for Java 7 and Java 8 so configure Installed JREs to have JDK 7 set default.
