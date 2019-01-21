@@ -1,12 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2013 Cloud Bees, Inc.
+ * Copyright (c) 2013, 2019 Cloud Bees, Inc., and others
  * All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * 	Cloud Bees, Inc. - initial API and implementation 
+ * 	Cloud Bees, Inc. - initial API and implementation
+ * 	IBM Corp. - crumb support
  *******************************************************************************/
 package com.cloudbees.eclipse.core;
 
@@ -64,6 +65,8 @@ public class JenkinsService {
   private final JenkinsInstance jenkins;
 
   private final Map<String, JenkinsScmConfig> scms = new HashMap<String, JenkinsScmConfig>();
+
+  private String userCrumb;
 
   public JenkinsService(final JenkinsInstance jenkins) {
     this.jenkins = jenkins;
@@ -212,6 +215,27 @@ public class JenkinsService {
       final List<NameValuePair> params, final boolean expectRedirect, final SubProgressMonitor monitor,
       final ResponseType responseType) throws UnsupportedEncodingException, IOException, ClientProtocolException,
       CloudBeesException, Exception {
+    if (userCrumb == null) {
+      // https://support.cloudbees.com/hc/en-us/articles/219257077-CSRF-Protection-Explained
+      String crumbUrl = this.jenkins.url;
+      if (!crumbUrl.endsWith("/")) {
+        crumbUrl += "/";
+      }
+      crumbUrl += "crumbIssuer/api/xml?xpath=concat(//crumbRequestField%2c%22:%22%2c//crumb)";
+      HttpGet crumbRetriever = new HttpGet(crumbUrl);
+      if (this.jenkins.username != null && this.jenkins.username.trim().length() > 0 && this.jenkins.password != null
+        && this.jenkins.password.trim().length() > 0) {
+        crumbRetriever.addHeader("Authorization", "Basic " + Utils.toB64(this.jenkins.username + ":" + this.jenkins.password));
+      }
+      HttpResponse crumbResponse = Utils.getAPIClient(this.jenkins.url).execute(crumbRetriever);
+      userCrumb = Utils.readString(crumbResponse.getEntity().getContent());
+    }
+
+    if (userCrumb != null) {
+      int colon = userCrumb.indexOf(':');
+      post.addHeader(userCrumb.substring(0, colon), userCrumb.substring(colon + 1));
+    }
+
     Object bodyResponse = null;
 
     if (this.jenkins.username != null && this.jenkins.username.trim().length() > 0 && this.jenkins.password != null
@@ -257,6 +281,10 @@ public class JenkinsService {
     case HTTP:
       bodyResponse = resp;
       break;
+    }
+
+    if (resp.getStatusLine().getStatusCode() == 403) {
+      userCrumb = null;
     }
 
     Utils.checkResponseCode(resp, expectRedirect, jenkins.atCloud);
