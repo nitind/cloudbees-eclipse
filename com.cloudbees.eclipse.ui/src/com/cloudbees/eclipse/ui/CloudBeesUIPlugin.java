@@ -1,12 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2013 Cloud Bees, Inc.
+ * Copyright (c) 2013, 2019 Cloud Bees, Inc. and others
  * All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * 	Cloud Bees, Inc. - initial API and implementation 
+ * 	Cloud Bees, Inc. - initial API and implementation
+ * 	IBM Corp. - Show parameter descriptions in the input dialogs,
+ *              make choice parameters user selectable.
  *******************************************************************************/
 package com.cloudbees.eclipse.ui;
 
@@ -35,6 +37,8 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
@@ -59,6 +63,7 @@ import com.cloudbees.eclipse.core.Logger;
 import com.cloudbees.eclipse.core.domain.JenkinsInstance;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsInstanceResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobProperty;
+import com.cloudbees.eclipse.ui.internal.CComboSelectionDialog;
 
 /**
  * CloudBees Eclipse Toolkit UI Plugin
@@ -468,16 +473,39 @@ public class CloudBeesUIPlugin extends AbstractUIPlugin {
     if (jobProps != null && jobProps.length > 0) {
       for (JenkinsJobProperty prop : jobProps) {
         if (prop.parameterDefinitions != null && prop.parameterDefinitions.length > 0) {
-          for (JenkinsJobProperty.ParameterDefinition def : prop.parameterDefinitions) {
-            JenkinsJobProperty.ParameterValue val = def.defaultParameterValue;
-            InputDialog propDialog = new InputDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-                "Job parameter is missing", "Specify value for job parameter '" + def.name + "':",
-                val != null ? val.value : "", null);
-            propDialog.setBlockOnOpen(true);
-            if (propDialog.open() != InputDialog.OK) {
-              throw new CancellationException();
+          for (final JenkinsJobProperty.ParameterDefinition def : prop.parameterDefinitions) {
+            if (def.choices != null) {
+              CComboSelectionDialog propDialog = new CComboSelectionDialog(
+                  PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Job parameter is missing",
+                  "Specify value for job parameter '" + def.name + "':", def.choices, 0, null);
+              if (def.description != null && def.description.length() > 0) {
+                propDialog.setToolTipText(def.description);
+              }
+              propDialog.setBlockOnOpen(true);
+              if (propDialog.open() != InputDialog.OK) {
+                throw new CancellationException();
+              }
+              props.put(def.name, propDialog.getStringValue());
+            } else {
+              JenkinsJobProperty.ParameterValue val = def.defaultParameterValue;
+              InputDialog propDialog = new InputDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+                  "Job parameter is missing", "Specify value for job parameter '" + def.name + "':",
+                  val != null ? val.value : "", null) {
+                @Override
+                protected Control createDialogArea(Composite parent) {
+                  Control dialogArea = super.createDialogArea(parent);
+                  if (def.description != null && def.description.length() > 0) {
+                    getText().setToolTipText(def.description);
+                  }
+                  return dialogArea;
+                }
+              };
+              propDialog.setBlockOnOpen(true);
+              if (propDialog.open() != InputDialog.OK) {
+                throw new CancellationException();
+              }
+              props.put(def.name, propDialog.getValue());
             }
-            props.put(def.name, propDialog.getValue());
           }
         }
       }

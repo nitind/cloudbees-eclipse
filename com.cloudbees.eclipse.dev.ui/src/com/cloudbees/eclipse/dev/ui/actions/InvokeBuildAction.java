@@ -1,12 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2013 Cloud Bees, Inc.
+ * Copyright (c) 2013, 2019 Cloud Bees, Inc. and others
  * All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * 	Cloud Bees, Inc. - initial API and implementation 
+ * 	Cloud Bees, Inc. - initial API and implementation
+ * 	IBM Corp. - better support for JobHolders
  *******************************************************************************/
 package com.cloudbees.eclipse.dev.ui.actions;
 
@@ -25,6 +26,7 @@ import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobAndBuildsResponse;
 import com.cloudbees.eclipse.core.jenkins.api.JenkinsJobsResponse;
 import com.cloudbees.eclipse.dev.ui.CBDEVImages;
 import com.cloudbees.eclipse.dev.ui.CloudBeesDevUiPlugin;
+import com.cloudbees.eclipse.dev.ui.views.jobs.JobHolder;
 import com.cloudbees.eclipse.ui.CloudBeesUIPlugin;
 
 public class InvokeBuildAction extends Action {
@@ -39,13 +41,10 @@ public class InvokeBuildAction extends Action {
   }
 
   public void setJob(final Object job) {
+    boolean previous = super.isEnabled();
     this.job = job;
     super.setEnabled(this.job != null);
-  }
-
-  @Override
-  public void setEnabled(final boolean enable) {
-    // ignore
+    firePropertyChange(ENABLED, previous, this.job != null);
   }
 
   @Override
@@ -54,12 +53,15 @@ public class InvokeBuildAction extends Action {
       return false;
     }
 
-    if (this.job instanceof JenkinsJobsResponse.Job) {
-      return ((JenkinsJobsResponse.Job) this.job).buildable != null && ((JenkinsJobsResponse.Job) this.job).buildable;
-    } else if (this.job instanceof JenkinsJobAndBuildsResponse) {
-      return ((JenkinsJobAndBuildsResponse) this.job).buildable != null
-          && ((JenkinsJobAndBuildsResponse) this.job).buildable;
-    } else if (this.job instanceof JenkinsBuild) {
+    Object target = this.job;
+    if (target instanceof JobHolder)
+      target = ((JobHolder) target).job;
+    if (target instanceof JenkinsJobsResponse.Job) {
+      return ((JenkinsJobsResponse.Job) target).buildable != null && ((JenkinsJobsResponse.Job) target).buildable;
+    } else if (target instanceof JenkinsJobAndBuildsResponse) {
+      return ((JenkinsJobAndBuildsResponse) target).buildable != null
+          && ((JenkinsJobAndBuildsResponse) target).buildable;
+    } else if (target instanceof JenkinsBuild) {
       return true;
     }
 
@@ -74,18 +76,21 @@ public class InvokeBuildAction extends Action {
       }
       final String url;
       final Map<String, String> props;
-      if (this.job instanceof JenkinsJobsResponse.Job) {
-        url = ((JenkinsJobsResponse.Job) this.job).url;
-        props = CloudBeesUIPlugin.getDefault().getJobPropValues(((JenkinsJobsResponse.Job) this.job).property);
-      } else if (this.job instanceof JenkinsJobAndBuildsResponse) {
-        url = ((JenkinsJobAndBuildsResponse) this.job).viewUrl;
-        props = CloudBeesUIPlugin.getDefault().getJobPropValues(((JenkinsJobAndBuildsResponse) this.job).property);
-      } else if (this.job instanceof JenkinsBuild) {
-        url = ((JenkinsBuild) this.job).url;
+      Object target = this.job;
+      if (target instanceof JobHolder)
+        target = ((JobHolder) target).job;
+      if (target instanceof JenkinsJobsResponse.Job) {
+        url = ((JenkinsJobsResponse.Job) target).url;
+        props = CloudBeesUIPlugin.getDefault().getJobPropValues(((JenkinsJobsResponse.Job) target).property);
+      } else if (target instanceof JenkinsJobAndBuildsResponse) {
+        url = ((JenkinsJobAndBuildsResponse) target).viewUrl;
+        props = CloudBeesUIPlugin.getDefault().getJobPropValues(((JenkinsJobAndBuildsResponse) target).property);
+      } else if (target instanceof JenkinsBuild) {
+        url = ((JenkinsBuild) target).url;
         // TODO find job to get props?
         props = null; // CloudBeesUIPlugin.getDefault().getJobPropValues(((JenkinsJobsResponse.Job) job).property);
       } else {
-        throw new IllegalStateException("Unsupported job type: " + this.job);
+        throw new IllegalStateException("Unsupported job type: " + target);
       }
 
       final JenkinsService ns = CloudBeesUIPlugin.getDefault().getJenkinsServiceForUrl(url);
