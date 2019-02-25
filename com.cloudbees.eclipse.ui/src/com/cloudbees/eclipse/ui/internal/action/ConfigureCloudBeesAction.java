@@ -30,9 +30,10 @@ public class ConfigureCloudBeesAction extends CBTreeAction {
   @Override
   public void run() {
     PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(null,
-        "com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage", new String[] {
-            "com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage",
-            "com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage" }, null);
+        "com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage", new String[] {
+            "com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage",
+            "com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage"
+             }, null);
     if (pref != null) {
       pref.open();
     }

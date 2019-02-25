@@ -20,7 +20,7 @@ public class ConfigureAccountHandler extends AbstractHandler {
 
   public Object execute(ExecutionEvent event) throws ExecutionException {
     PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(null,
-        "com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage", new String[] {
+        "com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage", new String[] {
             "com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage",
             "com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage" }, null);
 

@@ -10,13 +10,13 @@
         <page
             class="com.cloudbees.eclipse.ui.internal.preferences.GeneralPreferencePage"
             id="com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage"
+            category="com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage"
             name="CloudBees">
         </page>
         <page
             class="com.cloudbees.eclipse.ui.internal.preferences.JenkinsInstancesPreferencePage"
             id="com.cloudbees.eclipse.ui.preferences.JenkinsInstancesPreferencePage"
-            category="com.cloudbees.eclipse.ui.preferences.GeneralPreferencePage"
-            name="On-Premise Jenkins">
+            name="Jenkins">
         </page>
     </extension>
     
@@ -189,12 +189,12 @@
     <extension
         point="org.eclipse.ui.views">
         <category
-            name="CloudBees"
+            name="Jenkins"
             id="com.cloudbees.eclipse">
         </category>
         <view
-            name="CloudBees"
-            icon="icons/16x16/cb_plain3.png"
+            name="Jenkins"
+            icon="icons/16x16/jenkins.png"
             category="com.cloudbees.eclipse"
             class="com.cloudbees.eclipse.ui.views.CBTreeView"
             id="com.cloudbees.eclipse.ui.views.CBTreeView">
@@ -276,8 +276,8 @@
                 label="CloudBees">
              <command
                    commandId="com.cloudbees.eclipse.ui.commands.referenceToMenu"
-                   icon="icons/16x16/cb_plain3.png"
-                   label="CloudBees"
+                   icon="icons/16x16/jenkins.png"
+                   label="Jenkins"
                    style="pulldown">
              </command>
           </toolbar>
